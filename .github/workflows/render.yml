@@ -1,47 +1,68 @@
 
-name: Video Generator
+name: Hybrid Documentary Generator
 
 on:
   workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Documentary idea / topic (English or Indonesian)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
-  setup:
+  build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
+          cache: pip
 
-      - name: Install FFmpeg
+      - name: Install FFmpeg and fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download footage
+      - name: Restore Pixabay API search cache
+        uses: actions/cache@v4
+        with:
+          path: .api-cache
+          key: pixabay-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            pixabay-${{ runner.os }}-
+
+      - name: Generate documentary
         env:
+          INPUT_TOPIC: ${{ inputs.topic }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
-        run: |
-          python footage.py
+          TTS_VOICE: en-US-AriaNeural
+          GEMINI_MODEL: gemini-3.7-flash
+        run: python main.py
 
-      - name: Generate voice-over
-        run: |
-          python main.py
-
-      - name: Render documentary
-        run: |
-          python render.py
-
-      - name: Upload final video
+      - name: Upload documentary and production notes
         uses: actions/upload-artifact@v4
         with:
-          name: documentary-video
-          path: documentary.mp4
+          name: hybrid-documentary-${{ github.run_number }}
+          path: |
+            documentary.mp4
+            plan.json
+            credits.txt
+            output/voiceover.mp3
+            output/captions.ass
+          if-no-files-found: error
+          retention-days: 7
