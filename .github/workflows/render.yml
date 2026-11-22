@@ -1,11 +1,10 @@
-
 name: Hybrid Documentary Generator
 
 on:
   workflow_dispatch:
     inputs:
       topic:
-        description: 'Documentary idea / topic (English or Indonesian)'
+        description: "Documentary idea / topic (English or Indonesian)"
         required: true
         type: string
 
@@ -24,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
           cache: pip
 
       - name: Install FFmpeg and fonts
@@ -51,7 +50,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           TTS_VOICE: en-US-AriaNeural
-          GEMINI_MODEL: gemini-3.7-flash
+          GEMINI_MODEL: gemini-3.8-flash
         run: python main.py
 
       - name: Upload documentary and production notes
