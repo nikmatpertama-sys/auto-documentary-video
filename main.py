@@ -42,18 +42,53 @@ Return ONLY valid JSON with this exact structure:
 {{"title":"...","script":"...","scenes":[{{"narration":"exact sentence(s) from script","visual_query":"specific real-world stock-video search phrase, 3-7 words","diagram_title":"short title","diagram_text":"short explanatory text, max 18 words","visual_type":"footage or diagram"}}]}}
 Requirements: 8 scenes; script is one coherent narration with a 3-second curiosity hook, accurate cautious wording, no fabricated statistics, no unsupported precise numbers, no call to action, natural documentary English. Each scene narration must appear verbatim in script and scenes must cover the script in order. Use diagram for 2 or 3 scenes where a process, comparison, timeline, or mechanism is better explained visually; other scenes use real footage. Avoid asking for AI-generated footage. Do not invent citations or claim you browsed sources. Keep claims conservative and distinguish established facts from hypotheses."""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
-    response = requests.post(
-        url,
-        params={"key": GEMINI_KEY},
-        json={
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "responseMimeType": "application/json",
-                "temperature": 0.55,
-            },
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "temperature": 0.55,
         },
-        timeout=90,
-    )
+    }
+
+    # Gemini can occasionally take longer than 90 seconds to prepare
+    # the full 8-scene JSON plan. Retry transient timeouts automatically.
+    response = None
+    for attempt in range(1, 4):
+        try:
+            response = requests.post(
+                url,
+                params={"key": GEMINI_KEY},
+                json=payload,
+                timeout=(20, 240),
+            )
+            if response.status_code == 429 or response.status_code >= 500:
+                if attempt < 3:
+                    wait_seconds = attempt * 15
+                    print(
+                        f"Gemini temporarily unavailable "
+                        f"(HTTP {response.status_code}); retrying in "
+                        f"{wait_seconds}s ({attempt}/3)..."
+                    )
+                    time.sleep(wait_seconds)
+                    continue
+            break
+        except (requests.exceptions.Timeout,
+                requests.exceptions.ConnectionError) as exc:
+            if attempt == 3:
+                raise RuntimeError(
+                    "Gemini API timed out after 3 attempts. "
+                    "The video pipeline stopped before script generation. "
+                    "Try running the workflow again later."
+                ) from exc
+            wait_seconds = attempt * 15
+            print(
+                f"Gemini request timed out; retrying in "
+                f"{wait_seconds}s ({attempt}/3)..."
+            )
+            time.sleep(wait_seconds)
+
+    if response is None:
+        raise RuntimeError("Gemini API did not return a response.")
     if response.status_code >= 400:
         raise RuntimeError(
             f"Gemini API error {response.status_code}: {response.text[:1200]}"
