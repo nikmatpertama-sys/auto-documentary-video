@@ -34,10 +34,12 @@ jobs:
         run: |
           python main.py
 
-      - name: Upload assets
+      - name: Render documentary
+        run: |
+          python render.py
+
+      - name: Upload final video
         uses: actions/upload-artifact@v4
         with:
-          name: documentary-assets
-          path: |
-            voiceover.mp3
-            footage/
+          name: documentary-video
+          path: documentary.mp4
