@@ -5,7 +5,9 @@ import json
 import subprocess
 
 VOICE = "voiceover.mp3"
+SUBTITLES = "captions.srt"
 OUTPUT = "documentary.mp4"
+
 WIDTH = 1080
 HEIGHT = 1920
 FPS = 30
@@ -19,6 +21,9 @@ clips = sorted(
 
 if not os.path.exists(VOICE):
     raise FileNotFoundError("Voice-over not found!")
+
+if not os.path.exists(SUBTITLES):
+    raise FileNotFoundError("Captions file not found!")
 
 if not clips:
     raise FileNotFoundError("No footage found!")
@@ -60,7 +65,21 @@ concat_inputs = "".join(
 )
 
 filters.append(
-    f"{concat_inputs}concat=n={len(clips)}:v=1:a=0[outv]"
+    f"{concat_inputs}concat=n={len(clips)}:v=1:a=0[base]"
+)
+
+filters.append(
+    "[base]subtitles=captions.srt:"
+    "force_style='FontName=DejaVu Sans,"
+    "FontSize=48,"
+    "PrimaryColour=&H00FFFFFF,"
+    "OutlineColour=&H00000000,"
+    "BorderStyle=1,"
+    "Outline=3,"
+    "Shadow=1,"
+    "Alignment=2,"
+    "MarginV=260'"
+    "[outv]"
 )
 
 command += [
@@ -80,5 +99,5 @@ command += [
 
 subprocess.run(command, check=True)
 
-print("Video successfully rendered!")
+print("Video successfully rendered with subtitles!")
 print("Output:", OUTPUT)
