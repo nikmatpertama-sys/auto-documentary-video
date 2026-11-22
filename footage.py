@@ -8,13 +8,14 @@ os.makedirs("footage", exist_ok=True)
 API = "https://commons.wikimedia.org/w/api.php"
 
 SEARCH_TERMS = [
-    "hospital emergency room",
-    "traffic lights city",
-    "electric power station",
+    "hospital",
+    "traffic",
+    "power station",
     "solar panels",
-    "wind turbines",
+    "wind turbine",
     "hydroelectric dam",
-    "electricity transmission lines",
+    "power lines",
+    "electricity",
     "light bulb"
 ]
 
@@ -22,12 +23,11 @@ HEADERS = {
     "User-Agent": "DocumentaryVideoGenerator/1.0"
 }
 
-seen = set()
 downloaded = 0
+seen = set()
 MAX_VIDEOS = 10
 
 for term in SEARCH_TERMS:
-
     if downloaded >= MAX_VIDEOS:
         break
 
@@ -38,18 +38,15 @@ for term in SEARCH_TERMS:
         "generator": "search",
         "gsrsearch": f"{term} filetype:video",
         "gsrnamespace": 6,
-        "gsrlimit": 3,
+        "gsrlimit": 10,
         "prop": "imageinfo",
-        "iiprop": "url|extmetadata",
+        "iiprop": "url|extmetadata|mime",
         "format": "json"
     }
 
     try:
         response = requests.get(
-            API,
-            params=params,
-            headers=HEADERS,
-            timeout=30
+            API, params=params, headers=HEADERS, timeout=30
         )
         response.raise_for_status()
 
@@ -57,13 +54,13 @@ for term in SEARCH_TERMS:
             "query", {}
         ).get("pages", {})
 
+        print("Search results:", len(pages))
+
     except requests.exceptions.RequestException as error:
-        print("Search failed:", error)
-        time.sleep(3)
+        print("Search error:", error)
         continue
 
     for page in pages.values():
-
         if downloaded >= MAX_VIDEOS:
             break
 
@@ -76,27 +73,25 @@ for term in SEARCH_TERMS:
 
         info = page.get("imageinfo", [{}])[0]
         url = info.get("url", "")
+        mime = info.get("mime", "")
 
-        if not url:
+        if not url or not mime.startswith("video/"):
             continue
 
-        ext = os.path.splitext(
-            url.split("?")[0]
-        )[1].lower()
+        ext = os.path.splitext(url.split("?")[0])[1].lower()
 
         if ext not in [".mp4", ".webm", ".ogv", ".ogg"]:
             continue
 
-        filename = f"footage/clip_{downloaded + 1}{ext}"
+        number = downloaded + 1
+        filename = f"footage/clip_{number}{ext}"
 
         try:
             print("Downloading:", title)
 
             with requests.get(
-                url,
-                headers=HEADERS,
-                stream=True,
-                timeout=60
+                url, headers=HEADERS,
+                stream=True, timeout=60
             ) as video:
 
                 if video.status_code == 429:
@@ -113,34 +108,34 @@ for term in SEARCH_TERMS:
             metadata = info.get("extmetadata", {})
 
             with open(
-                f"footage/credit_{downloaded + 1}.txt",
-                "w"
+                f"footage/credit_{number}.txt", "w"
             ) as credit:
-
                 credit.write("Title: " + title + "\n")
                 credit.write(
                     "Artist: " +
-                    metadata.get("Artist", {}).get("value", "Unknown") +
-                    "\n"
+                    metadata.get("Artist", {}).get("value", "Unknown") + "\n"
                 )
                 credit.write(
                     "License: " +
-                    metadata.get("LicenseShortName", {}).get("value", "Check source") +
-                    "\n"
+                    metadata.get("LicenseShortName", {}).get("value", "Check source") + "\n"
                 )
                 credit.write(
-                    "Source: " +
-                    info.get("descriptionurl", "") +
-                    "\n"
+                    "Source: " + info.get("descriptionurl", "") + "\n"
                 )
 
             downloaded += 1
+            print("Downloaded:", downloaded)
 
         except requests.exceptions.RequestException as error:
-            print("Download failed:", error)
+            print("Download error:", error)
+            if os.path.exists(filename):
+                os.remove(filename)
             continue
 
         time.sleep(2)
 
 print("Footage search completed!")
 print("Total videos downloaded:", downloaded)
+
+if downloaded == 0:
+    raise RuntimeError("No video footage could be downloaded!")
