@@ -114,7 +114,7 @@ Return ONLY valid JSON in this exact structure:
 "script":"...",
 "scenes":[
 {{
-"narration":"exact consecutive sentence(s) copied verbatim from script",
+"narration":"complete spoken narration segment for this scene",
 "visual_query":"specific searchable real-world footage phrase, 3-6 words",
 "visual_queries":["alternate specific shot query","second alternate shot query"],
 "visual_type":"footage or diagram",
@@ -132,8 +132,9 @@ Requirements:
 - Exactly 8 scenes, in the same order as the script.
 - Scene 1 MUST be footage, not a diagram.
 - Its first sentence is a powerful curiosity hook, max 12 words.
-- Scene narration must be exact consecutive sentences from script.
-- All script sentences must appear in exactly one scene, in order.
+- Divide the complete spoken story across the 8 scene narration fields, in order.
+- Do not omit story content between scenes or repeat whole sentences.
+- The combined scene narration should form a coherent 145-165 word script.
 - Use 2 or 3 diagram scenes maximum.
 - Diagrams must explain a real mechanism, process, comparison,
   timeline, or geographic relationship.
@@ -225,8 +226,8 @@ def call_openai_compatible(provider, api_key, model, prompt):
             },
             {"role": "user", "content": prompt},
         ],
-        "temperature": 0.55,
-        "response_format": {"type": "json_object"},
+        "temperature": 0.35,
+        # Avoid forcing JSON mode: some Groq GPT-OSS models reject it with HTTP 400.
     }
 
     # A single attempt per provider: quota errors should immediately
@@ -332,17 +333,30 @@ def gemini_plan(topic):
         )
         try:
             candidate = generate()
-            candidate["script"] = re.sub(
-                r"\\s+", " ", str(candidate.get("script", ""))
-            ).strip()
-            candidate["scenes"] = candidate.get("scenes", [])[:8]
-
-            if len(candidate["scenes"]) != 8:
+            candidate["scenes"] = candidate.get("scenes", [])
+            if not isinstance(candidate["scenes"], list) or len(candidate["scenes"]) != 8:
                 raise RuntimeError(
-                    "AI returned an incomplete plan. Expected 8 scenes."
+                    "AI returned an incomplete plan. Expected exactly 8 scenes."
                 )
-            if len(candidate["script"].split()) < 100:
-                raise RuntimeError("Documentary script is too short.")
+
+            # Use scene narration as the canonical script. This avoids rejecting
+            # a usable plan when a provider paraphrases its separate script field.
+            scene_narrations = []
+            for scene_index, scene in enumerate(candidate["scenes"], 1):
+                if not isinstance(scene, dict):
+                    raise RuntimeError(f"Scene {scene_index} is not a JSON object.")
+                narration = re.sub(r"\\s+", " ", str(scene.get("narration", ""))).strip()
+                if not narration:
+                    raise RuntimeError(f"Scene {scene_index} has empty narration.")
+                scene["narration"] = narration
+                scene_narrations.append(narration)
+
+            candidate["script"] = " ".join(scene_narrations).strip()
+            word_count = len(candidate["script"].split())
+            if not 100 <= word_count <= 190:
+                raise RuntimeError(
+                    f"Scene narration totals {word_count} words; expected 100-190."
+                )
 
             candidate["scenes"][0]["visual_type"] = "footage"
             assign_scene_sentence_ranges(candidate)
