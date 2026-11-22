@@ -26,9 +26,13 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Download footage
-        run: |
-          python footage.py
+      
+        - name: Download footage
+          env:
+            PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          run: |
+            python footage.py
+
 
       - name: Generate voice-over
         run: |
