@@ -34,23 +34,16 @@ VOICE = "en-US-AriaNeural"
 TICKS_PER_SECOND = 10_000_000
 
 
-def format_srt_time(seconds):
-    milliseconds = round(seconds * 1000)
-
-    hours = milliseconds // 3_600_000
-    milliseconds %= 3_600_000
-
-    minutes = milliseconds // 60_000
-    milliseconds %= 60_000
-
-    secs = milliseconds // 1000
-    milliseconds %= 1000
+def ass_time(seconds):
+    total = round(seconds * 100)
+    hours = total // 360000
+    minutes = (total % 360000) // 6000
+    secs = (total % 6000) // 100
+    centiseconds = total % 100
 
     return (
-        f"{hours:02}:"
-        f"{minutes:02}:"
-        f"{secs:02},"
-        f"{milliseconds:03}"
+        f"{hours}:{minutes:02}:"
+        f"{secs:02}.{centiseconds:02}"
     )
 
 
@@ -72,37 +65,53 @@ def create_subtitles(words):
     if current:
         groups.append(current)
 
-    subtitles = []
+    with open("captions.ass", "w", encoding="utf-8") as file:
+        file.write("""[Script Info]
+Title: Documentary Captions
+ScriptType: v4.00+
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+PlayResX: 1080
+PlayResY: 1920
 
-    for index, group in enumerate(groups, start=1):
-        start = group[0]["offset"] / TICKS_PER_SECOND
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,DejaVu Sans,48,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,80,80,700,1
 
-        last_word = group[-1]
-        end = (
-            last_word["offset"] + last_word["duration"]
-        ) / TICKS_PER_SECOND
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+""")
 
-        end = max(end, start + 0.6)
+        for group in groups:
+            start = group[0]["offset"] / TICKS_PER_SECOND
 
-        phrase = " ".join(item["text"] for item in group)
-        phrase = "\n".join(
-            textwrap.wrap(
-                phrase,
-                width=34,
-                break_long_words=False,
-                break_on_hyphens=False
+            last = group[-1]
+            end = (
+                last["offset"] + last["duration"]
+            ) / TICKS_PER_SECOND
+
+            end = max(end, start + 0.6)
+
+            phrase = " ".join(
+                item["text"] for item in group
             )
-        )
 
-        subtitles.append(
-            f"{index}\n"
-            f"{format_srt_time(start)} --> "
-            f"{format_srt_time(end)}\n"
-            f"{phrase}\n"
-        )
+            phrase = "\\N".join(
+                textwrap.wrap(
+                    phrase,
+                    width=30,
+                    break_long_words=False,
+                    break_on_hyphens=False
+                )
+            )
 
-    with open("captions.srt", "w", encoding="utf-8") as file:
-        file.write("\n".join(subtitles))
+            phrase = phrase.replace("{", "\\{").replace("}", "\\}")
+
+            file.write(
+                f"Dialogue: 0,{ass_time(start)},"
+                f"{ass_time(end)},Default,,0,0,0,,"
+                f"{phrase}\n"
+            )
 
 
 async def main():
@@ -135,7 +144,7 @@ async def main():
     create_subtitles(words)
 
     print("Voice-over successfully generated!")
-    print(f"Subtitle cues generated: {len(words)} word events grouped into captions.")
+    print(f"Subtitle groups created: {len(words)} word events processed.")
 
 
 if __name__ == "__main__":
