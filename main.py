@@ -1,36 +1,46 @@
 
-import os, re, json, asyncio, subprocess, textwrap, time, hashlib
+import os
+import re
+import json
+import time
+import asyncio
+import hashlib
+import subprocess
+import textwrap
 from pathlib import Path
 
 import requests
 from PIL import Image, ImageDraw, ImageFont
 import edge_tts
 
-ROOT = Path(".")
+# ============================================================
+# CONFIG
+# ============================================================
 OUT = Path("output")
 FOOT = OUT / "footage"
 VIS = OUT / "visuals"
-OUT.mkdir(exist_ok=True)
-FOOT.mkdir(exist_ok=True)
-VIS.mkdir(exist_ok=True)
+CACHE = Path(".api-cache")
+
+for folder in (OUT, FOOT, VIS, CACHE):
+    folder.mkdir(parents=True, exist_ok=True)
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
 TOPIC = os.getenv("INPUT_TOPIC", "").strip()
-VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural")
-TTS_RATE = os.getenv("TTS_RATE", "-5%")
-TTS_PITCH = os.getenv("TTS_PITCH", "-4Hz")
-MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
+VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural").strip()
+BASE_RATE = os.getenv("TTS_RATE", "-4%").strip()
+BASE_PITCH = os.getenv("TTS_PITCH", "-3Hz").strip()
 
-FALLBACK_MODELS = [
-    x.strip() for x in os.getenv(
-        "GEMINI_FALLBACK_MODELS",
-        "gemini-3.5-flash-lite,gemini-3.1-flash-lite",
-    ).split(",") if x.strip()
-]
-
-TARGET_SECONDS = 70
 W, H, FPS = 1080, 1920, 30
+
+OPENING_LEAD = 0.75
+SENTENCE_GAP = 0.30
+HOOK_GAP = 0.70
+ENDING_HOLD = 1.25
+
+MIN_CLIP_WIDTH = 640
+MAX_CLIP_BYTES = 180 * 1024 * 1024
 
 if not GEMINI_KEY:
     raise RuntimeError("Missing GEMINI_API_KEY GitHub Secret.")
@@ -41,116 +51,159 @@ if not TOPIC:
 
 
 def run(cmd):
-    subprocess.run(cmd, check=True)
+    subprocess.run([str(x) for x in cmd], check=True)
 
+
+def ffprobe_duration(path):
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            str(path)
+        ],
+        capture_output=True,
+        text=True,
+        check=True
+    )
+    return max(0.0, float(result.stdout.strip()))
+
+
+def split_sentences(text):
+    return [
+        x.strip()
+        for x in re.findall(r"[^.!?]+[.!?]+|[^.!?]+$", text)
+        if x.strip()
+    ]
+
+
+def normalize_words(text):
+    return re.findall(r"[a-z0-9']+", str(text).lower())
+
+
+# ============================================================
+# AI DOCUMENTARY PLANNER
+# ============================================================
 
 def gemini_plan(topic):
-    prompt = f"""Create a fact-conscious, original English mini-documentary plan for vertical cinematic documentary video.
+    prompt = f'''Create an original, fact-conscious English mini-documentary
+for a vertical 9:16 video.
+
 TOPIC: {topic}
-Target voiceover duration: 60-75 seconds (roughly 145-165 spoken words).
-Return ONLY valid JSON with this exact structure:
-{{"title":"...","hook":"one punchy spoken opening sentence, max 12 words","script":"...","scenes":[{{"narration":"exact sentence(s) from script","visual_query":"specific searchable real-world footage phrase, 3-7 words","visual_queries":["alternate specific search phrase","another visual angle"],"visual_type":"footage or diagram","diagram_kind":"process, map, comparison, timeline, or data","diagram_title":"short title","diagram_text":"one concise explanatory line","diagram_steps":["short step 1","short step 2","short step 3"],"source_label":"reputable institution name only when genuinely certain","source_url":"official source URL only when genuinely certain"}}]}}
-Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its narration is a curiosity-driven hook suitable for the first 3 seconds. Open with a surprising consequence, paradox, vivid question, or stakes; avoid generic introductions. Script must be one coherent story with a reveal and satisfying payoff. Every scene narration appears verbatim in script and scenes cover it in order. Vary sentence length, cadence, pauses, and emotional intensity; write for a warm, deep male documentary narrator, not an announcer. Use 2-3 animated explanatory diagram scenes, choosing process/map/comparison/timeline/data layouts; never write a generic info-card paragraph. Other scenes use highly specific real-world stock-footage queries with distinct camera angles and subjects. Ask for 2 alternate footage queries per scene. No fabricated statistics, unsupported precise numbers, fake citations, or invented source URLs. Only name an institution/source when the fact and official URL are confidently known; otherwise leave source fields empty. Avoid repetitive structures, list-like narration, and calls to action."""
+
+Target spoken length: 145-165 words, approximately 60-75 seconds
+including deliberate pauses.
+
+Return ONLY valid JSON in this exact structure:
+
+{{
+"title":"...",
+"hook":"...",
+"script":"...",
+"scenes":[
+{{
+"narration":"exact consecutive sentence(s) copied verbatim from script",
+"visual_query":"specific searchable real-world footage phrase, 3-6 words",
+"visual_queries":["alternate specific shot query","second alternate shot query"],
+"visual_type":"footage or diagram",
+"diagram_kind":"process, map, comparison, timeline, or data",
+"diagram_title":"short title",
+"diagram_text":"one concise explanatory line",
+"diagram_steps":["short step 1","short step 2","short step 3"],
+"source_label":"verified institution name or empty",
+"source_url":"official URL or empty"
+}}
+]
+}}
+
+Requirements:
+
+- Exactly 8 scenes, in the same order as the script.
+- Scene 1 MUST be footage, not a diagram.
+- Its first sentence is a powerful curiosity hook, max 12 words.
+- Scene narration must be exact consecutive sentences from script.
+- All script sentences must appear in exactly one scene, in order.
+- Use 2 or 3 diagram scenes maximum.
+- Diagrams must explain a real mechanism, process, comparison,
+  timeline, or geographic relationship.
+- Other scenes must describe concrete real-world footage.
+- Include subject, environment, and/or camera angle in visual queries.
+- Tell one coherent story with a reveal and satisfying payoff.
+- Avoid list-like narration and generic introductions.
+- Vary sentence length and cadence.
+- Write for a warm, deep, calm male documentary narrator.
+- Use punctuation to indicate natural breaths.
+- Never invent statistics, exact quantities, sources, or URLs.
+- Leave source fields empty unless genuinely certain.
+- End with a memorable final thought, not a call to action.
+'''
+
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{MODEL}:generateContent"
+    )
 
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
             "responseMimeType": "application/json",
-            "temperature": 0.55,
-        },
+            "temperature": 0.55
+        }
     }
 
-    # Model utama dan fallback otomatis.
-    # HTTP 429 langsung pindah model agar tidak membuang waktu retry.
-    model_candidates = list(dict.fromkeys([MODEL] + FALLBACK_MODELS))
-    response = None
     last_error = None
+    response = None
 
-    for model_index, active_model in enumerate(model_candidates):
-        active_url = (
-            "https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{active_model}:generateContent"
-        )
-        print(f"Trying Gemini model: {active_model}")
-
-        for attempt in range(1, 4):
-            try:
-                result = requests.post(
-                    active_url,
-                    params={"key": GEMINI_KEY},
-                    json=payload,
-                    timeout=(20, 180),
-                )
-
-                if result.status_code == 429:
-                    last_error = (
-                        f"HTTP 429 on {active_model}: "
-                        f"{result.text[:700]}"
-                    )
-                    print(
-                        f"{active_model} quota/rate limit reached; "
-                        "switching model."
-                    )
-                    response = None
-                    break
-
-                if result.status_code in (408, 500, 502, 503, 504):
-                    last_error = (
-                        f"HTTP {result.status_code} on {active_model}: "
-                        f"{result.text[:700]}"
-                    )
-                    if attempt < 3:
-                        wait_seconds = 15 * (2 ** (attempt - 1))
-                        print(
-                            f"{active_model} unavailable; retrying in "
-                            f"{wait_seconds}s ({attempt}/3)..."
-                        )
-                        time.sleep(wait_seconds)
-                        continue
-                    response = None
-                    break
-
-                if result.status_code >= 400:
-                    raise RuntimeError(
-                        f"Gemini API error {result.status_code} "
-                        f"on {active_model}: {result.text[:1200]}"
-                    )
-
-                response = result
-                print(
-                    f"Gemini response received using {active_model}."
-                )
-                break
-
-            except (
-                requests.exceptions.Timeout,
-                requests.exceptions.ConnectionError,
-            ) as exc:
-                last_error = f"{active_model}: {exc}"
-                response = None
-                if attempt < 3:
-                    wait_seconds = 15 * (2 ** (attempt - 1))
-                    print(
-                        f"Connection problem; retrying in "
-                        f"{wait_seconds}s ({attempt}/3)..."
-                    )
-                    time.sleep(wait_seconds)
-
-        if response is not None:
-            break
-
-        if model_index < len(model_candidates) - 1:
-            print(
-                f"Switching to fallback model: "
-                f"{model_candidates[model_index + 1]}"
+    for attempt in range(1, 4):
+        try:
+            response = requests.post(
+                url,
+                params={"key": GEMINI_KEY},
+                json=payload,
+                timeout=(20, 180)
             )
 
-    if response is None:
+            if response.status_code == 429:
+                raise RuntimeError(
+                    "Gemini API quota/rate limit reached (HTTP 429). "
+                    "Wait for quota reset or change API provider/model."
+                )
+
+            if response.status_code in (408, 500, 502, 503, 504):
+                last_error = (
+                    f"HTTP {response.status_code}: "
+                    f"{response.text[:500]}"
+                )
+
+                if attempt < 3:
+                    wait = 10 * attempt
+                    print(
+                        f"Gemini temporarily unavailable; "
+                        f"retrying in {wait}s ({attempt}/3)."
+                    )
+                    time.sleep(wait)
+                    continue
+
+            response.raise_for_status()
+            break
+
+        except (
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError
+        ) as exc:
+            last_error = str(exc)
+
+            if attempt < 3:
+                time.sleep(10 * attempt)
+                continue
+
+        except RuntimeError:
+            raise
+
+    if response is None or response.status_code >= 400:
         raise RuntimeError(
-            "All Gemini models failed or reached quota. Tried: "
-            + ", ".join(model_candidates)
-            + f". Last error: {last_error}. "
-            "Check AI Studio quota/billing."
+            f"Gemini planning failed: "
+            f"{last_error or response.text[:1000]}"
         )
 
     data = response.json()
@@ -160,65 +213,147 @@ Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its n
         plan = json.loads(raw)
     except Exception as exc:
         raise RuntimeError(
-            f"Could not parse Gemini JSON response: {exc}; "
+            f"Gemini returned invalid JSON: {exc}; "
             f"response={str(data)[:1000]}"
         )
 
-    script = re.sub(r"\s+", " ", plan.get("script", "")).strip()
-    scenes = plan.get("scenes", [])
+    plan["script"] = re.sub(
+        r"\s+", " ", str(plan.get("script", ""))
+    ).strip()
 
-    if not script or len(scenes) < 6:
+    plan["scenes"] = plan.get("scenes", [])[:8]
+
+    if len(plan["scenes"]) != 8:
         raise RuntimeError(
-            "Gemini returned an incomplete script/scene plan. Run again."
+            "AI returned an incomplete plan. Expected 8 scenes."
         )
 
-    plan["script"] = script
-    plan["scenes"] = scenes[:8]
+    if len(plan["script"].split()) < 100:
+        raise RuntimeError("Documentary script is too short.")
+
+    plan["scenes"][0]["visual_type"] = "footage"
+
+    assign_scene_sentence_ranges(plan)
 
     Path("plan.json").write_text(
         json.dumps(plan, indent=2, ensure_ascii=False),
-        encoding="utf-8",
+        encoding="utf-8"
     )
 
     print(
-        f"Script ready: {len(script.split())} words; "
-        f"{len(plan['scenes'])} scenes"
+        f"Script ready: {len(plan['script'].split())} words, "
+        f"{len(plan['scenes'])} scenes."
     )
+
     return plan
 
+
+def assign_scene_sentence_ranges(plan):
+    """Map each scene to exact script sentences."""
+
+    sentences = split_sentences(plan["script"])
+
+    normalized = [
+        " ".join(normalize_words(s))
+        for s in sentences
+    ]
+
+    cursor = 0
+
+    for index, scene in enumerate(plan["scenes"]):
+        narration = str(scene.get("narration", "")).strip()
+        target = " ".join(normalize_words(narration))
+
+        if not target:
+            raise RuntimeError(
+                f"Scene {index + 1} has no narration."
+            )
+
+        target_words = target.split()
+        found = None
+
+        for start in range(cursor, len(sentences)):
+            joined = []
+
+            for end in range(
+                start,
+                min(len(sentences), start + 5)
+            ):
+                joined.extend(normalized[end].split())
+
+                if joined == target_words:
+                    found = (start, end)
+                    break
+
+                if len(joined) >= len(target_words):
+                    break
+
+            if found:
+                break
+
+        if not found:
+            raise RuntimeError(
+                f"Scene {index + 1} narration is not an exact "
+                "consecutive passage from the script. "
+                "Regenerate the plan."
+            )
+
+        scene["sentence_start"] = found[0]
+        scene["sentence_end"] = found[1]
+
+        cursor = found[1] + 1
+
+    if cursor != len(sentences):
+        raise RuntimeError(
+            "Some script sentences are not assigned to a scene."
+        )
+
+
+# ============================================================
+# FOOTAGE SEARCH AND RELEVANCE
+# ============================================================
 
 def download_stream(url, dest):
     with requests.get(
         url,
         stream=True,
         timeout=(25, 180),
-        headers={"User-Agent": "HybridDocumentaryPipeline/1.0"},
+        headers={
+            "User-Agent": "HybridDocumentaryPipeline/2.0"
+        }
     ) as response:
+
         response.raise_for_status()
         total = 0
 
-        with open(dest, "wb") as file:
+        with open(dest, "wb") as f:
             for chunk in response.iter_content(1024 * 1024):
                 if chunk:
                     total += len(chunk)
-                    if total > 180 * 1024 * 1024:
+
+                    if total > MAX_CLIP_BYTES:
                         raise RuntimeError(
-                            "Clip exceeded 180 MB safety limit"
+                            "Clip exceeded 180 MB safety limit."
                         )
-                    file.write(chunk)
+
+                    f.write(chunk)
 
     if Path(dest).stat().st_size < 50000:
+        Path(dest).unlink(missing_ok=True)
         raise RuntimeError(
-            "Downloaded media file is unexpectedly small"
+            "Downloaded clip is unexpectedly small."
         )
 
 
 def pixabay_search(query):
-    cache_dir = Path(".api-cache")
-    cache_dir.mkdir(exist_ok=True)
+    query = re.sub(
+        r"[^a-zA-Z0-9 ]", " ", query
+    ).strip()[:95]
 
-    cache_file = cache_dir / (
-        hashlib.sha256(query.lower().encode()).hexdigest() + ".json"
+    cache_file = CACHE / (
+        hashlib.sha256(
+            query.lower().encode()
+        ).hexdigest() + ".json"
     )
 
     if (
@@ -237,311 +372,253 @@ def pixabay_search(query):
         params={
             "key": PIXABAY_KEY,
             "q": query,
-            "per_page": 12,
+            "per_page": 20,
             "safesearch": "true",
             "video_type": "film",
-            "order": "popular",
+            "order": "popular"
         },
-        timeout=35,
+        timeout=35
     )
 
     if response.status_code == 429:
-        raise RuntimeError(
-            "Pixabay rate limit reached; wait before retrying."
-        )
+        raise RuntimeError("Pixabay rate limit reached.")
 
     response.raise_for_status()
+
     data = response.json()
 
     cache_file.write_text(
         json.dumps(data),
-        encoding="utf-8",
+        encoding="utf-8"
     )
 
     return data.get("hits", [])
 
 
-def nasa_search(query):
-    response = requests.get(
-        "https://images-api.nasa.gov/search",
-        params={
-            "q": query,
-            "media_type": "video",
-            "page_size": 8,
-        },
-        timeout=35,
-    )
+def relevance_score(hit, query, narration):
+    """
+    Rank footage using Pixabay metadata.
+    This is metadata matching, not AI visual recognition.
+    """
 
-    response.raise_for_status()
+    tags = set(normalize_words(hit.get("tags", "")))
+    q = set(normalize_words(query))
+    n = set(normalize_words(narration))
 
-    return (
-        response.json()
-        .get("collection", {})
-        .get("items", [])
-    )
-
-
-def _query_terms(text):
     stop = {
-        "the", "and", "for", "with", "from", "that", "this",
-        "into", "over", "under", "near", "shot", "video",
-        "footage", "cinematic", "aerial", "close", "wide",
-        "view", "of", "in", "on", "at", "to", "an", "its",
-        "their", "how", "why", "what", "where", "when",
+        "the", "and", "for", "with", "from", "into",
+        "that", "this", "over", "under", "through",
+        "about", "near", "shot", "video", "aerial",
+        "cinematic"
     }
 
-    words = re.findall(r"[a-z0-9]+", str(text).lower())
-    return {
-        word for word in words
-        if len(word) >= 3 and word not in stop
-    }
+    q -= stop
+    n -= stop
 
-
-def _pixabay_relevance(hit, query, narration):
-    """Reject weakly related clips instead of accepting first search result."""
-    tags = str(hit.get("tags", ""))
-    page = str(hit.get("pageURL", ""))
-    haystack = _query_terms(tags + " " + page)
-    wanted = _query_terms(query)
-    context = _query_terms(narration)
-
-    if not haystack or not wanted:
+    if not tags:
         return 0.0
 
-    direct = len(wanted & haystack) / max(1, len(wanted))
-    contextual = len(context & haystack) / max(
-        1, min(len(context), 8)
+    q_score = len(q & tags) / max(1, len(q))
+
+    n_score = (
+        len(n & tags) /
+        max(1, min(len(n), 10))
     )
 
-    return direct * 0.8 + contextual * 0.2
+    return (
+        0.72 * q_score +
+        0.28 * min(1.0, n_score)
+    )
 
 
 def fetch_footage(plan):
     credits = []
     used = set()
-    count = 0
 
     for i, scene in enumerate(plan["scenes"], 1):
-        if scene.get("visual_type") == "diagram":
+
+        if (
+            scene.get("visual_type") == "diagram"
+            and i != 1
+        ):
             print(
-                f"Scene {i}: animated explanatory graphic planned."
+                f"Scene {i}: explanatory motion graphic selected."
             )
             continue
 
-        queries = [
-            str(scene.get("visual_query") or plan["title"])
-        ] + [
-            str(q)
-            for q in scene.get("visual_queries", [])[:2]
-        ]
+        queries = (
+            [scene.get("visual_query", "")]
+            + list(scene.get("visual_queries", [])[:2])
+        )
 
-        selected_files = []
+        candidates = {}
 
         for query in queries:
-            try:
-                hits = pixabay_search(query[:95])
-            except Exception as exc:
-                print(
-                    f"Pixabay search issue for scene {i}: {exc}"
-                )
+            if not str(query).strip():
                 continue
 
-            for hit in hits:
-                relevance = _pixabay_relevance(
-                    hit,
-                    query,
-                    scene.get("narration", ""),
-                )
+            try:
+                hits = pixabay_search(query)
 
-                if relevance < 0.22:
-                    print(
-                        f"Scene {i}: rejected weak match "
-                        f"(score={relevance:.2f}, "
-                        f"tags={hit.get('tags', '')[:90]})"
+                for hit in hits:
+                    mid = hit.get("id")
+
+                    if not mid or mid in used:
+                        continue
+
+                    videos = hit.get("videos", {})
+
+                    rendition = (
+                        videos.get("large")
+                        or videos.get("medium")
+                        or videos.get("small")
+                        or {}
                     )
-                    continue
 
-                media_id = hit.get("id")
+                    url = rendition.get("url")
+                    width = int(rendition.get("width") or 0)
 
-                if not media_id or media_id in used:
-                    continue
+                    if not url or width < MIN_CLIP_WIDTH:
+                        continue
 
-                renditions = hit.get("videos", {})
-                rendition = (
-                    renditions.get("large")
-                    or renditions.get("medium")
-                    or renditions.get("small")
-                    or {}
-                )
-
-                candidate = rendition.get("url")
-
-                if (
-                    not candidate
-                    or rendition.get("width", 0) < 640
-                ):
-                    continue
-
-                destination = (
-                    FOOT
-                    / f"scene_{i:02d}_take_{len(selected_files)+1}.mp4"
-                )
-
-                try:
-                    download_stream(candidate, destination)
-                except Exception as exc:
-                    print(
-                        f"Scene {i}: clip download failed: {exc}"
+                    clip_seconds = float(
+                        hit.get("duration") or 0
                     )
-                    continue
 
-                used.add(media_id)
-                count += 1
-                selected_files.append(str(destination))
+                    if clip_seconds and clip_seconds < 5:
+                        continue
+
+                    score = relevance_score(
+                        hit,
+                        query,
+                        scene.get("narration", "")
+                    )
+
+                    old = candidates.get(mid)
+
+                    if old is None or score > old[0]:
+                        candidates[mid] = (
+                            score,
+                            hit,
+                            url
+                        )
+
+            except Exception as exc:
+                print(
+                    f"Scene {i}: search issue for "
+                    f"'{query}': {exc}"
+                )
+
+        ranked = sorted(
+            candidates.values(),
+            key=lambda x: x[0],
+            reverse=True
+        )
+
+        chosen = next(
+            (x for x in ranked if x[0] >= 0.12),
+            None
+        )
+
+        if chosen:
+            score, hit, url = chosen
+
+            destination = FOOT / f"scene_{i:02d}.mp4"
+
+            try:
+                download_stream(url, destination)
+
+                used.add(hit["id"])
+
+                scene["media_file"] = str(destination)
 
                 credits.append(
                     f"Scene {i} | Pixabay | "
                     f"Creator: {hit.get('user', 'Unknown')} | "
                     f"Source: {hit.get('pageURL', '')} | "
+                    f"Metadata relevance: {score:.2f} | "
                     "License: Pixabay Content License"
                 )
 
-                if len(selected_files) >= 2:
-                    break
+                print(
+                    f"Scene {i}: selected footage "
+                    f"(metadata match {score:.2f}) — "
+                    f"{hit.get('tags', '')[:90]}"
+                )
 
-            if len(selected_files) >= 2:
-                break
+            except Exception as exc:
+                print(
+                    f"Scene {i}: selected clip could not "
+                    f"be downloaded: {exc}"
+                )
 
-        # NASA is a fallback only when Pixabay did not supply a shot.
-        if not selected_files:
-            for query in queries:
-                try:
-                    for item in nasa_search(query):
-                        meta = item.get("data", [{}])[0]
-                        nasa_id = meta.get("nasa_id")
-
-                        if not nasa_id or nasa_id in used:
-                            continue
-
-                        asset = requests.get(
-                            f"https://images-api.nasa.gov/asset/{nasa_id}",
-                            timeout=30,
-                        )
-                        asset.raise_for_status()
-
-                        links = (
-                            asset.json()
-                            .get("collection", {})
-                            .get("items", [])
-                        )
-
-                        candidates = [
-                            entry.get("href", "")
-                            for entry in links
-                            if entry.get("href", "").lower().endswith(".mp4")
-                        ]
-
-                        if candidates:
-                            destination = (
-                                FOOT / f"scene_{i:02d}_take_1.mp4"
-                            )
-
-                            download_stream(
-                                candidates[0],
-                                destination,
-                            )
-
-                            used.add(nasa_id)
-                            count += 1
-                            selected_files.append(str(destination))
-
-                            credits.append(
-                                f"Scene {i} | NASA | "
-                                f"Center: {meta.get('center', 'NASA')} | "
-                                f"Source: https://images.nasa.gov/details/{nasa_id}"
-                            )
-                            break
-
-                except Exception as exc:
-                    print(
-                        f"NASA fallback issue for scene {i}: {exc}"
-                    )
-
-                if selected_files:
-                    break
-
-        if selected_files:
-            scene["media_files"] = selected_files
-            scene["media_file"] = selected_files[0]
-
-            print(
-                f"Scene {i}: secured "
-                f"{len(selected_files)} distinct footage shot(s)."
-            )
         else:
+            if i == 1:
+                raise RuntimeError(
+                    "No sufficiently relevant opening footage "
+                    "was found. Refusing to publish an unrelated "
+                    "or frozen opening. Try another topic wording "
+                    "or retry the workflow."
+                )
+
             scene["visual_type"] = "diagram"
-            scene["diagram_kind"] = (
-                scene.get("diagram_kind") or "process"
-            )
-            scene["diagram_title"] = (
-                scene.get("diagram_title") or "What happens next?"
-            )
-            scene["diagram_text"] = (
-                scene.get("diagram_text")
-                or scene.get("narration", "")
-            )
-            scene["diagram_steps"] = (
-                scene.get("diagram_steps")
-                or ["The cause", "The process", "The result"]
-            )
 
             print(
-                f"Scene {i}: no sufficiently relevant footage found; "
-                "using an explanatory animation instead of unrelated stock."
+                f"Scene {i}: no sufficiently relevant stock clip; "
+                "using animated explainer instead."
             )
 
     for i, scene in enumerate(plan["scenes"], 1):
-        label = str(scene.get("source_label") or "").strip()
-        url = str(scene.get("source_url") or "").strip()
+        label = str(
+            scene.get("source_label") or ""
+        ).strip()
+
+        url = str(
+            scene.get("source_url") or ""
+        ).strip()
 
         if label and url.startswith("https://"):
             credits.append(
-                f"Explainer source for scene {i} | {label} | {url}"
+                f"Explainer source for scene {i} | "
+                f"{label} | {url}"
             )
 
     Path("credits.txt").write_text(
         "\n".join(credits)
         if credits
-        else (
-            "No external footage/source references were verified; "
-            "explanatory graphics are illustrative.\n"
-        ),
-        encoding="utf-8",
+        else "No external footage/source references were verified.\n",
+        encoding="utf-8"
     )
 
     Path("plan.json").write_text(
         json.dumps(plan, indent=2, ensure_ascii=False),
-        encoding="utf-8",
+        encoding="utf-8"
     )
 
-    return count
 
+# ============================================================
+# ANIMATED DIAGRAMS
+# ============================================================
 
-def font(size, bold=False):
-    candidates = [
+def get_font(size, bold=False):
+    paths = [
         (
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-            if bold
-            else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+            "/usr/share/fonts/truetype/dejavu/"
+            "DejaVuSans-Bold.ttf"
+            if bold else
+            "/usr/share/fonts/truetype/dejavu/"
+            "DejaVuSans.ttf"
         ),
         (
-            "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf"
-            if bold
-            else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf"
-        ),
+            "/usr/share/fonts/truetype/liberation2/"
+            "LiberationSans-Bold.ttf"
+            if bold else
+            "/usr/share/fonts/truetype/liberation2/"
+            "LiberationSans-Regular.ttf"
+        )
     ]
 
-    for path in candidates:
+    for path in paths:
         if Path(path).exists():
             return ImageFont.truetype(path, size)
 
@@ -549,7 +626,9 @@ def font(size, bold=False):
 
 
 def make_diagram(scene, idx):
-    width, height, fps, frames = 720, 1280, 24, 72
+    """Generate a lightweight animated explainer."""
+
+    width, height, frames = 540, 960, 48
 
     kind = str(
         scene.get("diagram_kind") or "process"
@@ -562,32 +641,34 @@ def make_diagram(scene, idx):
 
     title = str(
         scene.get("diagram_title") or "The hidden connection"
-    )[:70]
+    )[:64]
 
     body = str(
-        scene.get("diagram_text")
-        or "Follow the chain of cause and effect"
+        scene.get("diagram_text") or
+        "A process revealed step by step"
     )[:120]
 
     steps = [
-        str(x)[:34]
+        str(x)[:30]
         for x in (scene.get("diagram_steps") or [])[:4]
     ]
 
     if len(steps) < 2:
         steps = [
-            "The trigger", "The process", "The result"
+            "The trigger",
+            "The process",
+            "The result"
         ]
 
-    accent = (79, 205, 216)
+    accent = (73, 204, 218)
     bg = (7, 18, 29)
 
-    frames_dir = VIS / f"diagram_frames_{idx:02d}"
-    frames_dir.mkdir(parents=True, exist_ok=True)
+    directory = VIS / f"diagram_{idx:02d}"
+    directory.mkdir(parents=True, exist_ok=True)
 
-    f_title = font(39, True)
-    f_body = font(25)
-    f_small = font(19, True)
+    ft = get_font(30, True)
+    fb = get_font(19)
+    fs = get_font(15, True)
 
     for frame in range(frames):
         t = frame / (frames - 1)
@@ -595,279 +676,273 @@ def make_diagram(scene, idx):
         im = Image.new("RGB", (width, height), bg)
         d = ImageDraw.Draw(im)
 
-        for x in range(-80, width + 80, 60):
-            xx = int(
-                (x + (frame * 1.4)) % (width + 120) - 60
-            )
+        sweep_x = int((t * 760) - 110)
+
+        d.rectangle(
+            (sweep_x, 0, sweep_x + 70, height),
+            fill=(9, 25, 37)
+        )
+
+        for x in range(-40, width + 40, 50):
+            xx = (x + int(frame * 1.2)) % width
+
             d.line(
                 (xx, 0, xx, height),
-                fill=(14, 34, 48),
-                width=1,
+                fill=(13, 31, 43),
+                width=1
             )
 
         d.text(
-            (48, 70),
-            f"FIELD EXPLAINER  /  {idx:02d}",
-            font=f_small,
-            fill=accent,
+            (32, 42),
+            f"FIELD EXPLAINER / {idx:02d}",
+            font=fs,
+            fill=accent
         )
 
         d.multiline_text(
-            (48, 135),
-            textwrap.fill(title, 25),
-            font=f_title,
+            (32, 100),
+            "\n".join(textwrap.wrap(title, 25)),
+            font=ft,
             fill=(245, 248, 250),
-            spacing=9,
+            spacing=5
         )
 
         d.line(
-            (48, 270, 672, 270),
+            (32, 205, 508, 205),
             fill=(43, 82, 101),
-            width=2,
+            width=2
         )
 
-        if kind == "comparison":
-            for j, label in enumerate(steps[:2]):
-                x0 = 55 + j * 320
-
-                d.rounded_rectangle(
-                    (x0, 390, x0 + 280, 800),
-                    radius=22,
-                    outline=(
-                        accent if t > j * 0.22
-                        else (45, 75, 90)
-                    ),
-                    width=3,
-                    fill=(13, 35, 49),
-                )
-
-                d.text(
-                    (x0 + 22, 430),
-                    "A" if j == 0 else "B",
-                    font=f_title,
-                    fill=accent,
-                )
-
-                d.multiline_text(
-                    (x0 + 22, 520),
-                    textwrap.fill(label, 15),
-                    font=f_body,
-                    fill=(235, 242, 246),
-                    spacing=8,
-                )
-
-                bar_w = int(
-                    210 * max(
-                        0,
-                        min(1, (t - j * 0.18) / 0.65),
-                    )
-                )
-
-                d.rounded_rectangle(
-                    (
-                        x0 + 22, 730,
-                        x0 + 22 + bar_w, 746,
-                    ),
-                    radius=8,
-                    fill=accent,
-                )
-
-        elif kind == "timeline":
-            y = 570
+        if kind == "timeline":
+            y = 470
 
             d.line(
-                (85, y, 635, y),
+                (55, y, 485, y),
                 fill=(55, 100, 120),
-                width=6,
+                width=5
             )
 
             for j, label in enumerate(steps[:4]):
-                x = 95 + j * (
-                    530 / max(1, len(steps) - 1)
+                x = 60 + j * (
+                    420 / max(1, len(steps) - 1)
                 )
 
                 active = max(
                     0,
-                    min(1, (t * len(steps)) - j),
+                    min(1, t * len(steps) - j)
                 )
 
-                r = 12 + int(8 * active)
+                r = 9 + int(8 * active)
 
                 d.ellipse(
                     (x-r, y-r, x+r, y+r),
-                    fill=(
-                        accent if active > 0
-                        else (45, 75, 90)
-                    ),
+                    fill=accent if active > 0 else (45, 75, 90)
                 )
 
                 d.multiline_text(
-                    (x - 58, y + 55),
-                    textwrap.fill(label, 12),
-                    font=f_small,
+                    (x-48, y+42),
+                    "\n".join(textwrap.wrap(label, 11)),
+                    font=fs,
                     fill=(235, 242, 246),
-                    spacing=6,
-                    align="center",
+                    spacing=4,
+                    align="center"
+                )
+
+        elif kind == "comparison":
+            for j, label in enumerate(steps[:2]):
+                x = 32 + j * 245
+
+                d.rounded_rectangle(
+                    (x, 310, x+220, 650),
+                    radius=18,
+                    fill=(13, 35, 49),
+                    outline=(
+                        accent if t > j*.22 else (45, 75, 90)
+                    ),
+                    width=3
+                )
+
+                d.text(
+                    (x+18, 340),
+                    "A" if j == 0 else "B",
+                    font=ft,
+                    fill=accent
+                )
+
+                d.multiline_text(
+                    (x+18, 430),
+                    "\n".join(textwrap.wrap(label, 13)),
+                    font=fb,
+                    fill=(235, 242, 246),
+                    spacing=6
+                )
+
+                bar = int(
+                    160 * max(
+                        0,
+                        min(1, (t-j*.18)/.65)
+                    )
+                )
+
+                d.rounded_rectangle(
+                    (x+18, 600, x+18+bar, 612),
+                    radius=6,
+                    fill=accent
                 )
 
         elif kind == "map":
             d.rounded_rectangle(
-                (65, 360, 655, 880),
-                radius=28,
+                (42, 290, 498, 690),
+                radius=22,
                 fill=(10, 35, 47),
                 outline=(38, 89, 105),
-                width=2,
+                width=2
             )
 
-            path = [
-                (125, 760), (235, 650), (330, 700),
-                (420, 530), (565, 440),
+            points = [
+                (90, 620),
+                (175, 540),
+                (260, 575),
+                (345, 420),
+                (450, 350)
             ]
 
-            for a, b in zip(path, path[1:]):
-                d.line(
-                    (a[0], a[1], b[0], b[1]),
-                    fill=(45, 105, 120),
-                    width=9,
-                )
-
             upto = min(
-                len(path) - 1,
-                int(t * (len(path) - 1)) + 1,
+                len(points)-1,
+                int(t*(len(points)-1))+1
             )
 
-            for j, (x, y0) in enumerate(path):
-                r = 13 if j <= upto else 8
+            for a, b in zip(
+                points[:upto+1],
+                points[1:upto+2]
+            ):
+                d.line(
+                    (a[0], a[1], b[0], b[1]),
+                    fill=accent,
+                    width=6
+                )
+
+            for j, (x, y) in enumerate(points):
+                r = 11 if j <= upto else 7
 
                 d.ellipse(
-                    (x-r, y0-r, x+r, y0+r),
-                    fill=(
-                        accent if j <= upto
-                        else (60, 92, 104)
-                    ),
+                    (x-r, y-r, x+r, y+r),
+                    fill=accent if j <= upto else (60, 92, 104)
                 )
 
             d.text(
-                (90, 910),
+                (62, 720),
                 "Illustrative pathway — not to scale",
-                font=f_small,
-                fill=(150, 180, 190),
+                font=fs,
+                fill=(150, 180, 190)
             )
 
         elif kind == "data":
             for j, label in enumerate(steps[:4]):
-                y = 380 + j * 125
+                y = 315 + j * 105
 
                 d.text(
-                    (65, y),
-                    textwrap.fill(label, 30),
-                    font=f_body,
-                    fill=(235, 242, 246),
+                    (48, y),
+                    "\n".join(textwrap.wrap(label, 32)),
+                    font=fb,
+                    fill=(235, 242, 246)
                 )
 
-                bar_width = int(
-                    500 * max(
+                bar = int(
+                    390 * max(
                         0,
-                        min(1, t * 1.45 - j * 0.22),
+                        min(1, t*1.4-j*.22)
                     )
                 )
 
                 d.rounded_rectangle(
-                    (
-                        65, y + 54,
-                        65 + max(4, bar_width), y + 68,
-                    ),
-                    radius=7,
-                    fill=accent,
+                    (48, y+54, 48+max(3, bar), y+67),
+                    radius=6,
+                    fill=accent
                 )
 
         else:
             n = min(4, len(steps))
-            gap = 28
-            boxw = (600 - gap * (n - 1)) // n
-            y = 470
+            gap = 16
+            boxw = (440-gap*(n-1))//n
+            y = 380
 
             for j, label in enumerate(steps[:n]):
-                x = 60 + j * (boxw + gap)
+                x = 50 + j * (boxw + gap)
 
                 active = max(
                     0,
-                    min(1, (t * n) - j),
+                    min(1, t*n-j)
                 )
 
                 d.rounded_rectangle(
-                    (x, y, x + boxw, y + 250),
-                    radius=18,
+                    (x, y, x+boxw, y+210),
+                    radius=14,
                     fill=(13, 37, 51),
                     outline=(
-                        accent if active > 0
-                        else (43, 76, 91)
+                        accent if active > 0 else (43, 76, 91)
                     ),
-                    width=3,
+                    width=3
                 )
 
                 d.text(
-                    (x + 16, y + 22),
+                    (x+10, y+18),
                     f"0{j+1}",
-                    font=f_small,
-                    fill=accent,
+                    font=fs,
+                    fill=accent
                 )
 
                 d.multiline_text(
-                    (x + 16, y + 85),
-                    textwrap.fill(label, 12),
-                    font=f_body,
+                    (x+10, y+68),
+                    "\n".join(textwrap.wrap(label, 10)),
+                    font=fs,
                     fill=(235, 242, 246),
-                    spacing=7,
+                    spacing=5
                 )
 
-                if j < n - 1:
-                    cy = y + 125
-                    cx = x + boxw + gap // 2
+                if j < n-1:
+                    cx = x + boxw + gap//2
+                    cy = y + 105
 
                     d.polygon(
                         [
-                            (cx - 8, cy - 12),
-                            (cx + 8, cy),
-                            (cx - 8, cy + 12),
+                            (cx-6, cy-9),
+                            (cx+6, cy),
+                            (cx-6, cy+9)
                         ],
                         fill=(
-                            accent if t * n > j + 1
-                            else (60, 90, 100)
-                        ),
+                            accent if t*n > j+1 else (60, 90, 100)
+                        )
                     )
 
         d.multiline_text(
-            (50, 1030),
-            textwrap.fill(body, 42),
-            font=f_body,
+            (38, 790),
+            "\n".join(textwrap.wrap(body, 42)),
+            font=fb,
             fill=(195, 215, 224),
-            spacing=9,
+            spacing=7
         )
 
-        source = str(scene.get("source_label") or "")
-
-        if source:
+        if scene.get("source_label"):
             d.text(
-                (50, 1195),
-                f"SOURCE: {source[:55]}",
-                font=f_small,
-                fill=(125, 165, 178),
+                (38, 900),
+                f"SOURCE: {str(scene['source_label'])[:48]}",
+                font=fs,
+                fill=(125, 165, 178)
             )
 
-        d.text(
-            (50, 1235),
-            "EXPLANATORY GRAPHIC",
-            font=f_small,
-            fill=(90, 125, 140),
-        )
-
         im.save(
-            frames_dir / f"frame_{frame:03d}.png"
+            directory / f"frame_{frame:03d}.jpg",
+            quality=88,
+            optimize=True
         )
 
-    return frames_dir
+    return directory
 
+
+# ============================================================
+# VOICEOVER AND SUBTITLES
+# ============================================================
 
 def ass_time(seconds):
     ticks = max(0, int(round(seconds * 100)))
@@ -881,176 +956,192 @@ def ass_time(seconds):
 
 
 def build_voice_and_subs(script):
-    sentence_list = re.findall(
-        r"[^.!?]+[.!?]+|[^.!?]+$",
-        script,
-    )
+    """Sentence-level TTS with deliberate pauses and word timing."""
 
-    sentence_list = [
-        x.strip()
-        for x in sentence_list
-        if x.strip()
-    ]
+    sentences = split_sentences(script)
 
-    if not sentence_list:
+    if not sentences:
         raise RuntimeError(
             "The script contains no speakable sentences."
         )
 
     async def generate():
-        all_words = []
-        concat_lines = []
+        word_events = []
+        sentence_events = []
+        wav_parts = []
         cursor = 0.0
 
-        base_rate = (
-            int(TTS_RATE.replace("%", ""))
-            if TTS_RATE.endswith("%") else -5
-        )
+        # Visual-only opening before the narrator starts.
+        opening_silence = OUT / "opening_silence.wav"
 
-        base_pitch = (
-            int(TTS_PITCH.replace("Hz", ""))
-            if TTS_PITCH.endswith("Hz") else -4
-        )
+        run([
+            "ffmpeg", "-y",
+            "-f", "lavfi",
+            "-i", "anullsrc=r=48000:cl=stereo",
+            "-t", str(OPENING_LEAD),
+            "-c:a", "pcm_s16le",
+            str(opening_silence)
+        ])
 
-        rate_steps = [
-            f"{base_rate + delta}%"
-            for delta in (1, -1, 2, 0)
-        ]
+        wav_parts.append(opening_silence)
+        cursor += OPENING_LEAD
 
-        pitch_steps = [
-            f"{base_pitch + delta}Hz"
-            for delta in (1, 2, 0, 1)
-        ]
+        for index, sentence in enumerate(sentences):
 
-        for index, sentence in enumerate(sentence_list):
-            rate = rate_steps[index % len(rate_steps)]
-            pitch = pitch_steps[index % len(pitch_steps)]
+            rate_values = [
+                BASE_RATE, "-5%", "-3%", "-4%"
+            ]
 
-            path = OUT / f"voice_{index:02d}.mp3"
-            words = []
+            pitch_values = [
+                BASE_PITCH, "-2Hz", "-4Hz", "-2Hz"
+            ]
 
-            communication = edge_tts.Communicate(
+            mp3_path = OUT / f"tts_{index:02d}.mp3"
+            wav_path = OUT / f"tts_{index:02d}.wav"
+
+            boundaries = []
+
+            communicate = edge_tts.Communicate(
                 sentence,
                 VOICE,
-                rate=rate,
-                pitch=pitch,
-                boundary="WordBoundary",
+                rate=rate_values[index % len(rate_values)],
+                pitch=pitch_values[index % len(pitch_values)],
+                boundary="WordBoundary"
             )
 
-            with open(path, "wb") as audio_file:
-                async for message in communication.stream():
+            with open(mp3_path, "wb") as f:
+                async for message in communicate.stream():
+
                     if message["type"] == "audio":
-                        audio_file.write(message["data"])
+                        f.write(message["data"])
 
                     elif message["type"] == "WordBoundary":
-                        words.append(
-                            {
-                                "text": message["text"],
-                                "offset": (
-                                    message["offset"] / 10_000_000
-                                ),
-                                "duration": (
-                                    message["duration"] / 10_000_000
-                                ),
-                            }
-                        )
+                        boundaries.append({
+                            "text": message["text"],
+                            "offset": (
+                                message["offset"] / 10_000_000
+                            ),
+                            "duration": (
+                                message["duration"] / 10_000_000
+                            )
+                        })
 
             if (
-                not words
-                or not path.exists()
-                or path.stat().st_size < 1000
+                not mp3_path.exists()
+                or mp3_path.stat().st_size < 1000
+                or not boundaries
             ):
                 raise RuntimeError(
-                    f"TTS failed on sentence {index+1}."
+                    f"Edge TTS failed on sentence {index+1}."
                 )
 
-            seg_duration = media_duration(path)
+            run([
+                "ffmpeg", "-y",
+                "-i", str(mp3_path),
+                "-ar", "48000",
+                "-ac", "2",
+                "-c:a", "pcm_s16le",
+                str(wav_path)
+            ])
 
-            for word in words:
-                all_words.append(
-                    {
-                        **word,
-                        "offset": cursor + word["offset"],
-                    }
-                )
+            duration = ffprobe_duration(wav_path)
+            sentence_start = cursor
 
-            concat_lines.append(
-                f"file '{path.resolve()}'"
+            for event in boundaries:
+                word_events.append({
+                    **event,
+                    "offset": cursor + event["offset"]
+                })
+
+            wav_parts.append(wav_path)
+            cursor += duration
+
+            sentence_events.append({
+                "start": sentence_start,
+                "end": cursor
+            })
+
+            gap = (
+                HOOK_GAP if index == 0
+                else SENTENCE_GAP
             )
 
-            cursor += seg_duration
+            silence = OUT / f"gap_{index:02d}.wav"
 
-            pause = (
-                0.24
-                if sentence.endswith(("?", "!"))
-                else 0.18
-            )
+            run([
+                "ffmpeg", "-y",
+                "-f", "lavfi",
+                "-i", "anullsrc=r=48000:cl=stereo",
+                "-t", str(gap),
+                "-c:a", "pcm_s16le",
+                str(silence)
+            ])
 
-            silence = OUT / f"pause_{index:02d}.mp3"
+            wav_parts.append(silence)
+            cursor += gap
 
-            run(
-                [
-                    "ffmpeg",
-                    "-y",
-                    "-f",
-                    "lavfi",
-                    "-i",
-                    "anullsrc=r=48000:cl=stereo",
-                    "-t",
-                    str(pause),
-                    "-q:a",
-                    "9",
-                    str(silence),
-                ]
-            )
+        # Remove the final ordinary sentence gap.
+        last_gap = wav_parts.pop()
+        last_gap.unlink(missing_ok=True)
 
-            concat_lines.append(
-                f"file '{silence.resolve()}'"
-            )
+        # Replace it with a longer visual ending hold.
+        ending = OUT / "ending_hold.wav"
 
-            cursor += pause
+        run([
+            "ffmpeg", "-y",
+            "-f", "lavfi",
+            "-i", "anullsrc=r=48000:cl=stereo",
+            "-t", str(ENDING_HOLD),
+            "-c:a", "pcm_s16le",
+            str(ending)
+        ])
 
-        concat_file = OUT / "voice_concat.txt"
+        wav_parts.append(ending)
 
-        concat_file.write_text(
-            "\n".join(concat_lines),
-            encoding="utf-8",
+        total_duration = sum(
+            ffprobe_duration(p) for p in wav_parts
         )
 
-        run(
-            [
-                "ffmpeg",
-                "-y",
-                "-f",
-                "concat",
-                "-safe",
-                "0",
-                "-i",
-                str(concat_file),
-                "-c:a",
-                "libmp3lame",
-                "-q:a",
-                "2",
-                str(OUT / "voiceover.mp3"),
-            ]
+        concat = OUT / "voice_concat.txt"
+
+        concat.write_text(
+            "".join(
+                f"file '{p.resolve()}'\n"
+                for p in wav_parts
+            ),
+            encoding="utf-8"
         )
 
-        if not all_words:
-            raise RuntimeError(
-                "Edge TTS returned no word timings."
-            )
+        run([
+            "ffmpeg", "-y",
+            "-f", "concat",
+            "-safe", "0",
+            "-i", str(concat),
+            "-c:a", "pcm_s16le",
+            "-ar", "48000",
+            "-ac", "2",
+            str(OUT / "voiceover.wav")
+        ])
 
+        run([
+            "ffmpeg", "-y",
+            "-i", str(OUT / "voiceover.wav"),
+            "-c:a", "libmp3lame",
+            "-b:a", "192k",
+            str(OUT / "voiceover.mp3")
+        ])
+
+        # Word-timed subtitle groups.
         groups = []
         current = []
 
-        for word in all_words:
-            current.append(word)
+        for event in word_events:
+            current.append(event)
 
-            endmark = bool(
-                re.search(r'[.!?]["\']?$', word["text"])
-            )
-
-            if len(current) >= 5 or endmark:
+            if (
+                len(current) >= 5
+                or re.search(r'[.!?]["\']?$', event["text"])
+            ):
                 groups.append(current)
                 current = []
 
@@ -1066,31 +1157,18 @@ def build_voice_and_subs(script):
             "PlayResX: 1080",
             "PlayResY: 1920",
             "[V4+ Styles]",
-            (
-                "Format: Name, Fontname, Fontsize, PrimaryColour, "
-                "SecondaryColour, OutlineColour, BackColour, Bold, "
-                "Italic, Underline, StrikeOut, ScaleX, ScaleY, "
-                "Spacing, Angle, BorderStyle, Outline, Shadow, "
-                "Alignment, MarginL, MarginR, MarginV, Encoding"
-            ),
-            (
-                "Style: Default,DejaVu Sans,52,&H00FFFFFF,"
-                "&H000000FF,&H00101A25,&H90000000,-1,0,0,0,"
-                "100,100,0,0,1,4,1,2,75,75,560,1"
-            ),
+            "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
+            "Style: Default,DejaVu Sans,49,&H00FFFFFF,&H000000FF,&H00101A25,&H90000000,-1,0,0,0,100,100,0,0,1,4,1,2,75,75,500,1",
             "[Events]",
-            (
-                "Format: Layer, Start, End, Style, Name, "
-                "MarginL, MarginR, MarginV, Effect, Text"
-            ),
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
         ]
 
         for group in groups:
-            st = group[0]["offset"]
+            start = group[0]["offset"]
 
-            en = max(
+            end = max(
                 group[-1]["offset"] + group[-1]["duration"],
-                st + 0.55,
+                start + 0.45
             )
 
             phrase = " ".join(
@@ -1100,331 +1178,319 @@ def build_voice_and_subs(script):
             phrase = r"\N".join(
                 textwrap.wrap(
                     phrase,
-                    width=28,
-                    break_long_words=False,
+                    width=29,
+                    break_long_words=False
                 )
             )
 
-            phrase = phrase.replace("{", r"\{")
-            phrase = phrase.replace("}", r"\}")
+            phrase = (
+                phrase.replace("{", r"\{")
+                .replace("}", r"\}")
+            )
 
             lines.append(
-                f"Dialogue: 0,{ass_time(st)},{ass_time(en)},"
-                f"Default,,0,0,0,,{phrase}"
+                f"Dialogue: 0,{ass_time(start)},"
+                f"{ass_time(end)},Default,,0,0,0,,{phrase}"
             )
 
         (OUT / "captions.ass").write_text(
             "\n".join(lines),
-            encoding="utf-8",
+            encoding="utf-8"
         )
 
-    asyncio.run(generate())
-
-
-def media_duration(path):
-    result = subprocess.run(
-        [
-            "ffprobe",
-            "-v",
-            "error",
-            "-show_entries",
-            "format=duration",
-            "-of",
-            "default=noprint_wrappers=1:nokey=1",
-            str(path),
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-
-    return float(result.stdout.strip())
-
-
-def render(plan):
-    voice = OUT / "voiceover.mp3"
-    duration = media_duration(voice)
-
-    scenes = plan["scenes"]
-    segment_duration = duration / len(scenes)
-    segment_files = []
-
-    for i, scene in enumerate(scenes, 1):
-        media_files = (
-            scene.get("media_files")
-            or (
-                [scene.get("media_file")]
-                if scene.get("media_file")
-                else []
-            )
+        Path("timing.json").write_text(
+            json.dumps({
+                "sentences": sentence_events,
+                "total_duration": total_duration
+            }, indent=2),
+            encoding="utf-8"
         )
 
-        media_files = [
-            x for x in media_files
-            if x and Path(x).exists()
-        ]
+        return sentence_events, total_duration
 
-        part_duration = (
-            segment_duration / max(1, len(media_files))
-            if media_files else segment_duration
-        )
+    return asyncio.run(generate())
 
-        parts = []
 
-        if (
-            scene.get("visual_type") == "diagram"
-            or not media_files
-        ):
-            frames_dir = make_diagram(scene, i)
-            output = OUT / f"segment_{i:02d}.mp4"
+# ============================================================
+# SCENE TIMING
+# ============================================================
 
-            run(
-                [
-                    "ffmpeg",
-                    "-y",
-                    "-framerate",
-                    "24",
-                    "-i",
-                    str(frames_dir / "frame_%03d.png"),
-                    "-t",
-                    f"{segment_duration:.3f}",
-                    "-vf",
-                    (
-                        f"scale={W}:{H}:flags=lanczos,"
-                        f"fps={FPS},format=yuv420p"
-                    ),
-                    "-an",
-                    "-c:v",
-                    "libx264",
-                    "-preset",
-                    "veryfast",
-                    "-crf",
-                    "21",
-                    str(output),
-                ]
+def scene_durations(plan, sentence_events, total_duration):
+    """
+    Each scene owns the pause after its last sentence.
+    No more equal-duration scene splitting.
+    """
+
+    result = []
+
+    for index, scene in enumerate(plan["scenes"]):
+        start_i = scene["sentence_start"]
+
+        start = sentence_events[start_i]["start"]
+
+        if index + 1 < len(plan["scenes"]):
+            next_start_i = (
+                plan["scenes"][index + 1]["sentence_start"]
             )
 
-            parts.append(output)
+            end = sentence_events[next_start_i]["start"]
 
         else:
-            for take, source in enumerate(media_files, 1):
-                output = (
-                    OUT / f"segment_{i:02d}_take_{take}.mp4"
-                )
+            end = total_duration
 
-                zoom = (
-                    "min(zoom+0.00055,1.06)"
-                    if (i + take) % 2
-                    else "max(1.0,1.06-on*0.000018)"
-                )
-
-                run(
-                    [
-                        "ffmpeg",
-                        "-y",
-                        "-stream_loop",
-                        "-1",
-                        "-i",
-                        str(source),
-                        "-t",
-                        f"{part_duration:.3f}",
-                        "-vf",
-                        (
-                            f"scale={W}:{H}:"
-                            "force_original_aspect_ratio=increase,"
-                            f"crop={W}:{H},"
-                            "zoompan="
-                            f"z='{zoom}':"
-                            "x='iw/2-(iw/zoom/2)+sin(on/75)*10':"
-                            "y='ih/2-(ih/zoom/2)':"
-                            f"d=1:s={W}x{H}:fps={FPS},"
-                            "setsar=1,format=yuv420p"
-                        ),
-                        "-an",
-                        "-c:v",
-                        "libx264",
-                        "-preset",
-                        "veryfast",
-                        "-crf",
-                        "21",
-                        str(output),
-                    ]
-                )
-
-                parts.append(output)
-
-        # Hook overlay khusus untuk adegan pertama.
-        if i == 1 and parts:
-            hook = str(
-                plan.get("hook")
-                or plan.get("title")
-                or "A hidden force is changing this world"
+        if end <= start:
+            raise RuntimeError(
+                "Invalid scene timing generated from sentence map."
             )
 
-            hook = re.sub(
-                r"[^A-Za-z0-9 ,.'?!-]",
-                "",
-                hook,
-            )[:90].replace(":", "")
+        result.append((start, end, end-start))
 
-            hook_file = OUT / "hook.txt"
+    # Show the opening visual during the lead-in silence.
+    first_end = result[0][1]
 
-            hook_wrapped = "\n".join(
-                textwrap.wrap(
-                    hook,
-                    width=23,
-                    break_long_words=False,
+    result[0] = (
+        0.0,
+        first_end,
+        first_end
+    )
+
+    return result
+
+
+# ============================================================
+# VIDEO RENDERING
+# ============================================================
+
+def render_footage_scene(
+    source,
+    duration,
+    output,
+    hook_text=None
+):
+    source_duration = ffprobe_duration(source)
+
+    loop_args = (
+        ["-stream_loop", "-1"]
+        if source_duration < duration + 0.1
+        else []
+    )
+
+    vf = (
+        f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,"
+        f"crop={W}:{H}:"
+        f"x='(iw-ow)/2+(iw-ow)*0.08*sin(t*0.22)':"
+        f"y='(ih-oh)/2+(ih-oh)*0.08*cos(t*0.18)':eval=frame,"
+        f"fps={FPS},setsar=1,format=yuv420p"
+    )
+
+    if hook_text:
+        hook_file = OUT / "hook.txt"
+        hook_file.write_text(
+            hook_text,
+            encoding="utf-8"
+        )
+
+        vf += (
+            ",drawbox=x=0:y=170:w=1080:h=420:"
+            "color=black@0.38:t=fill:"
+            "enable='between(t,0.6,4.5)'"
+
+            f",drawtext=fontfile=/usr/share/fonts/truetype/dejavu/"
+            f"DejaVuSans-Bold.ttf:textfile={hook_file}:"
+            "fontcolor=white:fontsize=66:line_spacing=14:"
+            "borderw=2:bordercolor=black@0.65:"
+            "x=70:y=260:"
+            "alpha='if(lt(t,1.0),(t-0.6)/0.4,"
+            "if(gt(t,4.1),(4.5-t)/0.4,1))':"
+            "enable='between(t,0.6,4.5)'"
+        )
+
+    cmd = [
+        "ffmpeg", "-y",
+        *loop_args,
+        "-i", str(source),
+        "-t", f"{duration:.3f}",
+        "-vf", vf,
+        "-an",
+        "-c:v", "libx264",
+        "-preset", "veryfast",
+        "-crf", "20",
+        "-r", str(FPS),
+        "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart",
+        str(output)
+    ]
+
+    run(cmd)
+
+
+def render_diagram_scene(
+    scene,
+    idx,
+    duration,
+    output
+):
+    frames_dir = make_diagram(scene, idx)
+
+    run([
+        "ffmpeg", "-y",
+        "-framerate", "24",
+        "-i", str(frames_dir / "frame_%03d.jpg"),
+        "-t", f"{duration:.3f}",
+        "-vf",
+        f"scale={W}:{H}:flags=lanczos,"
+        f"fps={FPS},format=yuv420p",
+        "-an",
+        "-c:v", "libx264",
+        "-preset", "veryfast",
+        "-crf", "20",
+        "-pix_fmt", "yuv420p",
+        str(output)
+    ])
+
+
+def render(plan, sentence_events, total_duration):
+    spans = scene_durations(
+        plan,
+        sentence_events,
+        total_duration
+    )
+
+    segment_files = []
+
+    for i, (scene, (_, _, duration)) in enumerate(
+        zip(plan["scenes"], spans),
+        1
+    ):
+        duration = max(0.8, duration)
+
+        output = OUT / f"segment_{i:02d}.mp4"
+
+        source = scene.get("media_file")
+
+        if source and Path(source).exists():
+            hook = None
+
+            if i == 1:
+                hook = re.sub(
+                    r"[^A-Za-z0-9 ,.!?\-]",
+                    "",
+                    str(plan.get("hook") or "")
+                )[:90]
+
+            render_footage_scene(
+                source,
+                duration,
+                output,
+                hook
+            )
+
+        else:
+            if i == 1:
+                raise RuntimeError(
+                    "Opening footage is missing. "
+                    "Refusing to render a frozen or unrelated opening."
                 )
+
+            render_diagram_scene(
+                scene,
+                i,
+                duration,
+                output
             )
 
-            hook_file.write_text(
-                hook_wrapped,
-                encoding="utf-8",
-            )
+        segment_files.append(output)
 
-            hooked = OUT / "segment_01_hook.mp4"
+        print(
+            f"Scene {i}/8 rendered: {duration:.2f}s"
+        )
 
-            run(
-                [
-                    "ffmpeg",
-                    "-y",
-                    "-i",
-                    str(parts[0]),
-                    "-vf",
-                    (
-                        "drawbox=x=0:y=180:w=1080:h=390:"
-                        "color=black@0.40:t=fill:"
-                        "enable='between(t,0,3.2)',"
-                        "drawtext="
-                        "fontfile=/usr/share/fonts/truetype/dejavu/"
-                        "DejaVuSans-Bold.ttf:"
-                        f"textfile={hook_file}:"
-                        "fontcolor=white:fontsize=66:"
-                        "line_spacing=12:borderw=2:"
-                        "bordercolor=black@0.6:"
-                        "x=70:y=250:"
-                        "alpha='if(lt(t,0.35),t/0.35,"
-                        "if(gt(t,2.8),(3.2-t)/0.4,1))':"
-                        "enable='between(t,0,3.2)'"
-                    ),
-                    "-c:v",
-                    "libx264",
-                    "-preset",
-                    "veryfast",
-                    "-crf",
-                    "21",
-                    "-pix_fmt",
-                    "yuv420p",
-                    "-an",
-                    str(hooked),
-                ]
-            )
-
-            parts[0] = hooked
-
-        segment_files.extend(parts)
-
-    concat = OUT / "concat.txt"
+    concat = OUT / "video_concat.txt"
 
     concat.write_text(
         "".join(
-            f"file '{path.resolve()}'\n"
-            for path in segment_files
+            f"file '{p.resolve()}'\n"
+            for p in segment_files
         ),
-        encoding="utf-8",
+        encoding="utf-8"
     )
 
-    base = OUT / "base.mp4"
+    base = OUT / "video_base.mp4"
 
-    run(
-        [
-            "ffmpeg",
-            "-y",
-            "-f",
-            "concat",
-            "-safe",
-            "0",
-            "-i",
-            str(concat),
-            "-c",
-            "copy",
-            str(base),
-        ]
+    run([
+        "ffmpeg", "-y",
+        "-f", "concat",
+        "-safe", "0",
+        "-i", str(concat),
+        "-c", "copy",
+        str(base)
+    ])
+
+    final = Path("documentary.mp4")
+
+    audio_filter = (
+        "[1:a]highpass=f=65,lowpass=f=15000,"
+        "acompressor=threshold=-22dB:ratio=2.0:"
+        "attack=25:release=250:makeup=1.15,"
+        "alimiter=limit=0.88,"
+        "loudnorm=I=-16:TP=-1.5:LRA=9,"
+        "aresample=48000[a]"
     )
 
-    output = Path("documentary.mp4")
-
-    run(
-        [
-            "ffmpeg",
-            "-y",
-            "-i",
-            str(base),
-            "-i",
-            str(voice),
-            "-filter_complex",
-            (
-                "[0:v]subtitles=output/captions.ass[v];"
-                "[1:a]highpass=f=65,"
-                "lowpass=f=15500,"
-                "acompressor=threshold=-20dB:"
-                "ratio=2.2:attack=18:release=220:makeup=1.3,"
-                "alimiter=limit=0.84,"
-                "loudnorm=I=-16:TP=-1.5:LRA=8,"
-                "aresample=48000,"
-                "aformat=sample_fmts=fltp:"
-                "channel_layouts=stereo[a]"
-            ),
-            "-map",
-            "[v]",
-            "-map",
-            "[a]",
-            "-t",
-            f"{duration:.3f}",
-            "-r",
-            str(FPS),
-            "-c:v",
-            "libx264",
-            "-preset",
-            "veryfast",
-            "-crf",
-            "20",
-            "-pix_fmt",
-            "yuv420p",
-            "-c:a",
-            "aac",
-            "-b:a",
-            "192k",
-            "-ar",
-            "48000",
-            "-ac",
-            "2",
-            "-movflags",
-            "+faststart",
-            str(output),
-        ]
-    )
+    run([
+        "ffmpeg", "-y",
+        "-i", str(base),
+        "-i", str(OUT / "voiceover.wav"),
+        "-filter_complex",
+        f"[0:v]subtitles={OUT}/captions.ass[v];{audio_filter}",
+        "-map", "[v]",
+        "-map", "[a]",
+        "-t", f"{total_duration:.3f}",
+        "-c:v", "libx264",
+        "-preset", "veryfast",
+        "-crf", "20",
+        "-pix_fmt", "yuv420p",
+        "-r", str(FPS),
+        "-c:a", "aac",
+        "-b:a", "192k",
+        "-ar", "48000",
+        "-ac", "2",
+        "-movflags", "+faststart",
+        str(final)
+    ])
 
     print(
-        f"Final video: {output}; duration {duration:.1f}s"
+        f"Final video: {final}; "
+        f"duration {ffprobe_duration(final):.2f}s"
     )
 
+
+# ============================================================
+# MAIN
+# ============================================================
 
 def main():
-    print("1/4 Generating original documentary plan...")
+    print("1/5 Generating documentary plan...")
     plan = gemini_plan(TOPIC)
 
-    print("2/4 Finding stock footage...")
+    print("2/5 Searching and ranking relevant footage...")
     fetch_footage(plan)
 
-    print("3/4 Generating voice-over and word-timed subtitles...")
-    build_voice_and_subs(plan["script"])
+    print("3/5 Generating paced voice-over and subtitles...")
+    sentence_events, total_duration = (
+        build_voice_and_subs(plan["script"])
+    )
 
-    print("4/4 Rendering vertical documentary...")
-    render(plan)
+    print("4/5 Rendering scenes to actual narration timing...")
+    render(
+        plan,
+        sentence_events,
+        total_duration
+    )
 
     print(
-        "SUCCESS: documentary.mp4, plan.json, credits.txt"
+        "5/5 Production complete: "
+        "documentary.mp4, plan.json, credits.txt, timing.json"
     )
 
 
