@@ -5,7 +5,7 @@ import json
 import subprocess
 
 VOICE = "voiceover.mp3"
-SUBTITLES = "captions.srt"
+SUBTITLES = "captions.ass"
 OUTPUT = "documentary.mp4"
 
 WIDTH = 1080
@@ -23,7 +23,7 @@ if not os.path.exists(VOICE):
     raise FileNotFoundError("Voice-over not found!")
 
 if not os.path.exists(SUBTITLES):
-    raise FileNotFoundError("Captions file not found!")
+    raise FileNotFoundError("ASS subtitle file not found!")
 
 if not clips:
     raise FileNotFoundError("No footage found!")
@@ -69,17 +69,7 @@ filters.append(
 )
 
 filters.append(
-    "[base]subtitles=captions.srt:"
-    "force_style='FontName=DejaVu Sans,"
-    "FontSize=48,"
-    "PrimaryColour=&H00FFFFFF,"
-    "OutlineColour=&H00000000,"
-    "BorderStyle=1,"
-    "Outline=3,"
-    "Shadow=1,"
-    "Alignment=2,"
-    "MarginV=260'"
-    "[outv]"
+    "[base]subtitles=captions.ass[outv]"
 )
 
 command += [
@@ -99,5 +89,5 @@ command += [
 
 subprocess.run(command, check=True)
 
-print("Video successfully rendered with subtitles!")
+print("Video successfully rendered with centered subtitles!")
 print("Output:", OUTPUT)
