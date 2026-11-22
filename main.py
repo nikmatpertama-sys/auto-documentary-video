@@ -63,7 +63,21 @@ if not TOPIC:
 
 
 def run(cmd):
-    subprocess.run([str(x) for x in cmd], check=True)
+    """Run a command and surface stderr so failures are diagnosable in Actions."""
+    result = subprocess.run(
+        [str(x) for x in cmd],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode != 0:
+        details = (result.stderr or result.stdout or "No diagnostic output.").strip()
+        raise RuntimeError(
+            f"Command failed with exit code {result.returncode}: "
+            f"{details[-5000:]}"
+        )
+    if result.stdout:
+        print(result.stdout, end="")
 
 
 def ffprobe_duration(path):
@@ -1418,7 +1432,7 @@ def render_footage_scene(
         f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,"
         f"crop={W}:{H}:"
         f"x='(iw-ow)/2+(iw-ow)*0.08*sin(t*0.22)':"
-        f"y='(ih-oh)/2+(ih-oh)*0.08*cos(t*0.18)':eval=frame,"
+        f"y='(ih-oh)/2+(ih-oh)*0.08*cos(t*0.18)',"
         f"fps={FPS},setsar=1,format=yuv420p"
     )
 
