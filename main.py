@@ -24,9 +24,18 @@ CACHE = Path(".api-cache")
 for folder in (OUT, FOOT, VIS, CACHE):
     folder.mkdir(parents=True, exist_ok=True)
 
+GROQ_KEY = os.getenv("GROQ_API_KEY", "").strip()
+OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
 TOPIC = os.getenv("INPUT_TOPIC", "").strip()
+
+GROQ_MODEL = os.getenv(
+    "GROQ_MODEL", "openai/gpt-oss-120b"
+).strip()
+OPENROUTER_MODEL = os.getenv(
+    "OPENROUTER_MODEL", "openrouter/free"
+).strip()
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
 VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural").strip()
 BASE_RATE = os.getenv("TTS_RATE", "-4%").strip()
@@ -42,8 +51,11 @@ ENDING_HOLD = 1.25
 MIN_CLIP_WIDTH = 640
 MAX_CLIP_BYTES = 180 * 1024 * 1024
 
-if not GEMINI_KEY:
-    raise RuntimeError("Missing GEMINI_API_KEY GitHub Secret.")
+if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
+    raise RuntimeError(
+        "Missing AI provider key. Add GROQ_API_KEY, "
+        "OPENROUTER_API_KEY, or GEMINI_API_KEY GitHub Secret."
+    )
 if not PIXABAY_KEY:
     raise RuntimeError("Missing PIXABAY_API_KEY GitHub Secret.")
 if not TOPIC:
@@ -85,8 +97,8 @@ def normalize_words(text):
 # AI DOCUMENTARY PLANNER
 # ============================================================
 
-def gemini_plan(topic):
-    prompt = f'''Create an original, fact-conscious English mini-documentary
+def documentary_prompt(topic):
+    return f"""Create an original, fact-conscious English mini-documentary
 for a vertical 9:16 video.
 
 TOPIC: {topic}
@@ -117,7 +129,6 @@ Return ONLY valid JSON in this exact structure:
 }}
 
 Requirements:
-
 - Exactly 8 scenes, in the same order as the script.
 - Scene 1 MUST be footage, not a diagram.
 - Its first sentence is a powerful curiosity hook, max 12 words.
@@ -136,104 +147,220 @@ Requirements:
 - Never invent statistics, exact quantities, sources, or URLs.
 - Leave source fields empty unless genuinely certain.
 - End with a memorable final thought, not a call to action.
-'''
+"""
 
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{MODEL}:generateContent"
+
+def extract_json_object(raw_text):
+    """Extract a JSON object even if a provider wraps it in markdown."""
+    raw = str(raw_text or "").strip()
+    raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.IGNORECASE)
+    raw = re.sub(r"\s*```$", "", raw)
+    first = raw.find("{")
+    last = raw.rfind("}")
+    if first < 0 or last <= first:
+        raise ValueError("Provider response did not contain a JSON object.")
+    return json.loads(raw[first:last + 1])
+
+
+def post_with_transient_retry(url, **kwargs):
+    """Retry temporary network/server failures once; never retry HTTP 429."""
+    last_error = None
+    for attempt in range(2):
+        try:
+            response = requests.post(url, **kwargs)
+            if response.status_code == 429:
+                return response
+            if response.status_code in (408, 500, 502, 503, 504):
+                last_error = RuntimeError(
+                    f"Temporary HTTP {response.status_code}: "
+                    f"{response.text[:500]}"
+                )
+                if attempt == 0:
+                    print("Temporary AI service issue; retrying once in 5s...")
+                    time.sleep(5)
+                    continue
+            return response
+        except (
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+        ) as exc:
+            last_error = exc
+            if attempt == 0:
+                print("AI connection issue; retrying once in 5s...")
+                time.sleep(5)
+                continue
+    if last_error:
+        raise last_error
+    raise RuntimeError("AI request failed without a response.")
+
+
+def call_openai_compatible(provider, api_key, model, prompt):
+    if provider == "Groq":
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+    else:
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": os.getenv(
+                "OPENROUTER_SITE_URL", "https://github.com/"
+            ),
+            "X-Title": "Auto Documentary Video",
+        }
+
+    payload = {
+        "model": model,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are an expert documentary writer and visual "
+                    "producer. Follow the requested schema exactly. "
+                    "Return only one valid JSON object, with no markdown."
+                ),
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.55,
+        "response_format": {"type": "json_object"},
+    }
+
+    # A single attempt per provider: quota errors should immediately
+    # trigger the next provider instead of wasting time retrying.
+    response = post_with_transient_retry(
+        url,
+        headers=headers,
+        json=payload,
+        timeout=(20, 180),
     )
 
+    if response.status_code >= 400:
+        detail = response.text[:700].replace("\n", " ")
+        raise RuntimeError(
+            f"{provider} HTTP {response.status_code}: {detail}"
+        )
+
+    data = response.json()
+    try:
+        return extract_json_object(
+            data["choices"][0]["message"]["content"]
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            f"{provider} returned an unreadable response: {exc}; "
+            f"body={str(data)[:700]}"
+        ) from exc
+
+
+def call_gemini(api_key, model, prompt):
+    url = (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{model}:generateContent"
+    )
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
             "responseMimeType": "application/json",
-            "temperature": 0.55
-        }
+            "temperature": 0.55,
+        },
     }
-
-    last_error = None
-    response = None
-
-    for attempt in range(1, 4):
-        try:
-            response = requests.post(
-                url,
-                params={"key": GEMINI_KEY},
-                json=payload,
-                timeout=(20, 180)
-            )
-
-            if response.status_code == 429:
-                raise RuntimeError(
-                    "Gemini API quota/rate limit reached (HTTP 429). "
-                    "Wait for quota reset or change API provider/model."
-                )
-
-            if response.status_code in (408, 500, 502, 503, 504):
-                last_error = (
-                    f"HTTP {response.status_code}: "
-                    f"{response.text[:500]}"
-                )
-
-                if attempt < 3:
-                    wait = 10 * attempt
-                    print(
-                        f"Gemini temporarily unavailable; "
-                        f"retrying in {wait}s ({attempt}/3)."
-                    )
-                    time.sleep(wait)
-                    continue
-
-            response.raise_for_status()
-            break
-
-        except (
-            requests.exceptions.Timeout,
-            requests.exceptions.ConnectionError
-        ) as exc:
-            last_error = str(exc)
-
-            if attempt < 3:
-                time.sleep(10 * attempt)
-                continue
-
-        except RuntimeError:
-            raise
-
-    if response is None or response.status_code >= 400:
+    response = post_with_transient_retry(
+        url,
+        params={"key": api_key},
+        json=payload,
+        timeout=(20, 180),
+    )
+    if response.status_code >= 400:
+        detail = response.text[:700].replace("\n", " ")
         raise RuntimeError(
-            f"Gemini planning failed: "
-            f"{last_error or response.text[:1000]}"
+            f"Gemini HTTP {response.status_code}: {detail}"
         )
-
     data = response.json()
-
     try:
-        raw = data["candidates"][0]["content"]["parts"][0]["text"]
-        plan = json.loads(raw)
+        return extract_json_object(
+            data["candidates"][0]["content"]["parts"][0]["text"]
+        )
     except Exception as exc:
         raise RuntimeError(
-            f"Gemini returned invalid JSON: {exc}; "
-            f"response={str(data)[:1000]}"
-        )
+            f"Gemini returned an unreadable response: {exc}; "
+            f"body={str(data)[:700]}"
+        ) from exc
 
-    plan["script"] = re.sub(
-        r"\s+", " ", str(plan.get("script", ""))
-    ).strip()
 
-    plan["scenes"] = plan.get("scenes", [])[:8]
+def gemini_plan(topic):
+    """Generate the plan with automatic provider failover."""
+    prompt = documentary_prompt(topic)
 
-    if len(plan["scenes"]) != 8:
+    providers = []
+    if GROQ_KEY:
+        providers.append((
+            "Groq",
+            lambda: call_openai_compatible(
+                "Groq", GROQ_KEY, GROQ_MODEL, prompt
+            ),
+        ))
+    if OPENROUTER_KEY:
+        providers.append((
+            "OpenRouter",
+            lambda: call_openai_compatible(
+                "OpenRouter", OPENROUTER_KEY, OPENROUTER_MODEL, prompt
+            ),
+        ))
+    if GEMINI_KEY:
+        providers.append((
+            "Gemini",
+            lambda: call_gemini(GEMINI_KEY, MODEL, prompt),
+        ))
+
+    if not providers:
         raise RuntimeError(
-            "AI returned an incomplete plan. Expected 8 scenes."
+            "No AI provider API key found. Add at least one GitHub "
+            "Secret: GROQ_API_KEY, OPENROUTER_API_KEY, or GEMINI_API_KEY."
         )
 
-    if len(plan["script"].split()) < 100:
-        raise RuntimeError("Documentary script is too short.")
+    errors = []
+    plan = None
 
-    plan["scenes"][0]["visual_type"] = "footage"
+    for index, (provider_name, generate) in enumerate(providers, 1):
+        print(
+            f"Trying AI provider {index}/{len(providers)}: "
+            f"{provider_name}..."
+        )
+        try:
+            candidate = generate()
+            candidate["script"] = re.sub(
+                r"\\s+", " ", str(candidate.get("script", ""))
+            ).strip()
+            candidate["scenes"] = candidate.get("scenes", [])[:8]
 
-    assign_scene_sentence_ranges(plan)
+            if len(candidate["scenes"]) != 8:
+                raise RuntimeError(
+                    "AI returned an incomplete plan. Expected 8 scenes."
+                )
+            if len(candidate["script"].split()) < 100:
+                raise RuntimeError("Documentary script is too short.")
+
+            candidate["scenes"][0]["visual_type"] = "footage"
+            assign_scene_sentence_ranges(candidate)
+            plan = candidate
+            print(f"Documentary plan generated successfully by {provider_name}.")
+            break
+        except Exception as exc:
+            message = f"{provider_name}: {exc}"
+            errors.append(message)
+            print(f"{message}")
+            if index < len(providers):
+                print("Switching automatically to the next AI provider...")
+
+    if plan is None:
+        raise RuntimeError(
+            "All configured AI providers failed:\\n- "
+            + "\\n- ".join(errors)
+        )
 
     Path("plan.json").write_text(
         json.dumps(plan, indent=2, ensure_ascii=False),
@@ -244,9 +371,7 @@ Requirements:
         f"Script ready: {len(plan['script'].split())} words, "
         f"{len(plan['scenes'])} scenes."
     )
-
     return plan
-
 
 def assign_scene_sentence_ranges(plan):
     """Map each scene to exact script sentences."""
