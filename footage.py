@@ -1,141 +1,120 @@
 
-import requests
 import os
-import time
+import requests
+import shutil
 
-os.makedirs("footage", exist_ok=True)
-
-API = "https://commons.wikimedia.org/w/api.php"
+API_KEY = os.getenv("PIXABAY_API_KEY")
+API_URL = "https://pixabay.com/api/videos/"
 
 SEARCH_TERMS = [
-    "hospital",
-    "traffic",
-    "power station",
+    "electricity power station",
+    "electrical power lines",
     "solar panels",
-    "wind turbine",
-    "hydroelectric dam",
-    "power lines",
-    "electricity",
-    "light bulb"
+    "wind turbines",
+    "hydroelectric dam"
 ]
 
-HEADERS = {
-    "User-Agent": "DocumentaryVideoGenerator/1.0"
-}
+OUTPUT_DIR = "footage"
 
-downloaded = 0
-seen = set()
-MAX_VIDEOS = 10
+if not API_KEY:
+    raise RuntimeError("PIXABAY_API_KEY secret is missing!")
+
+if os.path.exists(OUTPUT_DIR):
+    shutil.rmtree(OUTPUT_DIR)
+
+os.makedirs(OUTPUT_DIR)
+
+downloaded_ids = set()
+download_count = 0
 
 for term in SEARCH_TERMS:
-    if downloaded >= MAX_VIDEOS:
-        break
-
-    print("Searching:", term)
-
-    params = {
-        "action": "query",
-        "generator": "search",
-        "gsrsearch": f"{term} filetype:video",
-        "gsrnamespace": 6,
-        "gsrlimit": 10,
-        "prop": "imageinfo",
-        "iiprop": "url|extmetadata|mime",
-        "format": "json"
-    }
+    print(f"\nSearching Pixabay: {term}")
 
     try:
         response = requests.get(
-            API, params=params, headers=HEADERS, timeout=30
+            API_URL,
+            params={
+                "key": API_KEY,
+                "q": term,
+                "per_page": 5,
+                "safesearch": "true"
+            },
+            timeout=30
         )
         response.raise_for_status()
 
-        pages = response.json().get(
-            "query", {}
-        ).get("pages", {})
+        videos = response.json().get("hits", [])
+        selected = None
 
-        print("Search results:", len(pages))
+        for video in videos:
+            if video["id"] in downloaded_ids:
+                continue
 
-    except requests.exceptions.RequestException as error:
-        print("Search error:", error)
-        continue
+            renditions = video.get("videos", {})
+            video_url = (
+                renditions.get("medium", {}).get("url")
+                or renditions.get("small", {}).get("url")
+                or renditions.get("tiny", {}).get("url")
+            )
 
-    for page in pages.values():
-        if downloaded >= MAX_VIDEOS:
-            break
+            if video_url:
+                selected = video
+                break
 
-        title = page["title"]
-
-        if title in seen:
+        if not selected:
+            print("No suitable video found.")
             continue
 
-        seen.add(title)
+        video_url = (
+            selected["videos"].get("medium", {}).get("url")
+            or selected["videos"].get("small", {}).get("url")
+            or selected["videos"].get("tiny", {}).get("url")
+        )
 
-        info = page.get("imageinfo", [{}])[0]
-        url = info.get("url", "")
-        mime = info.get("mime", "")
+        filename = f"clip_{download_count + 1}.mp4"
+        filepath = os.path.join(OUTPUT_DIR, filename)
 
-        if not url or not mime.startswith("video/"):
-            continue
+        print(f"Downloading {filename}...")
 
-        ext = os.path.splitext(url.split("?")[0])[1].lower()
+        with requests.get(
+            video_url,
+            stream=True,
+            timeout=(30, 180)
+        ) as download:
+            download.raise_for_status()
 
-        if ext not in [".mp4", ".webm", ".ogv", ".ogg"]:
-            continue
+            with open(filepath, "wb") as file:
+                for chunk in download.iter_content(chunk_size=1024 * 1024):
+                    if chunk:
+                        file.write(chunk)
 
-        number = downloaded + 1
-        filename = f"footage/clip_{number}{ext}"
+        with open(filepath, "rb") as file:
+            if file.read(8)[:2] != b"\x00\x00":
+                pass
 
-        try:
-            print("Downloading:", title)
+        credit = (
+            f"Creator: {selected.get('user', 'Unknown')}\n"
+            f"Tags: {selected.get('tags', '')}\n"
+            f"Source: {selected.get('pageURL', '')}\n"
+            f"License: Pixabay Content License\n"
+        )
 
-            with requests.get(
-                url, headers=HEADERS,
-                stream=True, timeout=60
-            ) as video:
+        with open(
+            os.path.join(OUTPUT_DIR, f"clip_{download_count + 1}_credit.txt"),
+            "w",
+            encoding="utf-8"
+        ) as file:
+            file.write(credit)
 
-                if video.status_code == 429:
-                    print("Rate limited. Skipping.")
-                    continue
+        downloaded_ids.add(selected["id"])
+        download_count += 1
 
-                video.raise_for_status()
+        print(f"Downloaded: {filename}")
 
-                with open(filename, "wb") as file:
-                    for chunk in video.iter_content(1024 * 1024):
-                        if chunk:
-                            file.write(chunk)
+    except Exception as error:
+        print(f"Failed for '{term}': {error}")
 
-            metadata = info.get("extmetadata", {})
+print(f"\nTotal videos downloaded: {download_count}")
 
-            with open(
-                f"footage/credit_{number}.txt", "w"
-            ) as credit:
-                credit.write("Title: " + title + "\n")
-                credit.write(
-                    "Artist: " +
-                    metadata.get("Artist", {}).get("value", "Unknown") + "\n"
-                )
-                credit.write(
-                    "License: " +
-                    metadata.get("LicenseShortName", {}).get("value", "Check source") + "\n"
-                )
-                credit.write(
-                    "Source: " + info.get("descriptionurl", "") + "\n"
-                )
-
-            downloaded += 1
-            print("Downloaded:", downloaded)
-
-        except requests.exceptions.RequestException as error:
-            print("Download error:", error)
-            if os.path.exists(filename):
-                os.remove(filename)
-            continue
-
-        time.sleep(2)
-
-print("Footage search completed!")
-print("Total videos downloaded:", downloaded)
-
-if downloaded == 0:
-    raise RuntimeError("No video footage could be downloaded!")
+if download_count == 0:
+    raise RuntimeError("No footage downloaded from Pixabay!")
