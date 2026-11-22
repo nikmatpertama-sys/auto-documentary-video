@@ -16,7 +16,9 @@ VIS.mkdir(exist_ok=True)
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
 TOPIC = os.getenv("INPUT_TOPIC", "").strip()
-VOICE = os.getenv("TTS_VOICE", "en-US-AriaNeural")
+VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural")
+TTS_RATE = os.getenv("TTS_RATE", "-5%")
+TTS_PITCH = os.getenv("TTS_PITCH", "-4Hz")
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
 TARGET_SECONDS = 70
@@ -40,7 +42,7 @@ TOPIC: {topic}
 Target voiceover duration: about {TARGET_SECONDS} seconds (roughly 145-165 spoken words).
 Return ONLY valid JSON with this exact structure:
 {{"title":"...","script":"...","scenes":[{{"narration":"exact sentence(s) from script","visual_query":"specific real-world stock-video search phrase, 3-7 words","diagram_title":"short title","diagram_text":"short explanatory text, max 18 words","visual_type":"footage or diagram"}}]}}
-Requirements: 8 scenes; script is one coherent narration with a 3-second curiosity hook, accurate cautious wording, no fabricated statistics, no unsupported precise numbers, no call to action, natural documentary English. Each scene narration must appear verbatim in script and scenes must cover the script in order. Use diagram for 2 or 3 scenes where a process, comparison, timeline, or mechanism is better explained visually; other scenes use real footage. Avoid asking for AI-generated footage. Do not invent citations or claim you browsed sources. Keep claims conservative and distinguish established facts from hypotheses."""
+Requirements: 8 scenes; script is one coherent narration with a 3-second curiosity hook, accurate cautious wording, no fabricated statistics, no unsupported precise numbers, no call to action, natural documentary English. Write for an expressive human-like narrator: vary sentence length and cadence, use natural punctuation and meaningful pauses, build curiosity, emphasize key revelations, and avoid repetitive sentence structures or flat list-like narration. Each scene narration must appear verbatim in script and scenes must cover the script in order. Use diagram for 2 or 3 scenes where a process, comparison, timeline, or mechanism is better explained visually; other scenes use real footage. Avoid asking for AI-generated footage. Do not invent citations or claim you browsed sources. Keep claims conservative and distinguish established facts from hypotheses."""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
@@ -397,7 +399,11 @@ def build_voice_and_subs(script):
     async def generate():
         words = []
         communication = edge_tts.Communicate(
-            script, VOICE, boundary="WordBoundary"
+            script,
+            VOICE,
+            rate=TTS_RATE,
+            pitch=TTS_PITCH,
+            boundary="WordBoundary",
         )
         with open(OUT / "voiceover.mp3", "wb") as audio_file:
             async for message in communication.stream():
@@ -483,61 +489,77 @@ def media_duration(path):
     return float(result.stdout.strip())
 
 
-def scene_durations(plan, total_duration):
-    """Allocate screen time by narration length, keeping every scene readable."""
-    weights = [max(1, len(str(scene.get("narration", "")).split())) for scene in plan["scenes"]]
-    total_words = sum(weights)
-    raw = [total_duration * weight / total_words for weight in weights]
-    # Keep scenes proportional while preventing very short flashes.
-    minimum = min(3.0, total_duration / max(1, len(raw)) * 0.72)
-    durations = [max(minimum, value) for value in raw]
-    scale = total_duration / sum(durations)
-    return [value * scale for value in durations]
-
-
 def render(plan):
     voice = OUT / "voiceover.mp3"
     duration = media_duration(voice)
     scenes = plan["scenes"]
-    durations = scene_durations(plan, duration)
+    segment_duration = duration / len(scenes)
     segment_files = []
-    elapsed = 0.0
 
-    for i, (scene, segment_duration) in enumerate(zip(scenes, durations), 1):
+    for i, scene in enumerate(scenes, 1):
         source = scene.get("media_file")
         output = OUT / f"segment_{i:02d}.mp4"
-        fade = min(0.35, segment_duration / 5)
-        fade_out_start = max(0, segment_duration - fade)
-        if scene.get("visual_type") == "diagram" or not source or not Path(source).exists():
-            source = make_diagram(scene, i)
-            vf = (
-                f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
-                f"zoompan=z='min(zoom+0.00045,1.045)':d=1:s={W}x{H}:fps={FPS},"
-                f"fade=t=in:st=0:d={fade:.3f},fade=t=out:st={fade_out_start:.3f}:d={fade:.3f},"
-                "eq=contrast=1.06:saturation=1.08,format=yuv420p"
-            )
-            cmd = ["ffmpeg", "-y", "-loop", "1", "-i", str(source)]
-        else:
-            # Alternate subtle motion direction to avoid every shot feeling identical.
-            zoom_expr = "min(zoom+0.00035,1.035)" if i % 2 else "max(zoom-0.0002,1.0)"
-            vf = (
-                f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
-                f"zoompan=z='{zoom_expr}':d=1:s={W}x{H}:fps={FPS},"
-                f"fade=t=in:st=0:d={fade:.3f},fade=t=out:st={fade_out_start:.3f}:d={fade:.3f},"
-                "eq=contrast=1.07:saturation=1.10,unsharp=5:5:0.35:3:3:0.0,format=yuv420p"
-            )
-            cmd = ["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(source)]
 
-        cmd += [
-            "-t", f"{segment_duration:.3f}", "-vf", vf, "-an",
-            "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast",
-            "-crf", "21", "-pix_fmt", "yuv420p", str(output),
-        ]
-        run(cmd)
+        if (
+            scene.get("visual_type") == "diagram"
+            or not source
+            or not Path(source).exists()
+        ):
+            source = make_diagram(scene, i)
+            run(
+                [
+                    "ffmpeg",
+                    "-y",
+                    "-loop",
+                    "1",
+                    "-i",
+                    str(source),
+                    "-t",
+                    f"{segment_duration:.3f}",
+                    "-vf",
+                    (
+                        f"scale={W}:{H}:force_original_aspect_ratio=increase,"
+                        f"crop={W}:{H},"
+                        f"zoompan=z='min(zoom+0.0005,1.04)':d=1:"
+                        f"s={W}x{H}:fps={FPS},format=yuv420p"
+                    ),
+                    "-an",
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "veryfast",
+                    "-crf",
+                    "24",
+                    str(output),
+                ]
+            )
+        else:
+            run(
+                [
+                    "ffmpeg",
+                    "-y",
+                    "-stream_loop",
+                    "-1",
+                    "-i",
+                    str(source),
+                    "-t",
+                    f"{segment_duration:.3f}",
+                    "-vf",
+                    (
+                        f"scale={W}:{H}:force_original_aspect_ratio=increase,"
+                        f"crop={W}:{H},fps={FPS},setsar=1,format=yuv420p"
+                    ),
+                    "-an",
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "veryfast",
+                    "-crf",
+                    "24",
+                    str(output),
+                ]
+            )
         segment_files.append(output)
-        scene["render_start"] = round(elapsed, 3)
-        scene["render_duration"] = round(segment_duration, 3)
-        elapsed += segment_duration
 
     concat = OUT / "concat.txt"
     concat.write_text(
@@ -545,32 +567,76 @@ def render(plan):
         encoding="utf-8",
     )
     base = OUT / "base.mp4"
-    run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat), "-c", "copy", str(base)])
+    run(
+        [
+            "ffmpeg",
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            str(concat),
+            "-c",
+            "copy",
+            str(base),
+        ]
+    )
 
     output = Path("documentary.mp4")
+    # GitHub Actions runs on Linux; a relative subtitle path avoids the
+    # Windows-drive-colon escaping issue that caused the Python syntax error.
     subtitle_filter = "subtitles=output/captions.ass"
-    # A restrained original tonal bed, ducked beneath narration. No external music asset required.
-    bed_expr = (
-        "aevalsrc=0.010*sin(2*PI*55*t)+0.006*sin(2*PI*82.4*t)+"
-        "0.003*sin(2*PI*110*t):s=48000:d=" + f"{duration:.3f}"
+
+    run(
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(base),
+            "-i",
+            str(voice),
+            "-filter_complex",
+            (
+                f"[0:v]{subtitle_filter}[v];"
+                # Clean TTS signal: remove subsonic rumble, control peaks,
+                # normalize loudness, and convert to consistent stereo 48 kHz.
+                "[1:a]highpass=f=75,lowpass=f=16000,"
+                "acompressor=threshold=-18dB:ratio=2:attack=15:release=180:makeup=1.5,"
+                "alimiter=limit=0.89,loudnorm=I=-16:TP=-1.5:LRA=7,"
+                "aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[a]"
+            ),
+            "-map",
+            "[v]",
+            "-map",
+            "[a]",
+            "-t",
+            f"{duration:.3f}",
+            "-r",
+            str(FPS),
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "21",
+            "-pix_fmt",
+            "yuv420p",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            "-ar",
+            "48000",
+            "-ac",
+            "2",
+            "-movflags",
+            "+faststart",
+            str(output),
+        ]
     )
-    filter_complex = (
-        f"[0:v]{subtitle_filter}[v];"
-        "[1:a]volume=1.0,highpass=f=75,lowpass=f=12000[vo];"
-        f"[2:a]lowpass=f=260,volume=0.42,afade=t=in:st=0:d=2.5,"
-        f"afade=t=out:st={max(0, duration-3):.2f}:d=3[bed];"
-        "[vo][bed]amix=inputs=2:duration=first:dropout_transition=2,"
-        "alimiter=limit=0.95[a]"
-    )
-    run([
-        "ffmpeg", "-y", "-i", str(base), "-i", str(voice), "-f", "lavfi", "-i", bed_expr,
-        "-filter_complex", filter_complex, "-map", "[v]", "-map", "[a]",
-        "-t", f"{duration:.3f}", "-r", str(FPS), "-c:v", "libx264",
-        "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
-        "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(output),
-    ])
-    Path("plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"Final video: {output}; duration {duration:.1f}s; {len(scenes)} scenes")
+    print(f"Final video: {output}; duration {duration:.1f}s")
+
 
 def main():
     print("1/4 Generating original documentary plan...")
