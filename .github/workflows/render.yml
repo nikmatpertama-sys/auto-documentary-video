@@ -26,12 +26,18 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Download footage
+        run: |
+          python footage.py
+
       - name: Generate voice-over
         run: |
           python main.py
 
-      - name: Upload voice-over
+      - name: Upload assets
         uses: actions/upload-artifact@v4
         with:
-          name: voiceover-audio
-          path: voiceover.mp3
+          name: documentary-assets
+          path: |
+            voiceover.mp3
+            footage/
