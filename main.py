@@ -50,50 +50,90 @@ Requirements: 8 scenes; script is one coherent narration with a 3-second curiosi
         },
     }
 
-    # Gemini can occasionally take longer than 90 seconds to prepare
-    # the full 8-scene JSON plan. Retry transient timeouts automatically.
+    # Retry temporary Gemini capacity/network errors, then switch to a
+    # lighter supported model so a temporary 503 does not kill the whole run.
+    model_candidates = [MODEL]
+    fallback_model = "gemini-3.5-flash-lite"
+    if fallback_model != MODEL:
+        model_candidates.append(fallback_model)
+
     response = None
-    for attempt in range(1, 4):
-        try:
-            response = requests.post(
-                url,
-                params={"key": GEMINI_KEY},
-                json=payload,
-                timeout=(20, 240),
-            )
-            if response.status_code == 429 or response.status_code >= 500:
-                if attempt < 3:
-                    wait_seconds = attempt * 15
+    last_error = None
+
+    for model_index, active_model in enumerate(model_candidates):
+        active_url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{active_model}:generateContent"
+        )
+        for attempt in range(1, 4):
+            try:
+                response = requests.post(
+                    active_url,
+                    params={"key": GEMINI_KEY},
+                    json=payload,
+                    timeout=(20, 180),
+                )
+
+                if response.status_code in (408, 429, 500, 502, 503, 504):
+                    last_error = (
+                        f"HTTP {response.status_code}: {response.text[:500]}"
+                    )
+                    if attempt < 3:
+                        wait_seconds = 15 * (2 ** (attempt - 1))
+                        print(
+                            f"{active_model} temporarily unavailable "
+                            f"({last_error}); retrying in {wait_seconds}s "
+                            f"({attempt}/3)..."
+                        )
+                        time.sleep(wait_seconds)
+                        continue
                     print(
-                        f"Gemini temporarily unavailable "
-                        f"(HTTP {response.status_code}); retrying in "
+                        f"{active_model} still unavailable after 3 attempts."
+                    )
+                    response = None
+                    break
+
+                # Non-transient errors (e.g. invalid key or bad request)
+                # should be shown immediately rather than retried.
+                if response.status_code >= 400:
+                    raise RuntimeError(
+                        f"Gemini API error {response.status_code}: "
+                        f"{response.text[:1200]}"
+                    )
+
+                print(f"Gemini response received using {active_model}.")
+                break
+
+            except (requests.exceptions.Timeout,
+                    requests.exceptions.ConnectionError) as exc:
+                last_error = str(exc)
+                response = None
+                if attempt < 3:
+                    wait_seconds = 15 * (2 ** (attempt - 1))
+                    print(
+                        f"{active_model} connection timed out; retrying in "
                         f"{wait_seconds}s ({attempt}/3)..."
                     )
                     time.sleep(wait_seconds)
-                    continue
+                else:
+                    print(
+                        f"{active_model} failed after 3 connection attempts."
+                    )
+
+        if response is not None:
             break
-        except (requests.exceptions.Timeout,
-                requests.exceptions.ConnectionError) as exc:
-            if attempt == 3:
-                raise RuntimeError(
-                    "Gemini API timed out after 3 attempts. "
-                    "The video pipeline stopped before script generation. "
-                    "Try running the workflow again later."
-                ) from exc
-            wait_seconds = attempt * 15
+
+        if model_index < len(model_candidates) - 1:
             print(
-                f"Gemini request timed out; retrying in "
-                f"{wait_seconds}s ({attempt}/3)..."
+                f"Switching automatically from {active_model} "
+                f"to {model_candidates[model_index + 1]}..."
             )
-            time.sleep(wait_seconds)
 
     if response is None:
-        raise RuntimeError("Gemini API did not return a response.")
-    if response.status_code >= 400:
         raise RuntimeError(
-            f"Gemini API error {response.status_code}: {response.text[:1200]}"
+            "Gemini models are temporarily unavailable after retries. "
+            f"Last error: {last_error}. Try the workflow again later."
         )
-
     data = response.json()
     try:
         raw = data["candidates"][0]["content"]["parts"][0]["text"]
