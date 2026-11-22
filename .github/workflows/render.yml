@@ -1,0 +1,17 @@
+
+name: Video Generator
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check rendering environment
+        run: |
+          echo "Video Generator is ready!"
+          echo "Checking system..."
+          python3 --version
+          ffmpeg -version
