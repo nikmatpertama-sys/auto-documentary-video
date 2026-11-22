@@ -1,0 +1,68 @@
+
+import requests
+import os
+import re
+
+TOPIC = "electricity"
+
+os.makedirs("footage", exist_ok=True)
+
+API = "https://commons.wikimedia.org/w/api.php"
+
+params = {
+    "action": "query",
+    "generator": "search",
+    "gsrsearch": f"{TOPIC} filetype:video",
+    "gsrnamespace": 6,
+    "gsrlimit": 5,
+    "prop": "imageinfo",
+    "iiprop": "url|extmetadata",
+    "iiurlwidth": 1280,
+    "format": "json"
+}
+
+headers = {
+    "User-Agent": "DocumentaryVideoGenerator/1.0"
+}
+
+response = requests.get(
+    API, params=params, headers=headers, timeout=30
+)
+response.raise_for_status()
+
+pages = response.json().get("query", {}).get("pages", {})
+
+for index, page in enumerate(pages.values(), 1):
+    info = page.get("imageinfo", [{}])[0]
+    url = info.get("url", "")
+
+    if not url:
+        continue
+
+    ext = os.path.splitext(url.split("?")[0])[1].lower()
+
+    if ext not in [".mp4", ".webm", ".ogv", ".ogg"]:
+        continue
+
+    filename = f"footage/clip_{index}{ext}"
+
+    print("Downloading:", page["title"])
+
+    with requests.get(
+        url, headers=headers, stream=True, timeout=60
+    ) as video:
+        video.raise_for_status()
+        with open(filename, "wb") as file:
+            for chunk in video.iter_content(1024 * 1024):
+                if chunk:
+                    file.write(chunk)
+
+    metadata = info.get("extmetadata", {})
+
+    with open(f"footage/credit_{index}.txt", "w") as credit:
+        credit.write("Title: " + page["title"] + "\n")
+        credit.write("Artist: " + metadata.get("Artist", {}).get("value", "Unknown") + "\n")
+        credit.write("License: " + metadata.get("LicenseShortName", {}).get("value", "Check source") + "\n")
+        credit.write("Source: " + info.get("descriptionurl", "") + "\n")
+
+print("Footage download process finished!")
