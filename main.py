@@ -1,12 +1,5 @@
 
-import os
-import re
-import json
-import asyncio
-import subprocess
-import textwrap
-import time
-import hashlib
+import os, re, json, asyncio, subprocess, textwrap, time, hashlib
 from pathlib import Path
 
 import requests
@@ -27,16 +20,13 @@ TOPIC = os.getenv("INPUT_TOPIC", "").strip()
 VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural")
 TTS_RATE = os.getenv("TTS_RATE", "-5%")
 TTS_PITCH = os.getenv("TTS_PITCH", "-4Hz")
-
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
 FALLBACK_MODELS = [
-    model.strip()
-    for model in os.getenv(
+    x.strip() for x in os.getenv(
         "GEMINI_FALLBACK_MODELS",
         "gemini-3.5-flash-lite,gemini-3.1-flash-lite",
-    ).split(",")
-    if model.strip()
+    ).split(",") if x.strip()
 ]
 
 TARGET_SECONDS = 70
@@ -70,11 +60,9 @@ Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its n
         },
     }
 
-    # Model utama dan model cadangan.
-    # Jika terkena 429, langsung pindah model.
-    # Jika 503/502/500, coba ulang sebelum pindah model.
+    # Model utama dan fallback otomatis.
+    # HTTP 429 langsung pindah model agar tidak membuang waktu retry.
     model_candidates = list(dict.fromkeys([MODEL] + FALLBACK_MODELS))
-
     response = None
     last_error = None
 
@@ -83,7 +71,6 @@ Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its n
             "https://generativelanguage.googleapis.com/v1beta/models/"
             f"{active_model}:generateContent"
         )
-
         print(f"Trying Gemini model: {active_model}")
 
         for attempt in range(1, 4):
@@ -97,12 +84,12 @@ Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its n
 
                 if result.status_code == 429:
                     last_error = (
-                        f"HTTP 429 quota/rate limit on {active_model}: "
+                        f"HTTP 429 on {active_model}: "
                         f"{result.text[:700]}"
                     )
                     print(
-                        f"{active_model} quota reached. "
-                        "Switching to fallback model."
+                        f"{active_model} quota/rate limit reached; "
+                        "switching model."
                     )
                     response = None
                     break
@@ -112,20 +99,14 @@ Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its n
                         f"HTTP {result.status_code} on {active_model}: "
                         f"{result.text[:700]}"
                     )
-
                     if attempt < 3:
                         wait_seconds = 15 * (2 ** (attempt - 1))
                         print(
-                            f"{active_model} temporarily unavailable. "
-                            f"Retrying in {wait_seconds}s "
-                            f"({attempt}/3)..."
+                            f"{active_model} unavailable; retrying in "
+                            f"{wait_seconds}s ({attempt}/3)..."
                         )
                         time.sleep(wait_seconds)
                         continue
-
-                    print(
-                        f"{active_model} unavailable after 3 attempts."
-                    )
                     response = None
                     break
 
@@ -136,7 +117,9 @@ Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its n
                     )
 
                 response = result
-                print(f"Gemini response received using {active_model}.")
+                print(
+                    f"Gemini response received using {active_model}."
+                )
                 break
 
             except (
@@ -145,34 +128,29 @@ Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its n
             ) as exc:
                 last_error = f"{active_model}: {exc}"
                 response = None
-
                 if attempt < 3:
                     wait_seconds = 15 * (2 ** (attempt - 1))
                     print(
-                        f"Connection problem. Retrying in "
+                        f"Connection problem; retrying in "
                         f"{wait_seconds}s ({attempt}/3)..."
                     )
                     time.sleep(wait_seconds)
-                else:
-                    print(
-                        f"{active_model} failed after 3 connection attempts."
-                    )
 
         if response is not None:
             break
 
         if model_index < len(model_candidates) - 1:
             print(
-                f"Switching automatically to "
-                f"{model_candidates[model_index + 1]}..."
+                f"Switching to fallback model: "
+                f"{model_candidates[model_index + 1]}"
             )
 
     if response is None:
         raise RuntimeError(
-            "All configured Gemini models failed or reached quota. "
-            f"Models tried: {', '.join(model_candidates)}. "
-            f"Last error: {last_error}. "
-            "Check Google AI Studio quota/billing or try after quota reset."
+            "All Gemini models failed or reached quota. Tried: "
+            + ", ".join(model_candidates)
+            + f". Last error: {last_error}. "
+            "Check AI Studio quota/billing."
         )
 
     data = response.json()
@@ -206,7 +184,6 @@ Requirements: 8 scenes; scene 1 MUST be real footage (never a diagram) and its n
         f"Script ready: {len(script.split())} words; "
         f"{len(plan['scenes'])} scenes"
     )
-
     return plan
 
 
@@ -224,12 +201,10 @@ def download_stream(url, dest):
             for chunk in response.iter_content(1024 * 1024):
                 if chunk:
                     total += len(chunk)
-
                     if total > 180 * 1024 * 1024:
                         raise RuntimeError(
                             "Clip exceeded 180 MB safety limit"
                         )
-
                     file.write(chunk)
 
     if Path(dest).stat().st_size < 50000:
@@ -306,6 +281,41 @@ def nasa_search(query):
     )
 
 
+def _query_terms(text):
+    stop = {
+        "the", "and", "for", "with", "from", "that", "this",
+        "into", "over", "under", "near", "shot", "video",
+        "footage", "cinematic", "aerial", "close", "wide",
+        "view", "of", "in", "on", "at", "to", "an", "its",
+        "their", "how", "why", "what", "where", "when",
+    }
+
+    words = re.findall(r"[a-z0-9]+", str(text).lower())
+    return {
+        word for word in words
+        if len(word) >= 3 and word not in stop
+    }
+
+
+def _pixabay_relevance(hit, query, narration):
+    """Reject weakly related clips instead of accepting first search result."""
+    tags = str(hit.get("tags", ""))
+    page = str(hit.get("pageURL", ""))
+    haystack = _query_terms(tags + " " + page)
+    wanted = _query_terms(query)
+    context = _query_terms(narration)
+
+    if not haystack or not wanted:
+        return 0.0
+
+    direct = len(wanted & haystack) / max(1, len(wanted))
+    contextual = len(context & haystack) / max(
+        1, min(len(context), 8)
+    )
+
+    return direct * 0.8 + contextual * 0.2
+
+
 def fetch_footage(plan):
     credits = []
     used = set()
@@ -337,13 +347,26 @@ def fetch_footage(plan):
                 continue
 
             for hit in hits:
+                relevance = _pixabay_relevance(
+                    hit,
+                    query,
+                    scene.get("narration", ""),
+                )
+
+                if relevance < 0.22:
+                    print(
+                        f"Scene {i}: rejected weak match "
+                        f"(score={relevance:.2f}, "
+                        f"tags={hit.get('tags', '')[:90]})"
+                    )
+                    continue
+
                 media_id = hit.get("id")
 
                 if not media_id or media_id in used:
                     continue
 
                 renditions = hit.get("videos", {})
-
                 rendition = (
                     renditions.get("large")
                     or renditions.get("medium")
@@ -389,7 +412,7 @@ def fetch_footage(plan):
             if len(selected_files) >= 2:
                 break
 
-        # NASA menjadi sumber cadangan jika Pixabay tidak menemukan klip.
+        # NASA is a fallback only when Pixabay did not supply a shot.
         if not selected_files:
             for query in queries:
                 try:
@@ -404,7 +427,6 @@ def fetch_footage(plan):
                             f"https://images-api.nasa.gov/asset/{nasa_id}",
                             timeout=30,
                         )
-
                         asset.raise_for_status()
 
                         links = (
@@ -438,7 +460,6 @@ def fetch_footage(plan):
                                 f"Center: {meta.get('center', 'NASA')} | "
                                 f"Source: https://images.nasa.gov/details/{nasa_id}"
                             )
-
                             break
 
                 except Exception as exc:
@@ -458,12 +479,27 @@ def fetch_footage(plan):
                 f"{len(selected_files)} distinct footage shot(s)."
             )
         else:
-            print(
-                f"Scene {i}: no relevant footage found; "
-                "animated explainer fallback will be used."
+            scene["visual_type"] = "diagram"
+            scene["diagram_kind"] = (
+                scene.get("diagram_kind") or "process"
+            )
+            scene["diagram_title"] = (
+                scene.get("diagram_title") or "What happens next?"
+            )
+            scene["diagram_text"] = (
+                scene.get("diagram_text")
+                or scene.get("narration", "")
+            )
+            scene["diagram_steps"] = (
+                scene.get("diagram_steps")
+                or ["The cause", "The process", "The result"]
             )
 
-    # Sumber hanya dicantumkan jika diberikan oleh model.
+            print(
+                f"Scene {i}: no sufficiently relevant footage found; "
+                "using an explanatory animation instead of unrelated stock."
+            )
+
     for i, scene in enumerate(plan["scenes"], 1):
         label = str(scene.get("source_label") or "").strip()
         url = str(scene.get("source_url") or "").strip()
@@ -513,7 +549,6 @@ def font(size, bold=False):
 
 
 def make_diagram(scene, idx):
-    """Create an animated editorial graphic, never a static info card."""
     width, height, fps, frames = 720, 1280, 24, 72
 
     kind = str(
@@ -521,11 +556,7 @@ def make_diagram(scene, idx):
     ).lower()
 
     if kind not in {
-        "process",
-        "map",
-        "comparison",
-        "timeline",
-        "data",
+        "process", "map", "comparison", "timeline", "data"
     }:
         kind = "process"
 
@@ -545,9 +576,7 @@ def make_diagram(scene, idx):
 
     if len(steps) < 2:
         steps = [
-            "The trigger",
-            "The process",
-            "The result",
+            "The trigger", "The process", "The result"
         ]
 
     accent = (79, 205, 216)
@@ -566,12 +595,10 @@ def make_diagram(scene, idx):
         im = Image.new("RGB", (width, height), bg)
         d = ImageDraw.Draw(im)
 
-        # Animated background grid.
         for x in range(-80, width + 80, 60):
             xx = int(
                 (x + (frame * 1.4)) % (width + 120) - 60
             )
-
             d.line(
                 (xx, 0, xx, height),
                 fill=(14, 34, 48),
@@ -600,9 +627,7 @@ def make_diagram(scene, idx):
         )
 
         if kind == "comparison":
-            labels = steps[:2]
-
-            for j, label in enumerate(labels):
+            for j, label in enumerate(steps[:2]):
                 x0 = 55 + j * 320
 
                 d.rounded_rectangle(
@@ -640,10 +665,8 @@ def make_diagram(scene, idx):
 
                 d.rounded_rectangle(
                     (
-                        x0 + 22,
-                        730,
-                        x0 + 22 + bar_w,
-                        746,
+                        x0 + 22, 730,
+                        x0 + 22 + bar_w, 746,
                     ),
                     radius=8,
                     fill=accent,
@@ -688,7 +711,6 @@ def make_diagram(scene, idx):
                 )
 
         elif kind == "map":
-            # Schematic route/network map, labelled illustrative.
             d.rounded_rectangle(
                 (65, 360, 655, 880),
                 radius=28,
@@ -698,11 +720,8 @@ def make_diagram(scene, idx):
             )
 
             path = [
-                (125, 760),
-                (235, 650),
-                (330, 700),
-                (420, 530),
-                (565, 440),
+                (125, 760), (235, 650), (330, 700),
+                (420, 530), (565, 440),
             ]
 
             for a, b in zip(path, path[1:]):
@@ -755,17 +774,14 @@ def make_diagram(scene, idx):
 
                 d.rounded_rectangle(
                     (
-                        65,
-                        y + 54,
-                        65 + max(4, bar_width),
-                        y + 68,
+                        65, y + 54,
+                        65 + max(4, bar_width), y + 68,
                     ),
                     radius=7,
                     fill=accent,
                 )
 
         else:
-            # Animated cause-and-effect nodes.
             n = min(4, len(steps))
             gap = 28
             boxw = (600 - gap * (n - 1)) // n
@@ -865,7 +881,6 @@ def ass_time(seconds):
 
 
 def build_voice_and_subs(script):
-    """Render sentence-sized TTS takes with subtle delivery variation."""
     sentence_list = re.findall(
         r"[^.!?]+[.!?]+|[^.!?]+$",
         script,
@@ -887,21 +902,27 @@ def build_voice_and_subs(script):
         concat_lines = []
         cursor = 0.0
 
+        base_rate = (
+            int(TTS_RATE.replace("%", ""))
+            if TTS_RATE.endswith("%") else -5
+        )
+
+        base_pitch = (
+            int(TTS_PITCH.replace("Hz", ""))
+            if TTS_PITCH.endswith("Hz") else -4
+        )
+
+        rate_steps = [
+            f"{base_rate + delta}%"
+            for delta in (1, -1, 2, 0)
+        ]
+
+        pitch_steps = [
+            f"{base_pitch + delta}Hz"
+            for delta in (1, 2, 0, 1)
+        ]
+
         for index, sentence in enumerate(sentence_list):
-            rate_steps = [
-                "-3%",
-                "-5%",
-                "-2%",
-                "-4%",
-            ]
-
-            pitch_steps = [
-                "-3Hz",
-                "-1Hz",
-                "-4Hz",
-                "-2Hz",
-            ]
-
             rate = rate_steps[index % len(rate_steps)]
             pitch = pitch_steps[index % len(pitch_steps)]
 
@@ -1026,10 +1047,7 @@ def build_voice_and_subs(script):
             current.append(word)
 
             endmark = bool(
-                re.search(
-                    r'[.!?]["\']?$',
-                    word["text"],
-                )
+                re.search(r'[.!?]["\']?$', word["text"])
             )
 
             if len(current) >= 5 or endmark:
@@ -1076,8 +1094,7 @@ def build_voice_and_subs(script):
             )
 
             phrase = " ".join(
-                x["text"]
-                for x in group
+                x["text"] for x in group
             )
 
             phrase = r"\N".join(
@@ -1130,7 +1147,6 @@ def render(plan):
 
     scenes = plan["scenes"]
     segment_duration = duration / len(scenes)
-
     segment_files = []
 
     for i, scene in enumerate(scenes, 1):
@@ -1144,15 +1160,13 @@ def render(plan):
         )
 
         media_files = [
-            x
-            for x in media_files
+            x for x in media_files
             if x and Path(x).exists()
         ]
 
         part_duration = (
             segment_duration / max(1, len(media_files))
-            if media_files
-            else segment_duration
+            if media_files else segment_duration
         )
 
         parts = []
@@ -1219,7 +1233,8 @@ def render(plan):
                             f"scale={W}:{H}:"
                             "force_original_aspect_ratio=increase,"
                             f"crop={W}:{H},"
-                            f"zoompan=z='{zoom}':"
+                            "zoompan="
+                            f"z='{zoom}':"
                             "x='iw/2-(iw/zoom/2)+sin(on/75)*10':"
                             "y='ih/2-(ih/zoom/2)':"
                             f"d=1:s={W}x{H}:fps={FPS},"
@@ -1238,7 +1253,7 @@ def render(plan):
 
                 parts.append(output)
 
-        # Hook khusus untuk adegan pertama.
+        # Hook overlay khusus untuk adegan pertama.
         if i == 1 and parts:
             hook = str(
                 plan.get("hook")
@@ -1254,8 +1269,16 @@ def render(plan):
 
             hook_file = OUT / "hook.txt"
 
+            hook_wrapped = "\n".join(
+                textwrap.wrap(
+                    hook,
+                    width=23,
+                    break_long_words=False,
+                )
+            )
+
             hook_file.write_text(
-                hook,
+                hook_wrapped,
                 encoding="utf-8",
             )
 
