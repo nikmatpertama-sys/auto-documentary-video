@@ -9,6 +9,7 @@ import tempfile
 import subprocess
 import textwrap
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 import edge_tts
@@ -331,64 +332,112 @@ def assign_scene_sentence_ranges(plan):
 # FOOTAGE SEARCH AND RELEVANCE
 # ============================================================
 
-def download_stream(url, dest):
-    """Download safely; remove partial files on every failure."""
+def download_stream(url, dest, alternate_urls=None):
+    """Download a clip, trying alternate provider renditions after throttling."""
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.unlink(missing_ok=True)
 
-    try:
-        deadline = time.monotonic() + 240
-        with requests.get(
-            url,
-            stream=True,
-            timeout=(25, 60),
-            headers={
-                "User-Agent": "AutoDocumentaryVideo/3.0"
-            }
-        ) as response:
+    urls = []
+    for candidate_url in [url, *(alternate_urls or [])]:
+        if (
+            isinstance(candidate_url, str)
+            and candidate_url.startswith(("https://", "http://"))
+            and candidate_url not in urls
+        ):
+            urls.append(candidate_url)
 
-            response.raise_for_status()
+    if not urls:
+        raise RuntimeError("Footage candidate has no usable download URL.")
 
-            declared = int(
-                response.headers.get("Content-Length") or 0
-            )
+    deadline = time.monotonic() + 240
+    errors = []
 
-            if declared > MAX_CLIP_BYTES:
-                raise RuntimeError(
-                    f"Clip is {declared / 1024 / 1024:.1f} MB, "
-                    f"above the {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB limit."
+    for candidate_url in urls:
+        for attempt in range(2):
+            if time.monotonic() >= deadline:
+                break
+
+            response = None
+            try:
+                headers = {
+                    "User-Agent": (
+                        "Mozilla/5.0 (X11; Linux x86_64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/124.0.0.0 Safari/537.36"
+                    ),
+                    "Accept": "video/mp4,video/*;q=0.9,*/*;q=0.8",
+                }
+                host = urlparse(candidate_url).hostname or ""
+                if host.endswith("pixabay.com"):
+                    headers["Referer"] = "https://pixabay.com/"
+                    headers["Origin"] = "https://pixabay.com"
+
+                response = requests.get(
+                    candidate_url,
+                    stream=True,
+                    timeout=(25, 60),
+                    headers=headers,
                 )
 
-            total = 0
-
-            with open(dest, "wb") as f:
-                for chunk in response.iter_content(
-                    1024 * 1024
-                ):
-                    if not chunk:
+                if response.status_code in (429, 500, 502, 503, 504):
+                    status = response.status_code
+                    retry_after = response.headers.get("Retry-After", "")
+                    response.close()
+                    response = None
+                    if attempt == 0:
+                        try:
+                            delay = float(retry_after)
+                        except (TypeError, ValueError):
+                            delay = 2.0
+                        time.sleep(max(1.0, min(delay, 5.0)))
                         continue
-                    if time.monotonic() > deadline:
-                        raise RuntimeError("Footage download exceeded the 240s time budget.")
+                    errors.append(f"HTTP {status} from {host or 'media host'}")
+                    break
 
-                    total += len(chunk)
+                response.raise_for_status()
+                declared = int(response.headers.get("Content-Length") or 0)
+                if declared > MAX_CLIP_BYTES:
+                    raise RuntimeError(
+                        f"Clip is {declared / 1024 / 1024:.1f} MB, "
+                        f"above the {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB limit."
+                    )
 
-                    if total > MAX_CLIP_BYTES:
-                        raise RuntimeError(
-                            f"Clip exceeded "
-                            f"{MAX_CLIP_BYTES / 1024 / 1024:.0f} MB safety limit."
-                        )
+                total = 0
+                with open(dest, "wb") as f:
+                    for chunk in response.iter_content(1024 * 1024):
+                        if not chunk:
+                            continue
+                        if time.monotonic() > deadline:
+                            raise RuntimeError(
+                                "Footage download exceeded the 240s time budget."
+                            )
+                        total += len(chunk)
+                        if total > MAX_CLIP_BYTES:
+                            raise RuntimeError(
+                                f"Clip exceeded {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB safety limit."
+                            )
+                        f.write(chunk)
 
-                    f.write(chunk)
+                response.close()
+                response = None
+                if dest.stat().st_size < 50000:
+                    raise RuntimeError("Downloaded clip is unexpectedly small.")
+                return
 
-        if dest.stat().st_size < 50000:
-            raise RuntimeError(
-                "Downloaded clip is unexpectedly small."
-            )
+            except Exception as exc:
+                if response is not None:
+                    response.close()
+                dest.unlink(missing_ok=True)
+                errors.append(f"{type(exc).__name__}: {exc}")
+                # Try the next rendition/source URL; do not reuse a partial file.
+                break
 
-    except Exception:
-        dest.unlink(missing_ok=True)
-        raise
+    dest.unlink(missing_ok=True)
+    detail = " | ".join(errors[:4]) or "No download URL could be fetched."
+    raise RuntimeError(
+        f"All {len(urls)} available rendition URL(s) failed. {detail}"
+    )
 
 
 def clean_query(query):
@@ -451,12 +500,19 @@ def pixabay_search(query):
 
     for hit in data.get("hits", []):
         renditions = hit.get("videos", {})
-
-        rendition = (
-            renditions.get("large")
-            or renditions.get("medium")
-            or renditions.get("small")
-            or {}
+        rendition_order = [
+            renditions.get("large") or {},
+            renditions.get("medium") or {},
+            renditions.get("small") or {},
+        ]
+        download_urls = list(dict.fromkeys(
+            str(item.get("url"))
+            for item in rendition_order
+            if item.get("url")
+        ))
+        rendition = next(
+            (item for item in rendition_order if item.get("url")),
+            {},
         )
 
         if not rendition.get("url"):
@@ -466,6 +522,7 @@ def pixabay_search(query):
             "source": "Pixabay",
             "id": str(hit.get("id")),
             "url": rendition.get("url"),
+            "download_urls": download_urls,
             "thumbnail_url": rendition.get("thumbnail") or hit.get("picture"),
             "width": int(rendition.get("width") or 0),
             "duration": float(hit.get("duration") or 0),
@@ -1647,7 +1704,8 @@ def fetch_footage(plan):
             try:
                 download_stream(
                     hit["url"],
-                    destination
+                    destination,
+                    alternate_urls=hit.get("download_urls", []),
                 )
 
                 if visual_provider_names:
