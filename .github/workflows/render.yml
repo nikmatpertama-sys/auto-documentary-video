@@ -31,10 +31,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg fonts-dejavu-core
 
-      - name: Install Python dependencies
+      - name: Install CPU-only PyTorch
         run: |
           python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2,<3"
+
+      - name: Install Python dependencies
+        run: |
           pip install -r requirements.txt
+
+      - name: Restore SigLIP model cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: siglip-${{ runner.os }}-google-siglip-base-patch16-256-multilingual-v1
+          restore-keys: |
+            siglip-${{ runner.os }}-
 
       - name: Restore footage source search cache
         uses: actions/cache@v4
