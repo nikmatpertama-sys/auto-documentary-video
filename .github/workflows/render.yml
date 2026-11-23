@@ -36,13 +36,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Restore Pixabay API search cache
+      - name: Restore footage source search cache
         uses: actions/cache@v4
         with:
           path: .api-cache
-          key: pixabay-${{ runner.os }}-${{ github.run_id }}
+          key: footage-api-${{ runner.os }}-${{ github.run_id }}
           restore-keys: |
-            pixabay-${{ runner.os }}-
+            footage-api-${{ runner.os }}-
 
       - name: Generate documentary
         env:
@@ -51,6 +51,7 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           GROQ_MODEL: openai/gpt-oss-120b
           OPENROUTER_MODEL: openrouter/free
           TTS_VOICE: en-US-GuyNeural
