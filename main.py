@@ -53,11 +53,13 @@ ENDING_HOLD = 1.25
 MIN_CLIP_WIDTH = 640
 MAX_CLIP_BYTES = 180 * 1024 * 1024
 
-VISION_REQUIRED = os.getenv(
-    "FOOTAGE_VISION_REQUIRED", "true"
-).strip().lower() not in ("0", "false", "no", "off")
+# Visual verification is deliberately fail-closed by default. Set this to
+# false only if you explicitly accept metadata-only footage selection.
+VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "true").strip().lower() not in (
+    "0", "false", "no", "off"
+)
 
-# Do not stop after checking only five candidates.
+# Search more of the metadata-ranked pool before declaring a scene impossible.
 VISION_CANDIDATE_LIMIT = max(
     1, min(30, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "26")))
 )
@@ -69,9 +71,7 @@ try:
 except ValueError:
     VISION_MIN_CONFIDENCE = 0.72
 
-VISION_MIN_CONFIDENCE = max(
-    0.0, min(1.0, VISION_MIN_CONFIDENCE)
-)
+VISION_MIN_CONFIDENCE = max(0.0, min(1.0, VISION_MIN_CONFIDENCE))
 
 VISION_MODEL = (
     os.getenv("GEMINI_VISION_MODEL", MODEL).strip() or MODEL
@@ -101,12 +101,16 @@ OPENROUTER_VISION_FALLBACK_MODEL = (
     or "inclusionai/ling-3.2-flash:free"
 )
 
-# Do not silently use the dynamic router for vision.
+# Avoid silently using the dynamic free router for vision: it may select a
+# reasoning model that spends its output budget before returning the verdict.
 if OPENROUTER_VISION_MODEL.lower() == "openrouter/free":
     OPENROUTER_VISION_MODEL = "nvidia/nemotron-3.5-super-vl:free"
 
+# Hard model/config errors disable only one route. Quota and transient errors
+# use cooldowns, so a provider may recover later during the same workflow run.
 VISION_DISABLED_PROVIDERS = set()
 VISION_PROVIDER_COOLDOWN_UNTIL = {}
+FOOTAGE_SOURCE_DISABLED = set()
 
 
 class VisionProviderError(RuntimeError):
@@ -114,8 +118,7 @@ class VisionProviderError(RuntimeError):
         self.provider = provider
         self.status_code = status_code
         super().__init__(
-            f"{provider} visual verification HTTP "
-            f"{status_code}: {detail}"
+            f"{provider} visual verification HTTP {status_code}: {detail}"
         )
 
 
@@ -124,6 +127,8 @@ class VisionVerificationError(RuntimeError):
 
 
 class VisionResponseError(RuntimeError):
+    """A provider answered, but its response could not be used safely."""
+
     pass
 
 
@@ -138,7 +143,7 @@ if not TOPIC:
 
 
 def run(cmd):
-    """Run a command and surface stderr for diagnostics."""
+    """Run a command and surface stderr so failures are diagnosable in Actions."""
     result = subprocess.run(
         [str(x) for x in cmd],
         text=True,
@@ -235,9 +240,16 @@ Requirements:
 - The combined scene narration should form a coherent 145-165 word script.
 - ALL 8 scenes MUST use concrete, relevant real-world footage.
 - NEVER request diagrams, charts, infographics, title cards, or abstract graphics.
-- Each visual query must name the exact subject being narrated, not merely a broad mood or setting.
+- Each scene must focus on ONE practical, searchable footage shot.
+- visual_query must describe one dominant visible subject, ideally 3-7 words.
+- NEVER combine several things that are unlikely to appear in one clip (for example: a rainstorm + Amazon forest floor + orchids + jaguar).
+- Geographic identity such as Amazon belongs in source metadata; do not require the video image itself to prove a precise location.
+- Do not require weather (rain, mist, sunrise) unless it is the main visible subject. Weather is supporting context, not a hard requirement.
+- visual_queries must contain two alternative, independent shots that each illustrate the scene narration on their own. They must not repeat the full primary query or combine multiple unrelated subjects.
+- Prefer common searchable footage: aerial tropical canopy, rain falling on broad leaves, insects on wet leaves, orchid close-up in tropical forest, jaguar in rainforest, river through rainforest.
+- Avoid requesting a single clip that must show multiple rare species or several actions at once.
 - Avoid wildlife or objects unrelated to the specific narration.
-- Include subject, environment, and/or camera angle in visual queries.
+- Include a concrete subject and a useful environment or camera angle where appropriate.
 - Tell one coherent story with a reveal and satisfying payoff.
 - Avoid list-like narration and generic introductions.
 - Vary sentence length and cadence.
@@ -250,7 +262,7 @@ Requirements:
 
 
 def extract_json_object(raw_text):
-    """Extract the first complete JSON object."""
+    """Extract the first complete JSON object, including fenced responses."""
     if isinstance(raw_text, dict):
         return raw_text
 
@@ -303,7 +315,7 @@ def extract_json_object(raw_text):
 
 
 def post_with_transient_retry(url, retries=1, **kwargs):
-    """Retry temporary errors, but never retry HTTP 429."""
+    """Retry temporary network/server failures; never retry HTTP 429."""
     last_error = None
     retries = max(0, int(retries))
 
@@ -531,6 +543,7 @@ def gemini_plan(topic):
 
         try:
             candidate = generate()
+
             candidate["scenes"] = candidate.get("scenes", [])
 
             if (
@@ -1016,7 +1029,7 @@ def nasa_search(query):
 
 
 def commons_search(query):
-    """Search Commons video files and keep reusable licenses."""
+    """Search Commons video files and keep only files with reusable licenses."""
     response = requests.get(
         "https://commons.wikimedia.org/w/api.php",
         params={
@@ -1139,7 +1152,7 @@ def commons_search(query):
 
 
 def search_all_footage_sources(query):
-    """Query all configured/open sources independently."""
+    """Query each configured/open source independently; disable throttled sources."""
     cache_sources = (
         ("pixabay" if PIXABAY_KEY else "")
         + ("|pexels" if PEXELS_KEY else "")
@@ -1175,6 +1188,9 @@ def search_all_footage_sources(query):
     combined = []
 
     for source, search_fn in searches:
+        if source in FOOTAGE_SOURCE_DISABLED:
+            continue
+
         try:
             found = search_fn(query)
             combined.extend(found)
@@ -1185,10 +1201,23 @@ def search_all_footage_sources(query):
                 )
 
         except Exception as exc:
-            print(
-                f"  {source} search unavailable "
-                f"for '{query}': {exc}"
+            status_code = getattr(
+                getattr(exc, "response", None),
+                "status_code",
+                None
             )
+
+            if status_code == 429:
+                FOOTAGE_SOURCE_DISABLED.add(source)
+
+                print(
+                    f"  {source} rate-limited (HTTP 429); disabling this source "
+                    "for the remainder of this run."
+                )
+            else:
+                print(
+                    f"  {source} search unavailable for '{query}': {exc}"
+                )
 
     try:
         cache_file.write_text(
@@ -1202,21 +1231,21 @@ def search_all_footage_sources(query):
 
 
 STOP_WORDS = {
-    "the", "and", "for", "with", "from", "into", "that", "this",
-    "over", "of", "under", "through", "about", "near", "video",
+    "the", "and", "for", "with", "from", "into", "that", "this", "over", "of",
+    "under", "through", "about", "near", "video",
     "cinematic", "footage", "close", "up", "wide", "angle",
-    "slow", "motion", "beautiful", "nature", "scene", "view",
-    "real", "world", "camera", "showing", "moving", "during",
-    "while", "where", "what", "when", "which", "their", "there",
-    "they", "these", "those", "onto", "its", "are", "was",
-    "were", "been", "being", "has", "have", "had", "will",
-    "would", "could", "should", "can", "may", "one", "two",
-    "first", "second", "then", "than", "also", "more", "most",
-    "very", "some", "many", "such", "like", "make", "made",
-    "high", "low", "level", "shot", "shots", "clip"
+    "slow", "motion", "beautiful", "nature", "scene", "view", "real",
+    "world", "camera", "showing", "moving", "during", "while", "where",
+    "what", "when", "which", "their", "there", "they", "these", "those",
+    "onto", "its", "are", "was", "were", "been", "being", "has",
+    "have", "had", "will", "would", "could", "should", "can", "may",
+    "one", "two", "first", "second", "then", "than", "also", "more",
+    "most", "very", "some", "many", "such", "like", "make", "made",
+    "high", "low", "level", "shot", "shots", "footage", "clip"
 }
 
-
+# Synonym groups bridge the gap between a scene's precise wording and the
+# shorter tags commonly supplied by stock-footage libraries.
 CONCEPT_GROUPS = {
     "rainforest": {
         "amazon", "rainforest", "jungle",
@@ -1246,6 +1275,25 @@ CONCEPT_GROUPS = {
     },
     "wildlife": {
         "wildlife", "animal", "animals", "fauna"
+    },
+    "insect": {
+        "insect", "insects", "bug", "bugs", "ant", "ants",
+        "beetle", "beetles", "butterfly", "butterflies",
+        "mosquito", "mosquitoes", "dragonfly", "dragonflies"
+    },
+    "orchid": {
+        "orchid", "orchids", "orchidaceae"
+    },
+    "jaguar": {
+        "jaguar", "jaguars"
+    },
+    "rain": {
+        "rain", "rainstorm", "rainstorms", "rainfall",
+        "raining", "downpour", "monsoon", "raindrop", "raindrops"
+    },
+    "forest_floor": {
+        "floor", "undergrowth", "understory",
+        "understorey", "leaflitter", "groundcover"
     },
     "bird": {
         "bird", "birds", "avian", "parrot",
@@ -1311,7 +1359,7 @@ def query_concepts(text):
 
 
 def expand_visual_queries(raw_queries):
-    """Create targeted search variants while preserving shot type."""
+    """Create targeted search variants while preserving the requested shot type."""
     expanded = []
 
     replacements = (
@@ -1392,7 +1440,7 @@ def expand_visual_queries(raw_queries):
 
 
 def relevance_score(hit, query, narration):
-    """Score subject, setting and requested shot type from metadata."""
+    """Score subject, setting and requested shot type from source metadata."""
     metadata = " ".join([
         str(hit.get("metadata", "")),
         str(hit.get("tags", "")),
@@ -1430,36 +1478,26 @@ def relevance_score(hit, query, narration):
         if metadata_tokens & aliases
     )
 
-    narration_coverage = narration_matches / max(
-        1,
-        min(6, len(narration_groups))
+    narration_coverage = (
+        narration_matches / max(1, min(6, len(narration_groups)))
     )
 
-    # Aerial/drone is not interchangeable with a ground-level clip.
     camera_aliases = CONCEPT_GROUPS.get("aerial", set())
-
     camera_requested = bool(
         query_tokens & camera_aliases
     )
-
     camera_match = bool(
         metadata_tokens & camera_aliases
     )
 
     camera_bonus = (
-        0.10
-        if camera_requested and camera_match
-        else 0.0
+        0.10 if camera_requested and camera_match else 0.0
     )
-
     camera_penalty = (
-        0.04
-        if camera_requested and not camera_match
-        else 0.0
+        0.04 if camera_requested and not camera_match else 0.0
     )
 
     context_tokens = query_tokens | narration_tokens
-
     conflicts = 0
 
     for conflict_terms in CONTEXT_CONFLICTS.values():
@@ -1478,10 +1516,7 @@ def relevance_score(hit, query, narration):
     )
 
     if conflicts:
-        score -= min(
-            0.55,
-            0.30 * conflicts
-        )
+        score -= min(0.55, 0.30 * conflicts)
 
     return (
         max(0.0, score),
@@ -1490,27 +1525,20 @@ def relevance_score(hit, query, narration):
     )
 
 
-def required_visual_anchors(scene):
-    """Return non-mood subject and camera groups from the primary query."""
-    primary = str(
-        scene.get("visual_query", "")
-    )
-
-    _, groups = query_concepts(primary)
-
-    # Sunrise is mood/timing metadata; aerial is a key shot-type anchor.
-    non_subject = {"sunrise"}
-
-    return {
-        name: aliases
-        for name, aliases in groups.items()
-        if name not in non_subject
-    }
+def required_visual_anchors(query):
+    """Extract anchors from the actual search query, not always the primary query."""
+    _, groups = query_concepts(str(query or ""))
+    return groups
 
 
-def candidate_matches_visual_anchors(hit, scene):
-    """Require metadata to support the core scene and shot type."""
-    anchors = required_visual_anchors(scene)
+def candidate_matches_visual_anchors(hit, query):
+    """Require metadata to support this candidate's own visual query.
+
+    Each alternative query represents an independent possible shot. A clip
+    about insects should not be forced to contain orchids just because orchids
+    appeared in the scene's primary query.
+    """
+    anchors = required_visual_anchors(query)
 
     if not anchors:
         return True
@@ -1532,40 +1560,105 @@ def candidate_matches_visual_anchors(hit, scene):
         },
         "canopy": {
             "canopy", "canopies", "treetop",
-            "treetops", "foliage", "crown"
+            "treetops", "foliage", "crown",
+            "leaf", "leaves"
         },
         "aerial": {
             "aerial", "drone", "overhead",
             "topdown", "birdseye", "helicopter", "fromabove"
         },
+        "insect": {
+            "insect", "insects", "bug", "bugs", "ant", "ants",
+            "beetle", "beetles", "butterfly", "butterflies",
+            "mosquito", "mosquitoes", "dragonfly", "dragonflies"
+        },
+        "orchid": {
+            "orchid", "orchids", "orchidaceae"
+        },
+        "jaguar": {
+            "jaguar", "jaguars"
+        },
+        "forest_floor": {
+            "floor", "undergrowth", "understory",
+            "understorey", "leaflitter", "groundcover"
+        },
+        "rain": {
+            "rain", "rainstorm", "rainstorms", "rainfall",
+            "raining", "downpour", "monsoon", "raindrop", "raindrops"
+        },
     }
 
-    matched = 0
+    matched = set()
 
     for name, aliases in anchors.items():
         if name.startswith("term:"):
             term = name.split(":", 1)[1]
             has_match = term in tokens
         else:
-            match_aliases = strict_aliases.get(
-                name,
-                aliases
-            )
             has_match = bool(
-                tokens & match_aliases
+                tokens & strict_aliases.get(name, aliases)
             )
 
         if has_match:
-            matched += 1
+            matched.add(name)
 
-    required = min(2, len(anchors))
+    subject_groups = {
+        "canopy", "river", "waterfall", "wildlife", "insect",
+        "orchid", "jaguar", "bird", "mountain", "ocean", "desert",
+        "forest_floor",
+    }
 
-    return matched >= required
+    requested_subjects = subject_groups.intersection(
+        anchors.keys()
+    )
+
+    specific_subjects = {
+        "insect", "orchid", "jaguar", "bird", "wildlife"
+    }
+
+    requested_specific = specific_subjects.intersection(
+        anchors.keys()
+    )
+
+    # Specific organisms/plants named in a query are mandatory. A generic
+    # forest-floor tag must not let an ant clip pass an orchid or jaguar query.
+    if requested_specific and not requested_specific.issubset(matched):
+        return False
+
+    # For broader landscape queries, at least one requested subject/shot group
+    # must be present in the source metadata.
+    if (
+        requested_subjects
+        and not requested_subjects.intersection(matched)
+    ):
+        return False
+
+    # When a tropical/Amazon setting is explicitly requested, require the
+    # listing to carry at least one compatible location/environment term.
+    if (
+        "rainforest" in anchors
+        and "rainforest" not in matched
+    ):
+        return False
+
+    # An aerial request must be supported by metadata describing a drone or
+    # overhead shot. The visual model then confirms the actual composition.
+    if (
+        "aerial" in anchors
+        and "aerial" not in matched
+    ):
+        return False
+
+    return bool(matched)
 
 
 def tag_similarity(tags_a, tags_b):
-    a = set(normalize_words(tags_a))
-    b = set(normalize_words(tags_b))
+    a = set(
+        normalize_words(tags_a)
+    )
+    b = set(
+        normalize_words(tags_b)
+    )
 
     if not a or not b:
         return 0.0
@@ -1577,7 +1670,7 @@ def tag_similarity(tags_a, tags_b):
 
 
 def extract_vision_frames(video_path, frame_count=3):
-    """Extract evenly spaced frames for visual inspection."""
+    """Extract evenly spaced, low-resolution frames for visual inspection."""
     duration = ffprobe_duration(video_path)
 
     if duration <= 0:
@@ -1660,7 +1753,7 @@ def extract_vision_frames(video_path, frame_count=3):
 
 
 def _parse_visual_verdict(provider, raw_text):
-    """Parse and validate a strict visual-verification response."""
+    """Parse and validate a strict visual-verification JSON response."""
     try:
         verdict = extract_json_object(raw_text)
 
@@ -1907,7 +2000,9 @@ def _verify_with_openai_compatible_vision(
                         str(item["text"])
                     )
 
-            raw_text = "\n".join(text_parts).strip()
+            raw_text = "\n".join(
+                text_parts
+            ).strip()
 
         else:
             raw_text = str(
@@ -1938,7 +2033,7 @@ def _verify_with_openai_compatible_vision(
 
 
 def _provider_retry_delay(error_text, default_seconds=60):
-    """Read retry timing from common rate-limit messages."""
+    """Read retry timing from common rate-limit error messages."""
     text = str(error_text or "")
 
     patterns = (
@@ -1981,7 +2076,7 @@ def verify_footage_visually(
     query,
     candidate_metadata=""
 ):
-    """Verify the shot visually, using catalog metadata for provenance."""
+    """Verify visible shot content, using catalog metadata for provenance."""
     frames = extract_vision_frames(
         video_path,
         frame_count=3
@@ -2007,10 +2102,13 @@ IMPORTANT DISTINCTION:
 - However, metadata alone cannot turn an unrelated image into a match. The visible footage must still show the requested type of scene.
 
 VISUAL MATCH RULES:
+- Treat this individual search query as one independent shot option, not as a checklist of every detail mentioned anywhere in the scene.
+- The main concrete subject named in this query must be visible. For example, an orchid query must show an orchid; a jaguar query must show a jaguar; an insect query must show an insect.
+- Weather and mood words such as rain, mist, wet, or sunrise are supporting context. Do not reject a clearly matching subject only because a brief weather condition is not obvious in two or three sampled frames.
 - If the query asks for an aerial/drone canopy view, the frames must show a broad overhead view of dense forest treetops. A ground-level path, close-up leaves, isolated branches, hills, or a stylized animation is not a match.
-- If source metadata explicitly identifies Amazon rainforest and the frames visibly show dense tropical forest canopy from above, do not reject merely because the exact Amazon location cannot be recognized visually.
-- Treat the visual query as the primary shot requirement. The narration provides context, but do not require every fact in the narration to appear in one clip.
-- Do not infer actions or objects that are not visible. If the frames contradict the requested shot, reject.
+- Use the source catalog metadata to support geographic context. If metadata identifies tropical/Amazon rainforest and the frames show the requested subject in a compatible natural environment, do not demand that the exact country be visually recognizable.
+- The narration provides context, but do not require every fact in the narration to appear in one clip.
+- Do not infer the main subject if it is not visible. If the frames contradict the requested shot, reject.
 
 Return ONLY JSON:
 {{"relevant": true, "confidence": 0.0, "reason": "brief visible evidence and metadata basis"}}
@@ -2020,7 +2118,8 @@ Set relevant=true only when the visual composition is a genuine match and source
     providers = []
 
     if GROQ_KEY:
-        # One representative frame reduces Groq TPM consumption.
+        # Groq Qwen vision uses 2048 input tokens per image. One representative
+        # middle frame reduces TPM use while preserving the principal scene.
         groq_frames = [
             frames[len(frames) // 2]
         ]
@@ -2280,6 +2379,12 @@ def fetch_footage(plan):
             "GitHub Settings > Secrets and variables > Actions."
         )
 
+    if not PEXELS_KEY:
+        print(
+            "Footage source: Pexels disabled because "
+            "PEXELS_API_KEY is not configured."
+        )
+
     if not visual_provider_names:
         print(
             "WARNING: FOOTAGE_VISION_REQUIRED=false and no visual AI keys "
@@ -2310,15 +2415,10 @@ def fetch_footage(plan):
 
         candidates = {}
 
-        required_anchors = required_visual_anchors(
-            scene
+        print(
+            f"Scene {i}: applying metadata anchors independently to "
+            f"each of {len(queries)} search variants."
         )
-
-        if required_anchors:
-            print(
-                f"Scene {i}: metadata anchors required: "
-                + ", ".join(required_anchors.keys())
-            )
 
         for query in queries:
             for hit in search_all_footage_sources(query):
@@ -2334,7 +2434,7 @@ def fetch_footage(plan):
 
                 if not candidate_matches_visual_anchors(
                     hit,
-                    scene
+                    query
                 ):
                     continue
 
@@ -2358,15 +2458,7 @@ def fetch_footage(plan):
                     scene.get("narration", "")
                 )
 
-                required = (
-                    1 if total <= 1 else 2
-                )
-
-                # Anchors are the hard gate; score ranks the remaining pool.
-                if (
-                    matched < required
-                    or score < 0.32
-                ):
+                if matched < 1 or score < 0.20:
                     continue
 
                 metadata_tokens = set(
@@ -2438,7 +2530,6 @@ def fetch_footage(plan):
             f"{min(len(ranked), VISION_CANDIDATE_LIMIT)} candidates."
         )
 
-        # Log the top candidates so the next run shows why they ranked highly.
         for preview_index, preview_item in enumerate(
             ranked[:5],
             1
@@ -2457,6 +2548,7 @@ def fetch_footage(plan):
                 f"ID={preview_hit.get('id')} "
                 f"score={preview_score:.2f} "
                 f"match={preview_matched}/{preview_total} "
+                f"query={preview_query!r} "
                 f"metadata={str(preview_hit.get('metadata') or preview_hit.get('tags') or '')[:160]}"
             )
 
