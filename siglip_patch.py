@@ -7,8 +7,8 @@ if not MAIN_FILE.exists():
 
 source = MAIN_FILE.read_text(encoding="utf-8")
 
-if "SIGLIP_VISUAL_MATCHER_PATCH_V1" in source:
-    print("SigLIP patch sudah diterapkan.")
+if "SIGLIP_VISUAL_MATCHER_PATCH_V2" in source:
+    print("SigLIP patch V2 sudah diterapkan.")
     raise SystemExit(0)
 
 
@@ -30,7 +30,7 @@ source = replace_once(
     source,
     "import edge_tts\n",
     "import edge_tts\n\n"
-    "# SIGLIP_VISUAL_MATCHER_PATCH_V1\n"
+    "# SIGLIP_VISUAL_MATCHER_PATCH_V2\n"
     "from visual_matcher import rank_candidates\n",
     "import SigLIP",
 )
@@ -178,6 +178,131 @@ source = replace_once(
 )
 
 
+# 8. Tandai parameter retry sementara pada visual verifier
+source = replace_once(
+    source,
+    'def verify_footage_visually(\n'
+    '    video_path,\n'
+    '    scene,\n'
+    '    query,\n'
+    '    candidate_metadata=""\n'
+    '):',
+    'def verify_footage_visually(\n'
+    '    video_path,\n'
+    '    scene,\n'
+    '    query,\n'
+    '    candidate_metadata="",\n'
+    '    _cooldown_retry=False\n'
+    '):',
+    "parameter retry visual verifier",
+)
+
+
+# 9. Matikan semua model OpenRouter jika kuota gratis harian habis
+source = replace_once(
+    source,
+    '            if exc.status_code == 429:\n'
+    '                delay = _provider_retry_delay(\n'
+    '                    str(exc)\n'
+    '                )',
+    '            if exc.status_code == 429:\n'
+    '                error_text = str(exc).lower()\n'
+    '                daily_quota_exhausted = (\n'
+    '                    "free-models-per-day" in error_text\n'
+    '                    or "free_daily_limit" in error_text\n'
+    '                    or (\n'
+    '                        "x-ratelimit-remaining" in error_text\n'
+    '                        and bool(re.search(\n'
+    '                            r"x-ratelimit-remaining.{0,40}0",\n'
+    '                            error_text,\n'
+    '                        ))\n'
+    '                    )\n'
+    '                )\n'
+    '\n'
+    '                if (\n'
+    '                    provider_id.startswith("OpenRouter::")\n'
+    '                    and daily_quota_exhausted\n'
+    '                ):\n'
+    '                    for configured_id, _, _ in providers:\n'
+    '                        if configured_id.startswith("OpenRouter::"):\n'
+    '                            VISION_DISABLED_PROVIDERS.add(configured_id)\n'
+    '\n'
+    '                    print(\n'
+    '                        "Visual verifier: OpenRouter free daily quota "\n'
+    '                        "exhausted; disabling all OpenRouter vision "\n'
+    '                        "routes for this workflow run."\n'
+    '                    )\n'
+    '                    continue\n'
+    '\n'
+    '                delay = _provider_retry_delay(\n'
+    '                    str(exc)\n'
+    '                )',
+    "deteksi kuota harian OpenRouter",
+)
+
+
+# 10. Coba ulang sekali jika provider pulih setelah cooldown
+source = replace_once(
+    source,
+    '    if not providers:\n'
+    '        detail = (\n'
+    '            "No visual AI credentials are configured."\n'
+    '        )',
+    '    if not _cooldown_retry:\n'
+    '        recovered_route = None\n'
+    '\n'
+    '        for provider_id, provider_name, _ in providers:\n'
+    '            if provider_id in VISION_DISABLED_PROVIDERS:\n'
+    '                continue\n'
+    '\n'
+    '            if _provider_cooldown_remaining(provider_id) <= 0:\n'
+    '                recovered_route = provider_name\n'
+    '                break\n'
+    '\n'
+    '        if recovered_route:\n'
+    '            print(\n'
+    '                f"Visual verifier: {recovered_route} is available again; "\n'
+    '                "retrying this footage candidate once."\n'
+    '            )\n'
+    '            return verify_footage_visually(\n'
+    '                video_path,\n'
+    '                scene,\n'
+    '                query,\n'
+    '                candidate_metadata,\n'
+    '                _cooldown_retry=True,\n'
+    '            )\n'
+    '\n'
+    '        cooldowns = [\n'
+    '            _provider_cooldown_remaining(provider_id)\n'
+    '            for provider_id, _, _ in providers\n'
+    '            if provider_id not in VISION_DISABLED_PROVIDERS\n'
+    '            and 0 < _provider_cooldown_remaining(provider_id) <= 60\n'
+    '        ]\n'
+    '\n'
+    '        if cooldowns:\n'
+    '            wait_seconds = max(1, int(max(cooldowns)) + 1)\n'
+    '            print(\n'
+    '                "Visual verifier: waiting "\n'
+    '                f"{wait_seconds}s for provider cooldowns, then retrying "\n'
+    '                "this footage candidate once."\n'
+    '            )\n'
+    '            time.sleep(wait_seconds)\n'
+    '            return verify_footage_visually(\n'
+    '                video_path,\n'
+    '                scene,\n'
+    '                query,\n'
+    '                candidate_metadata,\n'
+    '                _cooldown_retry=True,\n'
+    '            )\n'
+    '\n'
+    '    if not providers:\n'
+    '        detail = (\n'
+    '            "No visual AI credentials are configured."\n'
+    '        )',
+    "retry satu kali setelah cooldown",
+)
+
+
 MAIN_FILE.write_text(source, encoding="utf-8")
 
-print("SigLIP integration berhasil diterapkan ke main.py.")
+print("SigLIP V2 dan visual verifier cooldown recovery berhasil diterapkan ke main.py.")
