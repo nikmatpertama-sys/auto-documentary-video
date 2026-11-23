@@ -594,6 +594,19 @@ def coverr_search(query):
         except (TypeError, ValueError):
             width = 0
 
+        creator_value = (
+            hit.get("creator_name")
+            or hit.get("contributor_name")
+            or hit.get("creator")
+            or hit.get("contributor")
+        )
+        if isinstance(creator_value, dict):
+            creator_value = (
+                creator_value.get("name")
+                or creator_value.get("username")
+                or creator_value.get("display_name")
+            )
+
         results.append({
             "source": "Coverr",
             "id": str(hit.get("id") or ""),
@@ -607,9 +620,13 @@ def coverr_search(query):
             "duration": duration,
             "metadata": " ".join((title, description, tag_text, page_url)),
             "tags": " ".join((title, description, tag_text)),
-            "creator": "Coverr",
+            "creator": str(creator_value or "Creator not supplied by Coverr API"),
             "page_url": page_url,
-            "license": "Coverr API free-video terms; non-commercial use only unless separately licensed",
+            "license": (
+                "Coverr Stock Library License: commercial and personal use permitted; "
+                "free Demo API requires Coverr attribution (and creator credit when listed); "
+                "do not resell raw files"
+            ),
         })
 
     return results
@@ -1955,6 +1972,7 @@ def fetch_footage(plan):
             f"Scene {i} | {hit.get('source')} | "
             f"Creator: {hit.get('creator', 'Unknown')} | "
             f"Source: {hit.get('page_url', '')} | "
+            f"{('Attribution: Coverr (https://coverr.co); ' if hit.get('source') == 'Coverr' else '')}"
             f"Metadata relevance: {score:.2f} "
             f"({matched}/{total} query concepts)"
             f"{vision_credit} | "
