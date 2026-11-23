@@ -27,7 +27,7 @@ jobs:
       OPENBLAS_NUM_THREADS: "2"
       TOKENIZERS_PARALLELISM: "false"
       HF_HUB_DISABLE_TELEMETRY: "1"
-      HF_HOME: ${{ runner.temp }}/huggingface
+      HF_HOME: ${{ github.workspace }}/.hf-cache
       HF_HUB_DOWNLOAD_TIMEOUT: "60"
       HF_HUB_ETAG_TIMEOUT: "20"
 
@@ -57,7 +57,7 @@ jobs:
       - name: Restore SigLIP model cache
         uses: actions/cache@v6
         with:
-          path: ${{ runner.temp }}/huggingface
+          path: ${{ github.workspace }}/.hf-cache
           key: siglip-${{ runner.os }}-python311-siglip-sentencepiece-v2
           restore-keys: |
             siglip-${{ runner.os }}-python311-
@@ -79,41 +79,30 @@ jobs:
       - name: Generate documentary
         env:
           INPUT_TOPIC: ${{ inputs.topic }}
-
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-
           AI_TEXT_PROVIDER_ORDER: groq,deepseek,gemini,openrouter
           AI_VISION_PROVIDER_ORDER: groq,deepseek,gemini,openrouter
-
           GROQ_MODEL: openai/gpt-oss-120b
           GROQ_VISION_MODEL: qwen/qwen3.8-27b
-
           DEEPSEEK_MODEL: deepseek-flash
-
           GEMINI_MODEL: gemini-3.8-flash
           GEMINI_VISION_MODEL: gemini-3.8-flash
-
           OPENROUTER_MODEL: openrouter/free
           OPENROUTER_VISION_MODEL: nvidia/nemotron-3.5-super-vl:free
           OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free
-
           FOOTAGE_VISION_REQUIRED: "true"
           FOOTAGE_VISION_MIN_CONFIDENCE: "0.72"
           FOOTAGE_VISION_CANDIDATE_LIMIT: "5"
-
           TTS_VOICE: en-US-GuyNeural
           TTS_FALLBACK_VOICE: en-US-AriaNeural
           TTS_RATE: "-5%"
           TTS_PITCH: "-4Hz"
-
           X264_PRESET: ultrafast
-
         run: python main.py
 
       - name: Upload final video and production files
