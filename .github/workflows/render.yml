@@ -1,27 +1,42 @@
+
 name: Hybrid Documentary Generator
 
 on:
   workflow_dispatch:
     inputs:
       topic:
-        description: "Documentary idea / topic (English or Indonesian)"
+        description: "Documentary topic / idea (English or Indonesian)"
         required: true
         type: string
 
 permissions:
   contents: read
 
+concurrency:
+  group: documentary-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
+
+    env:
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      TOKENIZERS_PARALLELISM: "false"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_HOME: ${{ runner.temp }}/huggingface
+      HF_HUB_DOWNLOAD_TIMEOUT: "60"
+      HF_HUB_ETAG_TIMEOUT: "20"
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -29,59 +44,88 @@ jobs:
       - name: Install FFmpeg and fonts
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
 
       - name: Install CPU-only PyTorch
         run: |
           python -m pip install --upgrade pip
-          pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2,<3"
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2,<3"
 
       - name: Install Python dependencies
-        run: |
-          pip install -r requirements.txt
+        run: python -m pip install -r requirements.txt
 
       - name: Restore SigLIP model cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
-          path: ~/.cache/huggingface
-          key: siglip-${{ runner.os }}-google-siglip-base-patch16-256-multilingual-v1
+          path: ${{ runner.temp }}/huggingface
+          key: siglip-${{ runner.os }}-python311-siglip-sentencepiece-v2
           restore-keys: |
-            siglip-${{ runner.os }}-
+            siglip-${{ runner.os }}-python311-
 
-      - name: Restore footage source search cache
-        uses: actions/cache@v4
+      - name: Restore footage and thumbnail cache
+        uses: actions/cache@v6
         with:
           path: .api-cache
           key: footage-api-${{ runner.os }}-${{ github.run_id }}
           restore-keys: |
             footage-api-${{ runner.os }}-
 
+      - name: Verify runtime and dependencies
+        run: |
+          python -m py_compile main.py ai_router.py visual_matcher.py healthcheck.py
+          python -m unittest discover -s tests -v
+          python healthcheck.py
+
       - name: Generate documentary
         env:
           INPUT_TOPIC: ${{ inputs.topic }}
+
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+
+          AI_TEXT_PROVIDER_ORDER: groq,deepseek,gemini,openrouter
+          AI_VISION_PROVIDER_ORDER: groq,deepseek,gemini,openrouter
+
           GROQ_MODEL: openai/gpt-oss-120b
+          GROQ_VISION_MODEL: qwen/qwen3.8-27b
+
+          DEEPSEEK_MODEL: deepseek-flash
+
+          GEMINI_MODEL: gemini-3.8-flash
+          GEMINI_VISION_MODEL: gemini-3.8-flash
+
           OPENROUTER_MODEL: openrouter/free
+          OPENROUTER_VISION_MODEL: nvidia/nemotron-3.5-super-vl:free
+          OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free
+
+          FOOTAGE_VISION_REQUIRED: "true"
+          FOOTAGE_VISION_MIN_CONFIDENCE: "0.72"
+          FOOTAGE_VISION_CANDIDATE_LIMIT: "5"
+
           TTS_VOICE: en-US-GuyNeural
+          TTS_FALLBACK_VOICE: en-US-AriaNeural
           TTS_RATE: "-5%"
           TTS_PITCH: "-4Hz"
-          GEMINI_MODEL: gemini-3.8-flash
-        run: |
-          python siglip_patch.py
-          python main.py
 
-      - name: Upload documentary and production notes
-        uses: actions/upload-artifact@v4
+          X264_PRESET: ultrafast
+
+        run: python main.py
+
+      - name: Upload final video and production files
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: hybrid-documentary-${{ github.run_number }}
           path: |
             documentary.mp4
             plan.json
             credits.txt
+            timing.json
+            production_report.json
             output/voiceover.mp3
             output/captions.ass
           if-no-files-found: error
