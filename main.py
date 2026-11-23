@@ -53,26 +53,38 @@ ENDING_HOLD = 1.25
 MIN_CLIP_WIDTH = 640
 MAX_CLIP_BYTES = 180 * 1024 * 1024
 
-# Visual verification is deliberately fail-closed by default. Set this to
-# false only if you explicitly accept metadata-only footage selection.
-VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "true").strip().lower() not in (
-    "0", "false", "no", "off"
-)
+VISION_REQUIRED = os.getenv(
+    "FOOTAGE_VISION_REQUIRED", "true"
+).strip().lower() not in ("0", "false", "no", "off")
+
+# Do not stop after checking only five candidates.
 VISION_CANDIDATE_LIMIT = max(
-    1, min(10, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "5")))
+    1, min(30, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "26")))
 )
+
 try:
     VISION_MIN_CONFIDENCE = float(
         os.getenv("FOOTAGE_VISION_MIN_CONFIDENCE", "0.72")
     )
 except ValueError:
     VISION_MIN_CONFIDENCE = 0.72
-VISION_MIN_CONFIDENCE = max(0.0, min(1.0, VISION_MIN_CONFIDENCE))
-VISION_MODEL = os.getenv("GEMINI_VISION_MODEL", MODEL).strip() or MODEL
+
+VISION_MIN_CONFIDENCE = max(
+    0.0, min(1.0, VISION_MIN_CONFIDENCE)
+)
+
+VISION_MODEL = (
+    os.getenv("GEMINI_VISION_MODEL", MODEL).strip() or MODEL
+)
+
 GROQ_VISION_MODEL = (
-    os.getenv("GROQ_VISION_MODEL", "qwen/qwen3.8-27b").strip()
+    os.getenv(
+        "GROQ_VISION_MODEL",
+        "qwen/qwen3.8-27b"
+    ).strip()
     or "qwen/qwen3.8-27b"
 )
+
 OPENROUTER_VISION_MODEL = (
     os.getenv(
         "OPENROUTER_VISION_MODEL",
@@ -80,6 +92,7 @@ OPENROUTER_VISION_MODEL = (
     ).strip()
     or "nvidia/nemotron-3.5-super-vl:free"
 )
+
 OPENROUTER_VISION_FALLBACK_MODEL = (
     os.getenv(
         "OPENROUTER_VISION_FALLBACK_MODEL",
@@ -88,15 +101,10 @@ OPENROUTER_VISION_FALLBACK_MODEL = (
     or "inclusionai/ling-3.2-flash:free"
 )
 
-# Do not let an old environment value silently re-enable the dynamic router
-# for visual verification. That router previously selected a reasoning model
-# which exhausted its output budget before returning the required JSON.
+# Do not silently use the dynamic router for vision.
 if OPENROUTER_VISION_MODEL.lower() == "openrouter/free":
     OPENROUTER_VISION_MODEL = "nvidia/nemotron-3.5-super-vl:free"
 
-# Hard configuration/model errors disable only that route for this run.
-# Rate limits and transient failures use a temporary cooldown instead, so a
-# provider can recover later during the same eight-scene production run.
 VISION_DISABLED_PROVIDERS = set()
 VISION_PROVIDER_COOLDOWN_UNTIL = {}
 
@@ -106,7 +114,8 @@ class VisionProviderError(RuntimeError):
         self.provider = provider
         self.status_code = status_code
         super().__init__(
-            f"{provider} visual verification HTTP {status_code}: {detail}"
+            f"{provider} visual verification HTTP "
+            f"{status_code}: {detail}"
         )
 
 
@@ -115,33 +124,40 @@ class VisionVerificationError(RuntimeError):
 
 
 class VisionResponseError(RuntimeError):
-    """A provider answered, but its response could not be used safely."""
-
     pass
+
 
 if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
     raise RuntimeError(
         "Missing AI provider key. Add GROQ_API_KEY, "
         "OPENROUTER_API_KEY, or GEMINI_API_KEY GitHub Secret."
     )
+
 if not TOPIC:
     raise RuntimeError("Enter a topic in the Run workflow form.")
 
 
 def run(cmd):
-    """Run a command and surface stderr so failures are diagnosable in Actions."""
+    """Run a command and surface stderr for diagnostics."""
     result = subprocess.run(
         [str(x) for x in cmd],
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+
     if result.returncode != 0:
-        details = (result.stderr or result.stdout or "No diagnostic output.").strip()
+        details = (
+            result.stderr
+            or result.stdout
+            or "No diagnostic output."
+        ).strip()
+
         raise RuntimeError(
             f"Command failed with exit code {result.returncode}: "
             f"{details[-5000:]}"
         )
+
     if result.stdout:
         print(result.stdout, end="")
 
@@ -158,19 +174,26 @@ def ffprobe_duration(path):
         text=True,
         check=True
     )
+
     return max(0.0, float(result.stdout.strip()))
 
 
 def split_sentences(text):
     return [
         x.strip()
-        for x in re.findall(r"[^.!?]+[.!?]+|[^.!?]+$", text)
+        for x in re.findall(
+            r"[^.!?]+[.!?]+|[^.!?]+$",
+            text
+        )
         if x.strip()
     ]
 
 
 def normalize_words(text):
-    return re.findall(r"[a-z0-9']+", str(text).lower())
+    return re.findall(
+        r"[a-z0-9']+",
+        str(text).lower()
+    )
 
 
 # ============================================================
@@ -227,16 +250,21 @@ Requirements:
 
 
 def extract_json_object(raw_text):
-    """Extract the first complete JSON object, including fenced responses."""
+    """Extract the first complete JSON object."""
     if isinstance(raw_text, dict):
         return raw_text
 
     raw = str(raw_text or "").strip()
-    raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.IGNORECASE)
+
+    raw = re.sub(
+        r"^```(?:json)?\s*",
+        "",
+        raw,
+        flags=re.IGNORECASE
+    )
+
     raw = re.sub(r"\s*```$", "", raw)
 
-    # Find a balanced object rather than slicing from the first to last brace.
-    # This avoids swallowing unrelated trailing text or a second JSON object.
     start = -1
     depth = 0
     in_string = False
@@ -254,66 +282,96 @@ def extract_json_object(raw_text):
 
         if char == '"':
             in_string = True
+
         elif char == "{":
             if depth == 0:
                 start = index
             depth += 1
+
         elif char == "}":
             if depth > 0:
                 depth -= 1
-                if depth == 0 and start >= 0:
-                    return json.loads(raw[start:index + 1])
 
-    raise ValueError("Provider response did not contain a complete JSON object.")
+                if depth == 0 and start >= 0:
+                    return json.loads(
+                        raw[start:index + 1]
+                    )
+
+    raise ValueError(
+        "Provider response did not contain a complete JSON object."
+    )
 
 
 def post_with_transient_retry(url, retries=1, **kwargs):
-    """Retry temporary errors only when the caller explicitly allows it."""
+    """Retry temporary errors, but never retry HTTP 429."""
     last_error = None
     retries = max(0, int(retries))
+
     for attempt in range(retries + 1):
         try:
             response = requests.post(url, **kwargs)
+
             if response.status_code == 429:
                 return response
+
             if response.status_code in (408, 500, 502, 503, 504):
                 last_error = RuntimeError(
                     f"Temporary HTTP {response.status_code}: "
                     f"{response.text[:500]}"
                 )
+
                 if attempt < retries:
-                    print("Temporary AI service issue; retrying once in 5s...")
+                    print(
+                        "Temporary AI service issue; retrying once in 5s..."
+                    )
                     time.sleep(5)
                     continue
+
             return response
+
         except (
             requests.exceptions.Timeout,
             requests.exceptions.ConnectionError,
         ) as exc:
             last_error = exc
+
             if attempt < retries:
-                print("AI connection issue; retrying once in 5s...")
+                print(
+                    "AI connection issue; retrying once in 5s..."
+                )
                 time.sleep(5)
                 continue
+
     if last_error:
         raise last_error
-    raise RuntimeError("AI request failed without a response.")
+
+    raise RuntimeError(
+        "AI request failed without a response."
+    )
 
 
 def call_openai_compatible(provider, api_key, model, prompt):
     if provider == "Groq":
-        url = "https://api.groq.com/openai/v1/chat/completions"
+        url = (
+            "https://api.groq.com/openai/v1/chat/completions"
+        )
+
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
+
     else:
-        url = "https://openrouter.ai/api/v1/chat/completions"
+        url = (
+            "https://openrouter.ai/api/v1/chat/completions"
+        )
+
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": os.getenv(
-                "OPENROUTER_SITE_URL", "https://github.com/"
+                "OPENROUTER_SITE_URL",
+                "https://github.com/"
             ),
             "X-Title": "Auto Documentary Video",
         }
@@ -329,18 +387,19 @@ def call_openai_compatible(provider, api_key, model, prompt):
                     "Return only one valid JSON object, with no markdown."
                 ),
             },
-            {"role": "user", "content": prompt},
+            {
+                "role": "user",
+                "content": prompt
+            },
         ],
         "temperature": 0.35,
-        # GPT-OSS on Groq is a reasoning model; reserve enough completion budget.
     }
+
     if provider == "Groq":
         payload["max_completion_tokens"] = 6000
     else:
         payload["max_tokens"] = 6000
 
-    # A single attempt per provider: quota errors should immediately
-    # trigger the next provider instead of wasting time retrying.
     response = post_with_transient_retry(
         url,
         headers=headers,
@@ -350,15 +409,18 @@ def call_openai_compatible(provider, api_key, model, prompt):
 
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
+
         raise RuntimeError(
             f"{provider} HTTP {response.status_code}: {detail}"
         )
 
     data = response.json()
+
     try:
         return extract_json_object(
             data["choices"][0]["message"]["content"]
         )
+
     except Exception as exc:
         raise RuntimeError(
             f"{provider} returned an unreadable response: {exc}; "
@@ -371,29 +433,42 @@ def call_gemini(api_key, model, prompt):
         "https://generativelanguage.googleapis.com/v1beta/models/"
         f"{model}:generateContent"
     )
+
     payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ],
         "generationConfig": {
             "responseMimeType": "application/json",
             "temperature": 0.55,
         },
     }
+
     response = post_with_transient_retry(
         url,
         params={"key": api_key},
         json=payload,
         timeout=(20, 180),
     )
+
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
+
         raise RuntimeError(
             f"Gemini HTTP {response.status_code}: {detail}"
         )
+
     data = response.json()
+
     try:
         return extract_json_object(
             data["candidates"][0]["content"]["parts"][0]["text"]
         )
+
     except Exception as exc:
         raise RuntimeError(
             f"Gemini returned an unreadable response: {exc}; "
@@ -406,24 +481,37 @@ def gemini_plan(topic):
     prompt = documentary_prompt(topic)
 
     providers = []
+
     if GROQ_KEY:
         providers.append((
             "Groq",
             lambda: call_openai_compatible(
-                "Groq", GROQ_KEY, GROQ_MODEL, prompt
+                "Groq",
+                GROQ_KEY,
+                GROQ_MODEL,
+                prompt
             ),
         ))
+
     if OPENROUTER_KEY:
         providers.append((
             "OpenRouter",
             lambda: call_openai_compatible(
-                "OpenRouter", OPENROUTER_KEY, OPENROUTER_MODEL, prompt
+                "OpenRouter",
+                OPENROUTER_KEY,
+                OPENROUTER_MODEL,
+                prompt
             ),
         ))
+
     if GEMINI_KEY:
         providers.append((
             "Gemini",
-            lambda: call_gemini(GEMINI_KEY, MODEL, prompt),
+            lambda: call_gemini(
+                GEMINI_KEY,
+                MODEL,
+                prompt
+            ),
         ))
 
     if not providers:
@@ -440,44 +528,80 @@ def gemini_plan(topic):
             f"Trying AI provider {index}/{len(providers)}: "
             f"{provider_name}..."
         )
+
         try:
             candidate = generate()
             candidate["scenes"] = candidate.get("scenes", [])
-            if not isinstance(candidate["scenes"], list) or len(candidate["scenes"]) != 8:
+
+            if (
+                not isinstance(candidate["scenes"], list)
+                or len(candidate["scenes"]) != 8
+            ):
                 raise RuntimeError(
-                    "AI returned an incomplete plan. Expected exactly 8 scenes."
+                    "AI returned an incomplete plan. "
+                    "Expected exactly 8 scenes."
                 )
 
-            # Use scene narration as the canonical script. This avoids rejecting
-            # a usable plan when a provider paraphrases its separate script field.
             scene_narrations = []
-            for scene_index, scene in enumerate(candidate["scenes"], 1):
+
+            for scene_index, scene in enumerate(
+                candidate["scenes"],
+                1
+            ):
                 if not isinstance(scene, dict):
-                    raise RuntimeError(f"Scene {scene_index} is not a JSON object.")
-                narration = re.sub(r"\s+", " ", str(scene.get("narration", ""))).strip()
+                    raise RuntimeError(
+                        f"Scene {scene_index} is not a JSON object."
+                    )
+
+                narration = re.sub(
+                    r"\s+",
+                    " ",
+                    str(scene.get("narration", ""))
+                ).strip()
+
                 if not narration:
-                    raise RuntimeError(f"Scene {scene_index} has empty narration.")
+                    raise RuntimeError(
+                        f"Scene {scene_index} has empty narration."
+                    )
+
                 scene["narration"] = narration
                 scene_narrations.append(narration)
 
-            candidate["script"] = " ".join(scene_narrations).strip()
-            word_count = len(candidate["script"].split())
+            candidate["script"] = " ".join(
+                scene_narrations
+            ).strip()
+
+            word_count = len(
+                candidate["script"].split()
+            )
+
             if not 100 <= word_count <= 190:
                 raise RuntimeError(
-                    f"Scene narration totals {word_count} words; expected 100-190."
+                    f"Scene narration totals {word_count} words; "
+                    "expected 100-190."
                 )
 
             candidate["scenes"][0]["visual_type"] = "footage"
+
             assign_scene_sentence_ranges(candidate)
+
             plan = candidate
-            print(f"Documentary plan generated successfully by {provider_name}.")
+
+            print(
+                f"Documentary plan generated successfully by {provider_name}."
+            )
             break
+
         except Exception as exc:
             message = f"{provider_name}: {exc}"
             errors.append(message)
-            print(f"{message}")
+
+            print(message)
+
             if index < len(providers):
-                print("Switching automatically to the next AI provider...")
+                print(
+                    "Switching automatically to the next AI provider..."
+                )
 
     if plan is None:
         raise RuntimeError(
@@ -486,7 +610,11 @@ def gemini_plan(topic):
         )
 
     Path("plan.json").write_text(
-        json.dumps(plan, indent=2, ensure_ascii=False),
+        json.dumps(
+            plan,
+            indent=2,
+            ensure_ascii=False
+        ),
         encoding="utf-8"
     )
 
@@ -494,11 +622,12 @@ def gemini_plan(topic):
         f"Script ready: {len(plan['script'].split())} words, "
         f"{len(plan['scenes'])} scenes."
     )
+
     return plan
+
 
 def assign_scene_sentence_ranges(plan):
     """Map each scene to exact script sentences."""
-
     sentences = split_sentences(plan["script"])
 
     normalized = [
@@ -509,8 +638,13 @@ def assign_scene_sentence_ranges(plan):
     cursor = 0
 
     for index, scene in enumerate(plan["scenes"]):
-        narration = str(scene.get("narration", "")).strip()
-        target = " ".join(normalize_words(narration))
+        narration = str(
+            scene.get("narration", "")
+        ).strip()
+
+        target = " ".join(
+            normalize_words(narration)
+        )
 
         if not target:
             raise RuntimeError(
@@ -527,7 +661,9 @@ def assign_scene_sentence_ranges(plan):
                 start,
                 min(len(sentences), start + 5)
             ):
-                joined.extend(normalized[end].split())
+                joined.extend(
+                    normalized[end].split()
+                )
 
                 if joined == target_words:
                     found = (start, end)
@@ -561,104 +697,181 @@ def assign_scene_sentence_ranges(plan):
 # FOOTAGE SEARCH AND RELEVANCE
 # ============================================================
 
-
 def download_stream(url, dest):
     """Download safely; remove partial files on every failure."""
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.unlink(missing_ok=True)
+
     try:
         with requests.get(
-            url, stream=True, timeout=(25, 180),
-            headers={"User-Agent": "AutoDocumentaryVideo/3.0"}
+            url,
+            stream=True,
+            timeout=(25, 180),
+            headers={
+                "User-Agent": "AutoDocumentaryVideo/3.0"
+            }
         ) as response:
+
             response.raise_for_status()
-            declared = int(response.headers.get("Content-Length") or 0)
+
+            declared = int(
+                response.headers.get("Content-Length") or 0
+            )
+
             if declared > MAX_CLIP_BYTES:
                 raise RuntimeError(
-                    f"Clip is {declared / 1024 / 1024:.1f} MB, above the "
-                    f"{MAX_CLIP_BYTES / 1024 / 1024:.0f} MB limit."
+                    f"Clip is {declared / 1024 / 1024:.1f} MB, "
+                    f"above the {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB limit."
                 )
+
             total = 0
+
             with open(dest, "wb") as f:
-                for chunk in response.iter_content(1024 * 1024):
+                for chunk in response.iter_content(
+                    1024 * 1024
+                ):
                     if not chunk:
                         continue
+
                     total += len(chunk)
+
                     if total > MAX_CLIP_BYTES:
                         raise RuntimeError(
-                            f"Clip exceeded {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB safety limit."
+                            f"Clip exceeded "
+                            f"{MAX_CLIP_BYTES / 1024 / 1024:.0f} MB safety limit."
                         )
+
                     f.write(chunk)
+
         if dest.stat().st_size < 50000:
-            raise RuntimeError("Downloaded clip is unexpectedly small.")
+            raise RuntimeError(
+                "Downloaded clip is unexpectedly small."
+            )
+
     except Exception:
         dest.unlink(missing_ok=True)
         raise
 
 
 def clean_query(query):
-    return re.sub(r"[^a-zA-Z0-9 ]", " ", str(query)).strip()[:95]
+    return re.sub(
+        r"[^a-zA-Z0-9 ]",
+        " ",
+        str(query)
+    ).strip()[:95]
 
 
 def pixabay_search(query):
     if not PIXABAY_KEY:
         return []
+
     query = clean_query(query)
+
     cache_file = CACHE / (
-        hashlib.sha256(query.lower().encode()).hexdigest() + ".json"
+        hashlib.sha256(
+            query.lower().encode()
+        ).hexdigest() + ".json"
     )
-    if cache_file.exists() and time.time() - cache_file.stat().st_mtime < 86400:
+
+    if (
+        cache_file.exists()
+        and time.time() - cache_file.stat().st_mtime < 86400
+    ):
         try:
-            return json.loads(cache_file.read_text(encoding="utf-8")).get("hits", [])
+            return json.loads(
+                cache_file.read_text(encoding="utf-8")
+            ).get("hits", [])
         except Exception:
             pass
+
     response = requests.get(
         "https://pixabay.com/api/videos/",
         params={
-            "key": PIXABAY_KEY, "q": query, "per_page": 25,
-            "safesearch": "true", "video_type": "film", "order": "popular"
+            "key": PIXABAY_KEY,
+            "q": query,
+            "per_page": 25,
+            "safesearch": "true",
+            "video_type": "film",
+            "order": "popular"
         },
         timeout=35
     )
+
     if response.status_code == 429:
-        raise RuntimeError("Pixabay rate limit reached.")
+        raise RuntimeError(
+            "Pixabay rate limit reached."
+        )
+
     response.raise_for_status()
+
     data = response.json()
-    cache_file.write_text(json.dumps(data), encoding="utf-8")
+
+    cache_file.write_text(
+        json.dumps(data),
+        encoding="utf-8"
+    )
+
     results = []
+
     for hit in data.get("hits", []):
         renditions = hit.get("videos", {})
-        rendition = renditions.get("large") or renditions.get("medium") or renditions.get("small") or {}
+
+        rendition = (
+            renditions.get("large")
+            or renditions.get("medium")
+            or renditions.get("small")
+            or {}
+        )
+
         if not rendition.get("url"):
             continue
+
         results.append({
-            "source": "Pixabay", "id": str(hit.get("id")),
+            "source": "Pixabay",
+            "id": str(hit.get("id")),
             "url": rendition.get("url"),
             "width": int(rendition.get("width") or 0),
             "duration": float(hit.get("duration") or 0),
-            "metadata": " ".join([str(hit.get("tags", "")), str(hit.get("pageURL", ""))]),
+            "metadata": " ".join([
+                str(hit.get("tags", "")),
+                str(hit.get("pageURL", ""))
+            ]),
             "tags": str(hit.get("tags", "")),
             "creator": hit.get("user", "Unknown"),
             "page_url": hit.get("pageURL", ""),
             "license": "Pixabay Content License",
         })
+
     return results
 
 
 def pexels_search(query):
     if not PEXELS_KEY:
         return []
+
     response = requests.get(
         "https://api.pexels.com/v1/videos/search",
-        headers={"Authorization": PEXELS_KEY},
-        params={"query": query, "per_page": 20, "size": "medium"},
+        headers={
+            "Authorization": PEXELS_KEY
+        },
+        params={
+            "query": query,
+            "per_page": 20,
+            "size": "medium"
+        },
         timeout=35
     )
+
     if response.status_code == 429:
-        raise RuntimeError("Pexels API rate limit reached.")
+        raise RuntimeError(
+            "Pexels API rate limit reached."
+        )
+
     response.raise_for_status()
+
     results = []
+
     for video in response.json().get("videos", []):
         files = sorted(
             video.get("video_files", []),
@@ -667,103 +880,206 @@ def pexels_search(query):
                 abs(int(x.get("width") or 0) - 1920)
             )
         )
-        # Prefer a file at least HD; choose the smallest qualifying rendition
-        # to reduce download size and render time.
-        files = [f for f in files if f.get("link") and int(f.get("width") or 0) >= MIN_CLIP_WIDTH]
+
+        files = [
+            f for f in files
+            if f.get("link")
+            and int(f.get("width") or 0) >= MIN_CLIP_WIDTH
+        ]
+
         if not files:
             continue
-        file = min(files, key=lambda x: int(x.get("width") or 99999))
-        slug = re.sub(r"[-_/]+", " ", str(video.get("url", "")))
+
+        file = min(
+            files,
+            key=lambda x: int(x.get("width") or 99999)
+        )
+
+        slug = re.sub(
+            r"[-_/]+",
+            " ",
+            str(video.get("url", ""))
+        )
+
         results.append({
-            "source": "Pexels", "id": str(video.get("id")),
-            "url": file["link"], "width": int(file.get("width") or 0),
+            "source": "Pexels",
+            "id": str(video.get("id")),
+            "url": file["link"],
+            "width": int(file.get("width") or 0),
             "duration": float(video.get("duration") or 0),
-            "metadata": slug, "tags": slug,
-            "creator": (video.get("user") or {}).get("name", "Unknown"),
+            "metadata": slug,
+            "tags": slug,
+            "creator": (
+                video.get("user") or {}
+            ).get("name", "Unknown"),
             "page_url": video.get("url", ""),
             "license": "Pexels License",
         })
+
     return results
 
 
 def nasa_search(query):
-    """NASA public media API; video assets only, no API key required."""
+    """NASA public media API; video assets only."""
     response = requests.get(
         "https://images-api.nasa.gov/search",
-        params={"q": query, "media_type": "video", "page_size": 8},
+        params={
+            "q": query,
+            "media_type": "video",
+            "page_size": 8
+        },
         timeout=35
     )
+
     response.raise_for_status()
+
     results = []
-    for item in response.json().get("collection", {}).get("items", [])[:6]:
+
+    for item in response.json().get(
+        "collection", {}
+    ).get("items", [])[:6]:
+
         data = (item.get("data") or [{}])[0]
         nasa_id = data.get("nasa_id")
+
         if not nasa_id:
             continue
+
         metadata = " ".join([
             str(data.get("title", "")),
             str(data.get("description", "")),
             " ".join(data.get("keywords") or [])
         ])
+
         try:
             manifest = requests.get(
-                f"https://images-api.nasa.gov/asset/{nasa_id}", timeout=35
+                f"https://images-api.nasa.gov/asset/{nasa_id}",
+                timeout=35
             )
+
             manifest.raise_for_status()
-            assets = manifest.json().get("collection", {}).get("items", [])
+
+            assets = manifest.json().get(
+                "collection", {}
+            ).get("items", [])
+
         except Exception as exc:
-            print(f"NASA asset lookup skipped ({nasa_id}): {exc}")
+            print(
+                f"NASA asset lookup skipped ({nasa_id}): {exc}"
+            )
             continue
+
         urls = [
-            str(x.get("href", "")) for x in assets
-            if str(x.get("href", "")).split("?", 1)[0].lower().endswith((".mp4", ".mov", ".m4v"))
+            str(x.get("href", ""))
+            for x in assets
+            if str(x.get("href", "")).split(
+                "?", 1
+            )[0].lower().endswith(
+                (".mp4", ".mov", ".m4v")
+            )
         ]
+
         if not urls:
             continue
-        # Prefer a medium/small MP4 when supplied; avoid huge original masters.
-        urls.sort(key=lambda u: (
-            0 if re.search(r"(medium|small|low)", u, re.I) else 1,
-            len(u)
-        ))
+
+        urls.sort(
+            key=lambda u: (
+                0 if re.search(
+                    r"(medium|small|low)",
+                    u,
+                    re.I
+                ) else 1,
+                len(u)
+            )
+        )
+
         results.append({
-            "source": "NASA", "id": str(nasa_id), "url": urls[0],
-            "width": MIN_CLIP_WIDTH, "duration": 0,
-            "metadata": metadata, "tags": metadata,
+            "source": "NASA",
+            "id": str(nasa_id),
+            "url": urls[0],
+            "width": MIN_CLIP_WIDTH,
+            "duration": 0,
+            "metadata": metadata,
+            "tags": metadata,
             "creator": data.get("center", "NASA"),
-            "page_url": item.get("href", f"https://images.nasa.gov/details/{nasa_id}"),
-            "license": "NASA media usage guidelines; verify third-party credits where noted",
+            "page_url": item.get(
+                "href",
+                f"https://images.nasa.gov/details/{nasa_id}"
+            ),
+            "license": (
+                "NASA media usage guidelines; "
+                "verify third-party credits where noted"
+            ),
         })
+
     return results
 
 
 def commons_search(query):
-    """Search Commons video files and keep only files with reusable licenses."""
+    """Search Commons video files and keep reusable licenses."""
     response = requests.get(
         "https://commons.wikimedia.org/w/api.php",
         params={
-            "action": "query", "format": "json", "generator": "search",
-            "gsrsearch": f"filetype:video {query}", "gsrnamespace": 6,
-            "gsrlimit": 10, "prop": "imageinfo",
+            "action": "query",
+            "format": "json",
+            "generator": "search",
+            "gsrsearch": f"filetype:video {query}",
+            "gsrnamespace": 6,
+            "gsrlimit": 10,
+            "prop": "imageinfo",
             "iiprop": "url|size|mime|extmetadata"
         },
-        headers={"User-Agent": "AutoDocumentaryVideo/3.0 (video research)"},
+        headers={
+            "User-Agent": "AutoDocumentaryVideo/3.0 (video research)"
+        },
         timeout=35
     )
+
     response.raise_for_status()
-    pages = response.json().get("query", {}).get("pages", {})
+
+    pages = response.json().get(
+        "query", {}
+    ).get("pages", {})
+
     results = []
+
     for page in pages.values():
         info = (page.get("imageinfo") or [{}])[0]
         mime = str(info.get("mime", ""))
+
         if not mime.startswith("video/"):
             continue
+
         ext = info.get("extmetadata") or {}
-        license_name = re.sub(r"<[^>]+>", "", str((ext.get("LicenseShortName") or {}).get("value", "")))
-        license_normalized = license_name.lower().replace(" ", "").replace("_", "-")
-        restricted = any(term in license_normalized for term in (
-            "noncommercial", "non-commercial", "cc-by-nc", "ccby-nc",
-            "noderivatives", "no-derivatives", "cc-by-nd", "ccby-nd",
-        ))
+
+        license_name = re.sub(
+            r"<[^>]+>",
+            "",
+            str(
+                (ext.get("LicenseShortName") or {}).get("value", "")
+            )
+        )
+
+        license_normalized = (
+            license_name.lower()
+            .replace(" ", "")
+            .replace("_", "-")
+        )
+
+        restricted = any(
+            term in license_normalized
+            for term in (
+                "noncommercial",
+                "non-commercial",
+                "cc-by-nc",
+                "ccby-nc",
+                "noderivatives",
+                "no-derivatives",
+                "cc-by-nd",
+                "ccby-nd",
+            )
+        )
+
         reusable = (
             "cc0" in license_normalized
             or "publicdomain" in license_normalized
@@ -771,39 +1087,81 @@ def commons_search(query):
             or "ccby" in license_normalized
             or "creativecommonsattribution" in license_normalized
         )
+
         if restricted or not reusable:
             continue
+
         url = info.get("url", "")
+
         if not url:
             continue
-        artist = re.sub(r"<[^>]+>", "", str((ext.get("Artist") or {}).get("value", "Unknown")))
-        description = re.sub(r"<[^>]+>", " ", str((ext.get("ImageDescription") or {}).get("value", "")))
-        metadata = f"{page.get('title', '')} {description}"
+
+        artist = re.sub(
+            r"<[^>]+>",
+            "",
+            str(
+                (ext.get("Artist") or {}).get("value", "Unknown")
+            )
+        )
+
+        description = re.sub(
+            r"<[^>]+>",
+            " ",
+            str(
+                (ext.get("ImageDescription") or {}).get("value", "")
+            )
+        )
+
+        metadata = (
+            f"{page.get('title', '')} {description}"
+        )
+
         results.append({
-            "source": "Wikimedia Commons", "id": str(page.get("pageid")),
-            "url": url, "width": int(info.get("width") or 0),
-            "duration": 0, "metadata": metadata, "tags": metadata,
-            "creator": artist, "page_url": page.get("canonicalurl") or "https://commons.wikimedia.org/wiki/" + str(page.get("title", "")).replace(" ", "_"),
+            "source": "Wikimedia Commons",
+            "id": str(page.get("pageid")),
+            "url": url,
+            "width": int(info.get("width") or 0),
+            "duration": 0,
+            "metadata": metadata,
+            "tags": metadata,
+            "creator": artist,
+            "page_url": (
+                page.get("canonicalurl")
+                or (
+                    "https://commons.wikimedia.org/wiki/"
+                    + str(page.get("title", "")).replace(" ", "_")
+                )
+            ),
             "license": license_name or "See file page",
         })
+
     return results
 
 
 def search_all_footage_sources(query):
-    """Query each configured/open source independently; cache normalized results."""
+    """Query all configured/open sources independently."""
     cache_sources = (
         ("pixabay" if PIXABAY_KEY else "")
         + ("|pexels" if PEXELS_KEY else "")
         + "|nasa|commons"
     )
+
     cache_file = CACHE / (
         hashlib.sha256(
-            (cache_sources + "|" + query.lower()).encode()
+            (
+                cache_sources + "|" + query.lower()
+            ).encode()
         ).hexdigest() + ".sources.json"
     )
-    if cache_file.exists() and time.time() - cache_file.stat().st_mtime < 21600:
+
+    if (
+        cache_file.exists()
+        and time.time() - cache_file.stat().st_mtime < 21600
+    ):
         try:
-            return json.loads(cache_file.read_text(encoding="utf-8"))
+            return json.loads(
+                cache_file.read_text(encoding="utf-8")
+            )
         except Exception:
             pass
 
@@ -813,211 +1171,506 @@ def search_all_footage_sources(query):
         ("NASA", nasa_search),
         ("Wikimedia Commons", commons_search),
     ]
+
     combined = []
+
     for source, search_fn in searches:
         try:
             found = search_fn(query)
             combined.extend(found)
+
             if found:
-                print(f"  {source}: {len(found)} candidate(s)")
+                print(
+                    f"  {source}: {len(found)} candidate(s)"
+                )
+
         except Exception as exc:
-            print(f"  {source} search unavailable for '{query}': {exc}")
+            print(
+                f"  {source} search unavailable "
+                f"for '{query}': {exc}"
+            )
+
     try:
-        cache_file.write_text(json.dumps(combined), encoding="utf-8")
+        cache_file.write_text(
+            json.dumps(combined),
+            encoding="utf-8"
+        )
     except Exception:
         pass
+
     return combined
 
 
 STOP_WORDS = {
-    "the", "and", "for", "with", "from", "into", "that", "this", "over", "of",
-    "under", "through", "about", "near", "shot", "video", "aerial",
-    "cinematic", "footage", "drone", "close", "up", "wide", "angle",
-    "slow", "motion", "beautiful", "nature", "scene", "view", "real",
-    "world", "camera", "showing", "moving", "during", "while", "where",
-    "what", "when", "which", "their", "there", "they", "these", "those",
-    "onto", "its", "are", "was", "were", "been", "being", "has",
-    "have", "had", "will", "would", "could", "should", "can", "may",
-    "one", "two", "first", "second", "then", "than", "also", "more",
-    "most", "very", "some", "many", "such", "like", "make", "made",
-    "high", "low", "level", "shot", "shots", "footage", "clip"
+    "the", "and", "for", "with", "from", "into", "that", "this",
+    "over", "of", "under", "through", "about", "near", "video",
+    "cinematic", "footage", "close", "up", "wide", "angle",
+    "slow", "motion", "beautiful", "nature", "scene", "view",
+    "real", "world", "camera", "showing", "moving", "during",
+    "while", "where", "what", "when", "which", "their", "there",
+    "they", "these", "those", "onto", "its", "are", "was",
+    "were", "been", "being", "has", "have", "had", "will",
+    "would", "could", "should", "can", "may", "one", "two",
+    "first", "second", "then", "than", "also", "more", "most",
+    "very", "some", "many", "such", "like", "make", "made",
+    "high", "low", "level", "shot", "shots", "clip"
 }
 
-# Synonym groups bridge the gap between a scene's precise wording and the
-# shorter tags commonly supplied by stock-footage libraries.
+
 CONCEPT_GROUPS = {
-    "rainforest": {"amazon", "rainforest", "jungle", "tropical", "tropics", "equatorial"},
-    "canopy": {"canopy", "treetop", "treetops", "tree", "trees", "foliage", "crown", "leaf", "leaves"},
-    "sunrise": {"sunrise", "sunrise", "dawn", "daybreak", "morning", "sunlight", "sun", "golden", "sunrise"},
-    "forest": {"forest", "woodland", "woods", "timberland", "trees"},
-    "aerial": {"aerial", "drone", "overhead", "topdown", "birdseye", "bird", "eye"},
-    "river": {"river", "rivers", "waterway", "tributary", "stream"},
-    "waterfall": {"waterfall", "falls", "cascade", "cascades"},
-    "wildlife": {"wildlife", "animal", "animals", "fauna"},
-    "bird": {"bird", "birds", "avian", "parrot", "parrots", "macaw", "macaws"},
-    "mountain": {"mountain", "mountains", "mountainous", "peak", "peaks", "alpine"},
-    "ocean": {"ocean", "sea", "marine", "underwater"},
-    "desert": {"desert", "arid", "dunes", "sand"},
+    "rainforest": {
+        "amazon", "rainforest", "jungle",
+        "tropical", "tropics", "equatorial"
+    },
+    "canopy": {
+        "canopy", "treetop", "treetops",
+        "tree", "trees", "foliage", "crown",
+        "leaf", "leaves"
+    },
+    "sunrise": {
+        "sunrise", "dawn", "daybreak", "morning",
+        "sunlight", "sun", "golden"
+    },
+    "forest": {
+        "forest", "woodland", "woods", "timberland", "trees"
+    },
+    "aerial": {
+        "aerial", "drone", "overhead",
+        "topdown", "birdseye", "helicopter", "fromabove"
+    },
+    "river": {
+        "river", "rivers", "waterway", "tributary", "stream"
+    },
+    "waterfall": {
+        "waterfall", "falls", "cascade", "cascades"
+    },
+    "wildlife": {
+        "wildlife", "animal", "animals", "fauna"
+    },
+    "bird": {
+        "bird", "birds", "avian", "parrot",
+        "parrots", "macaw", "macaws"
+    },
+    "mountain": {
+        "mountain", "mountains", "mountainous",
+        "peak", "peaks", "alpine"
+    },
+    "ocean": {
+        "ocean", "sea", "marine", "underwater"
+    },
+    "desert": {
+        "desert", "arid", "dunes", "sand"
+    },
 }
 
-# Reject obvious scene-category conflicts rather than accepting a generic
-# keyword overlap (e.g. a snowy forest for an Amazon rainforest scene).
+
 CONTEXT_CONFLICTS = {
-    "snow_winter": {"snow", "snowy", "winter", "ice", "icy", "frost", "frozen"},
-    "autumn": {"autumn", "fall", "falling", "maple", "orangeleaves"},
-    "underwater": {"underwater", "submarine", "coral", "reef", "fish", "fishes"},
-    "urban": {"urban", "city", "cities", "street", "building", "buildings", "traffic"},
-    "desert": {"desert", "dunes", "arid", "sandstorm"},
+    "snow_winter": {
+        "snow", "snowy", "winter", "ice",
+        "icy", "frost", "frozen"
+    },
+    "autumn": {
+        "autumn", "fall", "falling", "maple", "orangeleaves"
+    },
+    "underwater": {
+        "underwater", "submarine", "coral",
+        "reef", "fish", "fishes"
+    },
+    "urban": {
+        "urban", "city", "cities", "street",
+        "building", "buildings", "traffic"
+    },
+    "desert": {
+        "desert", "dunes", "arid", "sandstorm"
+    },
 }
 
 
 def query_concepts(text):
-    tokens = set(normalize_words(text)) - STOP_WORDS
+    tokens = set(
+        normalize_words(text)
+    ) - STOP_WORDS
+
     concepts = {}
+
     for name, aliases in CONCEPT_GROUPS.items():
         if tokens & aliases:
             concepts[name] = aliases
-    # Keep exact subject terms as their own concepts when no synonym group
-    # already captures them (e.g. jaguar, volcano, glacier, mushroom).
-    covered = set().union(*concepts.values()) if concepts else set()
+
+    covered = (
+        set().union(*concepts.values())
+        if concepts
+        else set()
+    )
+
     for token in tokens - covered:
         if len(token) > 2:
             concepts[f"term:{token}"] = {token}
+
     return tokens, concepts
 
 
 def expand_visual_queries(raw_queries):
-    """Create a few natural search variants without turning them generic."""
+    """Create targeted search variants while preserving shot type."""
     expanded = []
+
     replacements = (
         (r"\bAmazon\b", "tropical rainforest"),
         (r"\bcanopy\b", "treetops"),
         (r"\bsunrise\b", "dawn"),
         (r"\baerial view\b", "drone view"),
     )
+
     for raw in raw_queries:
         base = clean_query(raw)
+
         if not base:
             continue
+
         expanded.append(base)
+
         variant = base
+
         for pattern, replacement in replacements:
-            variant = re.sub(pattern, replacement, variant, flags=re.IGNORECASE)
+            variant = re.sub(
+                pattern,
+                replacement,
+                variant,
+                flags=re.IGNORECASE
+            )
+
         if variant.lower() != base.lower():
-            expanded.append(clean_query(variant))
-        # Search by the core subject too; mood/camera words often are absent
-        # from stock-library tags and should not cause false rejection.
-        mood_camera = {"sunrise", "sunset", "dawn", "dusk", "morning", "evening", "aerial", "drone", "view", "shot", "cinematic"}
+            expanded.append(
+                clean_query(variant)
+            )
+
+        mood_words = {
+            "sunrise", "sunset", "dawn", "dusk",
+            "morning", "evening", "golden",
+            "cinematic", "slow", "motion"
+        }
+
         core_words = [
-            token for token in normalize_words(base)
-            if token not in STOP_WORDS and token not in mood_camera
+            token
+            for token in normalize_words(base)
+            if token not in STOP_WORDS
+            and token not in mood_words
         ]
+
         core = " ".join(core_words).strip()
+
         if core and core.lower() != base.lower():
-            expanded.append(clean_query(core))
-    # Include a grounded rainforest phrase when Amazon/canopy is explicitly
-    # present; this improves recall on stock sites whose tags say jungle/forest.
+            expanded.append(
+                clean_query(core)
+            )
+
     joined = " ".join(expanded).lower()
-    if "amazon" in joined and ("canopy" in joined or "treetop" in joined):
-        expanded.extend(["tropical rainforest treetops", "jungle forest canopy"])
+
+    if (
+        "amazon" in joined
+        and ("canopy" in joined or "treetop" in joined)
+    ):
+        expanded.extend([
+            "Amazon rainforest aerial canopy",
+            "Amazon rainforest drone canopy",
+            "Brazil Amazon rainforest aerial treetops",
+            "tropical rainforest canopy drone view",
+            "Amazon jungle overhead forest canopy",
+        ])
+
     unique = []
+    seen = set()
+
     for item in expanded:
-        if item and item.lower() not in {x.lower() for x in unique}:
+        key = item.lower()
+
+        if item and key not in seen:
             unique.append(item)
-    return unique[:7]
+            seen.add(key)
+
+    return unique[:12]
 
 
 def relevance_score(hit, query, narration):
-    """Semantic-ish metadata score with synonym groups and scene-conflict checks."""
-    metadata = str(hit.get("metadata", "")) + " " + str(hit.get("tags", ""))
-    metadata_tokens = set(normalize_words(metadata))
+    """Score subject, setting and requested shot type from metadata."""
+    metadata = " ".join([
+        str(hit.get("metadata", "")),
+        str(hit.get("tags", "")),
+        str(hit.get("page_url", "")),
+    ])
+
+    metadata_tokens = set(
+        normalize_words(metadata)
+    )
+
     query_tokens, query_groups = query_concepts(query)
     narration_tokens, narration_groups = query_concepts(narration)
+
     if not metadata_tokens or not query_tokens:
         return 0.0, 0, max(1, len(query_groups))
 
     matched_groups = 0
+
     for aliases in query_groups.values():
         if metadata_tokens & aliases:
             matched_groups += 1
-    direct_hits = query_tokens & metadata_tokens
-    group_coverage = matched_groups / max(1, len(query_groups))
-    direct_coverage = len(direct_hits) / max(1, len(query_tokens))
 
-    # Scene narration supplies additional context, but cannot alone validate
-    # a result that has no match to the actual visual query.
-    narration_matches = sum(
-        1 for aliases in narration_groups.values() if metadata_tokens & aliases
+    direct_hits = query_tokens & metadata_tokens
+
+    group_coverage = (
+        matched_groups / max(1, len(query_groups))
     )
-    narration_coverage = narration_matches / max(1, min(6, len(narration_groups)))
+
+    direct_coverage = (
+        len(direct_hits) / max(1, len(query_tokens))
+    )
+
+    narration_matches = sum(
+        1 for aliases in narration_groups.values()
+        if metadata_tokens & aliases
+    )
+
+    narration_coverage = narration_matches / max(
+        1,
+        min(6, len(narration_groups))
+    )
+
+    # Aerial/drone is not interchangeable with a ground-level clip.
+    camera_aliases = CONCEPT_GROUPS.get("aerial", set())
+
+    camera_requested = bool(
+        query_tokens & camera_aliases
+    )
+
+    camera_match = bool(
+        metadata_tokens & camera_aliases
+    )
+
+    camera_bonus = (
+        0.10
+        if camera_requested and camera_match
+        else 0.0
+    )
+
+    camera_penalty = (
+        0.04
+        if camera_requested and not camera_match
+        else 0.0
+    )
 
     context_tokens = query_tokens | narration_tokens
+
     conflicts = 0
+
     for conflict_terms in CONTEXT_CONFLICTS.values():
-        if metadata_tokens & conflict_terms and not context_tokens & conflict_terms:
+        if (
+            metadata_tokens & conflict_terms
+            and not context_tokens & conflict_terms
+        ):
             conflicts += 1
 
-    score = (0.62 * group_coverage) + (0.18 * direct_coverage) + (0.20 * narration_coverage)
+    score = (
+        0.58 * group_coverage
+        + 0.18 * direct_coverage
+        + 0.18 * narration_coverage
+        + camera_bonus
+        - camera_penalty
+    )
+
     if conflicts:
-        score -= min(0.55, 0.30 * conflicts)
-    # Return matched concept groups, not raw word count; synonyms count as a
-    # match, while duplicated words do not inflate the score.
-    return max(0.0, score), matched_groups, max(1, len(query_groups))
+        score -= min(
+            0.55,
+            0.30 * conflicts
+        )
+
+    return (
+        max(0.0, score),
+        matched_groups,
+        max(1, len(query_groups))
+    )
+
+
+def required_visual_anchors(scene):
+    """Return non-mood subject and camera groups from the primary query."""
+    primary = str(
+        scene.get("visual_query", "")
+    )
+
+    _, groups = query_concepts(primary)
+
+    # Sunrise is mood/timing metadata; aerial is a key shot-type anchor.
+    non_subject = {"sunrise"}
+
+    return {
+        name: aliases
+        for name, aliases in groups.items()
+        if name not in non_subject
+    }
+
+
+def candidate_matches_visual_anchors(hit, scene):
+    """Require metadata to support the core scene and shot type."""
+    anchors = required_visual_anchors(scene)
+
+    if not anchors:
+        return True
+
+    metadata = " ".join([
+        str(hit.get("metadata", "")),
+        str(hit.get("tags", "")),
+        str(hit.get("page_url", "")),
+    ])
+
+    tokens = set(
+        normalize_words(metadata)
+    )
+
+    strict_aliases = {
+        "rainforest": {
+            "amazon", "rainforest", "jungle",
+            "tropical", "tropics", "equatorial"
+        },
+        "canopy": {
+            "canopy", "canopies", "treetop",
+            "treetops", "foliage", "crown"
+        },
+        "aerial": {
+            "aerial", "drone", "overhead",
+            "topdown", "birdseye", "helicopter", "fromabove"
+        },
+    }
+
+    matched = 0
+
+    for name, aliases in anchors.items():
+        if name.startswith("term:"):
+            term = name.split(":", 1)[1]
+            has_match = term in tokens
+        else:
+            match_aliases = strict_aliases.get(
+                name,
+                aliases
+            )
+            has_match = bool(
+                tokens & match_aliases
+            )
+
+        if has_match:
+            matched += 1
+
+    required = min(2, len(anchors))
+
+    return matched >= required
 
 
 def tag_similarity(tags_a, tags_b):
     a = set(normalize_words(tags_a))
     b = set(normalize_words(tags_b))
+
     if not a or not b:
         return 0.0
-    return len(a & b) / max(1, len(a | b))
+
+    return len(a & b) / max(
+        1,
+        len(a | b)
+    )
 
 
 def extract_vision_frames(video_path, frame_count=3):
-    """Extract evenly spaced, low-resolution frames for visual inspection."""
+    """Extract evenly spaced frames for visual inspection."""
     duration = ffprobe_duration(video_path)
-    if duration <= 0:
-        raise RuntimeError("Downloaded candidate has no readable video duration.")
 
-    fractions = (0.20, 0.50, 0.80)[:max(2, min(3, frame_count))]
+    if duration <= 0:
+        raise RuntimeError(
+            "Downloaded candidate has no readable video duration."
+        )
+
+    fractions = (
+        0.20,
+        0.50,
+        0.80
+    )[:max(2, min(3, frame_count))]
+
     timestamps = []
+
     for fraction in fractions:
-        timestamp = min(max(0.1, duration * fraction), max(0.1, duration - 0.1))
-        if not timestamps or abs(timestamp - timestamps[-1]) >= 0.05:
+        timestamp = min(
+            max(0.1, duration * fraction),
+            max(0.1, duration - 0.1)
+        )
+
+        if (
+            not timestamps
+            or abs(timestamp - timestamps[-1]) >= 0.05
+        ):
             timestamps.append(timestamp)
 
     frame_paths = []
-    with tempfile.TemporaryDirectory(prefix="footage_vision_") as temp_dir:
+
+    with tempfile.TemporaryDirectory(
+        prefix="footage_vision_"
+    ) as temp_dir:
+
         temp_path = Path(temp_dir)
+
         for index, timestamp in enumerate(timestamps, 1):
             frame_path = temp_path / f"frame_{index:02d}.jpg"
+
             result = subprocess.run(
                 [
-                    "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-                    "-ss", f"{timestamp:.3f}", "-i", str(video_path),
-                    "-frames:v", "1", "-vf", "scale=768:-2",
-                    "-q:v", "5", str(frame_path),
+                    "ffmpeg", "-y",
+                    "-hide_banner",
+                    "-loglevel", "error",
+                    "-ss", f"{timestamp:.3f}",
+                    "-i", str(video_path),
+                    "-frames:v", "1",
+                    "-vf", "scale=768:-2",
+                    "-q:v", "5",
+                    str(frame_path),
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
             )
-            if result.returncode != 0 or not frame_path.exists():
-                detail = (result.stderr or "FFmpeg did not create a frame.").strip()
-                raise RuntimeError(f"Could not extract visual-check frame: {detail[-700:]}")
-            frame_paths.append(frame_path.read_bytes())
+
+            if (
+                result.returncode != 0
+                or not frame_path.exists()
+            ):
+                detail = (
+                    result.stderr
+                    or "FFmpeg did not create a frame."
+                ).strip()
+
+                raise RuntimeError(
+                    f"Could not extract visual-check frame: "
+                    f"{detail[-700:]}"
+                )
+
+            frame_paths.append(
+                frame_path.read_bytes()
+            )
 
     if len(frame_paths) < 2:
-        raise RuntimeError("Not enough readable frames for visual verification.")
+        raise RuntimeError(
+            "Not enough readable frames for visual verification."
+        )
+
     return frame_paths
 
 
 def _parse_visual_verdict(provider, raw_text):
-    """Parse and validate a strict visual-verification JSON response."""
+    """Parse and validate a strict visual-verification response."""
     try:
         verdict = extract_json_object(raw_text)
+
     except Exception as exc:
-        preview = re.sub(r"\s+", " ", str(raw_text or "")).strip()[:350]
+        preview = re.sub(
+            r"\s+",
+            " ",
+            str(raw_text or "")
+        ).strip()[:350]
+
         raise VisionResponseError(
             f"{provider} did not return valid JSON: {exc}; "
             f"response preview={preview!r}"
@@ -1029,37 +1682,50 @@ def _parse_visual_verdict(provider, raw_text):
         )
 
     relevant_value = verdict.get("relevant")
+
     if not isinstance(relevant_value, bool):
         raise VisionResponseError(
             f"{provider} JSON is missing a boolean 'relevant' field."
         )
 
     confidence_value = verdict.get("confidence")
+
     if isinstance(confidence_value, bool):
         raise VisionResponseError(
             f"{provider} returned a boolean instead of numeric confidence."
         )
+
     try:
         confidence = float(confidence_value)
+
     except (TypeError, ValueError) as exc:
         raise VisionResponseError(
             f"{provider} JSON is missing numeric 'confidence'."
         ) from exc
+
     if not 0.0 <= confidence <= 1.0:
         raise VisionResponseError(
             f"{provider} confidence must be between 0 and 1."
         )
 
     reason = re.sub(
-        r"\s+", " ",
-        str(verdict.get("reason", "No visual evidence supplied."))
+        r"\s+",
+        " ",
+        str(
+            verdict.get(
+                "reason",
+                "No visual evidence supplied."
+            )
+        )
     ).strip()
+
     return relevant_value, confidence, reason
 
 
 def _verify_with_gemini(frames, prompt):
     parts = [{"text": prompt}]
-    for frame in frames:
+
+    for frame in frames[:2]:
         parts.append({
             "inline_data": {
                 "mime_type": "image/jpeg",
@@ -1071,14 +1737,18 @@ def _verify_with_gemini(frames, prompt):
         "https://generativelanguage.googleapis.com/v1beta/models/"
         f"{VISION_MODEL}:generateContent"
     )
+
     payload = {
-        "contents": [{"parts": parts}],
+        "contents": [
+            {"parts": parts}
+        ],
         "generationConfig": {
             "responseMimeType": "application/json",
             "temperature": 0.1,
             "maxOutputTokens": 512,
         },
     }
+
     response = post_with_transient_retry(
         url,
         retries=0,
@@ -1086,47 +1756,81 @@ def _verify_with_gemini(frames, prompt):
         json=payload,
         timeout=(15, 55),
     )
+
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
-        raise VisionProviderError("Gemini", response.status_code, detail)
+
+        raise VisionProviderError(
+            "Gemini",
+            response.status_code,
+            detail
+        )
 
     try:
         data = response.json()
+
         raw_text = "\n".join(
             part.get("text", "")
             for part in data["candidates"][0]["content"]["parts"]
             if part.get("text")
         )
+
     except Exception as exc:
         raise VisionResponseError(
             f"Gemini visual verification returned an unreadable payload: "
             f"{exc}; body={response.text[:500]}"
         ) from exc
 
-    return _parse_visual_verdict("Gemini", raw_text)
+    return _parse_visual_verdict(
+        "Gemini",
+        raw_text
+    )
 
 
-def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prompt):
+def _verify_with_openai_compatible_vision(
+    provider,
+    api_key,
+    model,
+    frames,
+    prompt
+):
     if provider == "Groq":
-        url = "https://api.groq.com/openai/v1/chat/completions"
+        url = (
+            "https://api.groq.com/openai/v1/chat/completions"
+        )
+
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
+
     else:
-        url = "https://openrouter.ai/api/v1/chat/completions"
+        url = (
+            "https://openrouter.ai/api/v1/chat/completions"
+        )
+
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": os.getenv(
-                "OPENROUTER_SITE_URL", "https://github.com/"
+                "OPENROUTER_SITE_URL",
+                "https://github.com/"
             ),
             "X-Title": "Auto Documentary Video",
         }
 
-    content = [{"type": "text", "text": prompt}]
+    content = [
+        {
+            "type": "text",
+            "text": prompt
+        }
+    ]
+
     for frame in frames:
-        encoded = base64.b64encode(frame).decode("ascii")
+        encoded = base64.b64encode(
+            frame
+        ).decode("ascii")
+
         content.append({
             "type": "image_url",
             "image_url": {
@@ -1140,47 +1844,29 @@ def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prom
             {
                 "role": "system",
                 "content": (
-                    "You are a strict visual verifier. Return exactly one "
-                    "valid JSON object with keys relevant, confidence, and "
-                    "reason. Do not add markdown or commentary."
+                    "You are a strict documentary footage reviewer. "
+                    "Return exactly one JSON object with relevant, confidence, "
+                    "and reason. Do not add markdown or commentary."
                 ),
             },
-            {"role": "user", "content": content},
+            {
+                "role": "user",
+                "content": content
+            },
         ],
         "temperature": 0.1,
+        "response_format": {
+            "type": "json_object"
+        },
     }
+
     if provider == "Groq":
-        payload["response_format"] = {"type": "json_object"}
-        # Qwen 3.8 supports instruct mode. Turning off reasoning preserves
-        # the small output budget for the JSON verdict itself.
         payload["max_completion_tokens"] = 384
-        payload["reasoning_effort"] = "none"
-        payload["reasoning_format"] = "hidden"
+
     else:
-        # Both fixed OpenRouter vision models support JSON Schema outputs.
-        # Structured output prevents extra prose/fences and validates the shape.
-        payload["max_tokens"] = 1024
-        payload["reasoning"] = {"enabled": False}
-        payload["response_format"] = {
-            "type": "json_schema",
-            "json_schema": {
-                "name": "visual_verdict",
-                "strict": True,
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "relevant": {"type": "boolean"},
-                        "confidence": {
-                            "type": "number",
-                            "minimum": 0,
-                            "maximum": 1,
-                        },
-                        "reason": {"type": "string"},
-                    },
-                    "required": ["relevant", "confidence", "reason"],
-                    "additionalProperties": False,
-                },
-            },
+        payload["max_tokens"] = 768
+        payload["reasoning"] = {
+            "enabled": False
         }
 
     response = post_with_transient_retry(
@@ -1190,227 +1876,369 @@ def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prom
         json=payload,
         timeout=(15, 65),
     )
+
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
-        raise VisionProviderError(provider, response.status_code, detail)
+
+        raise VisionProviderError(
+            provider,
+            response.status_code,
+            detail
+        )
 
     try:
         data = response.json()
+
         message = data["choices"][0]["message"]
         message_content = message.get("content")
+
         if isinstance(message_content, list):
             text_parts = []
+
             for item in message_content:
                 if isinstance(item, str):
                     text_parts.append(item)
-                elif isinstance(item, dict) and item.get("text"):
-                    text_parts.append(str(item["text"]))
+
+                elif (
+                    isinstance(item, dict)
+                    and item.get("text")
+                ):
+                    text_parts.append(
+                        str(item["text"])
+                    )
+
             raw_text = "\n".join(text_parts).strip()
+
         else:
-            raw_text = str(message_content or "").strip()
+            raw_text = str(
+                message_content or ""
+            ).strip()
 
         if not raw_text:
             choice = data.get("choices", [{}])[0]
-            finish_reason = choice.get("finish_reason")
-            actual_model = data.get("model", model)
-            actual_provider = data.get("provider", "unknown")
             usage = data.get("usage", {})
-            completion_details = usage.get("completion_tokens_details", {})
-            reasoning_tokens = completion_details.get("reasoning_tokens")
+
             raise ValueError(
-                "The model returned empty message content "
-                f"(model={actual_model!r}, provider={actual_provider!r}, "
-                f"finish_reason={finish_reason!r}, "
-                f"completion_tokens={usage.get('completion_tokens')!r}, "
-                f"reasoning_tokens={reasoning_tokens!r})."
+                "Empty response content "
+                f"(model={data.get('model', model)!r}, "
+                f"finish_reason={choice.get('finish_reason')!r}, "
+                f"completion_tokens={usage.get('completion_tokens')!r})."
             )
-    except VisionResponseError:
-        raise
+
     except Exception as exc:
         raise VisionResponseError(
             f"{provider} visual verification returned an unreadable response: "
             f"{exc}; body={response.text[:500]}"
         ) from exc
 
-    return _parse_visual_verdict(provider, raw_text)
+    return _parse_visual_verdict(
+        provider,
+        raw_text
+    )
 
 
 def _provider_retry_delay(error_text, default_seconds=60):
-    """Read retry timing from provider error bodies such as 'try again in 53s'."""
+    """Read retry timing from common rate-limit messages."""
     text = str(error_text or "")
+
     patterns = (
         r"try again in\s*([0-9]+(?:\.[0-9]+)?)\s*s",
         r"retry[- ]after[\s:=]+([0-9]+(?:\.[0-9]+)?)",
     )
+
     for pattern in patterns:
-        match = re.search(pattern, text, flags=re.IGNORECASE)
+        match = re.search(
+            pattern,
+            text,
+            flags=re.IGNORECASE
+        )
+
         if match:
             try:
-                return max(5, min(180, float(match.group(1))))
+                return max(
+                    5,
+                    min(180, float(match.group(1)))
+                )
             except ValueError:
                 pass
+
     return float(default_seconds)
 
 
-def _provider_on_cooldown(provider_id):
-    until = VISION_PROVIDER_COOLDOWN_UNTIL.get(provider_id, 0.0)
-    remaining = until - time.monotonic()
-    return max(0.0, remaining)
+def _provider_cooldown_remaining(provider_id):
+    return max(
+        0.0,
+        VISION_PROVIDER_COOLDOWN_UNTIL.get(
+            provider_id,
+            0.0
+        ) - time.monotonic(),
+    )
 
 
-def verify_footage_visually(video_path, scene, query):
-    """Verify using Groq, two fixed OpenRouter vision models, then Gemini."""
-    frames = extract_vision_frames(video_path, frame_count=3)
+def verify_footage_visually(
+    video_path,
+    scene,
+    query,
+    candidate_metadata=""
+):
+    """Verify the shot visually, using catalog metadata for provenance."""
+    frames = extract_vision_frames(
+        video_path,
+        frame_count=3
+    )
+
+    metadata_context = re.sub(
+        r"\s+",
+        " ",
+        str(candidate_metadata or "")
+    ).strip()[:1200]
+
     prompt = f"""You are a strict documentary footage verifier.
-Inspect the attached video frames sampled from one candidate clip.
+Inspect the attached frames sampled from one candidate video clip.
 
 SCENE VISUAL QUERY: {query}
 SCENE NARRATION: {scene.get('narration', '')}
+SOURCE CATALOG METADATA: {metadata_context or 'Not supplied'}
 
-Decide whether the actual visible content in these frames is a close match
-for the specific subject and setting requested. Do not infer objects,
-animals, locations, weather, camera angles, or actions that are not visibly
-supported by the frames. Generic scenery is NOT a match for a specific
-subject. A forest is not automatically an Amazon rainforest; trees are not
-a canopy aerial; hills are not tree roots; and greenery is not evidence of
-wildlife or rain.
+IMPORTANT DISTINCTION:
+- Judge visible subject, composition, environment and camera viewpoint from the images.
+- Use explicit source catalog metadata as supporting provenance for geographic identity.
+- Do NOT demand that an image visually proves an exact country, river basin, or rainforest name. A genuine Amazon rainforest clip cannot always be distinguished geographically from another tropical rainforest by pixels alone.
+- However, metadata alone cannot turn an unrelated image into a match. The visible footage must still show the requested type of scene.
 
-Return ONLY JSON with this exact structure:
-{{"relevant": true, "confidence": 0.0, "reason": "brief visible evidence"}}
+VISUAL MATCH RULES:
+- If the query asks for an aerial/drone canopy view, the frames must show a broad overhead view of dense forest treetops. A ground-level path, close-up leaves, isolated branches, hills, or a stylized animation is not a match.
+- If source metadata explicitly identifies Amazon rainforest and the frames visibly show dense tropical forest canopy from above, do not reject merely because the exact Amazon location cannot be recognized visually.
+- Treat the visual query as the primary shot requirement. The narration provides context, but do not require every fact in the narration to appear in one clip.
+- Do not infer actions or objects that are not visible. If the frames contradict the requested shot, reject.
 
-Set relevant=true only when the visible evidence clearly supports the main
-subject and essential context of the query/narration. If uncertain, vague,
-partially matching, or contradictory, set relevant=false. Confidence must
-be a number from 0 to 1 and reflect visual evidence, not guesswork."""
+Return ONLY JSON:
+{{"relevant": true, "confidence": 0.0, "reason": "brief visible evidence and metadata basis"}}
+
+Set relevant=true only when the visual composition is a genuine match and source metadata supports any specific geographic claim. If uncertain about the actual shot, set false. Confidence must be a number from 0 to 1."""
 
     providers = []
+
     if GROQ_KEY:
-        # Groq bills Qwen 3.8 vision input at 2048 tokens per image. Sending
-        # one representative middle frame (instead of three) materially lowers
-        # TPM consumption so the backup is not triggered on every second clip.
-        groq_frame = [frames[len(frames) // 2]]
+        # One representative frame reduces Groq TPM consumption.
+        groq_frames = [
+            frames[len(frames) // 2]
+        ]
+
         providers.append((
             "Groq",
             "Groq",
             lambda: _verify_with_openai_compatible_vision(
-                "Groq", GROQ_KEY, GROQ_VISION_MODEL, groq_frame, prompt
+                "Groq",
+                GROQ_KEY,
+                GROQ_VISION_MODEL,
+                groq_frames,
+                prompt
             ),
         ))
 
     if OPENROUTER_KEY:
-        openrouter_models = []
+        models = []
+
         for model_name in (
             OPENROUTER_VISION_MODEL,
             OPENROUTER_VISION_FALLBACK_MODEL,
         ):
-            if model_name and model_name not in openrouter_models:
-                openrouter_models.append(model_name)
-        for model_name in openrouter_models:
-            provider_id = f"OpenRouter::{model_name}"
+            if (
+                model_name
+                and model_name not in models
+            ):
+                models.append(model_name)
+
+        openrouter_frames = (
+            [frames[0], frames[-1]]
+            if len(frames) > 1
+            else frames
+        )
+
+        for model_name in models:
+            route_id = f"OpenRouter::{model_name}"
+
             providers.append((
-                provider_id,
+                route_id,
                 f"OpenRouter ({model_name})",
-                lambda model_name=model_name: _verify_with_openai_compatible_vision(
-                    "OpenRouter", OPENROUTER_KEY, model_name, frames, prompt
+                lambda model_name=model_name: (
+                    _verify_with_openai_compatible_vision(
+                        "OpenRouter",
+                        OPENROUTER_KEY,
+                        model_name,
+                        openrouter_frames,
+                        prompt
+                    )
                 ),
             ))
 
     if GEMINI_KEY:
+        gemini_frames = (
+            [frames[0], frames[-1]]
+            if len(frames) > 1
+            else frames
+        )
+
         providers.append((
             "Gemini",
             f"Gemini ({VISION_MODEL})",
-            lambda: _verify_with_gemini(frames, prompt),
+            lambda: _verify_with_gemini(
+                gemini_frames,
+                prompt
+            ),
         ))
 
     errors = []
     attempted = 0
+
     for provider_id, provider_name, verify in providers:
         if provider_id in VISION_DISABLED_PROVIDERS:
             print(
-                f"Visual verifier: skipping {provider_name}; this route "
-                "was disabled after an earlier hard error."
+                f"Visual verifier: skipping {provider_name}; "
+                "route disabled after a hard error."
             )
             continue
 
-        cooldown = _provider_on_cooldown(provider_id)
+        cooldown = _provider_cooldown_remaining(
+            provider_id
+        )
+
         if cooldown > 0:
             print(
                 f"Visual verifier: {provider_name} cooling down for "
-                f"{cooldown:.0f}s; using the next backup."
+                f"{cooldown:.0f}s; trying the next backup."
             )
             continue
 
         attempted += 1
-        print(f"Visual verifier: trying {provider_name}...")
+
+        print(
+            f"Visual verifier: trying {provider_name}..."
+        )
+
         try:
             relevant, confidence, reason = verify()
-            accepted = relevant and confidence >= VISION_MIN_CONFIDENCE
+
+            accepted = (
+                relevant
+                and confidence >= VISION_MIN_CONFIDENCE
+            )
+
             print(
                 f"Visual verifier: {provider_name} returned "
                 f"{'PASS' if accepted else 'REJECT'} "
                 f"({confidence:.2f})."
             )
-            return accepted, confidence, reason, provider_name
+
+            return (
+                accepted,
+                confidence,
+                reason,
+                provider_name
+            )
 
         except VisionProviderError as exc:
             errors.append(str(exc))
+
             if exc.status_code == 429:
-                delay = _provider_retry_delay(str(exc))
-                VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = (
-                    time.monotonic() + delay
+                delay = _provider_retry_delay(
+                    str(exc)
                 )
+
+                VISION_PROVIDER_COOLDOWN_UNTIL[
+                    provider_id
+                ] = time.monotonic() + delay
+
                 print(
                     f"Visual verifier {provider_name} rate-limited; "
                     f"cooling this route for {delay:.0f}s and switching backup."
                 )
-            elif exc.status_code in (400, 401, 403, 404, 413, 415, 422):
-                VISION_DISABLED_PROVIDERS.add(provider_id)
+
+            elif exc.status_code in (
+                400, 401, 403, 404, 413, 415, 422
+            ):
+                VISION_DISABLED_PROVIDERS.add(
+                    provider_id
+                )
+
                 print(
-                    f"Visual verifier {provider_name} has a hard configuration "
-                    f"error (HTTP {exc.status_code}); disabling only this route."
+                    f"Visual verifier {provider_name} has a hard "
+                    f"configuration error (HTTP {exc.status_code}); "
+                    "disabling this route."
                 )
+
             else:
-                VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = (
-                    time.monotonic() + 20
-                )
+                VISION_PROVIDER_COOLDOWN_UNTIL[
+                    provider_id
+                ] = time.monotonic() + 20
+
                 print(
                     f"Visual verifier {provider_name} unavailable: "
-                    f"{str(exc)[:450]}. Short cooldown; trying backup."
+                    f"{str(exc)[:450]}"
                 )
 
         except VisionResponseError as exc:
             errors.append(str(exc))
-            VISION_DISABLED_PROVIDERS.add(provider_id)
+
+            VISION_DISABLED_PROVIDERS.add(
+                provider_id
+            )
+
             print(
                 f"Visual verifier {provider_name} returned unusable output: "
-                f"{str(exc)[:500]}. Disabling only this route."
+                f"{str(exc)[:450]}. Disabling this route."
             )
 
         except requests.exceptions.Timeout as exc:
-            errors.append(f"{provider_name}: timeout: {exc}")
-            VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = time.monotonic() + 30
+            errors.append(
+                f"{provider_name}: timeout: {exc}"
+            )
+
+            VISION_PROVIDER_COOLDOWN_UNTIL[
+                provider_id
+            ] = time.monotonic() + 30
+
             print(
-                f"Visual verifier {provider_name} timed out; switching to backup."
+                f"Visual verifier {provider_name} timed out; "
+                "switching backup."
             )
 
         except Exception as exc:
-            errors.append(f"{provider_name}: {exc}")
-            VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = time.monotonic() + 20
+            errors.append(
+                f"{provider_name}: {exc}"
+            )
+
+            VISION_PROVIDER_COOLDOWN_UNTIL[
+                provider_id
+            ] = time.monotonic() + 20
+
             print(
-                f"Visual verifier {provider_name} failed: {str(exc)[:450]}. "
-                "Switching to backup."
+                f"Visual verifier {provider_name} failed: "
+                f"{str(exc)[:450]}"
             )
 
     if not providers:
-        detail = "No visual AI credentials are configured."
+        detail = (
+            "No visual AI credentials are configured."
+        )
+
     elif attempted == 0:
-        detail = "All configured visual AI routes are disabled or cooling down."
+        detail = (
+            "All visual AI routes are disabled or cooling down."
+        )
+
     elif not errors:
-        detail = "No provider produced a usable visual-verification response."
+        detail = (
+            "No provider produced a usable visual-verification response."
+        )
+
     else:
         detail = " | ".join(errors)
+
     raise VisionVerificationError(
-        "All visual verification routes failed for this candidate. " + detail
+        "All visual verification routes failed for this candidate. "
+        + detail
     )
 
 
@@ -1420,16 +2248,30 @@ def fetch_footage(plan):
     selected_tag_sets = []
 
     visual_provider_names = []
+
     if GROQ_KEY:
-        visual_provider_names.append(f"Groq ({GROQ_VISION_MODEL})")
+        visual_provider_names.append(
+            f"Groq ({GROQ_VISION_MODEL})"
+        )
+
     if OPENROUTER_KEY:
-        visual_provider_names.append(f"OpenRouter ({OPENROUTER_VISION_MODEL})")
-        if OPENROUTER_VISION_FALLBACK_MODEL != OPENROUTER_VISION_MODEL:
+        visual_provider_names.append(
+            f"OpenRouter ({OPENROUTER_VISION_MODEL})"
+        )
+
+        if (
+            OPENROUTER_VISION_FALLBACK_MODEL
+            != OPENROUTER_VISION_MODEL
+        ):
             visual_provider_names.append(
-                f"OpenRouter fallback ({OPENROUTER_VISION_FALLBACK_MODEL})"
+                "OpenRouter fallback "
+                f"({OPENROUTER_VISION_FALLBACK_MODEL})"
             )
+
     if GEMINI_KEY:
-        visual_provider_names.append(f"Gemini ({VISION_MODEL})")
+        visual_provider_names.append(
+            f"Gemini ({VISION_MODEL})"
+        )
 
     if VISION_REQUIRED and not visual_provider_names:
         raise RuntimeError(
@@ -1437,11 +2279,13 @@ def fetch_footage(plan):
             "GEMINI_API_KEY, GROQ_API_KEY, or OPENROUTER_API_KEY under "
             "GitHub Settings > Secrets and variables > Actions."
         )
+
     if not visual_provider_names:
         print(
             "WARNING: FOOTAGE_VISION_REQUIRED=false and no visual AI keys "
             "are configured; using metadata-only footage checks."
         )
+
     else:
         print(
             "Visual verification enabled with automatic failover: "
@@ -1451,104 +2295,263 @@ def fetch_footage(plan):
 
     for i, scene in enumerate(plan["scenes"], 1):
         scene["visual_type"] = "footage"
-        raw_queries = [scene.get("visual_query", "")]
-        raw_queries.extend(list(scene.get("visual_queries", [])[:2]))
-        queries = expand_visual_queries(raw_queries)
+
+        raw_queries = [
+            scene.get("visual_query", "")
+        ]
+
+        raw_queries.extend(
+            list(scene.get("visual_queries", [])[:2])
+        )
+
+        queries = expand_visual_queries(
+            raw_queries
+        )
 
         candidates = {}
+
+        required_anchors = required_visual_anchors(
+            scene
+        )
+
+        if required_anchors:
+            print(
+                f"Scene {i}: metadata anchors required: "
+                + ", ".join(required_anchors.keys())
+            )
+
         for query in queries:
             for hit in search_all_footage_sources(query):
-                identity = f"{hit.get('source')}:{hit.get('id')}"
-                if not hit.get("url") or identity in used_ids:
+                identity = (
+                    f"{hit.get('source')}:{hit.get('id')}"
+                )
+
+                if (
+                    not hit.get("url")
+                    or identity in used_ids
+                ):
                     continue
-                width = int(hit.get("width") or 0)
-                duration = float(hit.get("duration") or 0)
+
+                if not candidate_matches_visual_anchors(
+                    hit,
+                    scene
+                ):
+                    continue
+
+                width = int(
+                    hit.get("width") or 0
+                )
+
+                duration = float(
+                    hit.get("duration") or 0
+                )
+
                 if width and width < MIN_CLIP_WIDTH:
                     continue
+
                 if duration and duration < 4:
                     continue
+
                 score, matched, total = relevance_score(
-                    hit, query, scene.get("narration", "")
+                    hit,
+                    query,
+                    scene.get("narration", "")
                 )
-                required = 1 if total <= 1 else 2
-                if matched < required or score < 0.40:
+
+                required = (
+                    1 if total <= 1 else 2
+                )
+
+                # Anchors are the hard gate; score ranks the remaining pool.
+                if (
+                    matched < required
+                    or score < 0.32
+                ):
                     continue
-                metadata_tokens = set(normalize_words(
-                    str(hit.get("metadata", "")) + " " + str(hit.get("tags", ""))
-                ))
-                scene_context = set(normalize_words(scene.get("narration", "")))
+
+                metadata_tokens = set(
+                    normalize_words(
+                        str(hit.get("metadata", ""))
+                        + " "
+                        + str(hit.get("tags", ""))
+                    )
+                )
+
+                scene_context = set(
+                    normalize_words(
+                        scene.get("narration", "")
+                    )
+                )
+
                 if (
                     metadata_tokens & CONTEXT_CONFLICTS["snow_winter"]
                     and not scene_context & CONTEXT_CONFLICTS["snow_winter"]
                 ):
                     continue
+
                 if (
                     metadata_tokens & CONTEXT_CONFLICTS["underwater"]
                     and not scene_context & CONTEXT_CONFLICTS["underwater"]
                 ):
                     continue
-                tags = str(hit.get("tags") or hit.get("metadata") or "")
-                similarity = max(
-                    [tag_similarity(tags, old) for old in selected_tag_sets] or [0.0]
+
+                tags = str(
+                    hit.get("tags")
+                    or hit.get("metadata")
+                    or ""
                 )
+
+                similarity = max(
+                    [
+                        tag_similarity(tags, old)
+                        for old in selected_tag_sets
+                    ] or [0.0]
+                )
+
                 if similarity > 0.78:
                     continue
-                previous = candidates.get(identity)
-                if previous is None or score > previous[0]:
-                    candidates[identity] = (score, hit, query, matched, total)
 
-        ranked = sorted(candidates.values(), key=lambda item: item[0], reverse=True)
-        print(
-            f"Scene {i}: {len(candidates)} metadata-qualified candidate(s) "
-            f"across {len(queries)} search variants."
+                previous = candidates.get(identity)
+
+                if (
+                    previous is None
+                    or score > previous[0]
+                ):
+                    candidates[identity] = (
+                        score,
+                        hit,
+                        query,
+                        matched,
+                        total
+                    )
+
+        ranked = sorted(
+            candidates.values(),
+            key=lambda item: item[0],
+            reverse=True
         )
+
+        print(
+            f"Scene {i}: {len(candidates)} metadata-qualified "
+            f"candidate(s) across {len(queries)} search variants; "
+            f"checking up to "
+            f"{min(len(ranked), VISION_CANDIDATE_LIMIT)} candidates."
+        )
+
+        # Log the top candidates so the next run shows why they ranked highly.
+        for preview_index, preview_item in enumerate(
+            ranked[:5],
+            1
+        ):
+            (
+                preview_score,
+                preview_hit,
+                preview_query,
+                preview_matched,
+                preview_total
+            ) = preview_item
+
+            print(
+                f"  Candidate rank {preview_index}: "
+                f"{preview_hit.get('source')} "
+                f"ID={preview_hit.get('id')} "
+                f"score={preview_score:.2f} "
+                f"match={preview_matched}/{preview_total} "
+                f"metadata={str(preview_hit.get('metadata') or preview_hit.get('tags') or '')[:160]}"
+            )
+
         destination = FOOT / f"scene_{i:02d}.mp4"
+
         download_errors = []
         selected = None
         checked = 0
 
-        # Metadata only narrows the search. A vision-capable AI provider
-        # must confirm the sampled images in strict mode.
-        for score, hit, query, matched, total in ranked[:VISION_CANDIDATE_LIMIT]:
+        for (
+            score,
+            hit,
+            query,
+            matched,
+            total
+        ) in ranked[:VISION_CANDIDATE_LIMIT]:
+
             checked += 1
+
             try:
-                download_stream(hit["url"], destination)
+                download_stream(
+                    hit["url"],
+                    destination
+                )
+
                 if visual_provider_names:
-                    visually_relevant, confidence, visual_reason, vision_provider = (
-                        verify_footage_visually(destination, scene, query)
+                    candidate_metadata = " | ".join([
+                        str(hit.get("metadata", "")),
+                        str(hit.get("tags", "")),
+                    ])
+
+                    (
+                        visually_relevant,
+                        confidence,
+                        visual_reason,
+                        vision_provider
+                    ) = verify_footage_visually(
+                        destination,
+                        scene,
+                        query,
+                        candidate_metadata
                     )
+
                     print(
                         f"Scene {i}: visual check {checked}/"
-                        f"{min(len(ranked), VISION_CANDIDATE_LIMIT)} via "
-                        f"{vision_provider} — "
+                        f"{min(len(ranked), VISION_CANDIDATE_LIMIT)} "
+                        f"via {vision_provider} — "
                         f"{'PASS' if visually_relevant else 'REJECT'} "
-                        f"({confidence:.2f}): {visual_reason[:220]}"
+                        f"({confidence:.2f}): "
+                        f"{visual_reason[:220]}"
                     )
+
                     if not visually_relevant:
-                        destination.unlink(missing_ok=True)
+                        destination.unlink(
+                            missing_ok=True
+                        )
                         continue
+
                 else:
                     confidence = None
                     vision_provider = "Metadata-only"
-                    visual_reason = "Metadata-only fallback explicitly enabled."
+                    visual_reason = (
+                        "Metadata-only fallback explicitly enabled."
+                    )
 
                 selected = (
-                    score, hit, query, matched, total,
-                    confidence, visual_reason, vision_provider,
+                    score,
+                    hit,
+                    query,
+                    matched,
+                    total,
+                    confidence,
+                    visual_reason,
+                    vision_provider,
                 )
+
                 break
+
             except Exception as exc:
                 message = str(exc)
+
                 download_errors.append(
-                    f"{hit.get('source')} {hit.get('id')}: {message}"
+                    f"{hit.get('source')} "
+                    f"{hit.get('id')}: {message}"
                 )
+
                 print(
                     f"Scene {i}: candidate rejected/skipped "
                     f"({hit.get('source')}): {message[:350]}"
                 )
-                destination.unlink(missing_ok=True)
-                # If every configured vision provider fails, stop this workflow
-                # rather than repeatedly sending doomed requests for new clips.
+
+                destination.unlink(
+                    missing_ok=True
+                )
+
                 if isinstance(exc, VisionVerificationError):
                     raise RuntimeError(
                         "Visual verification cannot continue after automatic "
@@ -1557,59 +2560,126 @@ def fetch_footage(plan):
 
         if selected is None:
             if not ranked:
-                reason = "No candidate passed the metadata relevance filter."
-            elif checked >= VISION_CANDIDATE_LIMIT:
                 reason = (
-                    f"None of the first {checked} metadata-ranked candidates "
-                    "passed visual verification or downloaded successfully."
+                    "No candidate passed the metadata relevance filter."
                 )
+
+            elif checked >= min(
+                len(ranked),
+                VISION_CANDIDATE_LIMIT
+            ):
+                reason = (
+                    f"None of the {checked} candidates checked from "
+                    f"{len(ranked)} metadata-ranked candidates passed "
+                    "visual verification or downloaded successfully."
+                )
+
             else:
-                reason = "No candidate could be downloaded and visually verified."
+                reason = (
+                    "No candidate could be downloaded and visually verified."
+                )
+
             if download_errors:
-                reason += " Details: " + " | ".join(download_errors[:4])
+                reason += (
+                    " Details: "
+                    + " | ".join(download_errors[:4])
+                )
+
             raise RuntimeError(
-                f"Scene {i} could not obtain verified relevant footage. {reason} "
-                f"Queries tried: {queries}. No unrelated footage or diagram will be substituted."
+                f"Scene {i} could not obtain verified relevant footage. "
+                f"{reason} Queries tried: {queries}. "
+                "No unrelated footage or diagram will be substituted."
             )
 
         (
-            score, hit, query, matched, total,
-            vision_confidence, vision_reason, vision_provider,
+            score,
+            hit,
+            query,
+            matched,
+            total,
+            vision_confidence,
+            vision_reason,
+            vision_provider,
         ) = selected
-        identity = f"{hit.get('source')}:{hit.get('id')}"
+
+        identity = (
+            f"{hit.get('source')}:{hit.get('id')}"
+        )
+
         used_ids.add(identity)
-        selected_tag_sets.append(str(hit.get("tags") or hit.get("metadata") or ""))
+
+        selected_tag_sets.append(
+            str(
+                hit.get("tags")
+                or hit.get("metadata")
+                or ""
+            )
+        )
+
         scene["media_file"] = str(destination)
         scene["visual_type"] = "footage"
         scene["selected_footage_source"] = hit.get("source")
-        scene["selected_footage_tags"] = hit.get("tags") or hit.get("metadata", "")
-        scene["selected_footage_url"] = hit.get("page_url", "")
+        scene["selected_footage_tags"] = (
+            hit.get("tags")
+            or hit.get("metadata", "")
+        )
+        scene["selected_footage_url"] = hit.get(
+            "page_url",
+            ""
+        )
+
         scene["visual_verification"] = {
-            "method": f"{vision_provider} Vision" if vision_confidence is not None else "metadata-only fallback",
+            "method": (
+                f"{vision_provider} Vision"
+                if vision_confidence is not None
+                else "metadata-only fallback"
+            ),
             "confidence": vision_confidence,
             "reason": vision_reason,
             "query": query,
         }
+
         vision_credit = (
-            f" | Visual verification: {vision_provider} {vision_confidence:.2f} — {vision_reason}"
+            f" | Visual verification: "
+            f"{vision_provider} {vision_confidence:.2f} — "
+            f"{vision_reason}"
             if vision_confidence is not None
-            else " | Visual verification: disabled (metadata-only fallback)"
+            else (
+                " | Visual verification: disabled "
+                "(metadata-only fallback)"
+            )
         )
+
         credits.append(
-            f"Scene {i} | {hit.get('source')} | Creator: {hit.get('creator', 'Unknown')} | "
+            f"Scene {i} | {hit.get('source')} | "
+            f"Creator: {hit.get('creator', 'Unknown')} | "
             f"Source: {hit.get('page_url', '')} | "
-            f"Metadata relevance: {score:.2f} ({matched}/{total} query concepts)"
-            f"{vision_credit} | License: {hit.get('license', 'Check source page')}"
+            f"Metadata relevance: {score:.2f} "
+            f"({matched}/{total} query concepts)"
+            f"{vision_credit} | "
+            f"License: {hit.get('license', 'Check source page')}"
         )
+
         print(
-            f"Scene {i}: accepted {hit.get('source')} metadata={score:.2f}, "
-            f"visual confidence={vision_confidence if vision_confidence is not None else 'not checked'} — "
+            f"Scene {i}: accepted {hit.get('source')} "
+            f"metadata={score:.2f}, "
+            f"visual confidence="
+            f"{vision_confidence if vision_confidence is not None else 'not checked'} — "
             f"{str(hit.get('metadata', ''))[:140]}"
         )
 
-    Path("credits.txt").write_text("\n".join(credits) + "\n", encoding="utf-8")
+    Path("credits.txt").write_text(
+        "\n".join(credits) + "\n",
+        encoding="utf-8"
+    )
+
     Path("plan.json").write_text(
-        json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8"
+        json.dumps(
+            plan,
+            indent=2,
+            ensure_ascii=False
+        ),
+        encoding="utf-8"
     )
 
 
@@ -1618,7 +2688,10 @@ def fetch_footage(plan):
 # ============================================================
 
 def ass_time(seconds):
-    ticks = max(0, int(round(seconds * 100)))
+    ticks = max(
+        0,
+        int(round(seconds * 100))
+    )
 
     return (
         f"{ticks // 360000}:"
@@ -1630,7 +2703,6 @@ def ass_time(seconds):
 
 def build_voice_and_subs(script):
     """Sentence-level TTS with deliberate pauses and word timing."""
-
     sentences = split_sentences(script)
 
     if not sentences:
@@ -1644,7 +2716,6 @@ def build_voice_and_subs(script):
         wav_parts = []
         cursor = 0.0
 
-        # Visual-only opening before the narrator starts.
         opening_silence = OUT / "opening_silence.wav"
 
         run([
@@ -1660,7 +2731,6 @@ def build_voice_and_subs(script):
         cursor += OPENING_LEAD
 
         for index, sentence in enumerate(sentences):
-
             rate_values = [
                 BASE_RATE, "-5%", "-3%", "-4%"
             ]
@@ -1677,14 +2747,17 @@ def build_voice_and_subs(script):
             communicate = edge_tts.Communicate(
                 sentence,
                 VOICE,
-                rate=rate_values[index % len(rate_values)],
-                pitch=pitch_values[index % len(pitch_values)],
+                rate=rate_values[
+                    index % len(rate_values)
+                ],
+                pitch=pitch_values[
+                    index % len(pitch_values)
+                ],
                 boundary="WordBoundary"
             )
 
             with open(mp3_path, "wb") as f:
                 async for message in communicate.stream():
-
                     if message["type"] == "audio":
                         f.write(message["data"])
 
@@ -1735,7 +2808,8 @@ def build_voice_and_subs(script):
             })
 
             gap = (
-                HOOK_GAP if index == 0
+                HOOK_GAP
+                if index == 0
                 else SENTENCE_GAP
             )
 
@@ -1753,11 +2827,9 @@ def build_voice_and_subs(script):
             wav_parts.append(silence)
             cursor += gap
 
-        # Remove the final ordinary sentence gap.
         last_gap = wav_parts.pop()
         last_gap.unlink(missing_ok=True)
 
-        # Replace it with a longer visual ending hold.
         ending = OUT / "ending_hold.wav"
 
         run([
@@ -1772,7 +2844,8 @@ def build_voice_and_subs(script):
         wav_parts.append(ending)
 
         total_duration = sum(
-            ffprobe_duration(p) for p in wav_parts
+            ffprobe_duration(p)
+            for p in wav_parts
         )
 
         concat = OUT / "voice_concat.txt"
@@ -1804,7 +2877,6 @@ def build_voice_and_subs(script):
             str(OUT / "voiceover.mp3")
         ])
 
-        # Word-timed subtitle groups.
         groups = []
         current = []
 
@@ -1813,7 +2885,10 @@ def build_voice_and_subs(script):
 
             if (
                 len(current) >= 5
-                or re.search(r'[.!?]["\']?$', event["text"])
+                or re.search(
+                    r'[.!?]["\']?$',
+                    event["text"]
+                )
             ):
                 groups.append(current)
                 current = []
@@ -1888,17 +2963,16 @@ def build_voice_and_subs(script):
 # SCENE TIMING
 # ============================================================
 
-def scene_durations(plan, sentence_events, total_duration):
-    """
-    Each scene owns the pause after its last sentence.
-    No more equal-duration scene splitting.
-    """
-
+def scene_durations(
+    plan,
+    sentence_events,
+    total_duration
+):
+    """Each scene owns the pause after its last sentence."""
     result = []
 
     for index, scene in enumerate(plan["scenes"]):
         start_i = scene["sentence_start"]
-
         start = sentence_events[start_i]["start"]
 
         if index + 1 < len(plan["scenes"]):
@@ -1916,9 +2990,12 @@ def scene_durations(plan, sentence_events, total_duration):
                 "Invalid scene timing generated from sentence map."
             )
 
-        result.append((start, end, end-start))
+        result.append((
+            start,
+            end,
+            end - start
+        ))
 
-    # Show the opening visual during the lead-in silence.
     first_end = result[0][1]
 
     result[0] = (
@@ -1958,6 +3035,7 @@ def render_footage_scene(
 
     if hook_text:
         hook_file = OUT / "hook.txt"
+
         hook_file.write_text(
             hook_text,
             encoding="utf-8"
@@ -2013,7 +3091,6 @@ def render(plan, sentence_events, total_duration):
         duration = max(0.8, duration)
 
         output = OUT / f"segment_{i:02d}.mp4"
-
         source = scene.get("media_file")
 
         if source and Path(source).exists():
@@ -2036,7 +3113,8 @@ def render(plan, sentence_events, total_duration):
         else:
             raise RuntimeError(
                 f"Scene {i} has no approved real-world footage. "
-                "Rendering stopped rather than substituting a diagram or unrelated visual."
+                "Rendering stopped rather than substituting a diagram "
+                "or unrelated visual."
             )
 
         segment_files.append(output)
