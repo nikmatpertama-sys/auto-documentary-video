@@ -91,3 +91,8 @@ Important Notes
 - "credits.txt" records selected sources where available.
 - API quotas and provider availability may affect generation.
 - Always verify the generated MP4 before publishing.
+
+## Narration duration safety
+The generator measures the rendered voice-over audio, rather than relying only on the script word count. If the measured narration falls slightly outside 70-90 seconds, it applies a small pitch-preserving FFmpeg `atempo` adjustment toward 71 or 89 seconds. Word subtitle timing and sentence/scene timing are scaled by the measured audio-duration change. Large deviations requiring an `atempo` value outside 0.85-1.15 are rejected rather than distorted.
+
+Narration is generated and duration-checked before footage searches begin, so an invalid voice-over does not waste footage API calls. Footage sources that return HTTP 401, 403, or 429 are disabled for the remainder of that run to prevent repeated failed requests.

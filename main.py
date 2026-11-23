@@ -22,6 +22,8 @@ from ai_router import (
 )
 from visual_matcher import rank_candidates
 from visual_fallback import create_fallback_video
+from narration_timing import duration_correction
+from source_policy import source_failure_reason
 
 # ============================================================
 # CONFIG
@@ -1039,12 +1041,12 @@ def search_all_footage_sources(query):
                 None
             )
 
-            if status_code == 429:
+            reason = source_failure_reason(status_code)
+            if reason is not None:
                 FOOTAGE_SOURCE_DISABLED.add(source)
-
                 print(
-                    f"  {source} rate-limited (HTTP 429); disabling this source "
-                    "for the remainder of this run."
+                    f"  {source} returned HTTP {status_code} ({reason}); "
+                    "disabling this source for the remainder of this run."
                 )
             else:
                 detail = str(exc)
@@ -2279,6 +2281,7 @@ def build_voice_and_subs(script):
             encoding="utf-8"
         )
 
+        voice_path = OUT / "voiceover.wav"
         run([
             "ffmpeg", "-y",
             "-f", "concat",
@@ -2287,12 +2290,53 @@ def build_voice_and_subs(script):
             "-c:a", "pcm_s16le",
             "-ar", "48000",
             "-ac", "2",
-            str(OUT / "voiceover.wav")
+            str(voice_path)
         ])
+
+        # The planner targets 70-90 seconds, but word count alone cannot
+        # guarantee the actual Edge TTS duration. Correct small deviations
+        # with pitch-preserving atempo and apply the identical time scale to
+        # word/sentence events before subtitles and scene timing are written.
+        original_audio_duration = ffprobe_duration(voice_path)
+        correction = duration_correction(original_audio_duration)
+        if correction is not None:
+            paced_path = OUT / "voiceover_paced.wav"
+            atempo = correction["atempo"]
+            run([
+                "ffmpeg", "-y",
+                "-i", str(voice_path),
+                "-af", f"atempo={atempo:.8f}",
+                "-ar", "48000",
+                "-ac", "2",
+                "-c:a", "pcm_s16le",
+                str(paced_path)
+            ])
+            paced_duration = ffprobe_duration(paced_path)
+            if not 70.0 <= paced_duration <= 90.0:
+                raise RuntimeError(
+                    f"Tempo correction produced {paced_duration:.2f}s; expected 70-90s. "
+                    "The audio was not accepted."
+                )
+            time_scale = paced_duration / original_audio_duration
+            for event in word_events:
+                event["offset"] *= time_scale
+                event["duration"] *= time_scale
+            for event in sentence_events:
+                event["start"] *= time_scale
+                event["end"] *= time_scale
+            paced_path.replace(voice_path)
+            total_duration = paced_duration
+            print(
+                f"Narration timing normalized: {original_audio_duration:.2f}s -> "
+                f"{total_duration:.2f}s (pitch-preserving tempo adjustment)."
+            )
+        else:
+            total_duration = original_audio_duration
+            print(f"Narration duration already within target: {total_duration:.2f}s.")
 
         run([
             "ffmpeg", "-y",
-            "-i", str(OUT / "voiceover.wav"),
+            "-i", str(voice_path),
             "-c:a", "libmp3lame",
             "-b:a", "192k",
             str(OUT / "voiceover.mp3")
@@ -2702,21 +2746,23 @@ def main():
     print(
         "AI text provider secrets available: " + (", ".join(configured_keys) or "none")
     )
-    print("1/5 Generating documentary plan (AI with local fallback)...")
+    print("1/4 Generating documentary plan (AI with local fallback)...")
     plan = gemini_plan(TOPIC)
 
-    print("2/5 Searching and ranking relevant footage...")
-    fetch_footage(plan)
-
-    print("3/5 Generating paced voice-over and subtitles...")
+    # Validate and normalize narration before expensive footage searches. This
+    # prevents a short TTS result from wasting API calls and download time.
+    print("2/4 Generating narration and synchronized subtitles...")
     sentence_events, total_duration = build_voice_and_subs(plan["script"])
     if not 70.0 <= total_duration <= 90.0:
         raise RuntimeError(
-            f"Narration duration is {total_duration:.2f}s; production target is 70-90s. "
-            "Adjust the script or TTS pacing rather than silently publishing an off-target video."
+            f"Narration duration is {total_duration:.2f}s after normalization; "
+            "production target is 70-90s."
         )
 
-    print("4/5 Rendering scenes to actual narration timing...")
+    print("3/4 Searching and ranking relevant footage...")
+    fetch_footage(plan)
+
+    print("4/4 Rendering scenes to actual narration timing...")
     render(
         plan,
         sentence_events,
