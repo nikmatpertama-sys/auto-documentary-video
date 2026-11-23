@@ -43,7 +43,12 @@ BASE_RATE = os.getenv("TTS_RATE", "-4%").strip()
 BASE_PITCH = os.getenv("TTS_PITCH", "-3Hz").strip()
 
 W, H, FPS = 1080, 1920, 30
-X264_PRESET = os.getenv("X264_PRESET", "ultrafast").strip() or "ultrafast"
+_requested_x264_preset = os.getenv("X264_PRESET", "medium").strip().lower() or "medium"
+# The supplied workflow historically sets ultrafast; override it because it
+# visibly harms compression quality for this documentary-first pipeline.
+X264_PRESET = "medium" if _requested_x264_preset == "ultrafast" else _requested_x264_preset
+if X264_PRESET not in {"superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow"}:
+    X264_PRESET = "medium"
 
 OPENING_LEAD = 0.75
 SENTENCE_GAP = 0.30
@@ -153,7 +158,7 @@ for a vertical 9:16 video.
 
 TOPIC: {topic}
 
-Target spoken length: 145-165 words, approximately 60-75 seconds
+Target spoken length: 160-185 words, approximately 70-90 seconds
 including deliberate pauses.
 
 Return ONLY valid JSON in this exact structure:
@@ -179,9 +184,8 @@ Requirements:
 - Its first sentence is a powerful curiosity hook, max 12 words.
 - Divide the complete spoken story across the 8 scene narration fields, in order.
 - Do not omit story content between scenes or repeat whole sentences.
-- The combined scene narration should form a coherent 145-165 word script.
-- ALL 8 scenes MUST use concrete, relevant real-world footage.
-- NEVER request diagrams, charts, infographics, title cards, or abstract graphics.
+- The combined scene narration should form a coherent 160-185 word script.
+- Prefer concrete, relevant real-world footage. If footage is unavailable, the local fallback will create a topic-aware explanatory illustration.
 - Each scene must focus on ONE practical, searchable footage shot.
 - visual_query must describe one dominant visible subject, ideally 3-7 words.
 - NEVER combine several things that are unlikely to appear in one clip (for example: a rainstorm + Amazon forest floor + orchids + jaguar).
@@ -208,14 +212,14 @@ def _local_documentary_plan(topic):
     subject = re.sub(r"[\r\n]+", " ", str(topic or "this subject")).strip()
     subject = subject[:100] or "this subject"
     narrations = [
-        f"What makes {subject} worth understanding, and why does this subject deserve a closer look?",
-        f"To explore {subject}, begin with the basic context, the setting, and the questions that shape the story.",
-        f"Look at the key elements connected to {subject}, and notice how each part contributes to the bigger picture.",
-        f"A useful way to understand {subject} is to examine its patterns, processes, and relationships step by step.",
-        f"Different perspectives can reveal details about {subject} that a quick first impression might easily miss.",
-        f"The available evidence and documented examples help separate established information from open questions about {subject}.",
-        f"Taken together, these details show why {subject} matters and what viewers should remember from the explanation.",
-        f"The story of {subject} continues to invite curiosity, careful research, and a deeper understanding of the world.",
+        f"What makes {subject} worth understanding? The answer begins with a closer look at details that are easy to overlook.",
+        "Start with the setting. Its surrounding conditions help explain what can happen, which questions matter, and where the story begins.",
+        "Next, look at the key elements involved. Each one has a role, and their relationships often reveal more than any part alone.",
+        "The central process becomes clearer when its stages are considered in order, from the first change to the result that follows.",
+        "There may be more than one explanation or perspective. Comparing them carefully helps distinguish a strong interpretation from a simple assumption.",
+        "Evidence matters most when its origin and limits are understood. Reliable observations can support a conclusion, while unanswered questions remain open.",
+        "Taken together, the context, mechanisms, and evidence show why this subject matters beyond the first impression it creates.",
+        f"And that is the larger picture: understanding {subject} means seeing how individual details connect to a much wider story.",
     ]
     scenes = []
     query_templates = [
@@ -286,9 +290,9 @@ def gemini_plan(topic):
 
         candidate["script"] = " ".join(narrations).strip()
         word_count = len(candidate["script"].split())
-        if not 100 <= word_count <= 190:
+        if not 150 <= word_count <= 195:
             raise ValueError(
-                f"Scene narration totals {word_count} words; expected 100-190."
+                f"Scene narration totals {word_count} words; expected 150-195 for a 70-90 second narration."
             )
         try:
             assign_scene_sentence_ranges(candidate)
@@ -1983,7 +1987,7 @@ def fetch_footage(plan):
                 topic=TOPIC,
             )
             scene["media_file"] = str(fallback_path)
-            scene["visual_type"] = "generated_2d_motion_graphic"
+            scene["visual_type"] = "topic_aware_2d_illustration"
             scene["selected_footage_source"] = "Local procedural visual fallback"
             scene["selected_footage_tags"] = ""
             scene["selected_footage_url"] = ""
@@ -2140,34 +2144,23 @@ def build_voice_and_subs(script):
         cursor += OPENING_LEAD
 
         for index, sentence in enumerate(sentences):
-            rate_values = [
-                BASE_RATE, "-5%", "-3%", "-4%"
-            ]
-
-            pitch_values = [
-                BASE_PITCH, "-2Hz", "-4Hz", "-2Hz"
-            ]
 
             mp3_path = OUT / f"tts_{index:02d}.mp3"
             wav_path = OUT / f"tts_{index:02d}.wav"
 
             boundaries = []
-            tts_voices = list(dict.fromkeys([
-                VOICE,
-                os.getenv("TTS_FALLBACK_VOICE", "en-US-AriaNeural").strip(),
-            ]))
             last_tts_error = None
             generated = False
 
             for tts_attempt in range(3):
-                selected_voice = tts_voices[min(tts_attempt // 2, len(tts_voices) - 1)]
+                selected_voice = VOICE
                 boundaries = []
                 mp3_path.unlink(missing_ok=True)
                 communicate = edge_tts.Communicate(
                     sentence,
                     selected_voice,
-                    rate=rate_values[index % len(rate_values)],
-                    pitch=pitch_values[index % len(pitch_values)],
+                    rate=BASE_RATE,
+                    pitch=BASE_PITCH,
                     boundary="WordBoundary",
                 )
                 try:
@@ -2183,8 +2176,6 @@ def build_voice_and_subs(script):
                                 })
                     if mp3_path.exists() and mp3_path.stat().st_size >= 1000 and boundaries:
                         generated = True
-                        if selected_voice != VOICE:
-                            print(f"TTS fallback voice used for sentence {index + 1}: {selected_voice}")
                         break
                     raise RuntimeError("TTS returned empty audio or no word timings")
                 except Exception as exc:
@@ -2708,9 +2699,12 @@ def main():
     fetch_footage(plan)
 
     print("3/5 Generating paced voice-over and subtitles...")
-    sentence_events, total_duration = (
-        build_voice_and_subs(plan["script"])
-    )
+    sentence_events, total_duration = build_voice_and_subs(plan["script"])
+    if not 70.0 <= total_duration <= 90.0:
+        raise RuntimeError(
+            f"Narration duration is {total_duration:.2f}s; production target is 70-90s. "
+            "Adjust the script or TTS pacing rather than silently publishing an off-target video."
+        )
 
     print("4/5 Rendering scenes to actual narration timing...")
     render(
@@ -2766,11 +2760,17 @@ def main():
         "all_scenes_processed": True,
         "scene_count": len(scene_records),
         "visual_verification_required": VISION_REQUIRED,
-        "all_scenes_visually_verified": all(
-            item["visual_verification"].get("confidence") is not None
-            for item in scene_records
-            if item.get("visual_verification", {}).get("method") != "local procedural 2D graphic"
+        "all_scenes_visually_verified": (
+            bool(scene_records) and all(
+                item["visual_verification"].get("confidence") is not None
+                and item["visual_verification"].get("method") != "local procedural 2D graphic"
+                for item in scene_records
+            )
         ) if VISION_REQUIRED else None,
+        "local_illustration_scene_count": sum(
+            1 for item in scene_records
+            if item.get("visual_verification", {}).get("method") == "local procedural 2D graphic"
+        ),
         "scenes": scene_records,
         "final_video": {
             "path": str(final_path),

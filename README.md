@@ -1,6 +1,6 @@
 Auto Documentary Video
 
-Automated vertical mini-documentary generator using AI-assisted (or local-template fallback) story planning, stock footage, local SigLIP thumbnail ranking, API-free illustrated fallback scenes, Edge TTS narration, Pillow graphics, and FFmpeg rendering.
+Automated vertical mini-documentary generator using AI-assisted (or local-template fallback) story planning, stock footage, local SigLIP thumbnail ranking, topic-aware API-free explanatory illustrations, Edge TTS narration, Pillow graphics, and FFmpeg rendering.
 
 Output
 
@@ -40,7 +40,7 @@ Without AI text keys, a cautious local-template script is used. Without suitable
 
 Then open:
 
-Actions → Hybrid Documentary Generator → Run workflow
+Switch the repository branch selector to `project1` before uploading the upgrade ZIP or running Actions → Hybrid Documentary Generator → Run workflow. The self-upgrade step commits to the currently selected branch, so do not run it from `main`.
 
 Enter a documentary topic and run the workflow.
 
@@ -71,13 +71,13 @@ The project uses a local SigLIP-based visual matcher to help rank footage thumbn
 
 SigLIP ranks available footage thumbnails locally. If it cannot load, metadata ranking is used and the report does not claim SigLIP verification.
 
-AI visual verification is attempted when providers are configured. If verification services are unavailable, or no suitable footage can be selected, the pipeline creates an original 2D motion-graphic scene locally with Pillow and FFmpeg. This is an illustrated fallback, not photorealistic 3D.
+AI visual verification is attempted when providers are configured. If verification services are unavailable, or no suitable footage can be selected, the pipeline creates an topic-aware 2D explanatory illustration locally with Pillow and FFmpeg. Fallback diagrams cover selected subject families (for example hydrothermal vents, Earth layers, space, microbes, volcanoes, animals, and climate). Unknown subjects use an explicit input-process-outcome diagram rather than claiming to depict literal footage. This is an illustration, not photorealistic 3D.
 
 Rendering Pipeline
 
 - Scene durations are allocated according to narration length.
 - Footage is formatted for vertical 9:16 output.
-- Visual treatments include restrained camera motion and contrast/saturation adjustments.
+- Visual treatments include restrained camera motion and contrast/saturation adjustments. Final encoding uses the medium x264 preset by default to favor quality over minimum render time.
 - Diagram scenes use original Pillow-generated cards.
 - Captions use Edge TTS word-boundary timings.
 - FFmpeg handles final video rendering and encoding.
