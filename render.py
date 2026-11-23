@@ -1,3 +1,4 @@
+
 """Compatibility entry point. The complete pipeline is maintained in main.py."""
 import subprocess
 import sys
