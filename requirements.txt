@@ -1,2 +1,5 @@
 requests>=2.31.0
 edge-tts>=7.0.0
+torch>=2.2,<3
+transformers>=4.46,<5
+Pillow>=10.0.0
