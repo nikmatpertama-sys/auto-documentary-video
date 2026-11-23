@@ -1,3 +1,4 @@
+
 """
 Local visual footage matcher using multilingual SigLIP.
 Ranks candidate footage by comparing preview thumbnails with search queries.
@@ -16,21 +17,28 @@ log = logging.getLogger(__name__)
 
 MODEL_NAME = "google/siglip-base-patch16-256-multilingual"
 DEFAULT_CACHE = Path(".api-cache/visual-thumbnails")
-MAX_THUMBNAIL_BYTES = 8 * 1024 * 1024
+MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024
+MAX_CACHE_BYTES = 120 * 1024 * 1024
+BATCH_SIZE = 4
 REQUEST_TIMEOUT = 15
 
 _model = None
 _processor = None
 _torch = None
 _Image = None
+_load_attempted = False
+_load_error = None
 
 
 def _load_model():
-    """Load SigLIP lazily on CPU. Never make model loading mandatory."""
-    global _model, _processor, _torch, _Image
+    """Attempt model load only once per run; avoid repeating a bad download/import."""
+    global _model, _processor, _torch, _Image, _load_attempted, _load_error
 
     if _model is not None:
         return True
+    if _load_attempted:
+        return False
+    _load_attempted = True
 
     try:
         import torch
@@ -46,12 +54,35 @@ def _load_model():
         _Image = Image
         _processor = processor
         _model = model
-        log.info("Loaded visual matcher model: %s", MODEL_NAME)
+        log.info("Loaded CPU visual matcher: %s", MODEL_NAME)
         return True
 
     except Exception as exc:
-        log.warning("SigLIP unavailable; using metadata ranking: %s", exc)
+        _load_error = f"{type(exc).__name__}: {exc}"
+        log.warning(
+            "SigLIP unavailable; one-time fallback to metadata ranking: %s",
+            _load_error,
+        )
         return False
+
+
+def _prune_cache(cache_dir, max_bytes=MAX_CACHE_BYTES):
+    """Keep the thumbnail cache bounded; evict least-recently-used files."""
+    try:
+        files = [p for p in Path(cache_dir).glob("*") if p.is_file()]
+        total = sum(p.stat().st_size for p in files)
+        if total <= max_bytes:
+            return
+
+        for path in sorted(files, key=lambda p: p.stat().st_mtime):
+            size = path.stat().st_size
+            path.unlink(missing_ok=True)
+            total -= size
+            if total <= max_bytes:
+                break
+
+    except OSError:
+        log.debug("Thumbnail cache pruning skipped", exc_info=True)
 
 
 def _thumbnail_url(candidate):
@@ -78,33 +109,41 @@ def _download_thumbnail(url, cache_dir):
     filename = hashlib.sha256(url.encode("utf-8")).hexdigest() + suffix
     path = cache_dir / filename
 
-    if path.exists() and path.stat().st_size > 0:
-        return path
+    if path.exists():
+        cached_size = path.stat().st_size
+        if 0 < cached_size <= MAX_THUMBNAIL_BYTES:
+            return path
+        path.unlink(missing_ok=True)
 
     try:
-        response = requests.get(
+        total = 0
+        with requests.get(
             url,
             timeout=REQUEST_TIMEOUT,
             stream=True,
             headers={"User-Agent": "AutoDocumentaryVideo/1.0"},
-        )
-        response.raise_for_status()
+        ) as response:
+            response.raise_for_status()
+            content_type = response.headers.get("Content-Type", "").lower()
 
-        content_type = response.headers.get("Content-Type", "").lower()
-        if not content_type.startswith("image/"):
-            return None
+            if not content_type.startswith("image/"):
+                return None
 
-        total = 0
-        with path.open("wb") as handle:
-            for chunk in response.iter_content(65536):
-                if not chunk:
-                    continue
-                total += len(chunk)
-                if total > MAX_THUMBNAIL_BYTES:
-                    handle.close()
-                    path.unlink(missing_ok=True)
-                    return None
-                handle.write(chunk)
+            declared = int(response.headers.get("Content-Length") or 0)
+            if declared > MAX_THUMBNAIL_BYTES:
+                return None
+
+            with path.open("wb") as handle:
+                for chunk in response.iter_content(65536):
+                    if not chunk:
+                        continue
+
+                    total += len(chunk)
+                    if total > MAX_THUMBNAIL_BYTES:
+                        path.unlink(missing_ok=True)
+                        return None
+
+                    handle.write(chunk)
 
         if total == 0:
             path.unlink(missing_ok=True)
@@ -161,17 +200,21 @@ def rank_candidates(
     Returns a new sorted list. Candidates without thumbnails remain eligible.
     """
     items = [dict(item) for item in candidates or []]
+
     if len(items) < 2:
         return items
 
     metadata_values = [_metadata_score(item) for item in items]
     metadata_ranks = _percentile_ranks(metadata_values)
 
-    if not _load_model():
+    thumbnail_urls = [_thumbnail_url(item) for item in items]
+
+    if not any(thumbnail_urls) or not _load_model():
         for index, item in enumerate(items):
             item["visual_score"] = None
             item["visual_rank_score"] = None
             item["combined_rank_score"] = metadata_ranks[index]
+
         return sorted(
             items,
             key=lambda item: item["combined_rank_score"],
@@ -183,17 +226,26 @@ def rank_candidates(
     texts = []
 
     for index, item in enumerate(items):
-        url = _thumbnail_url(item)
+        url = thumbnail_urls[index]
         path = _download_thumbnail(url, cache_dir)
+
         if path is None:
             continue
 
         try:
-            image = _Image.open(path).convert("RGB")
+            with _Image.open(path) as opened:
+                image = opened.convert("RGB")
+                image.thumbnail((512, 512))
+
             images.append(image)
             valid_indices.append(index)
-            selected_query = str(item.get("query") or query or "").strip()
+
+            selected_query = str(
+                item.get("query") or query or ""
+            ).strip()
+
             texts.append("Video footage showing " + selected_query)
+
         except Exception as exc:
             log.debug("Invalid preview image: %s", exc)
 
@@ -202,9 +254,9 @@ def rank_candidates(
     if images:
         try:
             # Batch inference limits CPU memory use.
-            for start in range(0, len(images), 8):
-                batch_images = images[start:start + 8]
-                batch_texts = texts[start:start + 8]
+            for start in range(0, len(images), BATCH_SIZE):
+                batch_images = images[start:start + BATCH_SIZE]
+                batch_texts = texts[start:start + BATCH_SIZE]
 
                 inputs = _processor(
                     text=batch_texts,
@@ -218,23 +270,46 @@ def rank_candidates(
                     outputs = _model(**inputs)
 
                 # Paired image/text scores are on the diagonal.
-                scores = outputs.logits_per_image.diag().float().cpu().tolist()
+                scores = (
+                    outputs.logits_per_image
+                    .diag()
+                    .float()
+                    .cpu()
+                    .tolist()
+                )
 
                 for offset, score in enumerate(scores):
                     visual_scores[valid_indices[start + offset]] = float(score)
 
         except Exception as exc:
-            log.warning("SigLIP inference failed; using metadata ranking: %s", exc)
+            log.warning(
+                "SigLIP inference failed; using metadata ranking: %s",
+                exc,
+            )
             visual_scores = [None] * len(items)
 
+        finally:
+            for image in images:
+                try:
+                    image.close()
+                except Exception:
+                    pass
+
+    _prune_cache(cache_dir)
+
     present = [
-        index for index, score in enumerate(visual_scores)
+        index
+        for index, score in enumerate(visual_scores)
         if score is not None
     ]
+
     visual_ranks = [None] * len(items)
 
     if present:
-        ranked = _percentile_ranks([visual_scores[i] for i in present])
+        ranked = _percentile_ranks(
+            [visual_scores[i] for i in present]
+        )
+
         for index, rank in zip(present, ranked):
             visual_ranks[index] = rank
 
@@ -242,6 +317,7 @@ def rank_candidates(
 
     for index, item in enumerate(items):
         visual_rank = visual_ranks[index]
+
         item["visual_score"] = visual_scores[index]
         item["visual_rank_score"] = visual_rank
 
