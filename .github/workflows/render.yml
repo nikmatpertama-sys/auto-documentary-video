@@ -49,6 +49,9 @@ jobs:
           rm -f auto-documentary-video-upgrade.zip
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The ZIP contains a workflow file, but GITHUB_TOKEN cannot push workflow changes.
+          # Keep the workflow already committed on this branch and install the other files.
+          git restore --source=HEAD -- .github/workflows/render.yml
           git add -A
           if git diff --cached --quiet; then
             echo "No extracted project changes to commit."
