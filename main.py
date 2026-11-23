@@ -34,6 +34,7 @@ for folder in (OUT, FOOT, CACHE):
 
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
 PEXELS_KEY = os.getenv("PEXELS_API_KEY", "").strip()
+COVERR_API_KEY = os.getenv("COVERR_API_KEY", "").strip()
 TOPIC = os.getenv("INPUT_TOPIC", "").strip()
 
 VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural").strip()
@@ -539,6 +540,81 @@ def pixabay_search(query):
     return results
 
 
+def coverr_search(query):
+    """Search Coverr's free-video API and return normalized footage candidates."""
+    if not COVERR_API_KEY:
+        return []
+
+    query = clean_query(query)
+    if not query:
+        return []
+
+    response = requests.get(
+        "https://api.coverr.co/videos",
+        params={
+            "query": query,
+            "page": 0,
+            "page_size": 25,
+            "urls": "true",
+            "sort": "popular",
+        },
+        headers={"x-api-key": COVERR_API_KEY},
+        timeout=35,
+    )
+    response.raise_for_status()
+    data = response.json()
+
+    # Coverr's documented list response stores results under `hits`.
+    hits = data.get("hits", []) if isinstance(data, dict) else []
+    results = []
+
+    for hit in hits:
+        if not isinstance(hit, dict):
+            continue
+        urls = hit.get("urls") or {}
+        download_url = urls.get("mp4_download") or urls.get("mp4")
+        if not isinstance(download_url, str) or not download_url.startswith("https://"):
+            continue
+
+        tags = hit.get("tags", [])
+        if isinstance(tags, list):
+            tag_text = " ".join(str(tag) for tag in tags)
+        else:
+            tag_text = str(tags or "")
+        title = str(hit.get("title") or "")
+        description = str(hit.get("description") or "")
+        page_url = "https://coverr.co/videos/" + str(hit.get("id") or "")
+
+        try:
+            duration = float(hit.get("duration") or 0)
+        except (TypeError, ValueError):
+            duration = 0.0
+        try:
+            width = int(hit.get("max_width") or 0)
+        except (TypeError, ValueError):
+            width = 0
+
+        results.append({
+            "source": "Coverr",
+            "id": str(hit.get("id") or ""),
+            "url": download_url,
+            "download_urls": [
+                value for value in (urls.get("mp4_download"), urls.get("mp4"), urls.get("mp4_preview"))
+                if isinstance(value, str) and value.startswith("https://")
+            ],
+            "thumbnail_url": hit.get("thumbnail") or hit.get("poster"),
+            "width": width,
+            "duration": duration,
+            "metadata": " ".join((title, description, tag_text, page_url)),
+            "tags": " ".join((title, description, tag_text)),
+            "creator": "Coverr",
+            "page_url": page_url,
+            "license": "Coverr API free-video terms; non-commercial use only unless separately licensed",
+        })
+
+    return results
+
+
 def pexels_search(query):
     if not PEXELS_KEY:
         return []
@@ -833,6 +909,7 @@ def search_all_footage_sources(query):
     cache_sources = (
         ("pixabay" if PIXABAY_KEY else "")
         + ("|pexels" if PEXELS_KEY else "")
+        + ("|coverr" if COVERR_API_KEY else "")
         + "|nasa|commons"
     )
 
@@ -858,6 +935,7 @@ def search_all_footage_sources(query):
     searches = [
         ("Pixabay", pixabay_search),
         ("Pexels", pexels_search),
+        ("Coverr", coverr_search),
         ("NASA", nasa_search),
         ("Wikimedia Commons", commons_search),
     ]
@@ -893,7 +971,7 @@ def search_all_footage_sources(query):
                 )
             else:
                 detail = str(exc)
-                for secret in (PIXABAY_KEY, PEXELS_KEY):
+                for secret in (PIXABAY_KEY, PEXELS_KEY, COVERR_API_KEY):
                     if secret:
                         detail = detail.replace(secret, "[REDACTED]")
                 print(
