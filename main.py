@@ -732,33 +732,139 @@ def search_all_footage_sources(query):
 
 
 STOP_WORDS = {
-    "the", "and", "for", "with", "from", "into", "that", "this", "over",
+    "the", "and", "for", "with", "from", "into", "that", "this", "over", "of",
     "under", "through", "about", "near", "shot", "video", "aerial",
     "cinematic", "footage", "drone", "close", "up", "wide", "angle",
     "slow", "motion", "beautiful", "nature", "scene", "view", "real",
     "world", "camera", "showing", "moving", "during", "while", "where",
     "what", "when", "which", "their", "there", "they", "these", "those",
-    "into", "onto", "its", "are", "was", "were", "been", "being", "has",
+    "onto", "its", "are", "was", "were", "been", "being", "has",
     "have", "had", "will", "would", "could", "should", "can", "may",
     "one", "two", "first", "second", "then", "than", "also", "more",
-    "most", "very", "some", "many", "such", "like", "make", "made"
+    "most", "very", "some", "many", "such", "like", "make", "made",
+    "high", "low", "level", "shot", "shots", "footage", "clip"
+}
+
+# Synonym groups bridge the gap between a scene's precise wording and the
+# shorter tags commonly supplied by stock-footage libraries.
+CONCEPT_GROUPS = {
+    "rainforest": {"amazon", "rainforest", "jungle", "tropical", "tropics", "equatorial"},
+    "canopy": {"canopy", "treetop", "treetops", "tree", "trees", "foliage", "crown", "leaf", "leaves"},
+    "sunrise": {"sunrise", "sunrise", "dawn", "daybreak", "morning", "sunlight", "sun", "golden", "sunrise"},
+    "forest": {"forest", "woodland", "woods", "timberland", "trees"},
+    "aerial": {"aerial", "drone", "overhead", "topdown", "birdseye", "bird", "eye"},
+    "river": {"river", "rivers", "waterway", "tributary", "stream"},
+    "waterfall": {"waterfall", "falls", "cascade", "cascades"},
+    "wildlife": {"wildlife", "animal", "animals", "fauna"},
+    "bird": {"bird", "birds", "avian", "parrot", "parrots", "macaw", "macaws"},
+    "mountain": {"mountain", "mountains", "mountainous", "peak", "peaks", "alpine"},
+    "ocean": {"ocean", "sea", "marine", "underwater"},
+    "desert": {"desert", "arid", "dunes", "sand"},
+}
+
+# Reject obvious scene-category conflicts rather than accepting a generic
+# keyword overlap (e.g. a snowy forest for an Amazon rainforest scene).
+CONTEXT_CONFLICTS = {
+    "snow_winter": {"snow", "snowy", "winter", "ice", "icy", "frost", "frozen"},
+    "autumn": {"autumn", "fall", "falling", "maple", "orangeleaves"},
+    "underwater": {"underwater", "submarine", "coral", "reef", "fish", "fishes"},
+    "urban": {"urban", "city", "cities", "street", "building", "buildings", "traffic"},
+    "desert": {"desert", "dunes", "arid", "sandstorm"},
 }
 
 
+def query_concepts(text):
+    tokens = set(normalize_words(text)) - STOP_WORDS
+    concepts = {}
+    for name, aliases in CONCEPT_GROUPS.items():
+        if tokens & aliases:
+            concepts[name] = aliases
+    # Keep exact subject terms as their own concepts when no synonym group
+    # already captures them (e.g. jaguar, volcano, glacier, mushroom).
+    covered = set().union(*concepts.values()) if concepts else set()
+    for token in tokens - covered:
+        if len(token) > 2:
+            concepts[f"term:{token}"] = {token}
+    return tokens, concepts
+
+
+def expand_visual_queries(raw_queries):
+    """Create a few natural search variants without turning them generic."""
+    expanded = []
+    replacements = (
+        (r"\bAmazon\b", "tropical rainforest"),
+        (r"\bcanopy\b", "treetops"),
+        (r"\bsunrise\b", "dawn"),
+        (r"\baerial view\b", "drone view"),
+    )
+    for raw in raw_queries:
+        base = clean_query(raw)
+        if not base:
+            continue
+        expanded.append(base)
+        variant = base
+        for pattern, replacement in replacements:
+            variant = re.sub(pattern, replacement, variant, flags=re.IGNORECASE)
+        if variant.lower() != base.lower():
+            expanded.append(clean_query(variant))
+        # Search by the core subject too; mood/camera words often are absent
+        # from stock-library tags and should not cause false rejection.
+        mood_camera = {"sunrise", "sunset", "dawn", "dusk", "morning", "evening", "aerial", "drone", "view", "shot", "cinematic"}
+        core_words = [
+            token for token in normalize_words(base)
+            if token not in STOP_WORDS and token not in mood_camera
+        ]
+        core = " ".join(core_words).strip()
+        if core and core.lower() != base.lower():
+            expanded.append(clean_query(core))
+    # Include a grounded rainforest phrase when Amazon/canopy is explicitly
+    # present; this improves recall on stock sites whose tags say jungle/forest.
+    joined = " ".join(expanded).lower()
+    if "amazon" in joined and ("canopy" in joined or "treetop" in joined):
+        expanded.extend(["tropical rainforest treetops", "jungle forest canopy"])
+    unique = []
+    for item in expanded:
+        if item and item.lower() not in {x.lower() for x in unique}:
+            unique.append(item)
+    return unique[:7]
+
+
 def relevance_score(hit, query, narration):
-    """Score metadata against query AND scene narration; generic mood words do not count."""
-    metadata_tokens = set(normalize_words(hit.get("metadata", "")))
-    query_tokens = set(normalize_words(query)) - STOP_WORDS
-    narration_tokens = set(normalize_words(narration)) - STOP_WORDS
+    """Semantic-ish metadata score with synonym groups and scene-conflict checks."""
+    metadata = str(hit.get("metadata", "")) + " " + str(hit.get("tags", ""))
+    metadata_tokens = set(normalize_words(metadata))
+    query_tokens, query_groups = query_concepts(query)
+    narration_tokens, narration_groups = query_concepts(narration)
     if not metadata_tokens or not query_tokens:
-        return 0.0, 0, len(query_tokens)
-    q_hits = query_tokens & metadata_tokens
-    n_hits = narration_tokens & metadata_tokens
-    q_coverage = len(q_hits) / max(1, len(query_tokens))
-    # Narration is supporting evidence, not a substitute for matching the shot query.
-    n_coverage = len(n_hits) / max(1, min(10, len(narration_tokens)))
-    score = 0.72 * q_coverage + 0.28 * n_coverage
-    return score, len(q_hits), len(query_tokens)
+        return 0.0, 0, max(1, len(query_groups))
+
+    matched_groups = 0
+    for aliases in query_groups.values():
+        if metadata_tokens & aliases:
+            matched_groups += 1
+    direct_hits = query_tokens & metadata_tokens
+    group_coverage = matched_groups / max(1, len(query_groups))
+    direct_coverage = len(direct_hits) / max(1, len(query_tokens))
+
+    # Scene narration supplies additional context, but cannot alone validate
+    # a result that has no match to the actual visual query.
+    narration_matches = sum(
+        1 for aliases in narration_groups.values() if metadata_tokens & aliases
+    )
+    narration_coverage = narration_matches / max(1, min(6, len(narration_groups)))
+
+    context_tokens = query_tokens | narration_tokens
+    conflicts = 0
+    for conflict_terms in CONTEXT_CONFLICTS.values():
+        if metadata_tokens & conflict_terms and not context_tokens & conflict_terms:
+            conflicts += 1
+
+    score = (0.62 * group_coverage) + (0.18 * direct_coverage) + (0.20 * narration_coverage)
+    if conflicts:
+        score -= min(0.55, 0.30 * conflicts)
+    # Return matched concept groups, not raw word count; synonyms count as a
+    # match, while duplicated words do not inflate the score.
+    return max(0.0, score), matched_groups, max(1, len(query_groups))
 
 
 def tag_similarity(tags_a, tags_b):
@@ -778,11 +884,7 @@ def fetch_footage(plan):
         scene["visual_type"] = "footage"
         raw_queries = [scene.get("visual_query", "")]
         raw_queries.extend(list(scene.get("visual_queries", [])[:2]))
-        queries = []
-        for raw in raw_queries:
-            query = clean_query(raw)
-            if query and query.lower() not in [q.lower() for q in queries]:
-                queries.append(query)
+        queries = expand_visual_queries(raw_queries)
 
         candidates = {}
         for query in queries:
@@ -799,15 +901,25 @@ def fetch_footage(plan):
                 score, matched, total = relevance_score(
                     hit, query, scene.get("narration", "")
                 )
-                required = max(2, int((total + 1) // 2))
-                query_coverage = matched / max(1, total)
-                # At least half of the concrete subject terms must match,
-                # and two independent terms are mandatory.
+                # One strong concept is enough for a genuinely narrow query;
+                # broader multi-concept shots must match at least two concepts.
+                required = 1 if total <= 1 else 2
+                if matched < required or score < 0.40:
+                    continue
+                metadata_tokens = set(normalize_words(
+                    str(hit.get("metadata", "")) + " " + str(hit.get("tags", ""))
+                ))
+                scene_context = set(normalize_words(scene.get("narration", "")))
+                # Hard reject the most damaging mismatches even if "forest"
+                # or "trees" happens to overlap with the query.
                 if (
-                    total < 2
-                    or matched < required
-                    or query_coverage < 0.50
-                    or score < 0.56
+                    metadata_tokens & CONTEXT_CONFLICTS["snow_winter"]
+                    and not scene_context & CONTEXT_CONFLICTS["snow_winter"]
+                ):
+                    continue
+                if (
+                    metadata_tokens & CONTEXT_CONFLICTS["underwater"]
+                    and not scene_context & CONTEXT_CONFLICTS["underwater"]
                 ):
                     continue
                 tags = str(hit.get("tags") or hit.get("metadata") or "")
@@ -823,6 +935,10 @@ def fetch_footage(plan):
                     )
 
         ranked = sorted(candidates.values(), key=lambda item: item[0], reverse=True)
+        print(
+            f"Scene {i}: {len(candidates)} relevant candidate(s) after "
+            f"semantic matching across {len(queries)} search variants."
+        )
         destination = FOOT / f"scene_{i:02d}.mp4"
         download_errors = []
         selected = None
