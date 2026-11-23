@@ -1,4 +1,3 @@
-
 """Validate the GitHub Actions runner before a paid generation run."""
 import importlib
 import subprocess
@@ -6,7 +5,7 @@ import sys
 
 
 REQUIRED_MODULES = (
-    "requests", "edge_tts", "torch", "transformers", "sentencepiece", "PIL", "safetensors"
+    "requests", "edge_tts", "torch", "transformers", "sentencepiece", "google.protobuf", "PIL", "safetensors"
 )
 
 
