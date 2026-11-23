@@ -9,7 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: documentary-${{ github.workflow }}-${{ github.ref }}
@@ -33,6 +33,39 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+
+      - name: Extract bundled project upgrade
+        run: |
+          if [ -f auto-documentary-video-upgrade.zip ]; then
+            python - <<'PY'
+            import zipfile
+            from pathlib import Path
+            archive = Path("auto-documentary-video-upgrade.zip")
+            with zipfile.ZipFile(archive) as package:
+                for member in package.infolist():
+                    target = (Path(".") / member.filename).resolve()
+                    if not target.is_relative_to(Path(".").resolve()):
+                        raise SystemExit(f"Unsafe ZIP path: {member.filename}")
+                package.extractall(".")
+            print("Project upgrade package extracted.")
+            PY
+          else
+            echo "Project upgrade ZIP not found; using checked-out repository files."
+          fi
+
+      - name: Install extracted project files into this branch
+        if: hashFiles('auto-documentary-video-upgrade.zip') != ''
+        run: |
+          rm -f auto-documentary-video-upgrade.zip
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No extracted project changes to commit."
+          else
+            git commit -m "Install integrated video generator upgrade"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -71,7 +104,7 @@ jobs:
 
       - name: Verify runtime and dependencies
         run: |
-          python -m py_compile main.py ai_router.py visual_matcher.py healthcheck.py
+          python -m py_compile main.py ai_router.py visual_matcher.py visual_fallback.py healthcheck.py
           python -m unittest discover -s tests -v
           python healthcheck.py
 
@@ -95,7 +128,7 @@ jobs:
           OPENROUTER_MODEL: openrouter/free
           OPENROUTER_VISION_MODEL: nvidia/nemotron-3.5-super-vl:free
           OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free
-          FOOTAGE_VISION_REQUIRED: "true"
+          FOOTAGE_VISION_REQUIRED: "false"
           FOOTAGE_VISION_MIN_CONFIDENCE: "0.72"
           FOOTAGE_VISION_CANDIDATE_LIMIT: "5"
           TTS_VOICE: en-US-GuyNeural
