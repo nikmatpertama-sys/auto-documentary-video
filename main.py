@@ -10,7 +10,6 @@ import textwrap
 from pathlib import Path
 
 import requests
-from PIL import Image, ImageDraw, ImageFont
 import edge_tts
 
 # ============================================================
@@ -18,16 +17,16 @@ import edge_tts
 # ============================================================
 OUT = Path("output")
 FOOT = OUT / "footage"
-VIS = OUT / "visuals"
 CACHE = Path(".api-cache")
 
-for folder in (OUT, FOOT, VIS, CACHE):
+for folder in (OUT, FOOT, CACHE):
     folder.mkdir(parents=True, exist_ok=True)
 
 GROQ_KEY = os.getenv("GROQ_API_KEY", "").strip()
 OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
+PEXELS_KEY = os.getenv("PEXELS_API_KEY", "").strip()
 TOPIC = os.getenv("INPUT_TOPIC", "").strip()
 
 GROQ_MODEL = os.getenv(
@@ -57,8 +56,6 @@ if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
         "Missing AI provider key. Add GROQ_API_KEY, "
         "OPENROUTER_API_KEY, or GEMINI_API_KEY GitHub Secret."
     )
-if not PIXABAY_KEY:
-    raise RuntimeError("Missing PIXABAY_API_KEY GitHub Secret.")
 if not TOPIC:
     raise RuntimeError("Enter a topic in the Run workflow form.")
 
@@ -237,8 +234,12 @@ def call_openai_compatible(provider, api_key, model, prompt):
             {"role": "user", "content": prompt},
         ],
         "temperature": 0.35,
-        # Avoid forcing JSON mode: some Groq GPT-OSS models reject it with HTTP 400.
+        # GPT-OSS on Groq is a reasoning model; reserve enough completion budget.
     }
+    if provider == "Groq":
+        payload["max_completion_tokens"] = 6000
+    else:
+        payload["max_tokens"] = 6000
 
     # A single attempt per provider: quota errors should immediately
     # trigger the next provider instead of wasting time retrying.
@@ -462,107 +463,302 @@ def assign_scene_sentence_ranges(plan):
 # FOOTAGE SEARCH AND RELEVANCE
 # ============================================================
 
+
 def download_stream(url, dest):
-    with requests.get(
-        url,
-        stream=True,
-        timeout=(25, 180),
-        headers={
-            "User-Agent": "HybridDocumentaryPipeline/2.0"
-        }
-    ) as response:
-
-        response.raise_for_status()
-        total = 0
-
-        with open(dest, "wb") as f:
-            for chunk in response.iter_content(1024 * 1024):
-                if chunk:
+    """Download safely; remove partial files on every failure."""
+    dest = Path(dest)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.unlink(missing_ok=True)
+    try:
+        with requests.get(
+            url, stream=True, timeout=(25, 180),
+            headers={"User-Agent": "AutoDocumentaryVideo/3.0"}
+        ) as response:
+            response.raise_for_status()
+            declared = int(response.headers.get("Content-Length") or 0)
+            if declared > MAX_CLIP_BYTES:
+                raise RuntimeError(
+                    f"Clip is {declared / 1024 / 1024:.1f} MB, above the "
+                    f"{MAX_CLIP_BYTES / 1024 / 1024:.0f} MB limit."
+                )
+            total = 0
+            with open(dest, "wb") as f:
+                for chunk in response.iter_content(1024 * 1024):
+                    if not chunk:
+                        continue
                     total += len(chunk)
-
                     if total > MAX_CLIP_BYTES:
                         raise RuntimeError(
-                            "Clip exceeded 180 MB safety limit."
+                            f"Clip exceeded {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB safety limit."
                         )
-
                     f.write(chunk)
+        if dest.stat().st_size < 50000:
+            raise RuntimeError("Downloaded clip is unexpectedly small.")
+    except Exception:
+        dest.unlink(missing_ok=True)
+        raise
 
-    if Path(dest).stat().st_size < 50000:
-        Path(dest).unlink(missing_ok=True)
-        raise RuntimeError(
-            "Downloaded clip is unexpectedly small."
-        )
+
+def clean_query(query):
+    return re.sub(r"[^a-zA-Z0-9 ]", " ", str(query)).strip()[:95]
 
 
 def pixabay_search(query):
-    query = re.sub(
-        r"[^a-zA-Z0-9 ]", " ", query
-    ).strip()[:95]
-
+    if not PIXABAY_KEY:
+        return []
+    query = clean_query(query)
     cache_file = CACHE / (
-        hashlib.sha256(
-            query.lower().encode()
-        ).hexdigest() + ".json"
+        hashlib.sha256(query.lower().encode()).hexdigest() + ".json"
     )
-
-    if (
-        cache_file.exists()
-        and time.time() - cache_file.stat().st_mtime < 86400
-    ):
+    if cache_file.exists() and time.time() - cache_file.stat().st_mtime < 86400:
         try:
-            return json.loads(
-                cache_file.read_text(encoding="utf-8")
-            ).get("hits", [])
+            return json.loads(cache_file.read_text(encoding="utf-8")).get("hits", [])
         except Exception:
             pass
-
     response = requests.get(
         "https://pixabay.com/api/videos/",
         params={
-            "key": PIXABAY_KEY,
-            "q": query,
-            "per_page": 20,
-            "safesearch": "true",
-            "video_type": "film",
-            "order": "popular"
+            "key": PIXABAY_KEY, "q": query, "per_page": 25,
+            "safesearch": "true", "video_type": "film", "order": "popular"
         },
         timeout=35
     )
-
     if response.status_code == 429:
         raise RuntimeError("Pixabay rate limit reached.")
-
     response.raise_for_status()
-
     data = response.json()
+    cache_file.write_text(json.dumps(data), encoding="utf-8")
+    results = []
+    for hit in data.get("hits", []):
+        renditions = hit.get("videos", {})
+        rendition = renditions.get("large") or renditions.get("medium") or renditions.get("small") or {}
+        if not rendition.get("url"):
+            continue
+        results.append({
+            "source": "Pixabay", "id": str(hit.get("id")),
+            "url": rendition.get("url"),
+            "width": int(rendition.get("width") or 0),
+            "duration": float(hit.get("duration") or 0),
+            "metadata": " ".join([str(hit.get("tags", "")), str(hit.get("pageURL", ""))]),
+            "tags": str(hit.get("tags", "")),
+            "creator": hit.get("user", "Unknown"),
+            "page_url": hit.get("pageURL", ""),
+            "license": "Pixabay Content License",
+        })
+    return results
 
-    cache_file.write_text(
-        json.dumps(data),
-        encoding="utf-8"
+
+def pexels_search(query):
+    if not PEXELS_KEY:
+        return []
+    response = requests.get(
+        "https://api.pexels.com/v1/videos/search",
+        headers={"Authorization": PEXELS_KEY},
+        params={"query": query, "per_page": 20, "size": "medium"},
+        timeout=35
     )
+    if response.status_code == 429:
+        raise RuntimeError("Pexels API rate limit reached.")
+    response.raise_for_status()
+    results = []
+    for video in response.json().get("videos", []):
+        files = sorted(
+            video.get("video_files", []),
+            key=lambda x: (
+                0 if x.get("quality") == "hd" else 1,
+                abs(int(x.get("width") or 0) - 1920)
+            )
+        )
+        # Prefer a file at least HD; choose the smallest qualifying rendition
+        # to reduce download size and render time.
+        files = [f for f in files if f.get("link") and int(f.get("width") or 0) >= MIN_CLIP_WIDTH]
+        if not files:
+            continue
+        file = min(files, key=lambda x: int(x.get("width") or 99999))
+        slug = re.sub(r"[-_/]+", " ", str(video.get("url", "")))
+        results.append({
+            "source": "Pexels", "id": str(video.get("id")),
+            "url": file["link"], "width": int(file.get("width") or 0),
+            "duration": float(video.get("duration") or 0),
+            "metadata": slug, "tags": slug,
+            "creator": (video.get("user") or {}).get("name", "Unknown"),
+            "page_url": video.get("url", ""),
+            "license": "Pexels License",
+        })
+    return results
 
-    return data.get("hits", [])
+
+def nasa_search(query):
+    """NASA public media API; video assets only, no API key required."""
+    response = requests.get(
+        "https://images-api.nasa.gov/search",
+        params={"q": query, "media_type": "video", "page_size": 8},
+        timeout=35
+    )
+    response.raise_for_status()
+    results = []
+    for item in response.json().get("collection", {}).get("items", [])[:6]:
+        data = (item.get("data") or [{}])[0]
+        nasa_id = data.get("nasa_id")
+        if not nasa_id:
+            continue
+        metadata = " ".join([
+            str(data.get("title", "")),
+            str(data.get("description", "")),
+            " ".join(data.get("keywords") or [])
+        ])
+        try:
+            manifest = requests.get(
+                f"https://images-api.nasa.gov/asset/{nasa_id}", timeout=35
+            )
+            manifest.raise_for_status()
+            assets = manifest.json().get("collection", {}).get("items", [])
+        except Exception as exc:
+            print(f"NASA asset lookup skipped ({nasa_id}): {exc}")
+            continue
+        urls = [
+            str(x.get("href", "")) for x in assets
+            if str(x.get("href", "")).split("?", 1)[0].lower().endswith((".mp4", ".mov", ".m4v"))
+        ]
+        if not urls:
+            continue
+        # Prefer a medium/small MP4 when supplied; avoid huge original masters.
+        urls.sort(key=lambda u: (
+            0 if re.search(r"(medium|small|low)", u, re.I) else 1,
+            len(u)
+        ))
+        results.append({
+            "source": "NASA", "id": str(nasa_id), "url": urls[0],
+            "width": MIN_CLIP_WIDTH, "duration": 0,
+            "metadata": metadata, "tags": metadata,
+            "creator": data.get("center", "NASA"),
+            "page_url": item.get("href", f"https://images.nasa.gov/details/{nasa_id}"),
+            "license": "NASA media usage guidelines; verify third-party credits where noted",
+        })
+    return results
+
+
+def commons_search(query):
+    """Search Commons video files and keep only files with reusable licenses."""
+    response = requests.get(
+        "https://commons.wikimedia.org/w/api.php",
+        params={
+            "action": "query", "format": "json", "generator": "search",
+            "gsrsearch": f"filetype:video {query}", "gsrnamespace": 6,
+            "gsrlimit": 10, "prop": "imageinfo",
+            "iiprop": "url|size|mime|extmetadata"
+        },
+        headers={"User-Agent": "AutoDocumentaryVideo/3.0 (video research)"},
+        timeout=35
+    )
+    response.raise_for_status()
+    pages = response.json().get("query", {}).get("pages", {})
+    results = []
+    for page in pages.values():
+        info = (page.get("imageinfo") or [{}])[0]
+        mime = str(info.get("mime", ""))
+        if not mime.startswith("video/"):
+            continue
+        ext = info.get("extmetadata") or {}
+        license_name = re.sub(r"<[^>]+>", "", str((ext.get("LicenseShortName") or {}).get("value", "")))
+        license_normalized = license_name.lower().replace(" ", "").replace("_", "-")
+        restricted = any(term in license_normalized for term in (
+            "noncommercial", "non-commercial", "cc-by-nc", "ccby-nc",
+            "noderivatives", "no-derivatives", "cc-by-nd", "ccby-nd",
+        ))
+        reusable = (
+            "cc0" in license_normalized
+            or "publicdomain" in license_normalized
+            or "public-domain" in license_normalized
+            or "ccby" in license_normalized
+            or "creativecommonsattribution" in license_normalized
+        )
+        if restricted or not reusable:
+            continue
+        url = info.get("url", "")
+        if not url:
+            continue
+        artist = re.sub(r"<[^>]+>", "", str((ext.get("Artist") or {}).get("value", "Unknown")))
+        description = re.sub(r"<[^>]+>", " ", str((ext.get("ImageDescription") or {}).get("value", "")))
+        metadata = f"{page.get('title', '')} {description}"
+        results.append({
+            "source": "Wikimedia Commons", "id": str(page.get("pageid")),
+            "url": url, "width": int(info.get("width") or 0),
+            "duration": 0, "metadata": metadata, "tags": metadata,
+            "creator": artist, "page_url": page.get("canonicalurl") or "https://commons.wikimedia.org/wiki/" + str(page.get("title", "")).replace(" ", "_"),
+            "license": license_name or "See file page",
+        })
+    return results
+
+
+def search_all_footage_sources(query):
+    """Query each configured/open source independently; cache normalized results."""
+    cache_sources = (
+        ("pixabay" if PIXABAY_KEY else "")
+        + ("|pexels" if PEXELS_KEY else "")
+        + "|nasa|commons"
+    )
+    cache_file = CACHE / (
+        hashlib.sha256(
+            (cache_sources + "|" + query.lower()).encode()
+        ).hexdigest() + ".sources.json"
+    )
+    if cache_file.exists() and time.time() - cache_file.stat().st_mtime < 21600:
+        try:
+            return json.loads(cache_file.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    searches = [
+        ("Pixabay", pixabay_search),
+        ("Pexels", pexels_search),
+        ("NASA", nasa_search),
+        ("Wikimedia Commons", commons_search),
+    ]
+    combined = []
+    for source, search_fn in searches:
+        try:
+            found = search_fn(query)
+            combined.extend(found)
+            if found:
+                print(f"  {source}: {len(found)} candidate(s)")
+        except Exception as exc:
+            print(f"  {source} search unavailable for '{query}': {exc}")
+    try:
+        cache_file.write_text(json.dumps(combined), encoding="utf-8")
+    except Exception:
+        pass
+    return combined
+
+
+STOP_WORDS = {
+    "the", "and", "for", "with", "from", "into", "that", "this", "over",
+    "under", "through", "about", "near", "shot", "video", "aerial",
+    "cinematic", "footage", "drone", "close", "up", "wide", "angle",
+    "slow", "motion", "beautiful", "nature", "scene", "view", "real",
+    "world", "camera", "showing", "moving", "during", "while", "where",
+    "what", "when", "which", "their", "there", "they", "these", "those",
+    "into", "onto", "its", "are", "was", "were", "been", "being", "has",
+    "have", "had", "will", "would", "could", "should", "can", "may",
+    "one", "two", "first", "second", "then", "than", "also", "more",
+    "most", "very", "some", "many", "such", "like", "make", "made"
+}
 
 
 def relevance_score(hit, query, narration):
-    """Conservative tag-based relevance; the specific query is decisive."""
-    tags = set(normalize_words(hit.get("tags", "")))
-    stop = {
-        "the", "and", "for", "with", "from", "into", "that", "this",
-        "over", "under", "through", "about", "near", "shot", "video",
-        "aerial", "cinematic", "footage", "drone", "close", "up",
-        "wide", "angle", "slow", "motion", "beautiful", "nature"
-    }
-    query_tokens = set(normalize_words(query)) - stop
-    narration_tokens = set(normalize_words(narration)) - stop
-    if not tags or not query_tokens:
-        return 0.0, 0, 0
-    query_hits = query_tokens & tags
-    narration_hits = narration_tokens & tags
-    query_coverage = len(query_hits) / max(1, len(query_tokens))
-    narration_coverage = len(narration_hits) / max(1, min(12, len(narration_tokens)))
-    score = 0.82 * query_coverage + 0.18 * narration_coverage
-    return score, len(query_hits), len(query_tokens)
+    """Score metadata against query AND scene narration; generic mood words do not count."""
+    metadata_tokens = set(normalize_words(hit.get("metadata", "")))
+    query_tokens = set(normalize_words(query)) - STOP_WORDS
+    narration_tokens = set(normalize_words(narration)) - STOP_WORDS
+    if not metadata_tokens or not query_tokens:
+        return 0.0, 0, len(query_tokens)
+    q_hits = query_tokens & metadata_tokens
+    n_hits = narration_tokens & metadata_tokens
+    q_coverage = len(q_hits) / max(1, len(query_tokens))
+    # Narration is supporting evidence, not a substitute for matching the shot query.
+    n_coverage = len(n_hits) / max(1, min(10, len(narration_tokens)))
+    score = 0.72 * q_coverage + 0.28 * n_coverage
+    return score, len(q_hits), len(query_tokens)
 
 
 def tag_similarity(tags_a, tags_b):
@@ -581,82 +777,106 @@ def fetch_footage(plan):
     for i, scene in enumerate(plan["scenes"], 1):
         scene["visual_type"] = "footage"
         raw_queries = [scene.get("visual_query", "")]
-        raw_queries.extend(list(scene.get("visual_queries", [])[:3]))
+        raw_queries.extend(list(scene.get("visual_queries", [])[:2]))
         queries = []
-        for q in raw_queries:
-            q = re.sub(r"[^a-zA-Z0-9 ]", " ", str(q)).strip()
-            if q and q.lower() not in [x.lower() for x in queries]:
-                queries.append(q[:95])
+        for raw in raw_queries:
+            query = clean_query(raw)
+            if query and query.lower() not in [q.lower() for q in queries]:
+                queries.append(query)
 
         candidates = {}
         for query in queries:
-            try:
-                hits = pixabay_search(query)
-            except Exception as exc:
-                print(f"Scene {i}: search issue for '{query}': {exc}")
-                continue
-
-            for hit in hits:
-                media_id = hit.get("id")
-                if not media_id or media_id in used_ids:
+            for hit in search_all_footage_sources(query):
+                identity = f"{hit.get('source')}:{hit.get('id')}"
+                if not hit.get("url") or identity in used_ids:
                     continue
-                videos = hit.get("videos", {})
-                rendition = videos.get("large") or videos.get("medium") or videos.get("small") or {}
-                url = rendition.get("url")
-                width = int(rendition.get("width") or 0)
+                width = int(hit.get("width") or 0)
                 duration = float(hit.get("duration") or 0)
-                if not url or width < MIN_CLIP_WIDTH or (duration and duration < 5):
+                if width and width < MIN_CLIP_WIDTH:
                     continue
-
-                score, matched, total = relevance_score(hit, query, scene.get("narration", ""))
-                required = 2 if total >= 3 else 1
-                if matched < required or score < 0.30:
+                if duration and duration < 4:
                     continue
-
-                tags = str(hit.get("tags", ""))
-                similarity = max([tag_similarity(tags, old) for old in selected_tag_sets] or [0.0])
-                if similarity > 0.68:
+                score, matched, total = relevance_score(
+                    hit, query, scene.get("narration", "")
+                )
+                required = max(2, int((total + 1) // 2))
+                query_coverage = matched / max(1, total)
+                # At least half of the concrete subject terms must match,
+                # and two independent terms are mandatory.
+                if (
+                    total < 2
+                    or matched < required
+                    or query_coverage < 0.50
+                    or score < 0.56
+                ):
                     continue
+                tags = str(hit.get("tags") or hit.get("metadata") or "")
+                similarity = max(
+                    [tag_similarity(tags, old) for old in selected_tag_sets] or [0.0]
+                )
+                if similarity > 0.78:
+                    continue
+                previous = candidates.get(identity)
+                if previous is None or score > previous[0]:
+                    candidates[identity] = (
+                        score, hit, query, matched, total
+                    )
 
-                old = candidates.get(media_id)
-                if old is None or score > old[0]:
-                    candidates[media_id] = (score, hit, url, matched, total)
+        ranked = sorted(candidates.values(), key=lambda item: item[0], reverse=True)
+        destination = FOOT / f"scene_{i:02d}.mp4"
+        download_errors = []
+        selected = None
 
-        ranked = sorted(candidates.values(), key=lambda x: x[0], reverse=True)
-        if not ranked:
+        # Crucial: an oversized/broken top result is skipped; try every next result.
+        for score, hit, query, matched, total in ranked:
+            try:
+                download_stream(hit["url"], destination)
+                selected = (score, hit, query, matched, total)
+                break
+            except Exception as exc:
+                download_errors.append(
+                    f"{hit.get('source')} {hit.get('id')}: {exc}"
+                )
+                print(
+                    f"Scene {i}: skipping failed candidate "
+                    f"{hit.get('source')} ({exc})"
+                )
+                destination.unlink(missing_ok=True)
+
+        if selected is None:
+            if not ranked:
+                reason = "No candidate passed the strict metadata relevance check."
+            else:
+                reason = "Every relevant candidate failed to download: " + " | ".join(download_errors[:5])
             raise RuntimeError(
-                f"Scene {i} has no footage that meets the strict relevance threshold. "
-                f"Refusing to insert unrelated footage or a diagram. "
-                f"Visual query: {scene.get('visual_query', '')!r}. "
-                "Use a more specific visual query or another footage source."
+                f"Scene {i} could not obtain relevant footage. {reason} "
+                f"Queries tried: {queries}. No unrelated footage or diagram will be substituted."
             )
 
-        score, hit, url, matched, total = ranked[0]
-        destination = FOOT / f"scene_{i:02d}.mp4"
-        try:
-            download_stream(url, destination)
-        except Exception as exc:
-            raise RuntimeError(f"Scene {i}: relevant clip failed to download: {exc}") from exc
-
-        used_ids.add(hit["id"])
-        selected_tag_sets.append(str(hit.get("tags", "")))
+        score, hit, query, matched, total = selected
+        identity = f"{hit.get('source')}:{hit.get('id')}"
+        used_ids.add(identity)
+        selected_tag_sets.append(str(hit.get("tags") or hit.get("metadata") or ""))
         scene["media_file"] = str(destination)
         scene["visual_type"] = "footage"
-        scene["selected_footage_tags"] = str(hit.get("tags", ""))
-
+        scene["selected_footage_source"] = hit.get("source")
+        scene["selected_footage_tags"] = hit.get("tags") or hit.get("metadata", "")
+        scene["selected_footage_url"] = hit.get("page_url", "")
         credits.append(
-            f"Scene {i} | Pixabay | Creator: {hit.get('user', 'Unknown')} | "
-            f"Source: {hit.get('pageURL', '')} | "
+            f"Scene {i} | {hit.get('source')} | Creator: {hit.get('creator', 'Unknown')} | "
+            f"Source: {hit.get('page_url', '')} | "
             f"Metadata relevance: {score:.2f} ({matched}/{total} query terms) | "
-            "License: Pixabay Content License"
+            f"License: {hit.get('license', 'Check source page')}"
         )
         print(
-            f"Scene {i}: accepted footage score={score:.2f}, "
-            f"query match={matched}/{total} — {hit.get('tags', '')[:120]}"
+            f"Scene {i}: accepted {hit.get('source')} score={score:.2f}, "
+            f"query match={matched}/{total} — {str(hit.get('metadata', ''))[:140]}"
         )
 
-    Path("credits.txt").write_text(chr(10).join(credits) + chr(10), encoding="utf-8")
-    Path("plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
+    Path("credits.txt").write_text("\n".join(credits) + "\n", encoding="utf-8")
+    Path("plan.json").write_text(
+        json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
 
 # VOICEOVER AND SUBTITLES
