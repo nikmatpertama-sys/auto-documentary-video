@@ -1,6 +1,6 @@
 Auto Documentary Video
 
-Automated vertical mini-documentary generator using AI-powered story planning, stock footage, visual verification, Edge TTS narration, Pillow-generated explainer cards, and FFmpeg rendering.
+Automated vertical mini-documentary generator using AI-assisted (or local-template fallback) story planning, stock footage, local SigLIP thumbnail ranking, API-free illustrated fallback scenes, Edge TTS narration, Pillow graphics, and FFmpeg rendering.
 
 Output
 
@@ -22,18 +22,21 @@ Provider availability depends on valid API keys, model availability, quotas, and
 
 GitHub Actions Setup
 
-Add the required API keys under:
+API keys are optional. Add any available keys under:
 
 Repository → Settings → Secrets and variables → Actions
 
-Supported secrets:
+Supported optional secrets:
 
 - "GROQ_API_KEY"
 - "DEEPSEEK_API_KEY"
 - "GEMINI_API_KEY"
 - "OPENROUTER_API_KEY"
 - "PIXABAY_API_KEY"
-- "PEXELS_API_KEY" (optional)
+- "PEXELS_API_KEY"
+- "COVERR_API_KEY"
+
+Without AI text keys, a cautious local-template script is used. Without suitable footage or when AI Vision services are unavailable, a local illustrated 2D fallback scene is rendered. Footage provider keys improve the chance of finding real footage but are not required for the fallback renderer.
 
 Then open:
 
@@ -50,7 +53,7 @@ Requirements:
 - Python 3.11+
 - FFmpeg and ffprobe
 - FFmpeg subtitles/libass support
-- Required API keys
+- Optional AI API keys (local-template fallback is available if providers are unavailable)
 
 Install dependencies:
 
@@ -64,17 +67,17 @@ python main.py
 
 Visual Matching
 
-The project uses a local SigLIP-based visual matcher to help evaluate footage relevance.
+The project uses a local SigLIP-based visual matcher to help rank footage thumbnails. It is not equivalent to full video-frame verification.
 
-When local visual matching is unavailable, the system must report the fallback accurately rather than claiming that SigLIP verification succeeded.
+SigLIP ranks available footage thumbnails locally. If it cannot load, metadata ranking is used and the report does not claim SigLIP verification.
 
-AI visual verification uses the configured provider routing and fallback logic.
+AI visual verification is attempted when providers are configured. If verification services are unavailable, or no suitable footage can be selected, the pipeline creates an original 2D motion-graphic scene locally with Pillow and FFmpeg. This is an illustrated fallback, not photorealistic 3D.
 
 Rendering Pipeline
 
 - Scene durations are allocated according to narration length.
 - Footage is formatted for vertical 9:16 output.
-- Visual treatments include restrained motion, contrast/saturation adjustments, and short fades.
+- Visual treatments include restrained camera motion and contrast/saturation adjustments.
 - Diagram scenes use original Pillow-generated cards.
 - Captions use Edge TTS word-boundary timings.
 - FFmpeg handles final video rendering and encoding.

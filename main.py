@@ -21,6 +21,7 @@ from ai_router import (
     verify_images,
 )
 from visual_matcher import rank_candidates
+from visual_fallback import create_fallback_video
 
 # ============================================================
 # CONFIG
@@ -52,9 +53,9 @@ ENDING_HOLD = 1.25
 MIN_CLIP_WIDTH = 640
 MAX_CLIP_BYTES = 180 * 1024 * 1024
 
-# Visual verification is deliberately fail-closed by default. Set this to
-# false only if you explicitly accept metadata-only footage selection.
-VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "true").strip().lower() not in (
+# AI visual verification is attempted when providers are available. The
+# default permits local visual fallback when verification services are down.
+VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "false").strip().lower() not in (
     "0", "false", "no", "off"
 )
 
@@ -202,6 +203,53 @@ Requirements:
 """
 
 
+def _local_documentary_plan(topic):
+    """Deterministic no-API outline; cautious framing avoids inventing facts."""
+    subject = re.sub(r"[\r\n]+", " ", str(topic or "this subject")).strip()
+    subject = subject[:100] or "this subject"
+    narrations = [
+        f"What makes {subject} worth understanding, and why does this subject deserve a closer look?",
+        f"To explore {subject}, begin with the basic context, the setting, and the questions that shape the story.",
+        f"Look at the key elements connected to {subject}, and notice how each part contributes to the bigger picture.",
+        f"A useful way to understand {subject} is to examine its patterns, processes, and relationships step by step.",
+        f"Different perspectives can reveal details about {subject} that a quick first impression might easily miss.",
+        f"The available evidence and documented examples help separate established information from open questions about {subject}.",
+        f"Taken together, these details show why {subject} matters and what viewers should remember from the explanation.",
+        f"The story of {subject} continues to invite curiosity, careful research, and a deeper understanding of the world.",
+    ]
+    scenes = []
+    query_templates = [
+        f"{subject} documentary overview",
+        f"{subject} environment and context",
+        f"{subject} key elements close up",
+        f"{subject} process scientific visualization",
+        f"{subject} different perspectives",
+        f"{subject} research evidence archive",
+        f"{subject} impact and significance",
+        f"{subject} cinematic closing scene",
+    ]
+    for idx, narration in enumerate(narrations):
+        query = query_templates[idx]
+        scenes.append({
+            "title": f"{subject} — Chapter {idx + 1}",
+            "narration": narration,
+            "visual_query": query,
+            "visual_queries": [
+                f"{subject} realistic documentary footage",
+                f"{subject} educational illustration",
+            ],
+        })
+    plan = {
+        "title": f"Understanding {subject}",
+        "hook": f"What should we know about {subject}?",
+        "script": " ".join(narrations),
+        "scenes": scenes,
+        "ai_provider": {"provider": "local-template", "model": "built-in-fallback"},
+    }
+    assign_scene_sentence_ranges(plan)
+    return plan
+
+
 def gemini_plan(topic):
     """Generate and validate a complete 8-scene plan through the AI router."""
     prompt = documentary_prompt(topic)
@@ -248,8 +296,16 @@ def gemini_plan(topic):
             raise ValueError(f"Scene narration ranges are inconsistent: {exc}") from exc
         return candidate
 
-    plan, provider, model = generate_json(prompt, validator=validate_plan)
-    plan["ai_provider"] = {"provider": provider, "model": model}
+    try:
+        plan, provider, model = generate_json(prompt, validator=validate_plan)
+        plan["ai_provider"] = {"provider": provider, "model": model}
+    except Exception as exc:
+        print(
+            "AI text providers unavailable; using deterministic local "
+            f"documentary outline instead ({type(exc).__name__})."
+        )
+        plan = _local_documentary_plan(topic)
+        provider, model = "local-template", "built-in-fallback"
 
     Path("plan.json").write_text(
         json.dumps(plan, indent=2, ensure_ascii=False),
@@ -1785,6 +1841,7 @@ def fetch_footage(plan):
         download_errors = []
         selected = None
         checked = 0
+        vision_service_unavailable = False
 
         for (
             score,
@@ -1874,7 +1931,12 @@ def fetch_footage(plan):
                 )
 
                 if isinstance(exc, VisionVerificationError):
-                    raise
+                    vision_service_unavailable = True
+                    print(
+                        f"Scene {i}: AI Vision unavailable; switching to "
+                        "local illustrated fallback for this scene."
+                    )
+                    break
 
         if selected is None:
             if not ranked:
@@ -1903,11 +1965,39 @@ def fetch_footage(plan):
                     + " | ".join(download_errors[:4])
                 )
 
-            raise RuntimeError(
-                f"Scene {i} could not obtain verified relevant footage. "
-                f"{reason} Queries tried: {queries}. "
-                "No unrelated footage or diagram will be substituted."
+            fallback_reason = (
+                "AI visual verification unavailable."
+                if vision_service_unavailable
+                else reason
             )
+            print(
+                f"Scene {i}: no usable real footage. Creating original "
+                f"local visual fallback. Reason: {fallback_reason}"
+            )
+            fallback_path = FOOT / f"scene_{i:02d}_fallback.mp4"
+            create_fallback_video(
+                scene=scene,
+                scene_number=i,
+                output=fallback_path,
+                duration=max(5.0, float(scene.get("estimated_duration", 8.0) or 8.0)),
+                topic=TOPIC,
+            )
+            scene["media_file"] = str(fallback_path)
+            scene["visual_type"] = "generated_2d_motion_graphic"
+            scene["selected_footage_source"] = "Local procedural visual fallback"
+            scene["selected_footage_tags"] = ""
+            scene["selected_footage_url"] = ""
+            scene["visual_verification"] = {
+                "method": "local procedural 2D graphic",
+                "confidence": None,
+                "reason": fallback_reason,
+                "query": str(scene.get("visual_query", "")),
+            }
+            credits.append(
+                f"Scene {i} | Original local procedural 2D motion graphic | "
+                "Generated by this project with Pillow and FFmpeg; no stock footage used."
+            )
+            continue
 
         (
             score,
@@ -2360,6 +2450,8 @@ def render_footage_scene(
         f"crop={W}:{H}:"
         f"x='(iw-ow)/2+(iw-ow)*0.08*sin(t*0.22)':"
         f"y='(ih-oh)/2+(ih-oh)*0.08*cos(t*0.18)',"
+        f"eq=contrast=1.07:saturation=1.13:brightness=-0.01,"
+        f"unsharp=5:5:0.35:3:3:0.15,"
         f"fps={FPS},setsar=1,format=yuv420p"
     )
 
@@ -2601,18 +2693,15 @@ def main():
             "GROQ_API_KEY", "DEEPSEEK_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"
         ) if os.getenv(name, "").strip()
     ]
-    if not configured_keys:
-        raise RuntimeError(
-            "No AI provider secret configured. Add at least one of "
-            "GROQ_API_KEY, DEEPSEEK_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY."
-        )
     if VISION_REQUIRED and not configured_vision_provider_names():
         raise RuntimeError(
             "Visual verification is enabled but no vision provider key is configured. "
             "Add Groq, DeepSeek, Gemini, or OpenRouter secret."
         )
-    print("AI provider secrets available: " + ", ".join(configured_keys))
-    print("1/5 Generating documentary plan...")
+    print(
+        "AI text provider secrets available: " + (", ".join(configured_keys) or "none")
+    )
+    print("1/5 Generating documentary plan (AI with local fallback)...")
     plan = gemini_plan(TOPIC)
 
     print("2/5 Searching and ranking relevant footage...")
@@ -2655,11 +2744,17 @@ def main():
         verification = scene.get("visual_verification") or {}
         if not media_path.is_file():
             raise RuntimeError(f"Production report check: Scene {scene_index} footage is missing.")
-        if VISION_REQUIRED and verification.get("confidence") is None:
+        if (
+            VISION_REQUIRED
+            and scene.get("visual_type") != "generated_2d_motion_graphic"
+            and verification.get("confidence") is None
+        ):
             raise RuntimeError(f"Production report check: Scene {scene_index} is not visually verified.")
         scene_records.append({
             "scene": scene_index,
-            "footage_file": str(media_path),
+            "visual_file": str(media_path),
+            "visual_type": scene.get("visual_type", "footage"),
+            "visual_source": scene.get("selected_footage_source", "Unknown"),
             "visual_verification": verification,
         })
 
@@ -2674,6 +2769,7 @@ def main():
         "all_scenes_visually_verified": all(
             item["visual_verification"].get("confidence") is not None
             for item in scene_records
+            if item.get("visual_verification", {}).get("method") != "local procedural 2D graphic"
         ) if VISION_REQUIRED else None,
         "scenes": scene_records,
         "final_video": {
