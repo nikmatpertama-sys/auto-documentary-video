@@ -69,12 +69,14 @@ except ValueError:
     VISION_MIN_CONFIDENCE = 0.72
 VISION_MIN_CONFIDENCE = max(0.0, min(1.0, VISION_MIN_CONFIDENCE))
 VISION_MODEL = os.getenv("GEMINI_VISION_MODEL", MODEL).strip() or MODEL
-GROQ_VISION_MODEL = os.getenv(
-    "GROQ_VISION_MODEL", "qwen/qwen3.8-27b"
-).strip()
-OPENROUTER_VISION_MODEL = os.getenv(
-    "OPENROUTER_VISION_MODEL", "openrouter/free"
-).strip()
+GROQ_VISION_MODEL = (
+    os.getenv("GROQ_VISION_MODEL", "qwen/qwen3.8-27b").strip()
+    or "qwen/qwen3.8-27b"
+)
+OPENROUTER_VISION_MODEL = (
+    os.getenv("OPENROUTER_VISION_MODEL", "openrouter/free").strip()
+    or "openrouter/free"
+)
 
 # Once a provider reports a hard quota/configuration failure, do not keep
 # sending it one doomed request per scene during this workflow run.
@@ -91,6 +93,12 @@ class VisionProviderError(RuntimeError):
 
 
 class VisionVerificationError(RuntimeError):
+    pass
+
+
+class VisionResponseError(RuntimeError):
+    """A provider answered, but its response could not be used safely."""
+
     pass
 
 if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
@@ -201,15 +209,44 @@ Requirements:
 
 
 def extract_json_object(raw_text):
-    """Extract a JSON object even if a provider wraps it in markdown."""
+    """Extract the first complete JSON object, including fenced responses."""
+    if isinstance(raw_text, dict):
+        return raw_text
+
     raw = str(raw_text or "").strip()
     raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.IGNORECASE)
     raw = re.sub(r"\s*```$", "", raw)
-    first = raw.find("{")
-    last = raw.rfind("}")
-    if first < 0 or last <= first:
-        raise ValueError("Provider response did not contain a JSON object.")
-    return json.loads(raw[first:last + 1])
+
+    # Find a balanced object rather than slicing from the first to last brace.
+    # This avoids swallowing unrelated trailing text or a second JSON object.
+    start = -1
+    depth = 0
+    in_string = False
+    escaped = False
+
+    for index, char in enumerate(raw):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+
+        if char == '"':
+            in_string = True
+        elif char == "{":
+            if depth == 0:
+                start = index
+            depth += 1
+        elif char == "}":
+            if depth > 0:
+                depth -= 1
+                if depth == 0 and start >= 0:
+                    return json.loads(raw[start:index + 1])
+
+    raise ValueError("Provider response did not contain a complete JSON object.")
 
 
 def post_with_transient_retry(url, **kwargs):
@@ -957,13 +994,43 @@ def extract_vision_frames(video_path, frame_count=3):
 
 
 def _parse_visual_verdict(provider, raw_text):
-    verdict = extract_json_object(raw_text)
+    """Parse and validate a strict visual-verification JSON response."""
+    try:
+        verdict = extract_json_object(raw_text)
+    except Exception as exc:
+        preview = re.sub(r"\s+", " ", str(raw_text or "")).strip()[:350]
+        raise VisionResponseError(
+            f"{provider} did not return valid JSON: {exc}; "
+            f"response preview={preview!r}"
+        ) from exc
+
+    if not isinstance(verdict, dict):
+        raise VisionResponseError(
+            f"{provider} returned JSON, but it was not an object."
+        )
+
     relevant_value = verdict.get("relevant")
     if not isinstance(relevant_value, bool):
-        raise RuntimeError("The 'relevant' field must be true or false.")
-    confidence = float(verdict.get("confidence", 0.0))
+        raise VisionResponseError(
+            f"{provider} JSON is missing a boolean 'relevant' field."
+        )
+
+    confidence_value = verdict.get("confidence")
+    if isinstance(confidence_value, bool):
+        raise VisionResponseError(
+            f"{provider} returned a boolean instead of numeric confidence."
+        )
+    try:
+        confidence = float(confidence_value)
+    except (TypeError, ValueError) as exc:
+        raise VisionResponseError(
+            f"{provider} JSON is missing numeric 'confidence'."
+        ) from exc
     if not 0.0 <= confidence <= 1.0:
-        raise RuntimeError("The 'confidence' field must be between 0 and 1.")
+        raise VisionResponseError(
+            f"{provider} confidence must be between 0 and 1."
+        )
+
     reason = re.sub(
         r"\s+", " ",
         str(verdict.get("reason", "No visual evidence supplied."))
@@ -1003,18 +1070,19 @@ def _verify_with_gemini(frames, prompt):
         detail = response.text[:700].replace("\n", " ")
         raise VisionProviderError("Gemini", response.status_code, detail)
 
-    data = response.json()
     try:
+        data = response.json()
         raw_text = "\n".join(
             part.get("text", "")
             for part in data["candidates"][0]["content"]["parts"]
             if part.get("text")
         )
     except Exception as exc:
-        raise RuntimeError(
-            f"Gemini visual verification returned unreadable output: {exc}; "
-            f"body={str(data)[:700]}"
+        raise VisionResponseError(
+            f"Gemini visual verification returned an unreadable payload: "
+            f"{exc}; body={response.text[:500]}"
         ) from exc
+
     return _parse_visual_verdict("Gemini", raw_text)
 
 
@@ -1048,8 +1116,20 @@ def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prom
 
     payload = {
         "model": model,
-        "messages": [{"role": "user", "content": content}],
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are a strict visual verifier. Return exactly one "
+                    "valid JSON object with keys relevant, confidence, and "
+                    "reason. Do not add markdown or commentary."
+                ),
+            },
+            {"role": "user", "content": content},
+        ],
         "temperature": 0.1,
+        # Both endpoints support JSON object mode for the configured vision models.
+        "response_format": {"type": "json_object"},
     }
     if provider == "Groq":
         payload["max_completion_tokens"] = 512
@@ -1066,27 +1146,40 @@ def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prom
         detail = response.text[:700].replace("\n", " ")
         raise VisionProviderError(provider, response.status_code, detail)
 
-    data = response.json()
     try:
-        message_content = data["choices"][0]["message"]["content"]
+        data = response.json()
+        message = data["choices"][0]["message"]
+        message_content = message.get("content")
         if isinstance(message_content, list):
-            raw_text = "\n".join(
-                item.get("text", "")
-                for item in message_content
-                if isinstance(item, dict) and item.get("text")
-            )
+            text_parts = []
+            for item in message_content:
+                if isinstance(item, str):
+                    text_parts.append(item)
+                elif isinstance(item, dict) and item.get("text"):
+                    text_parts.append(str(item["text"]))
+            raw_text = "\n".join(text_parts).strip()
         else:
-            raw_text = str(message_content or "")
+            raw_text = str(message_content or "").strip()
+
+        if not raw_text:
+            finish_reason = data.get("choices", [{}])[0].get("finish_reason")
+            raise ValueError(
+                f"The model returned empty message content "
+                f"(finish_reason={finish_reason!r})."
+            )
+    except VisionResponseError:
+        raise
     except Exception as exc:
-        raise RuntimeError(
-            f"{provider} visual verification returned unreadable output: "
-            f"{exc}; body={str(data)[:700]}"
+        raise VisionResponseError(
+            f"{provider} visual verification returned an unreadable response: "
+            f"{exc}; body={response.text[:500]}"
         ) from exc
+
     return _parse_visual_verdict(provider, raw_text)
 
 
 def verify_footage_visually(video_path, scene, query):
-    """Verify footage with Gemini first, then Groq and OpenRouter on failure."""
+    """Verify footage using Groq, then OpenRouter, then Gemini as fallback."""
     frames = extract_vision_frames(video_path, frame_count=3)
     prompt = f"""You are a strict documentary footage verifier.
 Inspect the attached video frames sampled from one candidate clip.
@@ -1110,12 +1203,10 @@ subject and essential context of the query/narration. If uncertain, vague,
 partially matching, or contradictory, set relevant=false. Confidence must
 be a number from 0 to 1 and reflect visual evidence, not guesswork."""
 
+    # Prefer Groq's dedicated multimodal model so Gemini's daily quota is not
+    # consumed while the alternative provider is available. OpenRouter is the
+    # second route; Gemini is retained as the final fallback.
     providers = []
-    if GEMINI_KEY:
-        providers.append((
-            "Gemini",
-            lambda: _verify_with_gemini(frames, prompt),
-        ))
     if GROQ_KEY:
         providers.append((
             "Groq",
@@ -1131,16 +1222,23 @@ be a number from 0 to 1 and reflect visual evidence, not guesswork."""
                 OPENROUTER_VISION_MODEL, frames, prompt
             ),
         ))
+    if GEMINI_KEY:
+        providers.append((
+            "Gemini",
+            lambda: _verify_with_gemini(frames, prompt),
+        ))
 
     errors = []
+    attempted = 0
     for provider_name, verify in providers:
         if provider_name in VISION_DISABLED_PROVIDERS:
             print(
-                f"Visual verifier: skipping {provider_name}; it already "
-                "reported a quota/configuration failure in this run."
+                f"Visual verifier: skipping {provider_name}; it was disabled "
+                "after an earlier quota/configuration/response error."
             )
             continue
 
+        attempted += 1
         print(f"Visual verifier: trying {provider_name}...")
         try:
             relevant, confidence, reason = verify()
@@ -1153,25 +1251,38 @@ be a number from 0 to 1 and reflect visual evidence, not guesswork."""
             return accepted, confidence, reason, provider_name
         except VisionProviderError as exc:
             errors.append(str(exc))
-            # Quota, auth, unsupported model, and invalid request failures
-            # will not heal by retrying for every subsequent scene.
+            # Quota, authentication, invalid model and malformed-request errors
+            # are not useful to retry for every remaining scene in this run.
             if exc.status_code in (400, 401, 403, 404, 413, 415, 422, 429):
                 VISION_DISABLED_PROVIDERS.add(provider_name)
             print(
-                f"Visual verifier {provider_name} unavailable: {str(exc)[:450]}"
+                f"Visual verifier {provider_name} unavailable: {str(exc)[:500]}"
             )
-            print("Switching to the next visual AI provider...")
+            print("Switching to the next visual AI provider immediately...")
+        except VisionResponseError as exc:
+            errors.append(str(exc))
+            # A 200 response with invalid JSON/schema is also a provider failure
+            # for this run. Do not waste one request on it for every new clip.
+            VISION_DISABLED_PROVIDERS.add(provider_name)
+            print(
+                f"Visual verifier {provider_name} returned unusable output: "
+                f"{str(exc)[:500]}"
+            )
+            print("Disabling this provider for the run; trying the next one...")
         except Exception as exc:
             errors.append(f"{provider_name}: {exc}")
             print(
-                f"Visual verifier {provider_name} failed: {str(exc)[:450]}"
+                f"Visual verifier {provider_name} failed temporarily: "
+                f"{str(exc)[:450]}"
             )
-            print("Switching to the next visual AI provider...")
+            print("Switching to the next visual AI provider immediately...")
 
     if not providers:
         detail = "No visual AI credentials are configured."
-    elif not errors:
+    elif attempted == 0:
         detail = "All configured visual AI providers were disabled earlier in this run."
+    elif not errors:
+        detail = "No provider produced a usable visual-verification response."
     else:
         detail = " | ".join(errors)
     raise VisionVerificationError(
@@ -1185,12 +1296,12 @@ def fetch_footage(plan):
     selected_tag_sets = []
 
     visual_provider_names = []
-    if GEMINI_KEY:
-        visual_provider_names.append("Gemini")
     if GROQ_KEY:
         visual_provider_names.append(f"Groq ({GROQ_VISION_MODEL})")
     if OPENROUTER_KEY:
         visual_provider_names.append(f"OpenRouter ({OPENROUTER_VISION_MODEL})")
+    if GEMINI_KEY:
+        visual_provider_names.append(f"Gemini ({VISION_MODEL})")
 
     if VISION_REQUIRED and not visual_provider_names:
         raise RuntimeError(
