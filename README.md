@@ -1,6 +1,6 @@
 Auto Documentary Video
 
-Automated vertical mini-documentary generator using AI-assisted (or local-template fallback) story planning, stock footage, local SigLIP thumbnail ranking, topic-aware API-free explanatory illustrations, Edge TTS narration, Pillow graphics, and FFmpeg rendering.
+Automated vertical mini-documentary generator using AI-assisted (or local-template fallback) story planning, stock footage, local SigLIP thumbnail ranking, scene-aware API-free explanatory illustrations, Edge TTS narration, Pillow graphics, and FFmpeg rendering.
 
 Output
 
@@ -71,7 +71,7 @@ The project uses a local SigLIP-based visual matcher to help rank footage thumbn
 
 SigLIP ranks available footage thumbnails locally. If it cannot load, metadata ranking is used and the report does not claim SigLIP verification.
 
-AI visual verification is attempted when providers are configured. If verification services are unavailable, or no suitable footage can be selected, the pipeline creates an topic-aware 2D explanatory illustration locally with Pillow and FFmpeg. Fallback diagrams cover selected subject families (for example hydrothermal vents, Earth layers, space, microbes, volcanoes, animals, and climate). Unknown subjects use an explicit input-process-outcome diagram rather than claiming to depict literal footage. This is an illustration, not photorealistic 3D.
+AI visual verification is attempted when providers are configured. If verification services are unavailable, or no suitable footage can be selected, the pipeline creates an topic-aware 2D explanatory illustration locally with Pillow and FFmpeg. Fallback diagrams cover selected subject families (for example hydrothermal vents, Earth layers, space, microbes, volcanoes, animals, and climate). Rainforest scenes have separate illustrations for the forest floor, jaguars and leafcutter ants, winding rivers, drought, and leaf transpiration. Scene-local visual queries take priority over broad topic wording, and word-boundary matching prevents false matches such as “planetary” being mistaken for “planet”. Unknown subjects use an explicit input-process-outcome diagram rather than claiming to depict literal footage. These are explanatory illustrations, not photorealistic 3D. The production report includes candidate counts and fallback failure details where applicable.
 
 Rendering Pipeline
 

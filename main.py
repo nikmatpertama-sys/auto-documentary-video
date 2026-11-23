@@ -1970,10 +1970,13 @@ def fetch_footage(plan):
                 )
 
             fallback_reason = (
-                "AI visual verification unavailable."
+                "AI visual verification unavailable. " + reason
                 if vision_service_unavailable
                 else reason
             )
+            if download_errors:
+                fallback_reason += " Candidate diagnostics: " + " | ".join(download_errors[:4])
+            fallback_reason = fallback_reason[:1600]
             print(
                 f"Scene {i}: no usable real footage. Creating original "
                 f"local visual fallback. Reason: {fallback_reason}"
@@ -1996,6 +1999,13 @@ def fetch_footage(plan):
                 "confidence": None,
                 "reason": fallback_reason,
                 "query": str(scene.get("visual_query", "")),
+            }
+            scene["visual_fallback_diagnostics"] = {
+                "metadata_candidate_count": len(ranked),
+                "checked_candidate_count": checked,
+                "vision_service_unavailable": vision_service_unavailable,
+                "candidate_errors": download_errors[:4],
+                "reason": fallback_reason,
             }
             credits.append(
                 f"Scene {i} | Original local procedural 2D motion graphic | "
@@ -2744,13 +2754,16 @@ def main():
             and verification.get("confidence") is None
         ):
             raise RuntimeError(f"Production report check: Scene {scene_index} is not visually verified.")
-        scene_records.append({
+        scene_record = {
             "scene": scene_index,
             "visual_file": str(media_path),
             "visual_type": scene.get("visual_type", "footage"),
             "visual_source": scene.get("selected_footage_source", "Unknown"),
             "visual_verification": verification,
-        })
+        }
+        if scene.get("visual_fallback_diagnostics"):
+            scene_record["visual_fallback_diagnostics"] = scene["visual_fallback_diagnostics"]
+        scene_records.append(scene_record)
 
     if len(scene_records) != 8:
         raise RuntimeError(f"Production report check found {len(scene_records)} scenes; expected 8.")
