@@ -37,18 +37,8 @@ jobs:
       - name: Extract bundled project upgrade
         run: |
           if [ -f auto-documentary-video-upgrade.zip ]; then
-            python - <<'PY'
-            import zipfile
-            from pathlib import Path
-            archive = Path("auto-documentary-video-upgrade.zip")
-            with zipfile.ZipFile(archive) as package:
-                for member in package.infolist():
-                    target = (Path(".") / member.filename).resolve()
-                    if not target.is_relative_to(Path(".").resolve()):
-                        raise SystemExit(f"Unsafe ZIP path: {member.filename}")
-                package.extractall(".")
-            print("Project upgrade package extracted.")
-            PY
+            python -c "import zipfile; from pathlib import Path; root=Path('.').resolve(); z=zipfile.ZipFile('auto-documentary-video-upgrade.zip'); [(Path(root, n).resolve().relative_to(root)) for n in z.namelist()]; z.extractall('.')"
+            echo "Project upgrade package extracted."
           else
             echo "Project upgrade ZIP not found; using checked-out repository files."
           fi
