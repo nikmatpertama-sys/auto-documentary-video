@@ -1,3 +1,4 @@
+
 import os
 import re
 import json
@@ -68,6 +69,29 @@ except ValueError:
     VISION_MIN_CONFIDENCE = 0.72
 VISION_MIN_CONFIDENCE = max(0.0, min(1.0, VISION_MIN_CONFIDENCE))
 VISION_MODEL = os.getenv("GEMINI_VISION_MODEL", MODEL).strip() or MODEL
+GROQ_VISION_MODEL = os.getenv(
+    "GROQ_VISION_MODEL", "qwen/qwen3.8-27b"
+).strip()
+OPENROUTER_VISION_MODEL = os.getenv(
+    "OPENROUTER_VISION_MODEL", "openrouter/free"
+).strip()
+
+# Once a provider reports a hard quota/configuration failure, do not keep
+# sending it one doomed request per scene during this workflow run.
+VISION_DISABLED_PROVIDERS = set()
+
+
+class VisionProviderError(RuntimeError):
+    def __init__(self, provider, status_code, detail):
+        self.provider = provider
+        self.status_code = status_code
+        super().__init__(
+            f"{provider} visual verification HTTP {status_code}: {detail}"
+        )
+
+
+class VisionVerificationError(RuntimeError):
+    pass
 
 if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
     raise RuntimeError(
@@ -932,40 +956,22 @@ def extract_vision_frames(video_path, frame_count=3):
     return frame_paths
 
 
-def verify_footage_visually(video_path, scene, query):
-    """Ask Gemini Vision whether sampled frames depict the requested scene."""
-    if not GEMINI_KEY:
-        if VISION_REQUIRED:
-            raise RuntimeError(
-                "Visual verification requires GEMINI_API_KEY. Add it under "
-                "GitHub Settings > Secrets and variables > Actions, or set "
-                "FOOTAGE_VISION_REQUIRED=false to explicitly allow metadata-only selection."
-            )
-        return True, 1.0, "Visual verification disabled; metadata-only mode was explicitly allowed."
+def _parse_visual_verdict(provider, raw_text):
+    verdict = extract_json_object(raw_text)
+    relevant_value = verdict.get("relevant")
+    if not isinstance(relevant_value, bool):
+        raise RuntimeError("The 'relevant' field must be true or false.")
+    confidence = float(verdict.get("confidence", 0.0))
+    if not 0.0 <= confidence <= 1.0:
+        raise RuntimeError("The 'confidence' field must be between 0 and 1.")
+    reason = re.sub(
+        r"\s+", " ",
+        str(verdict.get("reason", "No visual evidence supplied."))
+    ).strip()
+    return relevant_value, confidence, reason
 
-    frames = extract_vision_frames(video_path, frame_count=3)
-    prompt = f"""You are a strict documentary footage verifier.
-Inspect the attached video frames sampled from one candidate clip.
 
-SCENE VISUAL QUERY: {query}
-SCENE NARRATION: {scene.get('narration', '')}
-
-Decide whether the actual visible content in these frames is a close match
-for the specific subject and setting requested. Do not infer objects,
-animals, locations, weather, camera angles, or actions that are not visibly
-supported by the frames. Generic scenery is NOT a match for a specific
-subject. A forest is not automatically an Amazon rainforest; trees are not
-a canopy aerial; hills are not tree roots; and greenery is not evidence of
-wildlife or rain.
-
-Return ONLY JSON with this exact structure:
-{{"relevant": true, "confidence": 0.0, "reason": "brief visible evidence"}}
-
-Set relevant=true only when the visible evidence clearly supports the main
-subject and essential context of the query/narration. If uncertain, vague,
-partially matching, or contradictory, set relevant=false. Confidence must
-be a number from 0 to 1 and reflect visual evidence, not guesswork."""
-
+def _verify_with_gemini(frames, prompt):
     parts = [{"text": prompt}]
     for frame in frames:
         parts.append({
@@ -995,29 +1001,182 @@ be a number from 0 to 1 and reflect visual evidence, not guesswork."""
     )
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
-        raise RuntimeError(
-            f"Gemini visual verification HTTP {response.status_code}: {detail}"
-        )
+        raise VisionProviderError("Gemini", response.status_code, detail)
 
     data = response.json()
     try:
-        text = "\n".join(
+        raw_text = "\n".join(
             part.get("text", "")
             for part in data["candidates"][0]["content"]["parts"]
             if part.get("text")
         )
-        verdict = extract_json_object(text)
-        relevant = verdict.get("relevant") is True
-        confidence = float(verdict.get("confidence", 0.0))
-        reason = re.sub(r"\s+", " ", str(verdict.get("reason", "No visual evidence supplied."))).strip()
     except Exception as exc:
         raise RuntimeError(
             f"Gemini visual verification returned unreadable output: {exc}; "
             f"body={str(data)[:700]}"
         ) from exc
+    return _parse_visual_verdict("Gemini", raw_text)
 
-    accepted = relevant and confidence >= VISION_MIN_CONFIDENCE
-    return accepted, confidence, reason
+
+def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prompt):
+    if provider == "Groq":
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+    else:
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": os.getenv(
+                "OPENROUTER_SITE_URL", "https://github.com/"
+            ),
+            "X-Title": "Auto Documentary Video",
+        }
+
+    content = [{"type": "text", "text": prompt}]
+    for frame in frames:
+        encoded = base64.b64encode(frame).decode("ascii")
+        content.append({
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:image/jpeg;base64,{encoded}"
+            },
+        })
+
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": content}],
+        "temperature": 0.1,
+    }
+    if provider == "Groq":
+        payload["max_completion_tokens"] = 512
+    else:
+        payload["max_tokens"] = 512
+
+    response = post_with_transient_retry(
+        url,
+        headers=headers,
+        json=payload,
+        timeout=(20, 120),
+    )
+    if response.status_code >= 400:
+        detail = response.text[:700].replace("\n", " ")
+        raise VisionProviderError(provider, response.status_code, detail)
+
+    data = response.json()
+    try:
+        message_content = data["choices"][0]["message"]["content"]
+        if isinstance(message_content, list):
+            raw_text = "\n".join(
+                item.get("text", "")
+                for item in message_content
+                if isinstance(item, dict) and item.get("text")
+            )
+        else:
+            raw_text = str(message_content or "")
+    except Exception as exc:
+        raise RuntimeError(
+            f"{provider} visual verification returned unreadable output: "
+            f"{exc}; body={str(data)[:700]}"
+        ) from exc
+    return _parse_visual_verdict(provider, raw_text)
+
+
+def verify_footage_visually(video_path, scene, query):
+    """Verify footage with Gemini first, then Groq and OpenRouter on failure."""
+    frames = extract_vision_frames(video_path, frame_count=3)
+    prompt = f"""You are a strict documentary footage verifier.
+Inspect the attached video frames sampled from one candidate clip.
+
+SCENE VISUAL QUERY: {query}
+SCENE NARRATION: {scene.get('narration', '')}
+
+Decide whether the actual visible content in these frames is a close match
+for the specific subject and setting requested. Do not infer objects,
+animals, locations, weather, camera angles, or actions that are not visibly
+supported by the frames. Generic scenery is NOT a match for a specific
+subject. A forest is not automatically an Amazon rainforest; trees are not
+a canopy aerial; hills are not tree roots; and greenery is not evidence of
+wildlife or rain.
+
+Return ONLY JSON with this exact structure:
+{{"relevant": true, "confidence": 0.0, "reason": "brief visible evidence"}}
+
+Set relevant=true only when the visible evidence clearly supports the main
+subject and essential context of the query/narration. If uncertain, vague,
+partially matching, or contradictory, set relevant=false. Confidence must
+be a number from 0 to 1 and reflect visual evidence, not guesswork."""
+
+    providers = []
+    if GEMINI_KEY:
+        providers.append((
+            "Gemini",
+            lambda: _verify_with_gemini(frames, prompt),
+        ))
+    if GROQ_KEY:
+        providers.append((
+            "Groq",
+            lambda: _verify_with_openai_compatible_vision(
+                "Groq", GROQ_KEY, GROQ_VISION_MODEL, frames, prompt
+            ),
+        ))
+    if OPENROUTER_KEY:
+        providers.append((
+            "OpenRouter",
+            lambda: _verify_with_openai_compatible_vision(
+                "OpenRouter", OPENROUTER_KEY,
+                OPENROUTER_VISION_MODEL, frames, prompt
+            ),
+        ))
+
+    errors = []
+    for provider_name, verify in providers:
+        if provider_name in VISION_DISABLED_PROVIDERS:
+            print(
+                f"Visual verifier: skipping {provider_name}; it already "
+                "reported a quota/configuration failure in this run."
+            )
+            continue
+
+        print(f"Visual verifier: trying {provider_name}...")
+        try:
+            relevant, confidence, reason = verify()
+            accepted = relevant and confidence >= VISION_MIN_CONFIDENCE
+            print(
+                f"Visual verifier: {provider_name} returned "
+                f"{'PASS' if accepted else 'REJECT'} "
+                f"({confidence:.2f})."
+            )
+            return accepted, confidence, reason, provider_name
+        except VisionProviderError as exc:
+            errors.append(str(exc))
+            # Quota, auth, unsupported model, and invalid request failures
+            # will not heal by retrying for every subsequent scene.
+            if exc.status_code in (400, 401, 403, 404, 413, 415, 422, 429):
+                VISION_DISABLED_PROVIDERS.add(provider_name)
+            print(
+                f"Visual verifier {provider_name} unavailable: {str(exc)[:450]}"
+            )
+            print("Switching to the next visual AI provider...")
+        except Exception as exc:
+            errors.append(f"{provider_name}: {exc}")
+            print(
+                f"Visual verifier {provider_name} failed: {str(exc)[:450]}"
+            )
+            print("Switching to the next visual AI provider...")
+
+    if not providers:
+        detail = "No visual AI credentials are configured."
+    elif not errors:
+        detail = "All configured visual AI providers were disabled earlier in this run."
+    else:
+        detail = " | ".join(errors)
+    raise VisionVerificationError(
+        "All visual verification providers failed. " + detail
+    )
 
 
 def fetch_footage(plan):
@@ -1025,19 +1184,30 @@ def fetch_footage(plan):
     used_ids = set()
     selected_tag_sets = []
 
-    if VISION_REQUIRED and not GEMINI_KEY:
+    visual_provider_names = []
+    if GEMINI_KEY:
+        visual_provider_names.append("Gemini")
+    if GROQ_KEY:
+        visual_provider_names.append(f"Groq ({GROQ_VISION_MODEL})")
+    if OPENROUTER_KEY:
+        visual_provider_names.append(f"OpenRouter ({OPENROUTER_VISION_MODEL})")
+
+    if VISION_REQUIRED and not visual_provider_names:
         raise RuntimeError(
-            "Stage 1 requires real visual verification, but GEMINI_API_KEY is "
-            "missing. Add GEMINI_API_KEY in GitHub Settings > Secrets and "
-            "variables > Actions. If you deliberately want the weaker "
-            "metadata-only fallback, set FOOTAGE_VISION_REQUIRED=false."
+            "Stage 1 requires visual verification. Add at least one of "
+            "GEMINI_API_KEY, GROQ_API_KEY, or OPENROUTER_API_KEY under "
+            "GitHub Settings > Secrets and variables > Actions."
         )
-    if not GEMINI_KEY:
-        print("WARNING: FOOTAGE_VISION_REQUIRED=false; using metadata-only footage checks.")
+    if not visual_provider_names:
+        print(
+            "WARNING: FOOTAGE_VISION_REQUIRED=false and no visual AI keys "
+            "are configured; using metadata-only footage checks."
+        )
     else:
         print(
-            f"Visual verification enabled: Gemini model={VISION_MODEL}, "
-            f"minimum confidence={VISION_MIN_CONFIDENCE:.2f}."
+            "Visual verification enabled with automatic failover: "
+            + " -> ".join(visual_provider_names)
+            + f". Minimum confidence={VISION_MIN_CONFIDENCE:.2f}."
         )
 
     for i, scene in enumerate(plan["scenes"], 1):
@@ -1098,19 +1268,20 @@ def fetch_footage(plan):
         selected = None
         checked = 0
 
-        # Metadata only narrows the search. Gemini must confirm the actual
-        # sampled images before a candidate can be accepted in strict mode.
+        # Metadata only narrows the search. A vision-capable AI provider
+        # must confirm the sampled images in strict mode.
         for score, hit, query, matched, total in ranked[:VISION_CANDIDATE_LIMIT]:
             checked += 1
             try:
                 download_stream(hit["url"], destination)
-                if GEMINI_KEY:
-                    visually_relevant, confidence, visual_reason = verify_footage_visually(
-                        destination, scene, query
+                if visual_provider_names:
+                    visually_relevant, confidence, visual_reason, vision_provider = (
+                        verify_footage_visually(destination, scene, query)
                     )
                     print(
                         f"Scene {i}: visual check {checked}/"
-                        f"{min(len(ranked), VISION_CANDIDATE_LIMIT)} — "
+                        f"{min(len(ranked), VISION_CANDIDATE_LIMIT)} via "
+                        f"{vision_provider} — "
                         f"{'PASS' if visually_relevant else 'REJECT'} "
                         f"({confidence:.2f}): {visual_reason[:220]}"
                     )
@@ -1119,11 +1290,12 @@ def fetch_footage(plan):
                         continue
                 else:
                     confidence = None
+                    vision_provider = "Metadata-only"
                     visual_reason = "Metadata-only fallback explicitly enabled."
 
                 selected = (
                     score, hit, query, matched, total,
-                    confidence, visual_reason,
+                    confidence, visual_reason, vision_provider,
                 )
                 break
             except Exception as exc:
@@ -1136,14 +1308,12 @@ def fetch_footage(plan):
                     f"({hit.get('source')}): {message[:350]}"
                 )
                 destination.unlink(missing_ok=True)
-                # Credentials, model, and quota failures affect every candidate;
-                # stop rather than repeatedly sending doomed API requests.
-                if re.search(
-                    r"Gemini visual verification HTTP (400|401|403|429)",
-                    message,
-                ):
+                # If every configured vision provider fails, stop this workflow
+                # rather than repeatedly sending doomed requests for new clips.
+                if isinstance(exc, VisionVerificationError):
                     raise RuntimeError(
-                        "Gemini visual verification cannot continue. " + message
+                        "Visual verification cannot continue after automatic "
+                        "provider failover. " + message
                     ) from exc
 
         if selected is None:
@@ -1165,7 +1335,7 @@ def fetch_footage(plan):
 
         (
             score, hit, query, matched, total,
-            vision_confidence, vision_reason,
+            vision_confidence, vision_reason, vision_provider,
         ) = selected
         identity = f"{hit.get('source')}:{hit.get('id')}"
         used_ids.add(identity)
@@ -1176,13 +1346,13 @@ def fetch_footage(plan):
         scene["selected_footage_tags"] = hit.get("tags") or hit.get("metadata", "")
         scene["selected_footage_url"] = hit.get("page_url", "")
         scene["visual_verification"] = {
-            "method": "Gemini Vision" if vision_confidence is not None else "metadata-only fallback",
+            "method": f"{vision_provider} Vision" if vision_confidence is not None else "metadata-only fallback",
             "confidence": vision_confidence,
             "reason": vision_reason,
             "query": query,
         }
         vision_credit = (
-            f" | Visual verification: Gemini {vision_confidence:.2f} — {vision_reason}"
+            f" | Visual verification: {vision_provider} {vision_confidence:.2f} — {vision_reason}"
             if vision_confidence is not None
             else " | Visual verification: disabled (metadata-only fallback)"
         )
