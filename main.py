@@ -42,6 +42,7 @@ BASE_RATE = os.getenv("TTS_RATE", "-4%").strip()
 BASE_PITCH = os.getenv("TTS_PITCH", "-3Hz").strip()
 
 W, H, FPS = 1080, 1920, 30
+X264_PRESET = os.getenv("X264_PRESET", "ultrafast").strip() or "ultrafast"
 
 OPENING_LEAD = 0.75
 SENTENCE_GAP = 0.30
@@ -131,11 +132,6 @@ Return ONLY valid JSON in this exact structure:
 "narration":"complete spoken narration segment for this scene",
 "visual_query":"specific searchable real-world footage phrase, 3-6 words",
 "visual_queries":["alternate specific shot query","second alternate shot query"],
-"visual_type":"footage or diagram",
-"diagram_kind":"process, map, comparison, timeline, or data",
-"diagram_title":"short title",
-"diagram_text":"one concise explanatory line",
-"diagram_steps":["short step 1","short step 2","short step 3"],
 "source_label":"verified institution name or empty",
 "source_url":"official URL or empty"
 }}
@@ -149,10 +145,10 @@ Requirements:
 - Divide the complete spoken story across the 8 scene narration fields, in order.
 - Do not omit story content between scenes or repeat whole sentences.
 - The combined scene narration should form a coherent 145-165 word script.
-- Use 2 or 3 diagram scenes maximum.
-- Diagrams must explain a real mechanism, process, comparison,
-  timeline, or geographic relationship.
-- Other scenes must describe concrete real-world footage.
+- ALL 8 scenes MUST use concrete, relevant real-world footage.
+- NEVER request diagrams, charts, infographics, title cards, or abstract graphics.
+- Each visual query must name the exact subject being narrated, not merely a broad mood or setting.
+- Avoid wildlife or objects unrelated to the specific narration.
 - Include subject, environment, and/or camera angle in visual queries.
 - Tell one coherent story with a reveal and satisfying payoff.
 - Avoid list-like narration and generic introductions.
@@ -359,7 +355,7 @@ def gemini_plan(topic):
             for scene_index, scene in enumerate(candidate["scenes"], 1):
                 if not isinstance(scene, dict):
                     raise RuntimeError(f"Scene {scene_index} is not a JSON object.")
-                narration = re.sub(r"\\s+", " ", str(scene.get("narration", ""))).strip()
+                narration = re.sub(r"\s+", " ", str(scene.get("narration", ""))).strip()
                 if not narration:
                     raise RuntimeError(f"Scene {scene_index} has empty narration.")
                 scene["narration"] = narration
@@ -549,551 +545,120 @@ def pixabay_search(query):
 
 
 def relevance_score(hit, query, narration):
-    """
-    Rank footage using Pixabay metadata.
-    This is metadata matching, not AI visual recognition.
-    """
-
+    """Conservative tag-based relevance; the specific query is decisive."""
     tags = set(normalize_words(hit.get("tags", "")))
-    q = set(normalize_words(query))
-    n = set(normalize_words(narration))
-
     stop = {
-        "the", "and", "for", "with", "from", "into",
-        "that", "this", "over", "under", "through",
-        "about", "near", "shot", "video", "aerial",
-        "cinematic"
+        "the", "and", "for", "with", "from", "into", "that", "this",
+        "over", "under", "through", "about", "near", "shot", "video",
+        "aerial", "cinematic", "footage", "drone", "close", "up",
+        "wide", "angle", "slow", "motion", "beautiful", "nature"
     }
+    query_tokens = set(normalize_words(query)) - stop
+    narration_tokens = set(normalize_words(narration)) - stop
+    if not tags or not query_tokens:
+        return 0.0, 0, 0
+    query_hits = query_tokens & tags
+    narration_hits = narration_tokens & tags
+    query_coverage = len(query_hits) / max(1, len(query_tokens))
+    narration_coverage = len(narration_hits) / max(1, min(12, len(narration_tokens)))
+    score = 0.82 * query_coverage + 0.18 * narration_coverage
+    return score, len(query_hits), len(query_tokens)
 
-    q -= stop
-    n -= stop
 
-    if not tags:
+def tag_similarity(tags_a, tags_b):
+    a = set(normalize_words(tags_a))
+    b = set(normalize_words(tags_b))
+    if not a or not b:
         return 0.0
-
-    q_score = len(q & tags) / max(1, len(q))
-
-    n_score = (
-        len(n & tags) /
-        max(1, min(len(n), 10))
-    )
-
-    return (
-        0.72 * q_score +
-        0.28 * min(1.0, n_score)
-    )
+    return len(a & b) / max(1, len(a | b))
 
 
 def fetch_footage(plan):
     credits = []
-    used = set()
+    used_ids = set()
+    selected_tag_sets = []
 
     for i, scene in enumerate(plan["scenes"], 1):
-
-        if (
-            scene.get("visual_type") == "diagram"
-            and i != 1
-        ):
-            print(
-                f"Scene {i}: explanatory motion graphic selected."
-            )
-            continue
-
-        queries = (
-            [scene.get("visual_query", "")]
-            + list(scene.get("visual_queries", [])[:2])
-        )
+        scene["visual_type"] = "footage"
+        raw_queries = [scene.get("visual_query", "")]
+        raw_queries.extend(list(scene.get("visual_queries", [])[:3]))
+        queries = []
+        for q in raw_queries:
+            q = re.sub(r"[^a-zA-Z0-9 ]", " ", str(q)).strip()
+            if q and q.lower() not in [x.lower() for x in queries]:
+                queries.append(q[:95])
 
         candidates = {}
-
         for query in queries:
-            if not str(query).strip():
-                continue
-
             try:
                 hits = pixabay_search(query)
-
-                for hit in hits:
-                    mid = hit.get("id")
-
-                    if not mid or mid in used:
-                        continue
-
-                    videos = hit.get("videos", {})
-
-                    rendition = (
-                        videos.get("large")
-                        or videos.get("medium")
-                        or videos.get("small")
-                        or {}
-                    )
-
-                    url = rendition.get("url")
-                    width = int(rendition.get("width") or 0)
-
-                    if not url or width < MIN_CLIP_WIDTH:
-                        continue
-
-                    clip_seconds = float(
-                        hit.get("duration") or 0
-                    )
-
-                    if clip_seconds and clip_seconds < 5:
-                        continue
-
-                    score = relevance_score(
-                        hit,
-                        query,
-                        scene.get("narration", "")
-                    )
-
-                    old = candidates.get(mid)
-
-                    if old is None or score > old[0]:
-                        candidates[mid] = (
-                            score,
-                            hit,
-                            url
-                        )
-
             except Exception as exc:
-                print(
-                    f"Scene {i}: search issue for "
-                    f"'{query}': {exc}"
-                )
+                print(f"Scene {i}: search issue for '{query}': {exc}")
+                continue
 
-        ranked = sorted(
-            candidates.values(),
-            key=lambda x: x[0],
-            reverse=True
-        )
+            for hit in hits:
+                media_id = hit.get("id")
+                if not media_id or media_id in used_ids:
+                    continue
+                videos = hit.get("videos", {})
+                rendition = videos.get("large") or videos.get("medium") or videos.get("small") or {}
+                url = rendition.get("url")
+                width = int(rendition.get("width") or 0)
+                duration = float(hit.get("duration") or 0)
+                if not url or width < MIN_CLIP_WIDTH or (duration and duration < 5):
+                    continue
 
-        chosen = next(
-            (x for x in ranked if x[0] >= 0.12),
-            None
-        )
+                score, matched, total = relevance_score(hit, query, scene.get("narration", ""))
+                required = 2 if total >= 3 else 1
+                if matched < required or score < 0.30:
+                    continue
 
-        if chosen:
-            score, hit, url = chosen
+                tags = str(hit.get("tags", ""))
+                similarity = max([tag_similarity(tags, old) for old in selected_tag_sets] or [0.0])
+                if similarity > 0.68:
+                    continue
 
-            destination = FOOT / f"scene_{i:02d}.mp4"
+                old = candidates.get(media_id)
+                if old is None or score > old[0]:
+                    candidates[media_id] = (score, hit, url, matched, total)
 
-            try:
-                download_stream(url, destination)
-
-                used.add(hit["id"])
-
-                scene["media_file"] = str(destination)
-
-                credits.append(
-                    f"Scene {i} | Pixabay | "
-                    f"Creator: {hit.get('user', 'Unknown')} | "
-                    f"Source: {hit.get('pageURL', '')} | "
-                    f"Metadata relevance: {score:.2f} | "
-                    "License: Pixabay Content License"
-                )
-
-                print(
-                    f"Scene {i}: selected footage "
-                    f"(metadata match {score:.2f}) — "
-                    f"{hit.get('tags', '')[:90]}"
-                )
-
-            except Exception as exc:
-                print(
-                    f"Scene {i}: selected clip could not "
-                    f"be downloaded: {exc}"
-                )
-
-        else:
-            if i == 1:
-                raise RuntimeError(
-                    "No sufficiently relevant opening footage "
-                    "was found. Refusing to publish an unrelated "
-                    "or frozen opening. Try another topic wording "
-                    "or retry the workflow."
-                )
-
-            scene["visual_type"] = "diagram"
-
-            print(
-                f"Scene {i}: no sufficiently relevant stock clip; "
-                "using animated explainer instead."
+        ranked = sorted(candidates.values(), key=lambda x: x[0], reverse=True)
+        if not ranked:
+            raise RuntimeError(
+                f"Scene {i} has no footage that meets the strict relevance threshold. "
+                f"Refusing to insert unrelated footage or a diagram. "
+                f"Visual query: {scene.get('visual_query', '')!r}. "
+                "Use a more specific visual query or another footage source."
             )
 
-    for i, scene in enumerate(plan["scenes"], 1):
-        label = str(
-            scene.get("source_label") or ""
-        ).strip()
+        score, hit, url, matched, total = ranked[0]
+        destination = FOOT / f"scene_{i:02d}.mp4"
+        try:
+            download_stream(url, destination)
+        except Exception as exc:
+            raise RuntimeError(f"Scene {i}: relevant clip failed to download: {exc}") from exc
 
-        url = str(
-            scene.get("source_url") or ""
-        ).strip()
+        used_ids.add(hit["id"])
+        selected_tag_sets.append(str(hit.get("tags", "")))
+        scene["media_file"] = str(destination)
+        scene["visual_type"] = "footage"
+        scene["selected_footage_tags"] = str(hit.get("tags", ""))
 
-        if label and url.startswith("https://"):
-            credits.append(
-                f"Explainer source for scene {i} | "
-                f"{label} | {url}"
-            )
-
-    Path("credits.txt").write_text(
-        "\n".join(credits)
-        if credits
-        else "No external footage/source references were verified.\n",
-        encoding="utf-8"
-    )
-
-    Path("plan.json").write_text(
-        json.dumps(plan, indent=2, ensure_ascii=False),
-        encoding="utf-8"
-    )
-
-
-# ============================================================
-# ANIMATED DIAGRAMS
-# ============================================================
-
-def get_font(size, bold=False):
-    paths = [
-        (
-            "/usr/share/fonts/truetype/dejavu/"
-            "DejaVuSans-Bold.ttf"
-            if bold else
-            "/usr/share/fonts/truetype/dejavu/"
-            "DejaVuSans.ttf"
-        ),
-        (
-            "/usr/share/fonts/truetype/liberation2/"
-            "LiberationSans-Bold.ttf"
-            if bold else
-            "/usr/share/fonts/truetype/liberation2/"
-            "LiberationSans-Regular.ttf"
+        credits.append(
+            f"Scene {i} | Pixabay | Creator: {hit.get('user', 'Unknown')} | "
+            f"Source: {hit.get('pageURL', '')} | "
+            f"Metadata relevance: {score:.2f} ({matched}/{total} query terms) | "
+            "License: Pixabay Content License"
         )
-    ]
-
-    for path in paths:
-        if Path(path).exists():
-            return ImageFont.truetype(path, size)
-
-    return ImageFont.load_default()
-
-
-def make_diagram(scene, idx):
-    """Generate a lightweight animated explainer."""
-
-    width, height, frames = 540, 960, 48
-
-    kind = str(
-        scene.get("diagram_kind") or "process"
-    ).lower()
-
-    if kind not in {
-        "process", "map", "comparison", "timeline", "data"
-    }:
-        kind = "process"
-
-    title = str(
-        scene.get("diagram_title") or "The hidden connection"
-    )[:64]
-
-    body = str(
-        scene.get("diagram_text") or
-        "A process revealed step by step"
-    )[:120]
-
-    steps = [
-        str(x)[:30]
-        for x in (scene.get("diagram_steps") or [])[:4]
-    ]
-
-    if len(steps) < 2:
-        steps = [
-            "The trigger",
-            "The process",
-            "The result"
-        ]
-
-    accent = (73, 204, 218)
-    bg = (7, 18, 29)
-
-    directory = VIS / f"diagram_{idx:02d}"
-    directory.mkdir(parents=True, exist_ok=True)
-
-    ft = get_font(30, True)
-    fb = get_font(19)
-    fs = get_font(15, True)
-
-    for frame in range(frames):
-        t = frame / (frames - 1)
-
-        im = Image.new("RGB", (width, height), bg)
-        d = ImageDraw.Draw(im)
-
-        sweep_x = int((t * 760) - 110)
-
-        d.rectangle(
-            (sweep_x, 0, sweep_x + 70, height),
-            fill=(9, 25, 37)
+        print(
+            f"Scene {i}: accepted footage score={score:.2f}, "
+            f"query match={matched}/{total} — {hit.get('tags', '')[:120]}"
         )
 
-        for x in range(-40, width + 40, 50):
-            xx = (x + int(frame * 1.2)) % width
-
-            d.line(
-                (xx, 0, xx, height),
-                fill=(13, 31, 43),
-                width=1
-            )
-
-        d.text(
-            (32, 42),
-            f"FIELD EXPLAINER / {idx:02d}",
-            font=fs,
-            fill=accent
-        )
-
-        d.multiline_text(
-            (32, 100),
-            "\n".join(textwrap.wrap(title, 25)),
-            font=ft,
-            fill=(245, 248, 250),
-            spacing=5
-        )
-
-        d.line(
-            (32, 205, 508, 205),
-            fill=(43, 82, 101),
-            width=2
-        )
-
-        if kind == "timeline":
-            y = 470
-
-            d.line(
-                (55, y, 485, y),
-                fill=(55, 100, 120),
-                width=5
-            )
-
-            for j, label in enumerate(steps[:4]):
-                x = 60 + j * (
-                    420 / max(1, len(steps) - 1)
-                )
-
-                active = max(
-                    0,
-                    min(1, t * len(steps) - j)
-                )
-
-                r = 9 + int(8 * active)
-
-                d.ellipse(
-                    (x-r, y-r, x+r, y+r),
-                    fill=accent if active > 0 else (45, 75, 90)
-                )
-
-                d.multiline_text(
-                    (x-48, y+42),
-                    "\n".join(textwrap.wrap(label, 11)),
-                    font=fs,
-                    fill=(235, 242, 246),
-                    spacing=4,
-                    align="center"
-                )
-
-        elif kind == "comparison":
-            for j, label in enumerate(steps[:2]):
-                x = 32 + j * 245
-
-                d.rounded_rectangle(
-                    (x, 310, x+220, 650),
-                    radius=18,
-                    fill=(13, 35, 49),
-                    outline=(
-                        accent if t > j*.22 else (45, 75, 90)
-                    ),
-                    width=3
-                )
-
-                d.text(
-                    (x+18, 340),
-                    "A" if j == 0 else "B",
-                    font=ft,
-                    fill=accent
-                )
-
-                d.multiline_text(
-                    (x+18, 430),
-                    "\n".join(textwrap.wrap(label, 13)),
-                    font=fb,
-                    fill=(235, 242, 246),
-                    spacing=6
-                )
-
-                bar = int(
-                    160 * max(
-                        0,
-                        min(1, (t-j*.18)/.65)
-                    )
-                )
-
-                d.rounded_rectangle(
-                    (x+18, 600, x+18+bar, 612),
-                    radius=6,
-                    fill=accent
-                )
-
-        elif kind == "map":
-            d.rounded_rectangle(
-                (42, 290, 498, 690),
-                radius=22,
-                fill=(10, 35, 47),
-                outline=(38, 89, 105),
-                width=2
-            )
-
-            points = [
-                (90, 620),
-                (175, 540),
-                (260, 575),
-                (345, 420),
-                (450, 350)
-            ]
-
-            upto = min(
-                len(points)-1,
-                int(t*(len(points)-1))+1
-            )
-
-            for a, b in zip(
-                points[:upto+1],
-                points[1:upto+2]
-            ):
-                d.line(
-                    (a[0], a[1], b[0], b[1]),
-                    fill=accent,
-                    width=6
-                )
-
-            for j, (x, y) in enumerate(points):
-                r = 11 if j <= upto else 7
-
-                d.ellipse(
-                    (x-r, y-r, x+r, y+r),
-                    fill=accent if j <= upto else (60, 92, 104)
-                )
-
-            d.text(
-                (62, 720),
-                "Illustrative pathway — not to scale",
-                font=fs,
-                fill=(150, 180, 190)
-            )
-
-        elif kind == "data":
-            for j, label in enumerate(steps[:4]):
-                y = 315 + j * 105
-
-                d.text(
-                    (48, y),
-                    "\n".join(textwrap.wrap(label, 32)),
-                    font=fb,
-                    fill=(235, 242, 246)
-                )
-
-                bar = int(
-                    390 * max(
-                        0,
-                        min(1, t*1.4-j*.22)
-                    )
-                )
-
-                d.rounded_rectangle(
-                    (48, y+54, 48+max(3, bar), y+67),
-                    radius=6,
-                    fill=accent
-                )
-
-        else:
-            n = min(4, len(steps))
-            gap = 16
-            boxw = (440-gap*(n-1))//n
-            y = 380
-
-            for j, label in enumerate(steps[:n]):
-                x = 50 + j * (boxw + gap)
-
-                active = max(
-                    0,
-                    min(1, t*n-j)
-                )
-
-                d.rounded_rectangle(
-                    (x, y, x+boxw, y+210),
-                    radius=14,
-                    fill=(13, 37, 51),
-                    outline=(
-                        accent if active > 0 else (43, 76, 91)
-                    ),
-                    width=3
-                )
-
-                d.text(
-                    (x+10, y+18),
-                    f"0{j+1}",
-                    font=fs,
-                    fill=accent
-                )
-
-                d.multiline_text(
-                    (x+10, y+68),
-                    "\n".join(textwrap.wrap(label, 10)),
-                    font=fs,
-                    fill=(235, 242, 246),
-                    spacing=5
-                )
-
-                if j < n-1:
-                    cx = x + boxw + gap//2
-                    cy = y + 105
-
-                    d.polygon(
-                        [
-                            (cx-6, cy-9),
-                            (cx+6, cy),
-                            (cx-6, cy+9)
-                        ],
-                        fill=(
-                            accent if t*n > j+1 else (60, 90, 100)
-                        )
-                    )
-
-        d.multiline_text(
-            (38, 790),
-            "\n".join(textwrap.wrap(body, 42)),
-            font=fb,
-            fill=(195, 215, 224),
-            spacing=7
-        )
-
-        if scene.get("source_label"):
-            d.text(
-                (38, 900),
-                f"SOURCE: {str(scene['source_label'])[:48]}",
-                font=fs,
-                fill=(125, 165, 178)
-            )
-
-        im.save(
-            directory / f"frame_{frame:03d}.jpg",
-            quality=88,
-            optimize=True
-        )
-
-    return directory
+    Path("credits.txt").write_text(chr(10).join(credits) + chr(10), encoding="utf-8")
+    Path("plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
-# ============================================================
 # VOICEOVER AND SUBTITLES
 # ============================================================
 
@@ -1466,7 +1031,7 @@ def render_footage_scene(
         "-vf", vf,
         "-an",
         "-c:v", "libx264",
-        "-preset", "veryfast",
+        "-preset", X264_PRESET,
         "-crf", "20",
         "-r", str(FPS),
         "-pix_fmt", "yuv420p",
@@ -1475,31 +1040,6 @@ def render_footage_scene(
     ]
 
     run(cmd)
-
-
-def render_diagram_scene(
-    scene,
-    idx,
-    duration,
-    output
-):
-    frames_dir = make_diagram(scene, idx)
-
-    run([
-        "ffmpeg", "-y",
-        "-framerate", "24",
-        "-i", str(frames_dir / "frame_%03d.jpg"),
-        "-t", f"{duration:.3f}",
-        "-vf",
-        f"scale={W}:{H}:flags=lanczos,"
-        f"fps={FPS},format=yuv420p",
-        "-an",
-        "-c:v", "libx264",
-        "-preset", "veryfast",
-        "-crf", "20",
-        "-pix_fmt", "yuv420p",
-        str(output)
-    ])
 
 
 def render(plan, sentence_events, total_duration):
@@ -1539,17 +1079,9 @@ def render(plan, sentence_events, total_duration):
             )
 
         else:
-            if i == 1:
-                raise RuntimeError(
-                    "Opening footage is missing. "
-                    "Refusing to render a frozen or unrelated opening."
-                )
-
-            render_diagram_scene(
-                scene,
-                i,
-                duration,
-                output
+            raise RuntimeError(
+                f"Scene {i} has no approved real-world footage. "
+                "Rendering stopped rather than substituting a diagram or unrelated visual."
             )
 
         segment_files.append(output)
@@ -1600,7 +1132,7 @@ def render(plan, sentence_events, total_duration):
         "-map", "[a]",
         "-t", f"{total_duration:.3f}",
         "-c:v", "libx264",
-        "-preset", "veryfast",
+        "-preset", X264_PRESET,
         "-crf", "20",
         "-pix_fmt", "yuv420p",
         "-r", str(FPS),
