@@ -74,13 +74,31 @@ GROQ_VISION_MODEL = (
     or "qwen/qwen3.8-27b"
 )
 OPENROUTER_VISION_MODEL = (
-    os.getenv("OPENROUTER_VISION_MODEL", "openrouter/free").strip()
-    or "openrouter/free"
+    os.getenv(
+        "OPENROUTER_VISION_MODEL",
+        "nvidia/nemotron-3.5-super-vl:free"
+    ).strip()
+    or "nvidia/nemotron-3.5-super-vl:free"
+)
+OPENROUTER_VISION_FALLBACK_MODEL = (
+    os.getenv(
+        "OPENROUTER_VISION_FALLBACK_MODEL",
+        "inclusionai/ling-3.2-flash:free"
+    ).strip()
+    or "inclusionai/ling-3.2-flash:free"
 )
 
-# Once a provider reports a hard quota/configuration failure, do not keep
-# sending it one doomed request per scene during this workflow run.
+# Do not let an old environment value silently re-enable the dynamic router
+# for visual verification. That router previously selected a reasoning model
+# which exhausted its output budget before returning the required JSON.
+if OPENROUTER_VISION_MODEL.lower() == "openrouter/free":
+    OPENROUTER_VISION_MODEL = "nvidia/nemotron-3.5-super-vl:free"
+
+# Hard configuration/model errors disable only that route for this run.
+# Rate limits and transient failures use a temporary cooldown instead, so a
+# provider can recover later during the same eight-scene production run.
 VISION_DISABLED_PROVIDERS = set()
+VISION_PROVIDER_COOLDOWN_UNTIL = {}
 
 
 class VisionProviderError(RuntimeError):
@@ -249,10 +267,11 @@ def extract_json_object(raw_text):
     raise ValueError("Provider response did not contain a complete JSON object.")
 
 
-def post_with_transient_retry(url, **kwargs):
-    """Retry temporary network/server failures once; never retry HTTP 429."""
+def post_with_transient_retry(url, retries=1, **kwargs):
+    """Retry temporary errors only when the caller explicitly allows it."""
     last_error = None
-    for attempt in range(2):
+    retries = max(0, int(retries))
+    for attempt in range(retries + 1):
         try:
             response = requests.post(url, **kwargs)
             if response.status_code == 429:
@@ -262,7 +281,7 @@ def post_with_transient_retry(url, **kwargs):
                     f"Temporary HTTP {response.status_code}: "
                     f"{response.text[:500]}"
                 )
-                if attempt == 0:
+                if attempt < retries:
                     print("Temporary AI service issue; retrying once in 5s...")
                     time.sleep(5)
                     continue
@@ -272,7 +291,7 @@ def post_with_transient_retry(url, **kwargs):
             requests.exceptions.ConnectionError,
         ) as exc:
             last_error = exc
-            if attempt == 0:
+            if attempt < retries:
                 print("AI connection issue; retrying once in 5s...")
                 time.sleep(5)
                 continue
@@ -1062,9 +1081,10 @@ def _verify_with_gemini(frames, prompt):
     }
     response = post_with_transient_retry(
         url,
+        retries=0,
         params={"key": GEMINI_KEY},
         json=payload,
-        timeout=(20, 120),
+        timeout=(15, 55),
     )
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
@@ -1128,19 +1148,47 @@ def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prom
             {"role": "user", "content": content},
         ],
         "temperature": 0.1,
-        # Both endpoints support JSON object mode for the configured vision models.
-        "response_format": {"type": "json_object"},
     }
     if provider == "Groq":
-        payload["max_completion_tokens"] = 512
+        payload["response_format"] = {"type": "json_object"}
+        # Qwen 3.8 supports instruct mode. Turning off reasoning preserves
+        # the small output budget for the JSON verdict itself.
+        payload["max_completion_tokens"] = 384
+        payload["reasoning_effort"] = "none"
+        payload["reasoning_format"] = "hidden"
     else:
-        payload["max_tokens"] = 512
+        # Both fixed OpenRouter vision models support JSON Schema outputs.
+        # Structured output prevents extra prose/fences and validates the shape.
+        payload["max_tokens"] = 1024
+        payload["reasoning"] = {"enabled": False}
+        payload["response_format"] = {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "visual_verdict",
+                "strict": True,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "relevant": {"type": "boolean"},
+                        "confidence": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                        },
+                        "reason": {"type": "string"},
+                    },
+                    "required": ["relevant", "confidence", "reason"],
+                    "additionalProperties": False,
+                },
+            },
+        }
 
     response = post_with_transient_retry(
         url,
+        retries=0,
         headers=headers,
         json=payload,
-        timeout=(20, 120),
+        timeout=(15, 65),
     )
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
@@ -1162,10 +1210,19 @@ def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prom
             raw_text = str(message_content or "").strip()
 
         if not raw_text:
-            finish_reason = data.get("choices", [{}])[0].get("finish_reason")
+            choice = data.get("choices", [{}])[0]
+            finish_reason = choice.get("finish_reason")
+            actual_model = data.get("model", model)
+            actual_provider = data.get("provider", "unknown")
+            usage = data.get("usage", {})
+            completion_details = usage.get("completion_tokens_details", {})
+            reasoning_tokens = completion_details.get("reasoning_tokens")
             raise ValueError(
-                f"The model returned empty message content "
-                f"(finish_reason={finish_reason!r})."
+                "The model returned empty message content "
+                f"(model={actual_model!r}, provider={actual_provider!r}, "
+                f"finish_reason={finish_reason!r}, "
+                f"completion_tokens={usage.get('completion_tokens')!r}, "
+                f"reasoning_tokens={reasoning_tokens!r})."
             )
     except VisionResponseError:
         raise
@@ -1178,8 +1235,31 @@ def _verify_with_openai_compatible_vision(provider, api_key, model, frames, prom
     return _parse_visual_verdict(provider, raw_text)
 
 
+def _provider_retry_delay(error_text, default_seconds=60):
+    """Read retry timing from provider error bodies such as 'try again in 53s'."""
+    text = str(error_text or "")
+    patterns = (
+        r"try again in\s*([0-9]+(?:\.[0-9]+)?)\s*s",
+        r"retry[- ]after[\s:=]+([0-9]+(?:\.[0-9]+)?)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            try:
+                return max(5, min(180, float(match.group(1))))
+            except ValueError:
+                pass
+    return float(default_seconds)
+
+
+def _provider_on_cooldown(provider_id):
+    until = VISION_PROVIDER_COOLDOWN_UNTIL.get(provider_id, 0.0)
+    remaining = until - time.monotonic()
+    return max(0.0, remaining)
+
+
 def verify_footage_visually(video_path, scene, query):
-    """Verify footage using Groq, then OpenRouter, then Gemini as fallback."""
+    """Verify using Groq, two fixed OpenRouter vision models, then Gemini."""
     frames = extract_vision_frames(video_path, frame_count=3)
     prompt = f"""You are a strict documentary footage verifier.
 Inspect the attached video frames sampled from one candidate clip.
@@ -1203,38 +1283,60 @@ subject and essential context of the query/narration. If uncertain, vague,
 partially matching, or contradictory, set relevant=false. Confidence must
 be a number from 0 to 1 and reflect visual evidence, not guesswork."""
 
-    # Prefer Groq's dedicated multimodal model so Gemini's daily quota is not
-    # consumed while the alternative provider is available. OpenRouter is the
-    # second route; Gemini is retained as the final fallback.
     providers = []
     if GROQ_KEY:
+        # Groq bills Qwen 3.8 vision input at 2048 tokens per image. Sending
+        # one representative middle frame (instead of three) materially lowers
+        # TPM consumption so the backup is not triggered on every second clip.
+        groq_frame = [frames[len(frames) // 2]]
         providers.append((
             "Groq",
+            "Groq",
             lambda: _verify_with_openai_compatible_vision(
-                "Groq", GROQ_KEY, GROQ_VISION_MODEL, frames, prompt
+                "Groq", GROQ_KEY, GROQ_VISION_MODEL, groq_frame, prompt
             ),
         ))
+
     if OPENROUTER_KEY:
-        providers.append((
-            "OpenRouter",
-            lambda: _verify_with_openai_compatible_vision(
-                "OpenRouter", OPENROUTER_KEY,
-                OPENROUTER_VISION_MODEL, frames, prompt
-            ),
-        ))
+        openrouter_models = []
+        for model_name in (
+            OPENROUTER_VISION_MODEL,
+            OPENROUTER_VISION_FALLBACK_MODEL,
+        ):
+            if model_name and model_name not in openrouter_models:
+                openrouter_models.append(model_name)
+        for model_name in openrouter_models:
+            provider_id = f"OpenRouter::{model_name}"
+            providers.append((
+                provider_id,
+                f"OpenRouter ({model_name})",
+                lambda model_name=model_name: _verify_with_openai_compatible_vision(
+                    "OpenRouter", OPENROUTER_KEY, model_name, frames, prompt
+                ),
+            ))
+
     if GEMINI_KEY:
         providers.append((
             "Gemini",
+            f"Gemini ({VISION_MODEL})",
             lambda: _verify_with_gemini(frames, prompt),
         ))
 
     errors = []
     attempted = 0
-    for provider_name, verify in providers:
-        if provider_name in VISION_DISABLED_PROVIDERS:
+    for provider_id, provider_name, verify in providers:
+        if provider_id in VISION_DISABLED_PROVIDERS:
             print(
-                f"Visual verifier: skipping {provider_name}; it was disabled "
-                "after an earlier quota/configuration/response error."
+                f"Visual verifier: skipping {provider_name}; this route "
+                "was disabled after an earlier hard error."
+            )
+            continue
+
+        cooldown = _provider_on_cooldown(provider_id)
+        if cooldown > 0:
+            print(
+                f"Visual verifier: {provider_name} cooling down for "
+                f"{cooldown:.0f}s; using the next backup."
             )
             continue
 
@@ -1249,44 +1351,66 @@ be a number from 0 to 1 and reflect visual evidence, not guesswork."""
                 f"({confidence:.2f})."
             )
             return accepted, confidence, reason, provider_name
+
         except VisionProviderError as exc:
             errors.append(str(exc))
-            # Quota, authentication, invalid model and malformed-request errors
-            # are not useful to retry for every remaining scene in this run.
-            if exc.status_code in (400, 401, 403, 404, 413, 415, 422, 429):
-                VISION_DISABLED_PROVIDERS.add(provider_name)
-            print(
-                f"Visual verifier {provider_name} unavailable: {str(exc)[:500]}"
-            )
-            print("Switching to the next visual AI provider immediately...")
+            if exc.status_code == 429:
+                delay = _provider_retry_delay(str(exc))
+                VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = (
+                    time.monotonic() + delay
+                )
+                print(
+                    f"Visual verifier {provider_name} rate-limited; "
+                    f"cooling this route for {delay:.0f}s and switching backup."
+                )
+            elif exc.status_code in (400, 401, 403, 404, 413, 415, 422):
+                VISION_DISABLED_PROVIDERS.add(provider_id)
+                print(
+                    f"Visual verifier {provider_name} has a hard configuration "
+                    f"error (HTTP {exc.status_code}); disabling only this route."
+                )
+            else:
+                VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = (
+                    time.monotonic() + 20
+                )
+                print(
+                    f"Visual verifier {provider_name} unavailable: "
+                    f"{str(exc)[:450]}. Short cooldown; trying backup."
+                )
+
         except VisionResponseError as exc:
             errors.append(str(exc))
-            # A 200 response with invalid JSON/schema is also a provider failure
-            # for this run. Do not waste one request on it for every new clip.
-            VISION_DISABLED_PROVIDERS.add(provider_name)
+            VISION_DISABLED_PROVIDERS.add(provider_id)
             print(
                 f"Visual verifier {provider_name} returned unusable output: "
-                f"{str(exc)[:500]}"
+                f"{str(exc)[:500]}. Disabling only this route."
             )
-            print("Disabling this provider for the run; trying the next one...")
+
+        except requests.exceptions.Timeout as exc:
+            errors.append(f"{provider_name}: timeout: {exc}")
+            VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = time.monotonic() + 30
+            print(
+                f"Visual verifier {provider_name} timed out; switching to backup."
+            )
+
         except Exception as exc:
             errors.append(f"{provider_name}: {exc}")
+            VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = time.monotonic() + 20
             print(
-                f"Visual verifier {provider_name} failed temporarily: "
-                f"{str(exc)[:450]}"
+                f"Visual verifier {provider_name} failed: {str(exc)[:450]}. "
+                "Switching to backup."
             )
-            print("Switching to the next visual AI provider immediately...")
 
     if not providers:
         detail = "No visual AI credentials are configured."
     elif attempted == 0:
-        detail = "All configured visual AI providers were disabled earlier in this run."
+        detail = "All configured visual AI routes are disabled or cooling down."
     elif not errors:
         detail = "No provider produced a usable visual-verification response."
     else:
         detail = " | ".join(errors)
     raise VisionVerificationError(
-        "All visual verification providers failed. " + detail
+        "All visual verification routes failed for this candidate. " + detail
     )
 
 
@@ -1300,6 +1424,10 @@ def fetch_footage(plan):
         visual_provider_names.append(f"Groq ({GROQ_VISION_MODEL})")
     if OPENROUTER_KEY:
         visual_provider_names.append(f"OpenRouter ({OPENROUTER_VISION_MODEL})")
+        if OPENROUTER_VISION_FALLBACK_MODEL != OPENROUTER_VISION_MODEL:
+            visual_provider_names.append(
+                f"OpenRouter fallback ({OPENROUTER_VISION_FALLBACK_MODEL})"
+            )
     if GEMINI_KEY:
         visual_provider_names.append(f"Gemini ({VISION_MODEL})")
 
