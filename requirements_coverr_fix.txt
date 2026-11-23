@@ -1,0 +1,7 @@
+requests>=2.32,<3
+edge-tts>=7.1,<8
+transformers>=4.57,<5
+sentencepiece>=0.2,<0.3
+protobuf>=7.36.1,<8
+Pillow>=10,<14
+safetensors>=0.4,<1
