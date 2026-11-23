@@ -1,10 +1,11 @@
-
 import os
 import re
 import json
 import time
 import asyncio
 import hashlib
+import base64
+import tempfile
 import subprocess
 import textwrap
 from pathlib import Path
@@ -50,6 +51,23 @@ ENDING_HOLD = 1.25
 
 MIN_CLIP_WIDTH = 640
 MAX_CLIP_BYTES = 180 * 1024 * 1024
+
+# Visual verification is deliberately fail-closed by default. Set this to
+# false only if you explicitly accept metadata-only footage selection.
+VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "true").strip().lower() not in (
+    "0", "false", "no", "off"
+)
+VISION_CANDIDATE_LIMIT = max(
+    1, min(10, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "5")))
+)
+try:
+    VISION_MIN_CONFIDENCE = float(
+        os.getenv("FOOTAGE_VISION_MIN_CONFIDENCE", "0.72")
+    )
+except ValueError:
+    VISION_MIN_CONFIDENCE = 0.72
+VISION_MIN_CONFIDENCE = max(0.0, min(1.0, VISION_MIN_CONFIDENCE))
+VISION_MODEL = os.getenv("GEMINI_VISION_MODEL", MODEL).strip() or MODEL
 
 if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
     raise RuntimeError(
@@ -383,8 +401,8 @@ def gemini_plan(topic):
 
     if plan is None:
         raise RuntimeError(
-            "All configured AI providers failed:\\n- "
-            + "\\n- ".join(errors)
+            "All configured AI providers failed:\n- "
+            + "\n- ".join(errors)
         )
 
     Path("plan.json").write_text(
@@ -875,10 +893,152 @@ def tag_similarity(tags_a, tags_b):
     return len(a & b) / max(1, len(a | b))
 
 
+def extract_vision_frames(video_path, frame_count=3):
+    """Extract evenly spaced, low-resolution frames for visual inspection."""
+    duration = ffprobe_duration(video_path)
+    if duration <= 0:
+        raise RuntimeError("Downloaded candidate has no readable video duration.")
+
+    fractions = (0.20, 0.50, 0.80)[:max(2, min(3, frame_count))]
+    timestamps = []
+    for fraction in fractions:
+        timestamp = min(max(0.1, duration * fraction), max(0.1, duration - 0.1))
+        if not timestamps or abs(timestamp - timestamps[-1]) >= 0.05:
+            timestamps.append(timestamp)
+
+    frame_paths = []
+    with tempfile.TemporaryDirectory(prefix="footage_vision_") as temp_dir:
+        temp_path = Path(temp_dir)
+        for index, timestamp in enumerate(timestamps, 1):
+            frame_path = temp_path / f"frame_{index:02d}.jpg"
+            result = subprocess.run(
+                [
+                    "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                    "-ss", f"{timestamp:.3f}", "-i", str(video_path),
+                    "-frames:v", "1", "-vf", "scale=768:-2",
+                    "-q:v", "5", str(frame_path),
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if result.returncode != 0 or not frame_path.exists():
+                detail = (result.stderr or "FFmpeg did not create a frame.").strip()
+                raise RuntimeError(f"Could not extract visual-check frame: {detail[-700:]}")
+            frame_paths.append(frame_path.read_bytes())
+
+    if len(frame_paths) < 2:
+        raise RuntimeError("Not enough readable frames for visual verification.")
+    return frame_paths
+
+
+def verify_footage_visually(video_path, scene, query):
+    """Ask Gemini Vision whether sampled frames depict the requested scene."""
+    if not GEMINI_KEY:
+        if VISION_REQUIRED:
+            raise RuntimeError(
+                "Visual verification requires GEMINI_API_KEY. Add it under "
+                "GitHub Settings > Secrets and variables > Actions, or set "
+                "FOOTAGE_VISION_REQUIRED=false to explicitly allow metadata-only selection."
+            )
+        return True, 1.0, "Visual verification disabled; metadata-only mode was explicitly allowed."
+
+    frames = extract_vision_frames(video_path, frame_count=3)
+    prompt = f"""You are a strict documentary footage verifier.
+Inspect the attached video frames sampled from one candidate clip.
+
+SCENE VISUAL QUERY: {query}
+SCENE NARRATION: {scene.get('narration', '')}
+
+Decide whether the actual visible content in these frames is a close match
+for the specific subject and setting requested. Do not infer objects,
+animals, locations, weather, camera angles, or actions that are not visibly
+supported by the frames. Generic scenery is NOT a match for a specific
+subject. A forest is not automatically an Amazon rainforest; trees are not
+a canopy aerial; hills are not tree roots; and greenery is not evidence of
+wildlife or rain.
+
+Return ONLY JSON with this exact structure:
+{{"relevant": true, "confidence": 0.0, "reason": "brief visible evidence"}}
+
+Set relevant=true only when the visible evidence clearly supports the main
+subject and essential context of the query/narration. If uncertain, vague,
+partially matching, or contradictory, set relevant=false. Confidence must
+be a number from 0 to 1 and reflect visual evidence, not guesswork."""
+
+    parts = [{"text": prompt}]
+    for frame in frames:
+        parts.append({
+            "inline_data": {
+                "mime_type": "image/jpeg",
+                "data": base64.b64encode(frame).decode("ascii"),
+            }
+        })
+
+    url = (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{VISION_MODEL}:generateContent"
+    )
+    payload = {
+        "contents": [{"parts": parts}],
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "temperature": 0.1,
+            "maxOutputTokens": 512,
+        },
+    }
+    response = post_with_transient_retry(
+        url,
+        params={"key": GEMINI_KEY},
+        json=payload,
+        timeout=(20, 120),
+    )
+    if response.status_code >= 400:
+        detail = response.text[:700].replace("\n", " ")
+        raise RuntimeError(
+            f"Gemini visual verification HTTP {response.status_code}: {detail}"
+        )
+
+    data = response.json()
+    try:
+        text = "\n".join(
+            part.get("text", "")
+            for part in data["candidates"][0]["content"]["parts"]
+            if part.get("text")
+        )
+        verdict = extract_json_object(text)
+        relevant = verdict.get("relevant") is True
+        confidence = float(verdict.get("confidence", 0.0))
+        reason = re.sub(r"\s+", " ", str(verdict.get("reason", "No visual evidence supplied."))).strip()
+    except Exception as exc:
+        raise RuntimeError(
+            f"Gemini visual verification returned unreadable output: {exc}; "
+            f"body={str(data)[:700]}"
+        ) from exc
+
+    accepted = relevant and confidence >= VISION_MIN_CONFIDENCE
+    return accepted, confidence, reason
+
+
 def fetch_footage(plan):
     credits = []
     used_ids = set()
     selected_tag_sets = []
+
+    if VISION_REQUIRED and not GEMINI_KEY:
+        raise RuntimeError(
+            "Stage 1 requires real visual verification, but GEMINI_API_KEY is "
+            "missing. Add GEMINI_API_KEY in GitHub Settings > Secrets and "
+            "variables > Actions. If you deliberately want the weaker "
+            "metadata-only fallback, set FOOTAGE_VISION_REQUIRED=false."
+        )
+    if not GEMINI_KEY:
+        print("WARNING: FOOTAGE_VISION_REQUIRED=false; using metadata-only footage checks.")
+    else:
+        print(
+            f"Visual verification enabled: Gemini model={VISION_MODEL}, "
+            f"minimum confidence={VISION_MIN_CONFIDENCE:.2f}."
+        )
 
     for i, scene in enumerate(plan["scenes"], 1):
         scene["visual_type"] = "footage"
@@ -901,8 +1061,6 @@ def fetch_footage(plan):
                 score, matched, total = relevance_score(
                     hit, query, scene.get("narration", "")
                 )
-                # One strong concept is enough for a genuinely narrow query;
-                # broader multi-concept shots must match at least two concepts.
                 required = 1 if total <= 1 else 2
                 if matched < required or score < 0.40:
                     continue
@@ -910,8 +1068,6 @@ def fetch_footage(plan):
                     str(hit.get("metadata", "")) + " " + str(hit.get("tags", ""))
                 ))
                 scene_context = set(normalize_words(scene.get("narration", "")))
-                # Hard reject the most damaging mismatches even if "forest"
-                # or "trees" happens to overlap with the query.
                 if (
                     metadata_tokens & CONTEXT_CONFLICTS["snow_winter"]
                     and not scene_context & CONTEXT_CONFLICTS["snow_winter"]
@@ -930,46 +1086,87 @@ def fetch_footage(plan):
                     continue
                 previous = candidates.get(identity)
                 if previous is None or score > previous[0]:
-                    candidates[identity] = (
-                        score, hit, query, matched, total
-                    )
+                    candidates[identity] = (score, hit, query, matched, total)
 
         ranked = sorted(candidates.values(), key=lambda item: item[0], reverse=True)
         print(
-            f"Scene {i}: {len(candidates)} relevant candidate(s) after "
-            f"semantic matching across {len(queries)} search variants."
+            f"Scene {i}: {len(candidates)} metadata-qualified candidate(s) "
+            f"across {len(queries)} search variants."
         )
         destination = FOOT / f"scene_{i:02d}.mp4"
         download_errors = []
         selected = None
+        checked = 0
 
-        # Crucial: an oversized/broken top result is skipped; try every next result.
-        for score, hit, query, matched, total in ranked:
+        # Metadata only narrows the search. Gemini must confirm the actual
+        # sampled images before a candidate can be accepted in strict mode.
+        for score, hit, query, matched, total in ranked[:VISION_CANDIDATE_LIMIT]:
+            checked += 1
             try:
                 download_stream(hit["url"], destination)
-                selected = (score, hit, query, matched, total)
+                if GEMINI_KEY:
+                    visually_relevant, confidence, visual_reason = verify_footage_visually(
+                        destination, scene, query
+                    )
+                    print(
+                        f"Scene {i}: visual check {checked}/"
+                        f"{min(len(ranked), VISION_CANDIDATE_LIMIT)} — "
+                        f"{'PASS' if visually_relevant else 'REJECT'} "
+                        f"({confidence:.2f}): {visual_reason[:220]}"
+                    )
+                    if not visually_relevant:
+                        destination.unlink(missing_ok=True)
+                        continue
+                else:
+                    confidence = None
+                    visual_reason = "Metadata-only fallback explicitly enabled."
+
+                selected = (
+                    score, hit, query, matched, total,
+                    confidence, visual_reason,
+                )
                 break
             except Exception as exc:
+                message = str(exc)
                 download_errors.append(
-                    f"{hit.get('source')} {hit.get('id')}: {exc}"
+                    f"{hit.get('source')} {hit.get('id')}: {message}"
                 )
                 print(
-                    f"Scene {i}: skipping failed candidate "
-                    f"{hit.get('source')} ({exc})"
+                    f"Scene {i}: candidate rejected/skipped "
+                    f"({hit.get('source')}): {message[:350]}"
                 )
                 destination.unlink(missing_ok=True)
+                # Credentials, model, and quota failures affect every candidate;
+                # stop rather than repeatedly sending doomed API requests.
+                if re.search(
+                    r"Gemini visual verification HTTP (400|401|403|429)",
+                    message,
+                ):
+                    raise RuntimeError(
+                        "Gemini visual verification cannot continue. " + message
+                    ) from exc
 
         if selected is None:
             if not ranked:
-                reason = "No candidate passed the strict metadata relevance check."
+                reason = "No candidate passed the metadata relevance filter."
+            elif checked >= VISION_CANDIDATE_LIMIT:
+                reason = (
+                    f"None of the first {checked} metadata-ranked candidates "
+                    "passed visual verification or downloaded successfully."
+                )
             else:
-                reason = "Every relevant candidate failed to download: " + " | ".join(download_errors[:5])
+                reason = "No candidate could be downloaded and visually verified."
+            if download_errors:
+                reason += " Details: " + " | ".join(download_errors[:4])
             raise RuntimeError(
-                f"Scene {i} could not obtain relevant footage. {reason} "
+                f"Scene {i} could not obtain verified relevant footage. {reason} "
                 f"Queries tried: {queries}. No unrelated footage or diagram will be substituted."
             )
 
-        score, hit, query, matched, total = selected
+        (
+            score, hit, query, matched, total,
+            vision_confidence, vision_reason,
+        ) = selected
         identity = f"{hit.get('source')}:{hit.get('id')}"
         used_ids.add(identity)
         selected_tag_sets.append(str(hit.get("tags") or hit.get("metadata") or ""))
@@ -978,15 +1175,27 @@ def fetch_footage(plan):
         scene["selected_footage_source"] = hit.get("source")
         scene["selected_footage_tags"] = hit.get("tags") or hit.get("metadata", "")
         scene["selected_footage_url"] = hit.get("page_url", "")
+        scene["visual_verification"] = {
+            "method": "Gemini Vision" if vision_confidence is not None else "metadata-only fallback",
+            "confidence": vision_confidence,
+            "reason": vision_reason,
+            "query": query,
+        }
+        vision_credit = (
+            f" | Visual verification: Gemini {vision_confidence:.2f} — {vision_reason}"
+            if vision_confidence is not None
+            else " | Visual verification: disabled (metadata-only fallback)"
+        )
         credits.append(
             f"Scene {i} | {hit.get('source')} | Creator: {hit.get('creator', 'Unknown')} | "
             f"Source: {hit.get('page_url', '')} | "
-            f"Metadata relevance: {score:.2f} ({matched}/{total} query terms) | "
-            f"License: {hit.get('license', 'Check source page')}"
+            f"Metadata relevance: {score:.2f} ({matched}/{total} query concepts)"
+            f"{vision_credit} | License: {hit.get('license', 'Check source page')}"
         )
         print(
-            f"Scene {i}: accepted {hit.get('source')} score={score:.2f}, "
-            f"query match={matched}/{total} — {str(hit.get('metadata', ''))[:140]}"
+            f"Scene {i}: accepted {hit.get('source')} metadata={score:.2f}, "
+            f"visual confidence={vision_confidence if vision_confidence is not None else 'not checked'} — "
+            f"{str(hit.get('metadata', ''))[:140]}"
         )
 
     Path("credits.txt").write_text("\n".join(credits) + "\n", encoding="utf-8")
@@ -995,6 +1204,7 @@ def fetch_footage(plan):
     )
 
 
+# ============================================================
 # VOICEOVER AND SUBTITLES
 # ============================================================
 
