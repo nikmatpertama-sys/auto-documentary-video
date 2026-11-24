@@ -458,8 +458,15 @@ def _openai_request(
         # mode. Asking for it is particularly important for OpenRouter's free
         # router: it can then select only models advertising structured-output
         # support rather than relying on a prose-only instruction.
-        if route.provider in ("groq", "deepseek", "openrouter"):
+        # Groq validates json_object output server-side and answers HTTP 400
+        # "Failed to validate JSON" when a reasoning model truncates its JSON,
+        # which hides a repairable parse error behind a provider failure. The
+        # router parses and repairs structured output itself, so Groq is asked
+        # for low reasoning effort and no server-side JSON validation.
+        if route.provider in ("deepseek", "openrouter"):
             payload["response_format"] = {"type": "json_object"}
+        if route.provider == "groq":
+            payload["reasoning_effort"] = "low"
 
         if route.provider == "deepseek":
             payload["thinking"] = {"type": "disabled"}

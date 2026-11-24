@@ -337,7 +337,11 @@ class AIRouterTests(unittest.TestCase):
         self.assertEqual(post.call_count, 2)
         first_payload = post.call_args_list[0].kwargs["json"]
         retry_payload = post.call_args_list[1].kwargs["json"]
-        self.assertEqual(first_payload["response_format"], {"type": "json_object"})
+        # Groq rejects truncated json_object output server-side with HTTP 400,
+        # so the router validates and repairs the JSON itself and asks for low
+        # reasoning effort instead.
+        self.assertNotIn("response_format", first_payload)
+        self.assertEqual(first_payload["reasoning_effort"], "low")
         retry_prompt = retry_payload["messages"][1]["content"]
         self.assertIn("STRICT OUTPUT REPAIR REQUIRED", retry_prompt)
         self.assertIn("visual_focus", retry_prompt)
