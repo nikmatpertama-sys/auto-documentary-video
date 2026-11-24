@@ -202,6 +202,8 @@ VERIFIED SOURCE PAGES. Each page below was published by a trusted institution
 and was confirmed to exist. Every fact_claims[].source_urls entry MUST be
 copied exactly from this list; never invent another URL. If these pages cannot
 support a sentence, rewrite or drop that sentence instead of guessing a page.
+The narration must STILL total 160-185 spoken words (about 20-23 words per
+scene) even though it only cites these pages; count the words before answering.
 {listing}
 """
     return f"""Create an original, evidence-backed English mini-documentary
