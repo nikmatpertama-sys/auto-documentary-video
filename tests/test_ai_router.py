@@ -314,6 +314,59 @@ class AIRouterTests(unittest.TestCase):
             {"type": "json_object"},
         )
 
+    def test_openrouter_dynamic_empty_output_falls_back_to_ernie(self):
+        # Mirrors the live failure: a dynamic free route can spend its entire
+        # output budget on reasoning and return empty assistant content.
+        empty_reasoning_only = FakeResponse(200, {
+            "choices": [{
+                "message": {
+                    "role": "assistant",
+                    "content": "",
+                    "reasoning": "internal reasoning only",
+                    "reasoning_details": [],
+                },
+                "finish_reason": "length",
+            }]
+        })
+        valid = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": True})}}]
+        })
+
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "openrouter",
+            "OPENROUTER_API_KEY": "test-openrouter",
+            "OPENROUTER_MODEL": "openrouter/free",
+        }, clear=True), patch(
+            "ai_router.requests.post",
+            side_effect=[empty_reasoning_only, empty_reasoning_only, valid],
+        ) as post:
+            value, provider, model = ai_router.generate_json("Return one complete JSON object")
+
+        self.assertEqual(value, {"ready": True})
+        self.assertEqual(provider, "openrouter")
+        self.assertEqual(model, "baidu/ernie-5.5-flash-preview:free")
+        self.assertEqual(post.call_count, 3)
+        fallback_payload = post.call_args_list[-1].kwargs["json"]
+        self.assertEqual(fallback_payload["model"], "baidu/ernie-5.5-flash-preview:free")
+        self.assertEqual(fallback_payload["reasoning"], {"effort": "low"})
+        self.assertEqual(fallback_payload["response_format"], {"type": "json_object"})
+
+    def test_transient_retry_preserves_first_failure_diagnostic(self):
+        first = FakeResponse(503, {"error": {"message": "service unavailable"}})
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "gemini",
+            "GEMINI_API_KEY": "test-gemini",
+        }, clear=True), patch(
+            "ai_router.requests.post",
+            side_effect=[first, ai_router.requests.exceptions.Timeout("read timeout")],
+        ), patch("ai_router.time.sleep"):
+            with self.assertRaises(ai_router.ProviderRoutingError) as caught:
+                ai_router.generate_json("Return JSON")
+
+        message = str(caught.exception)
+        self.assertIn("HTTP 503", message)
+        self.assertIn("Timeout", message)
+
     def test_text_route_cooldown_does_not_block_same_model_vision(self):
         temporary = FakeResponse(503, {"error": {"message": "text service unavailable"}})
         valid_vision = {"relevant": True, "confidence": 0.93, "reason": "Requested subject is visible"}

@@ -133,6 +133,21 @@ def _routes(task: str) -> list[Route]:
                     "https://openrouter.ai/api/v1/chat/completions",
                     "openai",
                 ))
+                if task in ("text", "fact"):
+                    # The dynamic free router can select a reasoning model that
+                    # exhausts its output budget before returning JSON. Keep an
+                    # explicit structured-output route as a second option, using
+                    # the same existing OpenRouter API key.
+                    fallback = _env(
+                        "OPENROUTER_TEXT_FALLBACK_MODEL",
+                        "baidu/ernie-5.5-flash-preview:free",
+                    )
+                    if fallback and fallback != model:
+                        routes.append(Route(
+                            "openrouter", fallback, key,
+                            "https://openrouter.ai/api/v1/chat/completions",
+                            "openai",
+                        ))
                 if task == "vision":
                     fallback = _env(
                         "OPENROUTER_VISION_FALLBACK_MODEL",
@@ -334,6 +349,14 @@ def _openai_request(
         if route.provider == "deepseek":
             payload["thinking"] = {"type": "disabled"}
 
+        if (
+            route.provider == "openrouter"
+            and route.model == "baidu/ernie-5.5-flash-preview:free"
+        ):
+            # ERNIE accepts OpenRouter's reasoning controls. Low effort reserves
+            # most of the completion budget for the required structured JSON.
+            payload["reasoning"] = {"effort": "low"}
+
         if route.provider == "groq":
             payload.pop("max_tokens", None)
             payload["max_completion_tokens"] = 7000
@@ -523,8 +546,9 @@ def _route(
     images: list[bytes] | None = None,
     validator: Callable[[Any], Any] | None = None,
     _transient_retry: bool = False,
+    _prior_errors: list[str] | None = None,
 ) -> tuple[Any, str, str]:
-    errors: list[str] = []
+    errors: list[str] = list(_prior_errors or [])
     transient_routes: list[Route] = []
     routes = _routes(task)
 
@@ -675,6 +699,7 @@ def _route(
             images=images,
             validator=validator,
             _transient_retry=True,
+            _prior_errors=errors,
         )
 
     if not routes:
