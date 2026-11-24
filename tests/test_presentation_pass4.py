@@ -136,11 +136,29 @@ class CaptionTimingTests(unittest.TestCase):
 
 
 class ReferenceVisualPolicyTests(unittest.TestCase):
-    def test_map_and_diagram_scenes_request_published_reference(self):
-        self.assertTrue(needs_reference_visual({"visual_query": "satellite image of Amazon river map"}))
-        self.assertTrue(needs_reference_visual({"visual_mode": "trusted_reference", "visual_query": "macaw"}))
-        self.assertTrue(needs_reference_visual({"visual_query": "published scientific animation of the water cycle"}))
-        self.assertTrue(needs_reference_visual({"visual_query": "scientific illustration of leaf anatomy"}))
+    def test_reference_visuals_require_a_concrete_evidence_need(self):
+        # Artifact wording by itself must not turn a filmable concept into a map job.
+        self.assertFalse(needs_reference_visual({
+            "visual_query": "tropical rainforest rainfall map",
+            "visual_mode": "trusted_reference",
+            "narration": "Rain falls through the canopy and replenishes the forest streams.",
+        }))
+        # Measured geographic distribution is a legitimate institutional-map use.
+        self.assertTrue(needs_reference_visual({
+            "visual_query": "Amazon annual rainfall distribution map",
+            "visual_mode": "trusted_reference",
+            "narration": "The basin receives 2,300 mm of rainfall each year, with measured totals varying across regions.",
+        }))
+        # An actual internal structure can need a published scientific illustration.
+        self.assertTrue(needs_reference_visual({
+            "visual_query": "scientific illustration of leaf anatomy",
+            "visual_mode": "trusted_reference",
+            "narration": "Inside each leaf, stomata form tiny pores that regulate gas exchange.",
+        }))
+        self.assertFalse(needs_reference_visual({
+            "visual_mode": "trusted_reference", "visual_query": "macaw",
+            "narration": "Macaws move between the forest trees.",
+        }))
         self.assertFalse(needs_reference_visual({"visual_query": "macaw flying over rainforest"}))
         self.assertFalse(needs_reference_visual({"visual_query": "rainforest landscape", "narration": "This model can explain the process."}))
         self.assertFalse(needs_reference_visual({"visual_query": "scientific overview", "visual_mode": "footage"}, scene_index=1))

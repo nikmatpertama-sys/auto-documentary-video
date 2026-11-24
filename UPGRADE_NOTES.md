@@ -110,3 +110,22 @@ The new search stage has not yet been exercised against the user's live GitHub A
 The latest run showed that transient text-generation failures could place a matching model route on cooldown before footage verification began. Pass 8 scopes provider disable flags, route disable flags, and cooldown timers to the task (`text` or `vision`). Vision can now attempt its configured DeepSeek/Gemini routes even when those same model routes encountered errors during script generation. Visual acceptance thresholds and the conservative outage policy are unchanged. A regression test covers a text-route cooldown followed by successful use of the same model for vision.
 
 See `PASS8_VALIDATION_REPORT.md` for the log-based diagnosis, validation results, and live-runtime caveat.
+
+
+## Pass 9 — footage-first visual planning and reference gating
+
+The latest Pass 8 run showed Scene 4 being planned as `tropical rainforest rainfall map` / `global precipitation map Amazon region`. The available stock clips were mostly live footage, so the Vision model correctly rejected them as not being rainfall maps; repeated rejected candidates then consumed the limited Vision-provider allowance.
+
+Pass 9 changes:
+- Keep footage as the default for natural processes that can be shown directly (rainfall, transpiration, evaporation, cooling, cloud formation, river flow, and forest ecology).
+- A map/chart/diagram word in an AI visual query is no longer sufficient to force the institutional-reference path. The narration must show a concrete need for measured values, a geographic distribution, or internal scientific structure.
+- Keep `visual_query` and its alternatives focused on real footage; reference-query wording is separate.
+- Remove artifact-only words such as `map`, `chart`, `diagram`, `illustration`, and `infographic` from stock-footage query phrases.
+- Add rainfall/rainforest-specific real-footage expansions, including rain falling in rainforest, raindrops on tropical leaves, and heavy rain over the canopy.
+- Keep the original Vision confidence threshold and strict rejection behavior unchanged. An actual Vision REJECT is still final; the outage metadata fallback remains conservative and is explicitly labelled as not pixel-verified.
+
+### Pass 9 validation
+- `py_compile` passed for the changed production and test files.
+- 49/49 unit tests passed, including new checks that generic rainfall-map requests downgrade to footage and that numerical geographic evidence still qualifies for a trusted reference.
+- Query-builder checks confirm the failing map/chart queries are converted into real-footage searches.
+- Live GitHub Actions, stock-provider responses, and external AI quotas have not been executed or verified in this local session. Code cannot replenish DeepSeek balance or override Groq/Gemini/OpenRouter rate limits; if all vision providers are down and no strong metadata candidate exists, the generator will still stop rather than use unrelated media.

@@ -19,21 +19,69 @@ REFERENCE_TERMS = (
 
 
 def needs_reference_visual(scene: dict, scene_index: int | None = None) -> bool:
-    """Return true for explicit evidence visuals, never for a generic narration word.
+    """Require a published reference only when the narration needs evidence pixels.
 
-    Scene one is always kept as footage so the opening title/hook has a stable
-    video background and is never lost behind a still-reference frame.
+    Stock-footage queries often contain words such as "map", "graphic" or
+    "illustration" because a planner over-specifies an otherwise filmable
+    concept. Those words alone must not force the production into a scarce
+    institutional-image path. A reference is reserved for explicit quantitative
+    or spatial evidence, or for internal scientific structure that cannot be
+    shown faithfully with ordinary footage.
     """
     if scene_index == 1:
         return False
+
     mode = str(scene.get("visual_mode") or scene.get("visual_type") or "").lower()
-    if mode in {"reference", "trusted_reference", "reference_visual", "map", "chart", "diagram", "table"}:
-        return True
     search_text = " ".join([
         str(scene.get("visual_query", "")),
         " ".join(str(x) for x in scene.get("visual_queries", []) if x),
+        str(scene.get("reference_query", "")),
     ]).lower()
-    return any(re.search(pattern, search_text, flags=re.I) for pattern in REFERENCE_TERMS)
+    requested = (
+        bool(scene.get("reference_required"))
+        or mode in {"reference", "trusted_reference", "reference_visual", "map", "chart", "diagram", "table"}
+        or any(re.search(pattern, search_text, flags=re.I) for pattern in REFERENCE_TERMS)
+    )
+    if not requested:
+        return False
+
+    narration = re.sub(r"\s+", " ", str(scene.get("narration", ""))).lower()
+    if not narration:
+        return False
+
+    has_quantity = bool(re.search(
+        r"\b\d+(?:[,.]\d+)?\s*(?:%|percent|mm|cm|km|miles?|meters?|metres?|degrees?|°c|°f|years?|months?|days?|million|billion)\b",
+        narration,
+    )) or bool(re.search(
+        r"\b(measured values?|measurement data|recorded data|statistics|quantitative data|numerical data|exact figures|annual totals|monthly totals)\b",
+        narration,
+    ))
+
+    has_spatial_evidence = bool(re.search(
+        r"\b(geographic(?:al)? distribution|spatial distribution|distribution across|varies across (?:the )?(?:region|basin|continent|country)|across (?:the )?(?:region|basin|continent|country)|where .* (?:located|found|occurs)|location of .* across)\b",
+        narration,
+    ))
+
+    map_requested = bool(re.search(r"\b(map|maps|satellite map|distribution map)\b", search_text))
+    chart_requested = bool(re.search(r"\b(chart|charts|graph|graphs|table|tables|data visualization|infographic)\b", search_text))
+    structure_requested = bool(re.search(
+        r"\b(diagram|schematic|cross[- ]section|anatomy|scientific illustration|scientific animation|explanatory animation|mechanism)\b",
+        search_text,
+    ))
+
+    if map_requested and (has_quantity or has_spatial_evidence):
+        return True
+    if chart_requested and has_quantity:
+        return True
+
+    has_internal_structure = bool(re.search(
+        r"\b(inside|internal structure|anatomy|cell membrane|stomata|molecule|molecular structure|atomic structure|organ|tissue|cross[- ]section|layers of|parts of the|mechanism inside)\b",
+        narration,
+    ))
+    if structure_requested and has_internal_structure:
+        return True
+
+    return False
 
 
 TRUSTED_DOMAINS = (

@@ -32,7 +32,7 @@ Text and visual AI providers depend on valid keys, model availability, service s
 
 ## Visual sourcing policy
 
-The production path does **not** create procedural scientific diagrams, charts, tables, maps, anatomy plates, or data graphics. When a scene needs this kind of evidence visual, it searches for an already-published visual from an institutional source. It currently searches NASA's image library and Wikimedia Commons records that include a linked primary institutional source and an accepted reusable license.
+The production path does **not** create procedural scientific diagrams, charts, tables, maps, anatomy plates, or data graphics. Real footage is the default, including for filmable natural processes such as rainfall, evaporation, transpiration, cloud formation, and river flow. A published reference visual is requested only when the narration needs measurable/geographic evidence or an internal scientific structure that ordinary footage cannot faithfully show. The generator searches NASA's image library and Wikimedia Commons records that include a linked primary institutional source and an accepted reusable license.
 
 - NASA assets explicitly marked as third-party copyrighted/restricted are skipped. NASA media usage rules still apply; the source is credited and no endorsement is implied.
 - Commons images are accepted only when a linked primary source belongs to a recognised institutional domain and the file has a reusable license such as CC0, public domain, CC BY, or CC BY-SA. Attribution and license details are included in `credits.txt`.
@@ -40,7 +40,7 @@ The production path does **not** create procedural scientific diagrams, charts, 
 - If no suitable published visual is found, the generator tries relevant real footage. It does not invent a replacement diagram. If no acceptable footage or published visual exists, the run stops with a diagnostic rather than silently presenting an unrelated illustration.
 - The legacy `visual_fallback.py` module remains in the repository for compatibility and its unit tests, but the production `main.py` path does not call it.
 
-The local SigLIP model may rank stock-footage thumbnails. It is not equivalent to checking every frame. AI visual verification is attempted when configured; if all vision providers are unavailable, the production report clearly distinguishes metadata-only acceptance from pixel-verified footage.
+The local SigLIP model ranks stock-footage thumbnails before external visual verification; it is not represented as a per-frame AI verdict. AI visual verification is attempted when configured. If every external vision provider is unavailable, only the separate strict metadata-only policy may accept a clip, and the production report labels that method distinctly from pixel-verified footage. Reference-artifact words (such as map/chart/diagram) are removed from stock-footage queries so the stock search looks for filmable subjects instead of still graphics.
 
 ## Opening title and hook
 
@@ -87,3 +87,7 @@ The default footage scan now checks up to eight ranked candidates. If all config
 ### Pass 7 reliability update
 
 When the initial footage search returns fewer than five metadata-qualified candidates, the generator now adds a short secondary search using broader but subject-preserving variants. Temporary visual details such as mist or camera wording no longer unnecessarily narrow every search. Alternative shots remain independent, and specific animals/plants are not dropped from their queries. At least eight candidates can be pixel-checked even when the older workflow environment still says five. The actual Vision verdict and confidence threshold are unchanged: a visual REJECT is still a rejection.
+
+### Pass 9 footage-first visual planning
+
+Pass 9 prevents generic natural-process scenes from being forced into map/chart searches. The planner must keep `visual_query` and both alternatives as real footage shots; published maps/charts are reserved for narration that contains a concrete quantitative, geographic-distribution, or internal-structure evidence need. If a reference asset is not found, the footage path strips graphic-artifact terms and expands rainforest/rainfall queries into real shots (rain falling in forest, raindrops on leaves, and rain over canopy). This change does not override a valid visual REJECT or relax the external Vision confidence threshold.

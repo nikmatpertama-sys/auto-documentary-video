@@ -27,6 +27,8 @@ from visual_outage_policy import metadata_fallback_decision
 from visual_search_expansion import (
     build_visual_search_fallbacks,
     effective_candidate_limit,
+    prepare_footage_queries,
+    expand_visual_search_variants,
 )
 from hook_overlay import create_hook_overlay
 from caption_timing import align_boundary_text, build_phrase_groups, karaoke_phrase, group_bounds
@@ -195,7 +197,8 @@ Return ONLY valid JSON in this exact structure:
 "visual_query":"specific searchable real-world footage phrase, 3-6 words",
 "visual_queries":["alternate specific shot query","second alternate shot query"],
 "visual_mode":"footage or trusted_reference",
-"reference_query":"search phrase for an existing published map/chart/diagram, or empty",
+"reference_required":false,
+"reference_query":"search phrase for an existing published evidence visual, or empty",
 "source_label":"verified institution name or empty",
 "source_url":"official URL or empty"
 }}
@@ -209,9 +212,12 @@ Requirements:
 - Divide the complete spoken story across the 8 scene narration fields, in order.
 - Do not omit story content between scenes or repeat whole sentences.
 - The combined scene narration should form a coherent 160-185 word script.
-- Prefer concrete, relevant real-world footage.
-- If a scene needs a scientific diagram, chart, map, table, data graphic, satellite map, anatomy plate, explanatory animation, scientific illustration, or other evidence visual, set visual_mode to "trusted_reference" and provide a focused reference_query for an already-published visual from a recognised scientific/government/university source.
-- Never invent, draw, approximate, or procedurally fabricate scientific data, maps, diagrams, tables, animations, or mechanisms. Use an actual published source asset with attribution. If no suitable source asset can be verified, use relevant real footage or stop with a clear diagnostic; do not create a substitute diagram.
+- Prefer concrete, relevant real-world footage in every scene. Footage is the default, including for natural processes such as rainfall, transpiration, evaporation, cooling, river flow, cloud formation, and ecosystem interactions.
+- visual_query MUST always describe real footage that a stock-video camera could capture. Never put the words map, chart, graph, diagram, table, infographic, illustration, animation, graphic, or visualization in visual_query or visual_queries.
+- visual_queries must be two independent real-footage shots that illustrate the narration on their own; they are not alternate evidence graphics.
+- Set reference_required=true and visual_mode="trusted_reference" only when the narration specifically depends on verifiable quantitative data, an actual geographic distribution, or an internal scientific structure that cannot be shown faithfully by real footage. A vague pattern, trend, process, region, or scientific topic does NOT by itself require a map or diagram.
+- For a general rainfall/climate/forest-process scene, prefer visible footage such as rain falling through canopy, droplets on leaves, clouds over forest, flowing water, or aerial forest footage; do not request a rainfall map unless the narration states a concrete mapped distribution or measured values.
+- Never invent, draw, approximate, or procedurally fabricate scientific data, maps, diagrams, tables, animations, or mechanisms. Use an actual published source asset with attribution when evidence visuals are essential. If no suitable source asset can be verified, use the real-footage visual_query fallback; do not create a substitute diagram.
 - Each scene must focus on ONE practical, searchable footage shot.
 - visual_query must describe one dominant visible subject, ideally 3-7 words.
 - NEVER combine several things that are unlikely to appear in one clip (for example: a rainstorm + Amazon forest floor + orchids + jaguar).
@@ -316,9 +322,15 @@ def gemini_plan(topic):
             requested_mode = str(scene.get("visual_mode") or "footage").strip().lower()
             if requested_mode not in {"footage", "trusted_reference"}:
                 requested_mode = "footage"
+            # A planner's map/graphic wording is not enough to force a scarce
+            # institutional-reference path. The policy checks whether the
+            # narration itself has a concrete quantitative, geographic or
+            # internal-structure evidence need.
+            scene["reference_required"] = needs_reference_visual(
+                {**scene, "visual_mode": requested_mode}, scene_index
+            )
             scene["visual_mode"] = (
-                "footage" if scene_index == 1 else
-                "trusted_reference" if requested_mode == "trusted_reference" or needs_reference_visual(scene, scene_index)
+                "trusted_reference" if scene_index != 1 and scene["reference_required"]
                 else "footage"
             )
             scene["reference_query"] = re.sub(
@@ -1233,87 +1245,6 @@ def query_concepts(text):
     return tokens, concepts
 
 
-def expand_visual_queries(raw_queries):
-    """Create targeted search variants while preserving the requested shot type."""
-    expanded = []
-
-    replacements = (
-        (r"\bAmazon\b", "tropical rainforest"),
-        (r"\bcanopy\b", "treetops"),
-        (r"\bsunrise\b", "dawn"),
-        (r"\baerial view\b", "drone view"),
-    )
-
-    for raw in raw_queries:
-        base = clean_query(raw)
-
-        if not base:
-            continue
-
-        expanded.append(base)
-
-        variant = base
-
-        for pattern, replacement in replacements:
-            variant = re.sub(
-                pattern,
-                replacement,
-                variant,
-                flags=re.IGNORECASE
-            )
-
-        if variant.lower() != base.lower():
-            expanded.append(
-                clean_query(variant)
-            )
-
-        mood_words = {
-            "sunrise", "sunset", "dawn", "dusk",
-            "morning", "evening", "golden",
-            "cinematic", "slow", "motion"
-        }
-
-        core_words = [
-            token
-            for token in normalize_words(base)
-            if token not in STOP_WORDS
-            and token not in mood_words
-        ]
-
-        core = " ".join(core_words).strip()
-
-        if core and core.lower() != base.lower():
-            expanded.append(
-                clean_query(core)
-            )
-
-    joined = " ".join(expanded).lower()
-
-    if (
-        "amazon" in joined
-        and ("canopy" in joined or "treetop" in joined)
-    ):
-        expanded.extend([
-            "Amazon rainforest aerial canopy",
-            "Amazon rainforest drone canopy",
-            "Brazil Amazon rainforest aerial treetops",
-            "tropical rainforest canopy drone view",
-            "Amazon jungle overhead forest canopy",
-        ])
-
-    unique = []
-    seen = set()
-
-    for item in expanded:
-        key = item.lower()
-
-        if item and key not in seen:
-            unique.append(item)
-            seen.add(key)
-
-    return unique[:6]
-
-
 def relevance_score(hit, query, narration):
     """Score subject, setting and requested shot type from source metadata."""
     metadata = " ".join([
@@ -1879,17 +1810,12 @@ def fetch_footage(plan):
                 "will try relevant real footage. No synthetic diagram will be generated."
             )
 
-        raw_queries = [
-            scene.get("visual_query", "")
-        ]
-
-        raw_queries.extend(
-            list(scene.get("visual_queries", [])[:2])
+        raw_queries = prepare_footage_queries(
+            scene.get("visual_query", ""),
+            list(scene.get("visual_queries", [])[:2]),
         )
 
-        queries = expand_visual_queries(
-            raw_queries
-        )
+        queries = expand_visual_search_variants(raw_queries)
 
         candidates = {}
 
