@@ -57,7 +57,18 @@ No keys at all and no money: `python scripts/offline_render_check.py` renders a 
 
 A push to the `ci-run` branch starts the same pipeline with the topic in `ci-topic.txt`, without using the Run-workflow form. Only that branch publishes `stage_report.json`, `failure_report.json`, `plan.json`, the fact-check report and a trimmed `pipeline.log` to the `ci-diagnostics` branch, so a failed run can be inspected without downloading artifacts. The job never commits to `project1` or `main`.
 
-A 429 now pauses a provider for a bounded window (honouring `Retry-After`, default 180 s, `AI_RATE_LIMIT_COOLDOWN_SECONDS`) instead of deleting it for the whole run; only an explicitly exhausted quota, billing or authentication failure disables a provider. Transient 5xx/network failures cool a route down for `AI_TRANSIENT_COOLDOWN_SECONDS` (default 300 s) and get one bounded retry pass. DeepSeek's chat endpoint is text-only, so it is only used for vision when `DEEPSEEK_VISION_MODEL` is set explicitly.
+A 429 pauses a provider for a bounded window (honouring `Retry-After`, default 180 s, `AI_RATE_LIMIT_COOLDOWN_SECONDS`) instead of deleting it for the whole run; only an explicitly exhausted quota, billing or authentication failure disables a provider. DeepSeek's chat endpoint is text-only, so it is only used for vision when `DEEPSEEK_VISION_MODEL` is set explicitly.
+
+### Provider retries (Phase 1)
+
+Every recoverable failure keeps its route alive for a later pass instead of removing it from the run:
+
+- `AI_ROUTER_MAX_PASSES` (default 2, the workflow uses 4) full sweeps over the provider order, separated by exponential backoff: `AI_RETRY_BASE_SECONDS` 5 s doubling up to `AI_RETRY_MAX_SECONDS` 60 s.
+- A wait the provider declares itself (`Retry-After`, or an exhausted tokens-per-minute window of `AI_TPM_WINDOW_SECONDS` 60 s) is only slept for when it fits inside `AI_ROUTER_WAIT_BUDGET_SECONDS` (default 0 for library callers; the workflow allows 600 s). Otherwise the router fails over immediately and never blocks on a window it cannot outlast.
+- HTTP 413 (request larger than the free-tier `AI_TEXT_TOKEN_CEILING`, 8,000 tokens) shrinks the completion budget and retries the same route; the Groq budget is now sized from the actual prompt so prompt plus budget fits the ceiling.
+- An empty answer with `finish_reason=length`, or an incomplete JSON object, is treated as a truncated output: the completion budget shrinks and the same route is retried. It no longer disables the provider.
+- A 400 whose message concerns JSON/token validation (`Failed to validate JSON`) is treated as an output-side problem with a short cooldown, not a broken configuration.
+- Provider health is recorded per pipeline sub-stage (`generate_json(..., stage=...)`), so a 503 while building the source pool no longer cools the same provider down for script generation and fact checking minutes later.
 
 Text, fact-check, and visual AI providers depend on valid keys, model availability, service status, and quota. The factual review uses its own provider order/cooldown (`AI_FACT_PROVIDER_ORDER`, defaulting to Gemini → Groq → OpenRouter → DeepSeek) so a script-writing provider outage does not automatically disable the fact-review route, and free-tier routes are exhausted before the prepaid one. Stock-footage providers are independently disabled for the remainder of a run after authentication, permission, or rate-limit errors (HTTP 401, 403, or 429). For text/fact generation, Groq, DeepSeek, and OpenRouter explicitly request JSON mode; a malformed or validator-rejected response receives one targeted repair attempt on the same provider before failover. HTTP 402 billing errors are reported separately and skip that provider for the current run. This improves recovery but cannot replenish a provider balance or guarantee service availability.
 

@@ -198,79 +198,109 @@ def documentary_prompt(topic, source_pool=None):
     if source_pool:
         listing = "\n".join(f"- {url}" for url in source_pool)
         pool_block = f"""
-VERIFIED SOURCE PAGES. Each page below was published by a trusted institution
-and was confirmed to exist. Every fact_claims[].source_urls entry MUST be
-copied exactly from this list; never invent another URL. If these pages cannot
-support a sentence, rewrite or drop that sentence instead of guessing a page.
-The narration must STILL total 160-185 spoken words (about 20-23 words per
-scene) even though it only cites these pages; count the words before answering.
+VERIFIED SOURCE PAGES (each confirmed to exist on a trusted institution site):
 {listing}
+Every fact_claims[].source_urls entry MUST be copied exactly from this list;
+never invent a URL. If these pages cannot support a sentence, rewrite or drop
+that sentence. The narration must STILL total 160-185 spoken words (about
+20-23 per scene); count the words before answering.
 """
-    return f"""Create an original, evidence-backed English mini-documentary
-for a vertical 9:16 video.
+    return f"""Create an original, evidence-backed English mini-documentary for a
+vertical 9:16 video.
 
 TOPIC: {topic}
 {pool_block}
-Target spoken length: 160-185 words, approximately 70-90 seconds including
-natural pauses. Create exactly 8 sequential scenes.
+Length: 160-185 spoken words, about 70-90 seconds with natural pauses.
+Exactly 8 sequential scenes.
 
-Return ONLY valid JSON in this exact structure:
+Return ONLY valid JSON:
 {{
   "title":"...",
   "hook":"...",
   "script":"...",
   "scenes":[
-    {{
-      "narration":"one or two complete spoken sentences for this scene",
-      "visual_focus":"one concrete subject that must be visibly present, 2-6 words",
-      "visual_query":"specific searchable real-world footage phrase, 3-6 words",
-      "visual_queries":["independent alternate shot query","second independent alternate shot query"],
+    {{"narration":"one or two complete spoken sentences",
+      "visual_focus":"one concrete visible subject, 2-6 words",
+      "visual_query":"searchable real-world footage phrase, 3-6 words",
+      "visual_queries":["independent alternate shot","second independent alternate shot"],
       "visual_mode":"footage or trusted_reference",
       "reference_required":false,
       "reference_query":"search phrase for an existing published evidence visual, or empty",
       "source_label":"verified institution name or empty",
-      "source_url":"official URL or empty"
-    }}
+      "source_url":"official URL or empty"}}
   ],
   "fact_claims":[
-    {{
-      "scene":1,
+    {{"scene":1,
       "sentence":"an exact complete factual sentence copied from scene narration",
-      "source_urls":["https://www.nasa.gov/direct-evidence-page", "https://www.noaa.gov/independent-evidence-page"]
-    }}
+      "source_urls":["https://www.nasa.gov/direct-evidence-page"]}}
   ]
 }}
 
-SCRIPT AND FACTUAL ACCURACY RULES:
-- The combined scene narration is the complete script, in order, and must total 160-185 words.
-- Every narration sentence must be listed in fact_claims as its exact complete sentence with source URLs. This deliberately includes scientific, biological, geographic, historical, statistical, causal, medical, legal, date/quantity, and descriptive claims so no sentence escapes evidence review. Do not leave any narration sentence uncited.
-- For each claim, aim to provide TWO direct source-page URLs from recognised institutions so the verifier can try an alternate if one page is unavailable or uses different wording. Prefer independent organisations when possible. Do not invent URLs; if only one genuinely known direct page exists, provide that one rather than fabricating another.
-- Source URL hosts must pass the application's allowlist: use HTTPS on recognised .gov, .edu, .int, .ac.uk or .fed.us hosts, or established institutions such as nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org, britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int, un.org, or worldbank.org. The JSON example URL is illustrative only; never copy it unless that exact page directly supports the claim.
-- Do not provide HTTP URLs, search-engine result pages, URL shorteners, redirector URLs, social-media posts, or invented example domains. A source URL that fails host validation will be rejected and regenerated.
-- Do not invent a source, title, author, DOI, URL, statistic, date, percentage, measurement, causal relationship, or quotation. Cite only pages you genuinely know exist and directly support the exact claim. If a claim cannot be confidently sourced, remove it or express a clearly non-factual question/transition instead.
-- Quantitative claims (numbers, percentages, measurements, ranges, dates with material significance) require at least TWO independent trusted source hosts in source_urls. Do not repeat two pages from the same site as independent confirmation.
-- Use restrained, precise wording. Distinguish correlation from causation, regional facts from global facts, estimates from measurements, and current facts from historical facts.
-- Do not claim that a local or regional statistic represents the whole planet. State units, geography, and timeframe whenever material.
-- Avoid overconfident absolutes such as "always", "never", "the only", or "the largest" unless the sources directly establish them.
-- At least three key factual claims must be source-backed. A documentary should contain verifiable information, not generic filler.
+NARRATION AND EVIDENCE
+- Combined scene narration is the full script, in order, totalling 160-185 words.
+- List every narration sentence in fact_claims as its exact complete sentence with
+  source URLs; no sentence may go uncited.
+- Give each claim TWO direct source pages from recognised institutions when
+  possible, preferring independent organisations, so the verifier can try an
+  alternate. Never invent URLs; give one only if a second known page truly does
+  not exist.
+- Hosts must pass the allowlist: HTTPS on .gov, .edu, .int, .ac.uk or .fed.us, or
+  nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org,
+  britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int,
+  un.org, worldbank.org. The example URL above is illustrative only.
+- Never use HTTP, search-result pages, shorteners, redirectors, social posts or
+  invented domains; a URL that fails host validation is rejected and regenerated.
+- Never invent a source, title, author, DOI, URL, statistic, date, percentage,
+  measurement, causal relationship or quotation. Cite only pages you know exist
+  and that directly support the exact claim. If a claim cannot be sourced
+  confidently, remove it or phrase a clearly non-factual question/transition.
+- Quantitative claims (numbers, percentages, measurements, ranges, significant
+  dates) need TWO independent trusted hosts, never two pages from one site.
+- Use restrained, precise wording: separate correlation from causation, regional
+  from global facts, estimates from measurements, current from historical facts.
+- Never present a local or regional statistic as a global one. State units,
+  geography and timeframe when material.
+- Avoid "always", "never", "the only", "the largest" unless the sources directly
+  establish it.
+- At least three key claims must be source-backed; a documentary needs
+  verifiable information, not generic filler.
 
-SCENE AND VISUAL RULES:
-- Exactly 8 scenes, same order as the script, 1-2 sentences per scene.
-- Each scene must communicate ONE main factual idea and one dominant visible subject. Do not list several species, places, objects, or unrelated processes in one scene.
-- The chosen visual_focus and visual_query must represent the central subject of the entire scene narration, not just a minor word in it. A generic forest/river/sky shot is not acceptable for a scene whose main subject is a named animal, plant, machine, person, or specific process.
-- Make visual_focus 2-6 concrete words and repeat at least half of those words verbatim in visual_query (case-insensitive); choose wording that can be searched as real footage. Do not use a synonym in visual_query when the exact visual_focus term can be included naturally.
-- Any named organism, object, or specific action in a scene must be the visual focus or be removed from that scene's narration. Do not narrate an orchid, hummingbird, and jaguar together while showing only an orchid.
-- Scene 1 must be real moving footage, not a diagram. The first spoken sentence is a curiosity hook of at most 12 words.
-- visual_query must describe real footage a camera can capture. Never put map, chart, graph, diagram, table, infographic, illustration, animation, graphic, or visualization in visual_query or visual_queries.
-- visual_queries must be two independent alternative real-footage shots that each illustrate the complete scene idea on their own. Do not repeat the main query with minor word changes.
-- Real footage is the default for rainfall, transpiration, evaporation, cooling, river flow, clouds, and ecosystem processes. Use a trusted published reference only when the narration truly needs a specific measured value, mapped distribution, or internal scientific structure that footage cannot faithfully show.
-- Never fabricate scientific visuals. If a published visual is essential but cannot be found and verified, stop rather than drawing a substitute.
-- Keep geographic identity in source metadata unless the visible scene genuinely establishes it; do not claim generic rainforest footage proves a precise location.
-- Each query should be one practical searchable shot with one dominant subject and, where useful, a camera angle or environment.
-- Ensure each scene's narration has a clear visual match and the overall story has a hook, explanation, reveal, and satisfying payoff.
-- Do not pad the script with generic statements merely to reach the word count.
-- Write naturally for a calm documentary narrator, with varied sentence lengths and spoken punctuation.
-- End on a memorable, evidence-consistent thought rather than a generic call to action.
+SCENES AND VISUALS
+- Exactly 8 scenes in script order, 1-2 sentences each, one main factual idea and
+  one dominant visible subject per scene.
+- Never list several species, places, objects or unrelated processes in one scene.
+- visual_focus and visual_query must represent the central subject of the whole
+  narration, not a minor word. A generic forest, river or sky shot is not
+  acceptable for a scene about a named animal, plant, machine, person or
+  specific process.
+- visual_focus is 2-6 concrete words and at least half of them must appear
+  verbatim in visual_query (case-insensitive) as a searchable real-footage
+  phrase. Do not substitute a synonym when the exact term fits naturally.
+- Any named organism, object or specific action in a scene must be the visual
+  focus or be removed from that narration.
+- Scene 1 is real moving footage, not a diagram; its first sentence is a
+  curiosity hook of at most 12 words.
+- visual_query must be filmable; never put map, chart, graph, diagram, table,
+  infographic, illustration, animation, graphic or visualization in
+  visual_query or visual_queries.
+- visual_queries holds two independent alternative real-footage shots that each
+  carry the whole scene idea; no minor word variants of the main query.
+- Prefer real footage for rainfall, transpiration, evaporation, cooling, river
+  flow, clouds and ecosystem processes. Use a trusted published reference only
+  when the narration truly needs a specific measured value, mapped distribution
+  or internal scientific structure that footage cannot show faithfully.
+- Never fabricate scientific visuals. If an essential published visual cannot be
+  found and verified, stop instead of drawing a substitute.
+- Keep geographic identity in source metadata unless the visible scene itself
+  establishes it; generic rainforest footage does not prove a location.
+- Each query is one practical shot with one dominant subject, optionally a camera
+  angle or environment.
+- Give every scene a clear visual match, and the story a hook, explanation,
+  reveal and satisfying payoff.
+- Do not pad the script with generic statements to reach the word count.
+- Write for a calm documentary narrator: varied sentence lengths, spoken
+  punctuation.
+- End on a memorable, evidence-consistent thought, not a generic call to action.
 """
 
 
@@ -288,7 +318,7 @@ def discover_source_pool(topic):
         f"{topic}\n"
         'Return ONLY JSON: {"articles":["Exact article title","..."]}'
     )
-    value, provider, model = generate_json(prompt)
+    value, provider, model = generate_json(prompt, stage="source_pool")
     titles = [
         str(item).strip()
         for item in (value.get("articles") or [])
@@ -413,7 +443,9 @@ def gemini_plan(topic, source_pool=None):
         return candidate
 
     try:
-        plan, provider, model = generate_json(prompt, validator=validate_plan)
+        plan, provider, model = generate_json(
+            prompt, validator=validate_plan, stage="script_generation"
+        )
     except Exception as exc:
         raise RuntimeError(
             "A source-backed documentary plan could not be generated. "

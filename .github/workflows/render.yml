@@ -167,6 +167,18 @@ jobs:
           GEMINI_MODEL_FALLBACKS: gemini-3.8-flash,gemini-2.5-flash,gemini-2.0-flash
           # Groq's per-minute token window needs a full minute to recover.
           AI_RATE_LIMIT_COOLDOWN_SECONDS: "60"
+          # Free-tier token ceiling for one request, and the window that must
+          # pass before an oversized or truncated request can be retried.
+          AI_TEXT_TOKEN_CEILING: "8000"
+          AI_TPM_WINDOW_SECONDS: "60"
+          # Bounded retry plan: four sweeps over the provider order with
+          # exponential backoff, and up to ten minutes of waiting for a wait
+          # the provider declared itself (Retry-After or an exhausted TPM
+          # window). A rate-limited run now finishes instead of aborting.
+          AI_ROUTER_MAX_PASSES: "4"
+          AI_RETRY_BASE_SECONDS: "5"
+          AI_RETRY_MAX_SECONDS: "60"
+          AI_ROUTER_WAIT_BUDGET_SECONDS: "600"
           OPENROUTER_MODEL: openrouter/free
           OPENROUTER_VISION_MODEL: nvidia/nemotron-3.5-super-vl:free
           OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free

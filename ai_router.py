@@ -26,6 +26,15 @@ class VisionServiceUnavailable(ProviderRoutingError):
     """All visual-verification routes failed at the service/transport layer."""
 
 
+class TruncatedOutputError(ValueError):
+    """The provider spent its whole output budget before finishing the answer.
+
+    This is a recoverable, output-side condition: the same provider usually
+    answers correctly once the completion budget is sized down and the call is
+    retried. It must never be treated as a dead provider for the whole run.
+    """
+
+
 @dataclass(frozen=True)
 class Route:
     provider: str
@@ -72,6 +81,73 @@ def _transient_cooldown_seconds() -> float:
 
 def _rate_limit_cooldown_seconds() -> float:
     return _positive_env_seconds("AI_RATE_LIMIT_COOLDOWN_SECONDS", 180)
+
+
+def _tpm_window_seconds() -> float:
+    """How long a free-tier tokens-per-minute window stays exhausted."""
+    return _positive_env_seconds("AI_TPM_WINDOW_SECONDS", 60)
+
+
+def _int_env(name: str, default: int, minimum: int, maximum: int) -> int:
+    try:
+        value = int(float(_env(name, str(default))))
+    except (TypeError, ValueError):
+        value = default
+    return max(minimum, min(value, maximum))
+
+
+def _float_env(name: str, default: float, minimum: float, maximum: float) -> float:
+    try:
+        value = float(_env(name, str(default)))
+    except (TypeError, ValueError):
+        value = default
+    return max(minimum, min(value, maximum))
+
+
+def _retry_policy() -> tuple[int, float, float, float]:
+    """Bounded retry plan: passes, exponential base, cap, declared-wait budget.
+
+    ``AI_ROUTER_MAX_PASSES`` counts full sweeps over the configured routes, so
+    two passes mean the first attempt plus one exponential-backoff retry.
+    ``AI_ROUTER_WAIT_BUDGET_SECONDS`` is the total time this call may spend
+    sleeping for a wait the provider declared itself (``Retry-After`` or an
+    exhausted tokens-per-minute window). It defaults to 0 because a library
+    caller should fail over immediately rather than block; the CI workflow
+    raises it so a rate-limited run can finish instead of aborting.
+    """
+    return (
+        _int_env("AI_ROUTER_MAX_PASSES", 2, 1, 6),
+        _float_env("AI_RETRY_BASE_SECONDS", 5.0, 0.5, 120.0),
+        _float_env("AI_RETRY_MAX_SECONDS", 120.0, 1.0, 900.0),
+        _float_env("AI_ROUTER_WAIT_BUDGET_SECONDS", 0.0, 0.0, 1800.0),
+    )
+
+
+def _health_key(task: str, stage: str, name: str) -> tuple[str, ...]:
+    """Health is scoped to the pipeline sub-stage that made the request.
+
+    Sharing cooldowns across every text sub-stage meant a 503 while building
+    the source pool deleted the same provider for plan writing and fact
+    checking, even minutes later. Each capped sub-stage now owns its own
+    cooldown state, so one failed stage cannot disable the whole run.
+    """
+    return (task, name) if not stage else (task, stage, name)
+
+
+# Completion budgets shrink after a truncation or 413 instead of the route
+# being removed for the run. The plan needs roughly 1,500 output tokens, so a
+# smaller budget is still usable once the prompt and the budget fit together.
+_COMPLETION_SCALE: dict[tuple[str, str], float] = {}
+
+
+def _completion_scale(task: str, route: Route) -> float:
+    return _COMPLETION_SCALE.get((task, route.route_id), 1.0)
+
+
+def _shrink_completion_budget(task: str, route: Route) -> float:
+    scale = max(0.3, _completion_scale(task, route) * 0.6)
+    _COMPLETION_SCALE[(task, route.route_id)] = scale
+    return scale
 
 
 def _env(name: str, default: str = "") -> str:
@@ -275,16 +351,22 @@ def _safe_detail(response: requests.Response) -> str:
 
 def _mark_failure(
     task: str,
+    stage: str,
     route: Route,
     status: int | None,
     detail: str,
     retry_after: float | None = None,
-) -> None:
+) -> str:
+    """Record a route failure and return how it should be retried.
+
+    ``disabled``: no further attempt makes sense in this run.
+    ``retryable``: transient, the route is worth another pass after backoff.
+    """
     detail = str(detail or "").replace(route.api_key, "[REDACTED]")
     detail = re.sub(r"(?i)Bearer\s+[^ ,;]+", "Bearer [REDACTED]", detail)
 
-    provider_key = (task, route.provider)
-    route_key = (task, route.route_id)
+    provider_key = _health_key(task, stage, route.provider)
+    route_key = _health_key(task, stage, route.route_id)
 
     if status == 429:
         lowered = detail.lower()
@@ -293,9 +375,10 @@ def _mark_failure(
             _DISABLED_PROVIDERS.add(provider_key)
             print(
                 f"AI router: {route.provider} reports an exhausted quota or "
-                "billing limit (HTTP 429); provider skipped for this task for "
+                "billing limit (HTTP 429); provider skipped for this stage for "
                 "the rest of this run."
             )
+            return "disabled"
         else:
             cooldown = min(
                 900.0,
@@ -307,25 +390,63 @@ def _mark_failure(
                 f"AI router: {route.provider} rate limited (HTTP 429); provider "
                 f"paused for {cooldown:.0f}s and the next route is used now."
             )
+            return "retryable"
     elif status in (401, 403):
         _DISABLED_PROVIDERS.add(provider_key)
         print(
             f"AI router: {route.provider} authentication/permission error "
-            f"(HTTP {status}); provider disabled for this task for this run."
+            f"(HTTP {status}); provider disabled for this stage for this run."
         )
+        return "disabled"
     elif status == 402:
         _DISABLED_PROVIDERS.add(provider_key)
         print(
             f"AI router: {route.provider} reports insufficient balance/payment "
-            "(HTTP 402); provider skipped for this task for the rest of this run. "
+            "(HTTP 402); provider skipped for this stage for the rest of this run. "
             "Check the provider account balance or billing status."
         )
-    elif status in (400, 404, 413, 415, 422):
+        return "disabled"
+    elif status == 413:
+        # HTTP 413 is the free-tier token ceiling: prompt plus completion budget
+        # exceeded the per-minute allowance. Shrinking the budget fixes it, so
+        # the route cools down for one TPM window instead of being disabled.
+        cooldown = _tpm_window_seconds()
+        _COOLDOWN_UNTIL[route_key] = time.monotonic() + cooldown
+        print(
+            f"AI router: route {route.route_id} rejected the request size "
+            f"(HTTP 413, token ceiling); shrinking the completion budget and "
+            f"cooling this route for {cooldown:.0f}s. {detail}"
+        )
+        return "retryable"
+    elif status == 400:
+        # Groq answers 400 "Failed to validate JSON" when a reasoning model
+        # truncates structured output. That is an output-side problem, not a
+        # broken configuration, so the route only cools down briefly.
+        lowered = str(detail).lower()
+        output_side = any(
+            marker in lowered
+            for marker in ("json", "validate", "token", "context", "length")
+        )
+        if output_side:
+            _COOLDOWN_UNTIL[route_key] = time.monotonic() + _tpm_window_seconds()
+            print(
+                f"AI router: route {route.route_id} rejected its own structured "
+                f"output (HTTP 400); retrying later in this run. {detail}"
+            )
+            return "retryable"
+        _DISABLED_ROUTES.add(route_key)
+        print(
+            f"AI router: route {route.route_id} rejected the request "
+            f"(HTTP 400); trying another route. {detail}"
+        )
+        return "disabled"
+    elif status in (404, 405, 415, 422):
         _DISABLED_ROUTES.add(route_key)
         print(
             f"AI router: route {route.route_id} rejected configuration/request "
             f"(HTTP {status}); trying another route. {detail}"
         )
+        return "disabled"
     elif status is not None or detail:
         cooldown = _transient_cooldown_seconds()
         _COOLDOWN_UNTIL[route_key] = time.monotonic() + cooldown
@@ -333,19 +454,18 @@ def _mark_failure(
             f"AI router: {route.route_id} temporarily unavailable; "
             f"switching provider. {detail}"
         )
-    else:
-        _COOLDOWN_UNTIL[route_key] = (
-            time.monotonic() + _transient_cooldown_seconds()
-        )
-        print(
-            f"AI router: {route.route_id} connection timeout/network error; "
-            "switching provider."
-        )
+        return "retryable"
+    _COOLDOWN_UNTIL[route_key] = time.monotonic() + _transient_cooldown_seconds()
+    print(
+        f"AI router: {route.route_id} connection timeout/network error; "
+        "switching provider."
+    )
+    return "retryable"
 
 
-def _usable(task: str, route: Route) -> bool:
-    provider_key = (task, route.provider)
-    route_key = (task, route.route_id)
+def _usable(task: str, stage: str, route: Route) -> bool:
+    provider_key = _health_key(task, stage, route.provider)
+    route_key = _health_key(task, stage, route.route_id)
     if provider_key in _DISABLED_PROVIDERS or route_key in _DISABLED_ROUTES:
         return False
     now = time.monotonic()
@@ -393,7 +513,7 @@ def _extract_json(raw: str) -> Any:
                 if depth == 0:
                     return json.loads(raw[start:index + 1])
 
-        raise ValueError("AI response contained incomplete JSON")
+        raise TruncatedOutputError("AI response contained incomplete JSON")
 
 
 def _openai_request(
@@ -448,11 +568,13 @@ def _openai_request(
     }
 
     if task in ("text", "fact"):
-        # Groq's free plan counts the completion budget against a 8,000 TPM
-        # ceiling, so a 7,000-token budget plus the planner prompt was rejected
-        # with HTTP 413 before the model ever ran. The documentary plan needs
-        # roughly 1,500 output tokens, so 3,000 keeps real headroom.
-        payload["max_tokens"] = 7000
+        # Groq's free plan counts the completion budget against a tokens-per-minute
+        # ceiling, so a fixed 7,000-token budget plus the planner prompt was
+        # rejected with HTTP 413 before the model ever ran. The documentary plan
+        # needs roughly 1,500 output tokens, so the budget is sized from the
+        # prompt and a shrinking factor instead.
+        scale = _completion_scale(task, route)
+        payload["max_tokens"] = max(1200, int(7000 * scale))
 
         # All OpenAI-compatible text routes used by this project support JSON
         # mode. Asking for it is particularly important for OpenRouter's free
@@ -479,16 +601,25 @@ def _openai_request(
             payload["reasoning"] = {"effort": "low"}
 
         if route.provider == "groq":
-            # The free plan counts prompt plus completion budget against an
-            # 8,000 tokens-per-minute ceiling. A fixed large budget was rejected
-            # with HTTP 413, while a too-small budget truncated the JSON and
-            # Groq's json_object mode answered HTTP 400 "Failed to validate
-            # JSON". Size the budget from the actual prompt instead.
+            # The free plan counts prompt plus completion budget against a
+            # tokens-per-minute ceiling. A fixed large budget was rejected with
+            # HTTP 413, while a too-small budget truncated the JSON and Groq's
+            # json_object mode answered HTTP 400 "Failed to validate JSON".
+            # Size the budget from the actual prompt, warn when the prompt alone
+            # is already too large, and honour a shrink requested after a 413.
             payload.pop("max_tokens", None)
+            ceiling = _int_env("AI_TEXT_TOKEN_CEILING", 8000, 2000, 200000)
             approx_prompt_tokens = max(1, len(prompt) // 4)
-            payload["max_completion_tokens"] = min(
-                6000, max(1500, 8000 - approx_prompt_tokens - 400)
-            )
+            if approx_prompt_tokens + 1200 > ceiling:
+                print(
+                    "AI router: the prompt is "
+                    f"~{approx_prompt_tokens} tokens against a {ceiling}-token "
+                    "per-minute ceiling; the completion budget is capped at the "
+                    "minimum and the prompt should be shortened."
+                )
+            raw_budget = min(6000, ceiling - approx_prompt_tokens - 400)
+            budget = max(900, raw_budget)
+            payload["max_completion_tokens"] = max(600, int(budget * scale))
     else:
         payload["max_tokens"] = 600 if route.provider != "groq" else 500
 
@@ -569,10 +700,13 @@ def _openai_request(
     if not content:
         finish_reason = str(choices[0].get("finish_reason", "unknown"))[:60]
         message_keys = ",".join(sorted(message.keys())[:12])
-        raise ValueError(
+        detail = (
             "provider returned empty assistant content "
             f"(finish_reason={finish_reason}, message_keys={message_keys})"
         )
+        if finish_reason in ("length", "max_tokens"):
+            raise TruncatedOutputError(detail)
+        raise ValueError(detail)
 
     return content
 
@@ -640,7 +774,10 @@ def _gemini_request(
         "generationConfig": {
             "responseMimeType": "application/json",
             "temperature": 0.25 if task in ("text", "fact") else 0.05,
-            "maxOutputTokens": 7000 if task in ("text", "fact") else 600,
+            "maxOutputTokens": (
+                max(1200, int(7000 * _completion_scale(task, route)))
+                if task in ("text", "fact") else 600
+            ),
         },
     }
 
@@ -681,23 +818,34 @@ def _gemini_request(
 
     try:
         data = response.json()
-        candidates = data.get("candidates") or []
-        content = candidates[0]["content"]["parts"]
-        raw = "\n".join(
-            str(part.get("text", ""))
-            for part in content
-            if part.get("text")
+    except (ValueError, TypeError) as exc:
+        raise ValueError("Gemini response body was not JSON") from exc
+
+    candidates = data.get("candidates") or []
+    if not candidates:
+        feedback = data.get("promptFeedback") or {}
+        blocked = str(feedback.get("blockReason") or "")[:60]
+        raise ValueError(
+            "Gemini returned no candidate"
+            + (f" (blockReason={blocked})" if blocked else "")
         )
 
-        if not raw.strip():
-            raise ValueError("empty Gemini response")
+    first = candidates[0] if isinstance(candidates[0], dict) else {}
+    finish_reason = str(first.get("finishReason") or "")[:40]
+    parts = ((first.get("content") or {}).get("parts")) or []
+    raw = "\n".join(
+        str(part.get("text", ""))
+        for part in parts
+        if isinstance(part, dict) and part.get("text")
+    ).strip()
 
-        return raw.strip()
+    if not raw:
+        detail = f"empty Gemini response (finishReason={finish_reason or 'unknown'})"
+        if finish_reason in ("MAX_TOKENS", "LENGTH"):
+            raise TruncatedOutputError(detail)
+        raise ValueError(detail)
 
-    except Exception as exc:
-        raise ValueError(
-            f"Unreadable Gemini response ({type(exc).__name__})"
-        ) from exc
+    return raw
 
 
 def _request(
@@ -732,180 +880,286 @@ def _route(
     *,
     images: list[bytes] | None = None,
     validator: Callable[[Any], Any] | None = None,
-    _transient_retry: bool = False,
+    stage: str = "",
     _prior_errors: list[str] | None = None,
 ) -> tuple[Any, str, str]:
+    """Route one request through every usable provider with bounded retries.
+
+    Every recoverable condition keeps its route alive for a later pass instead
+    of deleting it from the run: rate limits honour the provider's own wait
+    hint, a 413 or a truncated answer shrinks the completion budget first, and
+    transient 5xx/network failures get exponential backoff. Only an explicit
+    auth, billing, exhausted-quota or configuration rejection disables a route.
+    """
     errors: list[str] = list(_prior_errors or [])
-    transient_routes: list[Route] = []
     routes = _routes(task)
+    max_passes, base_delay, max_delay, wait_budget = _retry_policy()
+    wait_left = wait_budget
+    label = f"{task}/{stage}" if stage else task
 
-    for route in routes:
-        if not _usable(task, route):
-            continue
+    for pass_index in range(1, max_passes + 1):
+        retry_next: list[Route] = []
 
-        print(
-            f"AI router: trying {route.provider} / {route.model} "
-            f"for {task}..."
-        )
+        for route in routes:
+            if not _usable(task, stage, route):
+                continue
 
-        route_images = images
-        if images and route.provider == "groq":
-            route_images = [images[len(images) // 2]]
-        elif images:
-            route_images = [images[0], images[-1]]
+            print(
+                f"AI router: trying {route.provider} / {route.model} "
+                f"for {label}..."
+            )
 
-        # A semantically invalid but parseable response is not proof that the
-        # provider is unavailable. Retry that same route once with the exact
-        # validation error before consuming another provider's quota.
-        request_prompt = prompt
-        repair_used = False
+            route_images = images
+            if images and route.provider == "groq":
+                route_images = [images[len(images) // 2]]
+            elif images:
+                route_images = [images[0], images[-1]]
 
-        while True:
-            try:
-                raw = _request(route, request_prompt, route_images, task)
-                value: Any = _extract_json(raw)
+            # A semantically invalid but parseable response is not proof that the
+            # provider is unavailable. Retry that same route once with the exact
+            # validation error before consuming another provider's quota.
+            request_prompt = prompt
+            repair_used = False
+            shrink_attempts = 0
 
-                if validator:
-                    value = validator(value)
+            while True:
+                try:
+                    raw = _request(route, request_prompt, route_images, task)
+                    value: Any = _extract_json(raw)
 
-                if task == "vision":
-                    if not isinstance(value, dict):
-                        raise ValueError("vision response is not a JSON object")
+                    if validator:
+                        value = validator(value)
 
-                    relevant = value.get("relevant")
-                    confidence = value.get("confidence")
+                    if task == "vision":
+                        if not isinstance(value, dict):
+                            raise ValueError("vision response is not a JSON object")
 
-                    if not isinstance(relevant, bool) or isinstance(confidence, bool):
-                        raise ValueError(
-                            "vision response needs boolean relevant and numeric confidence"
+                        relevant = value.get("relevant")
+                        confidence = value.get("confidence")
+
+                        if not isinstance(relevant, bool) or isinstance(confidence, bool):
+                            raise ValueError(
+                                "vision response needs boolean relevant and numeric confidence"
+                            )
+
+                        confidence = float(confidence)
+                        if not 0 <= confidence <= 1:
+                            raise ValueError(
+                                "vision confidence must be between 0 and 1"
+                            )
+
+                        reason = re.sub(
+                            r"\s+",
+                            " ",
+                            str(value.get("reason", "No reason provided")),
+                        ).strip()[:400]
+
+                        result = {
+                            "relevant": relevant,
+                            "confidence": confidence,
+                            "reason": reason,
+                            "accepted": (
+                                relevant
+                                and confidence >= _vision_min_confidence()
+                            ),
+                            "provider": route.provider,
+                            "model": route.model,
+                        }
+
+                        print(
+                            f"AI router: {route.provider}/{route.model} "
+                            f"visual verdict={'PASS' if result['accepted'] else 'REJECT'} "
+                            f"({confidence:.2f})."
                         )
-
-                    confidence = float(confidence)
-                    if not 0 <= confidence <= 1:
-                        raise ValueError(
-                            "vision confidence must be between 0 and 1"
-                        )
-
-                    reason = re.sub(
-                        r"\s+",
-                        " ",
-                        str(value.get("reason", "No reason provided")),
-                    ).strip()[:400]
-
-                    result = {
-                        "relevant": relevant,
-                        "confidence": confidence,
-                        "reason": reason,
-                        "accepted": (
-                            relevant
-                            and confidence >= _vision_min_confidence()
-                        ),
-                        "provider": route.provider,
-                        "model": route.model,
-                    }
+                        return result, route.provider, route.model
 
                     print(
                         f"AI router: {route.provider}/{route.model} "
-                        f"visual verdict={'PASS' if result['accepted'] else 'REJECT'} "
-                        f"({confidence:.2f})."
+                        f"returned a valid {task} response."
                     )
-                    return result, route.provider, route.model
+                    return value, route.provider, route.model
 
-                print(
-                    f"AI router: {route.provider}/{route.model} "
-                    f"returned a valid {task} response."
-                )
-                return value, route.provider, route.model
+                except TruncatedOutputError as exc:
+                    # The model spent its whole completion budget before
+                    # finishing. Shrink the budget and retry the same route
+                    # instead of losing it for the rest of the run.
+                    errors.append(
+                        f"{route.provider}/{route.model}: truncated output ({exc})"
+                    )
+                    if shrink_attempts < 1:
+                        shrink_attempts += 1
+                        scale = _shrink_completion_budget(task, route)
+                        _COOLDOWN_UNTIL.pop(
+                            _health_key(task, stage, route.route_id), None
+                        )
+                        print(
+                            f"AI router: {route.route_id} exhausted its output "
+                            f"budget; retrying with a {scale:.2f}x completion "
+                            "budget."
+                        )
+                        continue
+                    _COOLDOWN_UNTIL[
+                        _health_key(task, stage, route.route_id)
+                    ] = time.monotonic() + _tpm_window_seconds()
+                    print(
+                        f"AI router: {route.route_id} still truncates its output "
+                        "after shrinking the budget; retrying later in this run."
+                    )
+                    retry_next.append(route)
+                    break
 
-            except _HTTPFailure as exc:
-                errors.append(
-                    f"{route.provider}/{route.model}: HTTP {exc.status}"
-                )
-                _mark_failure(task, route, exc.status, exc.detail, exc.retry_after)
-                if exc.status in (408, 500, 502, 503, 504):
-                    transient_routes.append(route)
-                break
+                except _HTTPFailure as exc:
+                    errors.append(
+                        f"{route.provider}/{route.model}: HTTP {exc.status}"
+                    )
+                    outcome = _mark_failure(
+                        task, stage, route, exc.status, exc.detail, exc.retry_after
+                    )
+                    if exc.status == 413 and shrink_attempts < 1:
+                        # The free-tier token ceiling was exceeded: the prompt is
+                        # fine, the completion budget is not. Try a smaller one
+                        # straight away rather than abandoning the provider.
+                        shrink_attempts += 1
+                        scale = _shrink_completion_budget(task, route)
+                        _COOLDOWN_UNTIL.pop(
+                            _health_key(task, stage, route.route_id), None
+                        )
+                        print(
+                            f"AI router: {route.route_id} token ceiling exceeded; "
+                            f"retrying with a {scale:.2f}x completion budget."
+                        )
+                        continue
+                    if outcome == "retryable" and exc.status != 413:
+                        _COOLDOWN_UNTIL.pop(
+                            _health_key(task, stage, route.route_id), None
+                        )
+                    if outcome == "retryable":
+                        retry_next.append(route)
+                    break
 
-            except (
-                requests.exceptions.Timeout,
-                requests.exceptions.ConnectionError,
-            ) as exc:
-                errors.append(
-                    f"{route.provider}/{route.model}: {type(exc).__name__}"
-                )
-                _mark_failure(task, route, None, "network timeout/connection error")
-                transient_routes.append(route)
-                break
+                except (
+                    requests.exceptions.Timeout,
+                    requests.exceptions.ConnectionError,
+                ) as exc:
+                    errors.append(
+                        f"{route.provider}/{route.model}: {type(exc).__name__}"
+                    )
+                    _mark_failure(
+                        task, stage, route, None, "network timeout/connection error"
+                    )
+                    # The backoff scheduler owns the timing of this retry, so the
+                    # placeholder transport cooldown must not hide the route.
+                    _COOLDOWN_UNTIL.pop(
+                        _health_key(task, stage, route.route_id), None
+                    )
+                    retry_next.append(route)
+                    break
 
-            except requests.exceptions.RequestException as exc:
-                errors.append(
-                    f"{route.provider}/{route.model}: {type(exc).__name__}"
-                )
-                _mark_failure(task, route, None, "request transport error")
-                transient_routes.append(route)
-                break
+                except requests.exceptions.RequestException as exc:
+                    errors.append(
+                        f"{route.provider}/{route.model}: {type(exc).__name__}"
+                    )
+                    _mark_failure(task, stage, route, None, "request transport error")
+                    _COOLDOWN_UNTIL.pop(
+                        _health_key(task, stage, route.route_id), None
+                    )
+                    retry_next.append(route)
+                    break
 
-            except (ValueError, KeyError, TypeError) as exc:
-                if task in ("text", "fact") and not repair_used:
-                    repair_used = True
-                    if route.provider == "groq":
-                        # The first request already consumed most of Groq's
-                        # 8,000 tokens-per-minute free-plan window, so an
-                        # immediate second request would be rejected with 429
-                        # instead of repairing anything.
-                        try:
-                            groq_wait = float(
-                                _env("AI_GROQ_REPAIR_WAIT_SECONDS", "60") or "60"
-                            )
-                        except (TypeError, ValueError):
-                            groq_wait = 60.0
-                        if groq_wait > 0:
-                            print(
-                                "AI router: waiting "
-                                f"{groq_wait:.0f}s for the Groq free-plan token "
-                                "window before the repair attempt."
-                            )
-                            time.sleep(groq_wait)
-                    request_prompt = _repair_prompt(prompt, exc)
+                except (ValueError, KeyError, TypeError) as exc:
+                    if task in ("text", "fact") and not repair_used:
+                        repair_used = True
+                        if route.provider == "groq":
+                            # The first request already consumed most of Groq's
+                            # free-plan token window, so an immediate second
+                            # request would be rejected with 429 instead of
+                            # repairing anything.
+                            try:
+                                groq_wait = float(
+                                    _env("AI_GROQ_REPAIR_WAIT_SECONDS", "60") or "60"
+                                )
+                            except (TypeError, ValueError):
+                                groq_wait = 60.0
+                            if groq_wait > 0:
+                                groq_wait = _positive_env_seconds(
+                                    "AI_GROQ_REPAIR_WAIT_SECONDS", 60
+                                )
+                            if groq_wait > 0:
+                                print(
+                                    "AI router: waiting "
+                                    f"{groq_wait:.0f}s for the Groq free-plan token "
+                                    "window before the repair attempt."
+                                )
+                                time.sleep(groq_wait)
+                        request_prompt = _repair_prompt(prompt, exc)
+                        print(
+                            f"AI router: {route.provider}/{route.model} returned "
+                            "invalid JSON/schema; retrying this provider once with "
+                            "a targeted correction."
+                        )
+                        continue
+
+                    errors.append(
+                        f"{route.provider}/{route.model}: invalid response ({exc})"
+                    )
+                    # A malformed answer is not a dead provider: cool the route
+                    # down for one token window and let a later pass try again
+                    # with a smaller completion budget.
+                    _COOLDOWN_UNTIL[
+                        _health_key(task, stage, route.route_id)
+                    ] = time.monotonic() + _tpm_window_seconds()
+                    _shrink_completion_budget(task, route)
                     print(
                         f"AI router: {route.provider}/{route.model} returned "
-                        "invalid JSON/schema; retrying this provider once with "
-                        "a targeted correction."
+                        f"invalid data after the bounded repair attempt; cooling "
+                        f"it down and trying another provider. {exc}"
                     )
-                    continue
+                    retry_next.append(route)
+                    break
 
-                errors.append(
-                    f"{route.provider}/{route.model}: invalid response ({exc})"
-                )
-                _DISABLED_ROUTES.add((task, route.route_id))
+        if not retry_next or pass_index >= max_passes:
+            break
+
+        # Exponential backoff between passes. A route is only re-queued when its
+        # remaining cooldown fits inside this delay plus the remaining declared
+        # wait budget, so the router never blocks on a window it cannot outlast.
+        next_delay = min(max_delay, base_delay * (2 ** (pass_index - 1)))
+        now = time.monotonic()
+        waiting: list[Route] = []
+        for route in retry_next:
+            remaining = max(
+                _COOLDOWN_UNTIL.get(_health_key(task, stage, route.route_id), 0.0) - now,
+                _PROVIDER_COOLDOWN_UNTIL.get(
+                    _health_key(task, stage, route.provider), 0.0
+                ) - now,
+                0.0,
+            )
+            if remaining > next_delay + wait_left:
                 print(
-                    f"AI router: {route.provider}/{route.model} returned "
-                    f"invalid data after the bounded repair attempt; trying "
-                    f"another provider. {exc}"
+                    f"AI router: {route.route_id} needs {remaining:.0f}s before it "
+                    "can answer again; that exceeds the remaining wait budget, so "
+                    "this run will not block on it."
                 )
-                break
+                continue
+            waiting.append(route)
+            if remaining > next_delay:
+                wait_left -= remaining - next_delay
+                next_delay = remaining
 
-    if transient_routes and not _transient_retry:
-        # Retry only the routes that produced a transient transport/server
-        # failure. Authentication, billing, quota, and malformed-output routes
-        # are not retried as if they were temporary server outages.
+        if not waiting:
+            break
+
+        for route in waiting:
+            _COOLDOWN_UNTIL.pop(_health_key(task, stage, route.route_id), None)
+            _PROVIDER_COOLDOWN_UNTIL.pop(
+                _health_key(task, stage, route.provider), None
+            )
+
         print(
-            f"AI router: all available {task} routes had transient errors; "
-            "one bounded retry in 5s."
+            f"AI router: retry pass {pass_index + 1}/{max_passes} for {label} "
+            f"in {next_delay:.1f}s with {len(waiting)} route(s)."
         )
-        time.sleep(5)
-
-        for route in transient_routes:
-            _COOLDOWN_UNTIL.pop((task, route.route_id), None)
-
-        return _route(
-            task,
-            prompt,
-            images=images,
-            validator=validator,
-            _transient_retry=True,
-            _prior_errors=errors,
-        )
+        time.sleep(next_delay)
 
     if not routes:
         message = "No configured AI key for this task."
@@ -932,17 +1186,24 @@ def _route(
 def generate_json(
     prompt: str,
     validator: Callable[[Any], Any] | None = None,
+    stage: str = "",
 ) -> tuple[Any, str, str]:
-    """Generate documentary-planning JSON using the text-provider route."""
-    return _route("text", prompt, validator=validator)
+    """Generate documentary-planning JSON using the text-provider route.
+
+    ``stage`` names the pipeline sub-step (source pool, script generation, ...)
+    so provider health is isolated per sub-step: one failed stage cannot cool a
+    provider down for the stages that follow it.
+    """
+    return _route("text", prompt, validator=validator, stage=stage)
 
 
 def generate_fact_json(
     prompt: str,
     validator: Callable[[Any], Any] | None = None,
+    stage: str = "",
 ) -> tuple[Any, str, str]:
     """Run an independent evidence-audit task with its own provider order/cooldown."""
-    return _route("fact", prompt, validator=validator)
+    return _route("fact", prompt, validator=validator, stage=stage)
 
 
 def verify_images(frames: list[bytes], prompt: str) -> dict[str, Any]:
