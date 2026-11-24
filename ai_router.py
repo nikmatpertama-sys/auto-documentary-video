@@ -487,7 +487,7 @@ def _openai_request(
             payload.pop("max_tokens", None)
             approx_prompt_tokens = max(1, len(prompt) // 4)
             payload["max_completion_tokens"] = min(
-                4500, max(1500, 8000 - approx_prompt_tokens - 600)
+                6000, max(1500, 8000 - approx_prompt_tokens - 400)
             )
     else:
         payload["max_tokens"] = 600 if route.provider != "groq" else 500
@@ -848,6 +848,16 @@ def _route(
             except (ValueError, KeyError, TypeError) as exc:
                 if task in ("text", "fact") and not repair_used:
                     repair_used = True
+                    if route.provider == "groq" and "incomplete" in str(exc).lower():
+                        # The first request already consumed most of Groq's
+                        # 8,000 tokens-per-minute free-plan window, so an
+                        # immediate second request would be rejected with 429
+                        # instead of repairing anything.
+                        print(
+                            "AI router: waiting 60s for the Groq free-plan "
+                            "token window before the repair attempt."
+                        )
+                        time.sleep(60)
                     request_prompt = _repair_prompt(prompt, exc)
                     print(
                         f"AI router: {route.provider}/{route.model} returned "
