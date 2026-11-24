@@ -10,10 +10,11 @@ import ai_router
 
 
 class FakeResponse:
-    def __init__(self, status_code, payload):
+    def __init__(self, status_code, payload, headers=None):
         self.status_code = status_code
         self._payload = payload
         self.text = json.dumps(payload)
+        self.headers = dict(headers or {})
 
     def json(self):
         return self._payload
@@ -24,6 +25,7 @@ class AIRouterTests(unittest.TestCase):
         ai_router._DISABLED_PROVIDERS.clear()
         ai_router._DISABLED_ROUTES.clear()
         ai_router._COOLDOWN_UNTIL.clear()
+        ai_router._PROVIDER_COOLDOWN_UNTIL.clear()
 
     def test_text_429_fails_over_to_deepseek(self):
         raw_plan = {"ok": True, "scenes": []}
@@ -153,14 +155,14 @@ class AIRouterTests(unittest.TestCase):
             "choices": [{"message": {"content": json.dumps(reject)}}]
         })
         with patch.dict(os.environ, {
-            "AI_VISION_PROVIDER_ORDER": "deepseek,gemini",
-            "DEEPSEEK_API_KEY": "test-deepseek",
-            "GEMINI_API_KEY": "test-gemini",
+            "AI_VISION_PROVIDER_ORDER": "groq,openrouter",
+            "GROQ_API_KEY": "test-groq",
+            "OPENROUTER_API_KEY": "test-openrouter",
         }, clear=True), patch("ai_router.requests.post", return_value=response) as post:
             value = ai_router.verify_images([b"jpeg-frame-a", b"jpeg-frame-b"], "Check the animal")
 
         self.assertFalse(value["accepted"])
-        self.assertEqual(value["provider"], "deepseek")
+        self.assertEqual(value["provider"], "groq")
         self.assertEqual(post.call_count, 1)
 
     def test_all_vision_routes_rate_limited_is_distinct_error(self):
@@ -422,6 +424,103 @@ class AIRouterTests(unittest.TestCase):
             self.assertEqual(_vision_min_confidence(), 0.72)
         with patch.dict("os.environ", {"FOOTAGE_VISION_MIN_CONFIDENCE": "0.90"}, clear=False):
             self.assertEqual(_vision_min_confidence(), 0.90)
+
+
+class AIRouterFailoverTests(unittest.TestCase):
+    """Rate limits must pause a provider, not delete it from the rest of the run."""
+
+    def setUp(self):
+        ai_router._DISABLED_PROVIDERS.clear()
+        ai_router._DISABLED_ROUTES.clear()
+        ai_router._COOLDOWN_UNTIL.clear()
+        ai_router._PROVIDER_COOLDOWN_UNTIL.clear()
+
+    def _ok(self, payload):
+        return FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps(payload)}}]
+        })
+
+    def test_deepseek_is_not_used_for_vision_without_explicit_model(self):
+        with patch.dict(os.environ, {
+            "AI_VISION_PROVIDER_ORDER": "deepseek",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+        }, clear=True):
+            self.assertEqual(ai_router._routes("vision"), [])
+            self.assertEqual(ai_router.configured_vision_provider_names(), [])
+            with self.assertRaises(ai_router.VisionServiceUnavailable):
+                ai_router.verify_images([b"frame"], "Check footage")
+
+    def test_deepseek_vision_route_requires_explicit_model(self):
+        with patch.dict(os.environ, {
+            "AI_VISION_PROVIDER_ORDER": "deepseek",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+            "DEEPSEEK_VISION_MODEL": "deepseek-vl",
+        }, clear=True):
+            routes = ai_router._routes("vision")
+        self.assertEqual(len(routes), 1)
+        self.assertEqual(routes[0].model, "deepseek-vl")
+
+    def test_rate_limit_429_pauses_provider_then_reuses_it(self):
+        rate_limited = FakeResponse(429, {"error": {"message": "too many requests"}})
+        env = {
+            "AI_TEXT_PROVIDER_ORDER": "groq,deepseek",
+            "GROQ_API_KEY": "test-groq",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+        }
+        with patch.dict(os.environ, env, clear=True), patch(
+            "ai_router.requests.post",
+            side_effect=[rate_limited, self._ok({"first": True}), self._ok({"second": True})],
+        ) as post:
+            value, provider, _model = ai_router.generate_json("Return JSON")
+            self.assertEqual(provider, "deepseek")
+            self.assertEqual(value, {"first": True})
+            # The provider is paused, not permanently disabled.
+            self.assertNotIn(("text", "groq"), ai_router._DISABLED_PROVIDERS)
+            self.assertIn(("text", "groq"), ai_router._PROVIDER_COOLDOWN_UNTIL)
+
+            # Once the pause expires the same provider must be usable again.
+            ai_router._PROVIDER_COOLDOWN_UNTIL.clear()
+            ai_router._COOLDOWN_UNTIL.clear()
+            value, provider, _model = ai_router.generate_json("Return JSON")
+
+        self.assertEqual(provider, "groq")
+        self.assertEqual(value, {"second": True})
+        self.assertEqual(post.call_count, 3)
+
+    def test_exhausted_quota_429_disables_provider_for_the_run(self):
+        exhausted = FakeResponse(429, {"error": {"message": "You exceeded your current quota"}})
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "groq,deepseek",
+            "GROQ_API_KEY": "test-groq",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+        }, clear=True), patch(
+            "ai_router.requests.post",
+            side_effect=[exhausted, self._ok({"ok": True})],
+        ):
+            _value, provider, _model = ai_router.generate_json("Return JSON")
+
+        self.assertEqual(provider, "deepseek")
+        self.assertIn(("text", "groq"), ai_router._DISABLED_PROVIDERS)
+
+    def test_retry_after_header_bounds_the_pause(self):
+        rate_limited = FakeResponse(
+            429,
+            {"error": {"message": "slow down"}},
+            headers={"Retry-After": "42"},
+        )
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "groq",
+            "GROQ_API_KEY": "test-groq",
+        }, clear=True), patch("ai_router.requests.post", return_value=rate_limited):
+            with self.assertRaises(ai_router.ProviderRoutingError):
+                ai_router.generate_json("Return JSON")
+
+        remaining = (
+            ai_router._PROVIDER_COOLDOWN_UNTIL[("text", "groq")]
+            - __import__("time").monotonic()
+        )
+        self.assertLessEqual(remaining, 42.0)
+        self.assertGreater(remaining, 30.0)
 
 
 if __name__ == "__main__":

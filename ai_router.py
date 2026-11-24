@@ -44,7 +44,34 @@ class Route:
 _DISABLED_PROVIDERS: set[tuple[str, str]] = set()
 _DISABLED_ROUTES: set[tuple[str, str]] = set()
 _COOLDOWN_UNTIL: dict[tuple[str, str], float] = {}
-_TRANSIENT_COOLDOWN_SECONDS = 3600
+_PROVIDER_COOLDOWN_UNTIL: dict[tuple[str, str], float] = {}
+
+# A 429 is usually a short-window rate limit, not a dead provider. Disabling the
+# provider for the whole run used to remove an otherwise healthy fallback route
+# for narration, fact-checking and vision. Exhausted quota/billing stays fatal
+# for the run because it cannot recover on its own.
+_QUOTA_FAILURE_MARKERS = (
+    "quota", "billing", "insufficient", "credit", "payment", "daily limit",
+    "exceeded your current",
+)
+
+
+def _positive_env_seconds(name: str, default: int) -> float:
+    try:
+        value = float(_env(name, str(default)))
+    except (TypeError, ValueError):
+        value = float(default)
+    if not value or value <= 0:
+        value = float(default)
+    return max(15.0, min(value, 3600.0))
+
+
+def _transient_cooldown_seconds() -> float:
+    return _positive_env_seconds("AI_TRANSIENT_COOLDOWN_SECONDS", 300)
+
+
+def _rate_limit_cooldown_seconds() -> float:
+    return _positive_env_seconds("AI_RATE_LIMIT_COOLDOWN_SECONDS", 180)
 
 
 def _env(name: str, default: str = "") -> str:
@@ -102,7 +129,14 @@ def _routes(task: str) -> list[Route]:
                 ))
         elif provider == "deepseek":
             key = _env("DEEPSEEK_API_KEY")
-            model = _env("DEEPSEEK_MODEL", "deepseek-flash")
+            if task == "vision":
+                # DeepSeek's chat endpoint is text-only. Routing frames here
+                # always failed with a request error and silently consumed one
+                # of the bounded vision attempts, so vision is opt-in only when
+                # an operator knows a multimodal DeepSeek model is available.
+                model = _env("DEEPSEEK_VISION_MODEL")
+            else:
+                model = _env("DEEPSEEK_MODEL", "deepseek-flash")
             if key and model:
                 routes.append(Route(
                     "deepseek", model, key,
@@ -185,7 +219,13 @@ def _safe_detail(response: requests.Response) -> str:
     return message[:240] or f"HTTP {response.status_code}"
 
 
-def _mark_failure(task: str, route: Route, status: int | None, detail: str) -> None:
+def _mark_failure(
+    task: str,
+    route: Route,
+    status: int | None,
+    detail: str,
+    retry_after: float | None = None,
+) -> None:
     detail = str(detail or "").replace(route.api_key, "[REDACTED]")
     detail = re.sub(r"(?i)Bearer\s+[^ ,;]+", "Bearer [REDACTED]", detail)
 
@@ -193,11 +233,26 @@ def _mark_failure(task: str, route: Route, status: int | None, detail: str) -> N
     route_key = (task, route.route_id)
 
     if status == 429:
-        _DISABLED_PROVIDERS.add(provider_key)
-        print(
-            f"AI router: {route.provider} rate/quota limit (HTTP 429); "
-            "provider skipped for this task for the rest of this run."
-        )
+        lowered = detail.lower()
+        exhausted = any(marker in lowered for marker in _QUOTA_FAILURE_MARKERS)
+        if exhausted:
+            _DISABLED_PROVIDERS.add(provider_key)
+            print(
+                f"AI router: {route.provider} reports an exhausted quota or "
+                "billing limit (HTTP 429); provider skipped for this task for "
+                "the rest of this run."
+            )
+        else:
+            cooldown = min(
+                900.0,
+                max(15.0, retry_after or _rate_limit_cooldown_seconds()),
+            )
+            _PROVIDER_COOLDOWN_UNTIL[provider_key] = time.monotonic() + cooldown
+            _COOLDOWN_UNTIL[route_key] = time.monotonic() + cooldown
+            print(
+                f"AI router: {route.provider} rate limited (HTTP 429); provider "
+                f"paused for {cooldown:.0f}s and the next route is used now."
+            )
     elif status in (401, 403):
         _DISABLED_PROVIDERS.add(provider_key)
         print(
@@ -218,16 +273,15 @@ def _mark_failure(task: str, route: Route, status: int | None, detail: str) -> N
             f"(HTTP {status}); trying another route. {detail}"
         )
     elif status is not None or detail:
-        _COOLDOWN_UNTIL[route_key] = (
-            time.monotonic() + _TRANSIENT_COOLDOWN_SECONDS
-        )
+        cooldown = _transient_cooldown_seconds()
+        _COOLDOWN_UNTIL[route_key] = time.monotonic() + cooldown
         print(
             f"AI router: {route.route_id} temporarily unavailable; "
             f"switching provider. {detail}"
         )
     else:
         _COOLDOWN_UNTIL[route_key] = (
-            time.monotonic() + _TRANSIENT_COOLDOWN_SECONDS
+            time.monotonic() + _transient_cooldown_seconds()
         )
         print(
             f"AI router: {route.route_id} connection timeout/network error; "
@@ -240,7 +294,10 @@ def _usable(task: str, route: Route) -> bool:
     route_key = (task, route.route_id)
     if provider_key in _DISABLED_PROVIDERS or route_key in _DISABLED_ROUTES:
         return False
-    if _COOLDOWN_UNTIL.get(route_key, 0) > time.monotonic():
+    now = time.monotonic()
+    if _COOLDOWN_UNTIL.get(route_key, 0) > now:
+        return False
+    if _PROVIDER_COOLDOWN_UNTIL.get(provider_key, 0) > now:
         return False
     return True
 
@@ -381,7 +438,9 @@ def _openai_request(
     )
 
     if response.status_code >= 400:
-        raise _HTTPFailure(response.status_code, _safe_detail(response))
+        raise _HTTPFailure(
+            response.status_code, _safe_detail(response), _retry_after_seconds(response)
+        )
 
     try:
         data = response.json()
@@ -446,10 +505,26 @@ def _openai_request(
     return content
 
 
+def _retry_after_seconds(response: requests.Response) -> float | None:
+    """Read a numeric Retry-After header, ignoring HTTP-date formats."""
+    try:
+        raw = str(response.headers.get("Retry-After", "") or "").strip()
+    except Exception:
+        return None
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return None
+    if value <= 0:
+        return None
+    return min(value, 900.0)
+
+
 class _HTTPFailure(Exception):
-    def __init__(self, status: int, detail: str):
+    def __init__(self, status: int, detail: str, retry_after: float | None = None):
         self.status = status
         self.detail = detail
+        self.retry_after = retry_after
         super().__init__(f"HTTP {status}: {detail}")
 
 
@@ -490,7 +565,9 @@ def _gemini_request(
     )
 
     if response.status_code >= 400:
-        raise _HTTPFailure(response.status_code, _safe_detail(response))
+        raise _HTTPFailure(
+            response.status_code, _safe_detail(response), _retry_after_seconds(response)
+        )
 
     try:
         data = response.json()
@@ -634,7 +711,7 @@ def _route(
                 errors.append(
                     f"{route.provider}/{route.model}: HTTP {exc.status}"
                 )
-                _mark_failure(task, route, exc.status, exc.detail)
+                _mark_failure(task, route, exc.status, exc.detail, exc.retry_after)
                 if exc.status in (408, 500, 502, 503, 504):
                     transient_routes.append(route)
                 break
