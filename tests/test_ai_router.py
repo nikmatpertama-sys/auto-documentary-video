@@ -47,6 +47,24 @@ class AIRouterTests(unittest.TestCase):
         self.assertNotIn("test-groq", logs.getvalue())
         self.assertNotIn("test-deepseek", logs.getvalue())
 
+
+    def test_fact_check_uses_independent_provider_order(self):
+        response = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"checked": True})}}]
+        })
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "groq",
+            "AI_FACT_PROVIDER_ORDER": "deepseek",
+            "GROQ_API_KEY": "test-groq",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+        }, clear=True), patch("ai_router.requests.post", return_value=response) as post:
+            value, provider, model = ai_router.generate_fact_json("Verify claims")
+
+        self.assertEqual(value, {"checked": True})
+        self.assertEqual(provider, "deepseek")
+        self.assertEqual(model, "deepseek-flash")
+        self.assertIn("api.deepseek.com", post.call_args.args[0])
+
     def test_valid_visual_reject_does_not_trigger_provider_fallback(self):
         reject = {"relevant": False, "confidence": 0.94, "reason": "Requested animal not visible"}
         response = FakeResponse(200, {
@@ -173,6 +191,16 @@ class AIRouterTests(unittest.TestCase):
         with patch.dict(os.environ, {"AI_TEXT_PROVIDER_ORDER": "groq"}, clear=True):
             with self.assertRaises(ai_router.ProviderRoutingError):
                 ai_router.generate_json("Return JSON")
+
+
+    def test_vision_confidence_floor_cannot_be_lowered_by_environment(self):
+        from unittest.mock import patch
+        from ai_router import _vision_min_confidence
+
+        with patch.dict("os.environ", {"FOOTAGE_VISION_MIN_CONFIDENCE": "0.10"}, clear=False):
+            self.assertEqual(_vision_min_confidence(), 0.72)
+        with patch.dict("os.environ", {"FOOTAGE_VISION_MIN_CONFIDENCE": "0.90"}, clear=False):
+            self.assertEqual(_vision_min_confidence(), 0.90)
 
 
 if __name__ == "__main__":

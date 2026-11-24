@@ -129,3 +129,28 @@ Pass 9 changes:
 - 49/49 unit tests passed, including new checks that generic rainfall-map requests downgrade to footage and that numerical geographic evidence still qualifies for a trusted reference.
 - Query-builder checks confirm the failing map/chart queries are converted into real-footage searches.
 - Live GitHub Actions, stock-provider responses, and external AI quotas have not been executed or verified in this local session. Code cannot replenish DeepSeek balance or override Groq/Gemini/OpenRouter rate limits; if all vision providers are down and no strong metadata candidate exists, the generator will still stop rather than use unrelated media.
+
+
+## Pass 10 — evidence coverage and mandatory visual verification
+
+Pass 10 supersedes the historical Pass 6 metadata-only Vision-outage fallback. The production path now requires pixel-level Vision verification for every selected scene, and a configured confidence value below 0.72 is ignored; operators may only make the threshold stricter.
+
+Narrative quality and factuality changes:
+- Every complete narration sentence must appear verbatim in the `fact_claims` evidence ledger with source URLs. The validator blocks missing sentence coverage before any voice-over is generated. A shared sentence splitter preserves decimal measurements and common abbreviations during fact checks and VO timing.
+- Source pages must use HTTPS and an institutional/scientific allowlist. Redirects are followed manually, one hop at a time, only after the destination passes the same allowlist check.
+- Fetched pages must contain a relevant passage for the claim. Page text comes from the actual fetched content; generated snippets and page titles are not accepted as evidence.
+- Numeric/quantitative statements require two distinct source organisations; subdomains of one institution do not count as independent evidence.
+- Claim, URL, redirect, and page-size limits bound requests and diagnostic artifacts. Failed source fetches and fact-provider outages produce a blocked fact-check report when possible.
+- `production_report.json` embeds the complete fact-check evidence and verdict. The current GitHub Actions upload list does not separately upload `fact_check_report.json`, although the file is created and validated in the runner workspace.
+
+Visual and operational changes:
+- All downloaded footage and trusted reference visuals must pass the full scene narration + visual-focus pixel check. Metadata-only acceptance is removed from the production path.
+- Exact duplicate video bytes are blocked between scenes; a second metadata collection call was removed.
+- The original `.github/workflows/render.yml` is kept byte-for-byte unchanged because the self-upgrade workflow restores the checked-out version. Python code overrides the workflow's historical `FOOTAGE_VISION_REQUIRED=false` and candidate-limit-five values.
+
+### Pass 10 local validation and limitations
+- `python -m py_compile *.py tests/*.py`: passed.
+- `python -m unittest discover -s tests -q`: **66/66 passed**.
+- `healthcheck.py`: FFmpeg, ffprobe, libass, libx264, CPU PyTorch, requests, Pillow, SentencePiece and protobuf passed. The isolated build container lacks `edge_tts` and `transformers`; both are declared in `requirements.txt` and are installed by GitHub Actions.
+- No live GitHub Actions run, actual provider call, source-page fetch for a real topic, or external stock-footage download was executed here. Production rendering still requires the configured provider secrets and real Actions environment.
+- AI fact-checking cannot offer a mathematical guarantee. The evidence excerpts and verdicts must be reviewed before publishing, especially for high-stakes or time-sensitive statements.

@@ -56,6 +56,15 @@ def _order(name: str, default: str) -> list[str]:
     return list(dict.fromkeys(x for x in values if x))
 
 
+def _vision_min_confidence() -> float:
+    """Keep the production Vision floor at 0.72; configuration may only make it stricter."""
+    try:
+        requested = float(_env("FOOTAGE_VISION_MIN_CONFIDENCE", "0.72"))
+    except (TypeError, ValueError):
+        requested = 0.72
+    return max(0.72, min(1.0, requested))
+
+
 def configured_vision_provider_names() -> list[str]:
     names = []
     for route in _routes("vision"):
@@ -71,6 +80,9 @@ def configured_vision_provider_names() -> list[str]:
 def _routes(task: str) -> list[Route]:
     if task == "text":
         order = _order("AI_TEXT_PROVIDER_ORDER", "groq,deepseek,gemini,openrouter")
+    elif task == "fact":
+        # Keep fact review on an independent provider order/cooldown from script writing.
+        order = _order("AI_FACT_PROVIDER_ORDER", "deepseek,gemini,groq,openrouter")
     else:
         order = _order("AI_VISION_PROVIDER_ORDER", "groq,deepseek,gemini,openrouter")
 
@@ -79,8 +91,8 @@ def _routes(task: str) -> list[Route]:
         if provider == "groq":
             key = _env("GROQ_API_KEY")
             model = _env(
-                "GROQ_MODEL" if task == "text" else "GROQ_VISION_MODEL",
-                "openai/gpt-oss-120b" if task == "text" else "qwen/qwen3.8-27b",
+                "GROQ_VISION_MODEL" if task == "vision" else "GROQ_MODEL",
+                "openai/gpt-oss-120b" if task in ("text", "fact") else "qwen/qwen3.8-27b",
             )
             if key and model:
                 routes.append(Route(
@@ -100,7 +112,7 @@ def _routes(task: str) -> list[Route]:
         elif provider == "gemini":
             key = _env("GEMINI_API_KEY")
             model = _env(
-                "GEMINI_MODEL" if task == "text" else "GEMINI_VISION_MODEL",
+                "GEMINI_VISION_MODEL" if task == "vision" else "GEMINI_MODEL",
                 "gemini-3.8-flash",
             )
             if key and model:
@@ -112,8 +124,8 @@ def _routes(task: str) -> list[Route]:
         elif provider == "openrouter":
             key = _env("OPENROUTER_API_KEY")
             model = _env(
-                "OPENROUTER_MODEL" if task == "text" else "OPENROUTER_VISION_MODEL",
-                "openrouter/free" if task == "text" else "nvidia/nemotron-3.5-super-vl:free",
+                "OPENROUTER_VISION_MODEL" if task == "vision" else "OPENROUTER_MODEL",
+                "openrouter/free" if task in ("text", "fact") else "nvidia/nemotron-3.5-super-vl:free",
             )
             if key and model:
                 routes.append(Route(
@@ -286,7 +298,7 @@ def _openai_request(
     system = (
         "You are a precise documentary production assistant. "
         "Return only one valid JSON object."
-        if task == "text"
+        if task in ("text", "fact")
         else
         "You are a strict visual footage verifier. Inspect the pixels, "
         "not just metadata. Return only JSON with boolean relevant, "
@@ -299,10 +311,10 @@ def _openai_request(
             {"role": "system", "content": system},
             {"role": "user", "content": user_content},
         ],
-        "temperature": 0.25 if task == "text" else 0.05,
+        "temperature": 0.25 if task in ("text", "fact") else 0.05,
     }
 
-    if task == "text":
+    if task in ("text", "fact"):
         payload["max_tokens"] = 7000
 
         if route.provider == "deepseek":
@@ -387,8 +399,8 @@ def _gemini_request(
         "contents": [{"parts": parts}],
         "generationConfig": {
             "responseMimeType": "application/json",
-            "temperature": 0.25 if task == "text" else 0.05,
-            "maxOutputTokens": 7000 if task == "text" else 600,
+            "temperature": 0.25 if task in ("text", "fact") else 0.05,
+            "maxOutputTokens": 7000 if task in ("text", "fact") else 600,
         },
     }
 
@@ -503,9 +515,7 @@ def _route(
                     "reason": reason,
                     "accepted": (
                         relevant
-                        and confidence >= float(
-                            _env("FOOTAGE_VISION_MIN_CONFIDENCE", "0.72")
-                        )
+                        and confidence >= _vision_min_confidence()
                     ),
                     "provider": route.provider,
                     "model": route.model,
@@ -601,8 +611,16 @@ def generate_json(
     prompt: str,
     validator: Callable[[Any], Any] | None = None,
 ) -> tuple[Any, str, str]:
-    """Generate JSON using bounded provider failover; returns value/provider/model."""
+    """Generate documentary-planning JSON using the text-provider route."""
     return _route("text", prompt, validator=validator)
+
+
+def generate_fact_json(
+    prompt: str,
+    validator: Callable[[Any], Any] | None = None,
+) -> tuple[Any, str, str]:
+    """Run an independent evidence-audit task with its own provider order/cooldown."""
+    return _route("fact", prompt, validator=validator)
 
 
 def verify_images(frames: list[bytes], prompt: str) -> dict[str, Any]:

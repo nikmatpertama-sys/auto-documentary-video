@@ -22,3 +22,10 @@ production_report.json
 .env
 .env.*
 !.env.example
+
+# Generated audit/production metadata
+fact_check_report.json
+voiceover_manifest.json
+opening_layout.json
+opening_hook_overlay.png
+.hf-cache/
