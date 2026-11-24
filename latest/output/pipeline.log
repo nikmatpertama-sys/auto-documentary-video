@@ -6,48 +6,42 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 1/7 Writing and validating the documentary script...
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text...
-AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, Stream restoration
-Source pool: 51 trusted page(s) cited by Beaver, Keystone species, Stream restoration.
-[stage] source_pool: completed in 0.9s
-[stage] script_generation: start
-AI router: trying gemini / gemini-3.5-flash-lite for text...
 AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+AI router: trying groq / openai/gpt-oss-120b for text...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+Source pool articles suggested by groq/openai/gpt-oss-120b: Beaver, Beaver dam, Ecology of beavers
+Source pool: 47 trusted page(s) cited by Beaver, Beaver dam, Ecology of beavers.
+[stage] source_pool: completed in 16.2s
+[stage] script_generation: start
 AI router: trying groq / openai/gpt-oss-120b for text...
 AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
 AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; trying another provider. Scene narration totals 103 words; expected 150-195 for a 70-90 second narration.
+AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; trying another provider. Expected exactly 8 scenes; received 7 and no safe scene-count repair was possible.
 AI router: trying openrouter / openrouter/free for text...
 AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this task for the rest of this run.
-AI router: all available text routes had transient errors; one bounded retry in 5s.
-AI router: trying gemini / gemini-3.5-flash-lite for text...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-[stage] script_generation: FAILED after 78.5s
+[stage] script_generation: FAILED after 73.5s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 414, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 416, in gemini_plan
     plan, provider, model = generate_json(prompt, validator=validate_plan)
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 937, in generate_json
     return _route("text", prompt, validator=validator)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 901, in _route
-    return _route(
-           ^^^^^^^
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 927, in _route
     raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: invalid response (Scene narration totals 103 words; expected 150-195 for a 70-90 second narration.); openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: HTTP 503
+ai_router.ProviderRoutingError: All text-generation providers are unavailable: groq/openai/gpt-oss-120b: invalid response (Expected exactly 8 scenes; received 7 and no safe scene-count repair was possible.); openrouter/openrouter/free: HTTP 429
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3627, in <module>
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3629, in <module>
     main()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3607, in main
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3609, in main
     _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3365, in _run_pipeline
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3367, in _run_pipeline
     plan = gemini_plan(TOPIC, source_pool)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 416, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 418, in gemini_plan
     raise RuntimeError(
-RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: invalid response (Scene narration totals 103 words; expected 150-195 for a 70-90 second narration.); openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: HTTP 503
+RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: groq/openai/gpt-oss-120b: invalid response (Expected exactly 8 scenes; received 7 and no safe scene-count repair was possible.); openrouter/openrouter/free: HTTP 429
