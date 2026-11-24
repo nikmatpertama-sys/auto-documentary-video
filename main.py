@@ -24,6 +24,10 @@ from visual_matcher import rank_candidates
 from narration_timing import duration_correction
 from source_policy import source_failure_reason
 from visual_outage_policy import metadata_fallback_decision
+from visual_search_expansion import (
+    build_visual_search_fallbacks,
+    effective_candidate_limit,
+)
 from hook_overlay import create_hook_overlay
 from caption_timing import align_boundary_text, build_phrase_groups, karaoke_phrase, group_bounds
 from reference_visuals import (
@@ -80,9 +84,11 @@ VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "false").strip().lower() 
     "0", "false", "no", "off"
 )
 
-# Search more of the metadata-ranked pool before declaring a scene impossible.
-VISION_CANDIDATE_LIMIT = max(
-    1, min(8, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "8")))
+# The checked-in workflow still exports a legacy value of 5. Enforce a
+# production minimum of 8 candidates in code so that old workflow settings
+# cannot silently reduce the quality gate. Allow operators to raise it to 12.
+VISION_CANDIDATE_LIMIT = effective_candidate_limit(
+    os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "8")
 )
 
 try:
@@ -1892,102 +1898,128 @@ def fetch_footage(plan):
             f"each of {len(queries)} search variants."
         )
 
-        for query in queries:
-            for hit in search_all_footage_sources(query):
-                identity = (
-                    f"{hit.get('source')}:{hit.get('id')}"
-                )
-
-                if (
-                    not hit.get("url")
-                    or identity in used_ids
-                ):
-                    continue
-
-                if not candidate_matches_visual_anchors(
-                    hit,
-                    query
-                ):
-                    continue
-
-                width = int(
-                    hit.get("width") or 0
-                )
-
-                duration = float(
-                    hit.get("duration") or 0
-                )
-
-                if width and width < MIN_CLIP_WIDTH:
-                    continue
-
-                if duration and duration < 4:
-                    continue
-
-                score, matched, total = relevance_score(
-                    hit,
-                    query,
-                    scene.get("narration", "")
-                )
-
-                if matched < 1 or score < 0.20:
-                    continue
-
-                metadata_tokens = set(
-                    normalize_words(
-                        str(hit.get("metadata", ""))
-                        + " "
-                        + str(hit.get("tags", ""))
+        def collect_candidates(search_queries):
+            for query in search_queries:
+                for hit in search_all_footage_sources(query):
+                    identity = (
+                        f"{hit.get('source')}:{hit.get('id')}"
                     )
-                )
 
-                scene_context = set(
-                    normalize_words(
-                        scene.get("narration", "")
+                    if (
+                        not hit.get("url")
+                        or identity in used_ids
+                    ):
+                        continue
+
+                    if not candidate_matches_visual_anchors(
+                        hit,
+                        query
+                    ):
+                        continue
+
+                    width = int(
+                        hit.get("width") or 0
                     )
-                )
 
-                if (
-                    metadata_tokens & CONTEXT_CONFLICTS["snow_winter"]
-                    and not scene_context & CONTEXT_CONFLICTS["snow_winter"]
-                ):
-                    continue
+                    duration = float(
+                        hit.get("duration") or 0
+                    )
 
-                if (
-                    metadata_tokens & CONTEXT_CONFLICTS["underwater"]
-                    and not scene_context & CONTEXT_CONFLICTS["underwater"]
-                ):
-                    continue
+                    if width and width < MIN_CLIP_WIDTH:
+                        continue
 
-                tags = str(
-                    hit.get("tags")
-                    or hit.get("metadata")
-                    or ""
-                )
+                    if duration and duration < 4:
+                        continue
 
-                similarity = max(
-                    [
-                        tag_similarity(tags, old)
-                        for old in selected_tag_sets
-                    ] or [0.0]
-                )
-
-                if similarity > 0.78:
-                    continue
-
-                previous = candidates.get(identity)
-
-                if (
-                    previous is None
-                    or score > previous[0]
-                ):
-                    candidates[identity] = (
-                        score,
+                    score, matched, total = relevance_score(
                         hit,
                         query,
-                        matched,
-                        total
+                        scene.get("narration", "")
                     )
+
+                    if matched < 1 or score < 0.20:
+                        continue
+
+                    metadata_tokens = set(
+                        normalize_words(
+                            str(hit.get("metadata", ""))
+                            + " "
+                            + str(hit.get("tags", ""))
+                        )
+                    )
+
+                    scene_context = set(
+                        normalize_words(
+                            scene.get("narration", "")
+                        )
+                    )
+
+                    if (
+                        metadata_tokens & CONTEXT_CONFLICTS["snow_winter"]
+                        and not scene_context & CONTEXT_CONFLICTS["snow_winter"]
+                    ):
+                        continue
+
+                    if (
+                        metadata_tokens & CONTEXT_CONFLICTS["underwater"]
+                        and not scene_context & CONTEXT_CONFLICTS["underwater"]
+                    ):
+                        continue
+
+                    tags = str(
+                        hit.get("tags")
+                        or hit.get("metadata")
+                        or ""
+                    )
+
+                    similarity = max(
+                        [
+                            tag_similarity(tags, old)
+                            for old in selected_tag_sets
+                        ] or [0.0]
+                    )
+
+                    if similarity > 0.78:
+                        continue
+
+                    previous = candidates.get(identity)
+
+                    if (
+                        previous is None
+                        or score > previous[0]
+                    ):
+                        candidates[identity] = (
+                            score,
+                            hit,
+                            query,
+                            matched,
+                            total
+                        )
+
+        collect_candidates(queries)
+
+        # A few precise, camera/weather-heavy queries can return almost no
+        # usable stock results. When that happens, search a small set of broader
+        # subject-preserving variants before deciding that the scene is impossible.
+        # The visual verifier still checks the downloaded pixels; this does not
+        # weaken the acceptance threshold or invent substitute visuals.
+        if len(candidates) < 5:
+            fallback_queries = build_visual_search_fallbacks(
+                scene.get("visual_query", ""),
+                list(scene.get("visual_queries", [])[:2]),
+            )[:4]
+            fallback_queries = [
+                q for q in fallback_queries
+                if q.lower() not in {existing.lower() for existing in queries}
+            ]
+            if fallback_queries:
+                print(
+                    f"Scene {i}: only {len(candidates)} initial candidate(s); "
+                    f"expanding search with {len(fallback_queries)} broader "
+                    "subject-preserving query variant(s)."
+                )
+                collect_candidates(fallback_queries)
+                queries.extend(fallback_queries)
 
         ranked = sorted(
             candidates.values(),

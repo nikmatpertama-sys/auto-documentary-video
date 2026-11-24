@@ -83,3 +83,23 @@ The local integrated test uses eSpeak-generated test speech behind a fake Edge T
 - When every configured Vision provider is temporarily unavailable, candidate acceptance now evaluates both the original visual-search query and the actual scene narration. Strong narration-context metadata can qualify footage even when a camera/source-specific query such as “NASA Landsat satellite image” is too restrictive.
 - Weak candidates remain rejected. The fallback never treats an unavailable Vision response as a visual PASS and records that pixel verification was not completed.
 - Added isolated policy tests for strong direct matches, narration-context matches, weak candidates, and single-keyword false matches.
+
+## Pass 7 — adaptive search when a scene has too few candidates
+
+The latest failed run (`122666073603`) showed that Scene 3 had only two metadata-qualified candidates after the initial six search variants. Both candidates were correctly rejected by pixel-level Vision checks. The run also encountered Wikimedia HTTP 429, Coverr HTTP 403, Groq HTTP 429, a DeepSeek insufficient-balance response, and a Gemini timeout. OpenRouter still returned a valid visual REJECT, so this was not a complete Vision outage and the Pass 6 metadata-only outage path correctly did not override that REJECT.
+
+Pass 7 adds:
+- A secondary search stage when the first pass finds fewer than five metadata-qualified candidates.
+- Up to four broader, subject-preserving query variants. Weather/mood descriptors such as `mist` are removed from the search phrase when they make discovery too restrictive, while specific subjects such as jaguars, orchids, insects, and birds remain in their own independent alternatives.
+- Alternative shot queries are broadened independently; they are never merged into one query that combines unrelated subjects.
+- At least eight candidates are now eligible for pixel verification even though the checked-in legacy workflow still exports `FOOTAGE_VISION_CANDIDATE_LIMIT=5`. The existing workflow file remains unchanged by the ZIP installer.
+- No relaxation of the visual verification threshold. A clip with an actual Vision REJECT remains rejected. Metadata-only acceptance is still limited to the separate, conservative policy for genuine Vision-service outages.
+
+### Pass 7 validation
+- 45/45 unit tests passed locally.
+- Python compile check passed for the project files.
+- The specific logged query `mist rising from tropical rainforest treetops` was checked against the new search-expansion function; it produces broader canopy/treetop queries without retaining `mist` as a hard search requirement.
+- ZIP integrity and clean extraction were checked after packaging.
+
+### Limits
+The new search stage has not yet been exercised against the user's live GitHub Actions credentials or the external footage APIs. It improves discovery when the initial result pool is sparse; it cannot guarantee a usable clip when providers are rate-limited or no genuinely relevant footage exists. The visual verifier remains authoritative, so a scene can still stop with a diagnostic rather than use unrelated footage.

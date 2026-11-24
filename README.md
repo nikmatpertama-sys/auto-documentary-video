@@ -83,3 +83,7 @@ Set provider keys as environment variables before running locally.
 ### Pass 6 reliability update
 
 The default footage scan now checks up to eight ranked candidates. If all configured AI Vision providers are temporarily unavailable, the generator can still accept a candidate only when its source metadata strongly matches either the scene's visual query or the actual narration. Weak matches remain rejected; the log explicitly marks metadata-only acceptance so it is not confused with pixel-level verification.
+
+### Pass 7 reliability update
+
+When the initial footage search returns fewer than five metadata-qualified candidates, the generator now adds a short secondary search using broader but subject-preserving variants. Temporary visual details such as mist or camera wording no longer unnecessarily narrow every search. Alternative shots remain independent, and specific animals/plants are not dropped from their queries. At least eight candidates can be pixel-checked even when the older workflow environment still says five. The actual Vision verdict and confidence threshold are unchanged: a visual REJECT is still a rejection.
