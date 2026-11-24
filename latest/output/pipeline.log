@@ -9,30 +9,31 @@ AI router: trying gemini / gemini-3.5-flash-lite for text...
 AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
 AI router: trying groq / openai/gpt-oss-120b for text...
 AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; trying another provider. AI response contained incomplete JSON
+AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; trying another provider. Fact claim 4 has source URL endpoint(s) outside the trusted HTTPS allowlist: https://www.fs.fed.us. Use direct HTTPS pages on recognised institutions; accepted examples include nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org, britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int, un.org, and qualifying .gov, .edu, .int, or .ac.uk hosts. Do not use search-result pages, URL shorteners, or redirects.
 AI router: trying openrouter / openrouter/free for text...
 AI router: openrouter/openrouter/free returned invalid JSON/schema; retrying this provider once with a targeted correction.
 AI router: openrouter/openrouter/free returned invalid data after the bounded repair attempt; trying another provider. provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)
 AI router: trying openrouter / baidu/ernie-5.5-flash-preview:free for text...
-AI router: openrouter rate limited (HTTP 429); provider paused for 60s and the next route is used now.
+AI router: openrouter/baidu/ernie-5.5-flash-preview:free returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: openrouter/baidu/ernie-5.5-flash-preview:free returned invalid data after the bounded repair attempt; trying another provider. provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)
 AI router: all available text routes had transient errors; one bounded retry in 5s.
 AI router: trying gemini / gemini-3.5-flash-lite for text...
 AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-[stage] script_generation: FAILED after 115.7s
+[stage] script_generation: FAILED after 220.1s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 370, in gemini_plan
     plan, provider, model = generate_json(prompt, validator=validate_plan)
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 919, in generate_json
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 929, in generate_json
     return _route("text", prompt, validator=validator)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 883, in _route
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 893, in _route
     return _route(
            ^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 909, in _route
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 919, in _route
     raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: invalid response (AI response contained incomplete JSON); openrouter/openrouter/free: invalid response (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: HTTP 429; gemini/gemini-3.5-flash-lite: HTTP 503
+ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: invalid response (Fact claim 4 has source URL endpoint(s) outside the trusted HTTPS allowlist: https://www.fs.fed.us. Use direct HTTPS pages on recognised institutions; accepted examples include nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org, britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int, un.org, and qualifying .gov, .edu, .int, or .ac.uk hosts. Do not use search-result pages, URL shorteners, or redirects.); openrouter/openrouter/free: invalid response (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: invalid response (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); gemini/gemini-3.5-flash-lite: HTTP 503
 
 The above exception was the direct cause of the following exception:
 
@@ -46,4 +47,4 @@ Traceback (most recent call last):
            ^^^^^^^^^^^^^^^^^^
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 372, in gemini_plan
     raise RuntimeError(
-RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: invalid response (AI response contained incomplete JSON); openrouter/openrouter/free: invalid response (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: HTTP 429; gemini/gemini-3.5-flash-lite: HTTP 503
+RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: invalid response (Fact claim 4 has source URL endpoint(s) outside the trusted HTTPS allowlist: https://www.fs.fed.us. Use direct HTTPS pages on recognised institutions; accepted examples include nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org, britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int, un.org, and qualifying .gov, .edu, .int, or .ac.uk hosts. Do not use search-result pages, URL shorteners, or redirects.); openrouter/openrouter/free: invalid response (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: invalid response (provider returned empty assistant content (finish_reason=length, message_keys=content,rea
