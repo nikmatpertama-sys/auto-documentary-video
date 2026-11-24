@@ -1,98 +1,73 @@
-Auto Documentary Video
+# Auto Documentary Video Generator — PROJECT1
 
-Automated vertical mini-documentary generator using AI-assisted (or local-template fallback) story planning, stock footage, local SigLIP thumbnail ranking, scene-aware API-free explanatory illustrations, Edge TTS narration, Pillow graphics, and FFmpeg rendering.
+Automated vertical mini-documentary generator using AI-assisted story planning, licensed stock footage and published institutional visuals, Edge TTS narration, word-synchronized captions, and FFmpeg rendering.
 
-Output
+## Output
 
-- "documentary.mp4" — 1080 × 1920, 30 FPS, H.264/AAC.
-- "plan.json" — generated script, scene plan, source metadata, and render timing.
-- "credits.txt" — footage source and creator attribution.
-- "output/" — downloaded media, voice-over, captions, scene cards, and intermediate renders.
+- `documentary.mp4` — 1080 × 1920, 30 FPS, H.264/AAC.
+- `plan.json` — script, scene plan, selected media and provenance metadata.
+- `credits.txt` — asset creator, source page, license/usage information, and visual-verification status.
+- `production_report.json` — per-scene source, verification method, reference visual details, opening layout, and caption-group count.
+- `timing.json` — sentence events, word-level timings, and caption phrase groups.
+- `output/voiceover.mp3` and `output/captions.ass` — final voice-over and word-synchronized subtitle file.
 
-AI Providers
+## GitHub Actions setup
 
-The project supports multiple AI providers with fallback routing:
+Switch the repository branch selector to `project1` before uploading the upgrade ZIP or running **Actions → Hybrid Documentary Generator → Run workflow**. The self-upgrade workflow commits to the currently selected branch. Do not run it from `main`.
 
-- Groq
-- DeepSeek
-- Google Gemini
-- OpenRouter
+Upload the file `auto-documentary-video-upgrade.zip` to the repository root, commit it, and run the workflow with branch `project1`. Enter the documentary topic in the workflow input.
 
-Provider availability depends on valid API keys, model availability, quotas, and service status.
+Optional GitHub Actions secrets:
 
-GitHub Actions Setup
+- `GROQ_API_KEY`
+- `DEEPSEEK_API_KEY`
+- `GEMINI_API_KEY`
+- `OPENROUTER_API_KEY`
+- `PIXABAY_API_KEY`
+- `PEXELS_API_KEY`
+- `COVERR_API_KEY`
 
-API keys are optional. Add any available keys under:
+Text and visual AI providers depend on valid keys, model availability, service status, and quota. Stock-footage providers are independently disabled for the remainder of a run after authentication, permission, or rate-limit errors (HTTP 401, 403, or 429).
 
-Repository → Settings → Secrets and variables → Actions
+## Visual sourcing policy
 
-Supported optional secrets:
+The production path does **not** create procedural scientific diagrams, charts, tables, maps, anatomy plates, or data graphics. When a scene needs this kind of evidence visual, it searches for an already-published visual from an institutional source. It currently searches NASA's image library and Wikimedia Commons records that include a linked primary institutional source and an accepted reusable license.
 
-- "GROQ_API_KEY"
-- "DEEPSEEK_API_KEY"
-- "GEMINI_API_KEY"
-- "OPENROUTER_API_KEY"
-- "PIXABAY_API_KEY"
-- "PEXELS_API_KEY"
-- "COVERR_API_KEY"
+- NASA assets explicitly marked as third-party copyrighted/restricted are skipped. NASA media usage rules still apply; the source is credited and no endorsement is implied.
+- Commons images are accepted only when a linked primary source belongs to a recognised institutional domain and the file has a reusable license such as CC0, public domain, CC BY, or CC BY-SA. Attribution and license details are included in `credits.txt`.
+- The published image's scientific content is preserved. It is fitted into the vertical canvas without cropping its data or labels; the frame adds only the title and source credit.
+- If no suitable published visual is found, the generator tries relevant real footage. It does not invent a replacement diagram. If no acceptable footage or published visual exists, the run stops with a diagnostic rather than silently presenting an unrelated illustration.
+- The legacy `visual_fallback.py` module remains in the repository for compatibility and its unit tests, but the production `main.py` path does not call it.
 
-Without AI text keys, a cautious local-template script is used. Without suitable footage or when AI Vision services are unavailable, a local illustrated 2D fallback scene is rendered. Footage provider keys improve the chance of finding real footage but are not required for the fallback renderer.
+The local SigLIP model may rank stock-footage thumbnails. It is not equivalent to checking every frame. AI visual verification is attempted when configured; if all vision providers are unavailable, the production report clearly distinguishes metadata-only acceptance from pixel-verified footage.
 
-Then open:
+## Opening title and hook
 
-Switch the repository branch selector to `project1` before uploading the upgrade ZIP or running Actions → Hybrid Documentary Generator → Run workflow. The self-upgrade step commits to the currently selected branch, so do not run it from `main`.
+The opening title/hook is rendered as a separate transparent Pillow overlay. Text is wrapped using actual pixel widths, preserves Unicode punctuation (including curly apostrophes), and is checked before rendering. The first scene is forced to use moving footage so the opening card is always available. The build fails clearly if supplied title/hook text cannot fit safely; it does not silently clip words at the screen edge.
 
-Enter a documentary topic and run the workflow.
+## Narration and subtitles
 
-When the workflow completes successfully, download the generated artifact from the workflow run.
+- Narration uses Edge TTS word-boundary events.
+- Word timings are aligned back to the original script so punctuation is retained.
+- Captions are grouped by punctuation, clause boundaries, timing gaps, and phrase length—not fixed five-word chunks.
+- Each phrase uses word-level ASS karaoke timing from the TTS boundaries, with the currently spoken word highlighted.
+- If a word cannot be aligned reliably to a TTS boundary, caption generation stops instead of silently omitting or drifting that word.
+- If actual voice-over duration is slightly outside 70–90 seconds, a small pitch-preserving FFmpeg `atempo` adjustment may normalize it, and all word/sentence timestamps are scaled by the measured duration change. Larger deviations are rejected rather than forcing unnatural speech.
 
-Local Setup
+## Local setup
 
-Requirements:
+Requirements: Python 3.11+, FFmpeg/ffprobe with libass subtitles, and packages in `requirements.txt`.
 
-- Python 3.11+
-- FFmpeg and ffprobe
-- FFmpeg subtitles/libass support
-- Optional AI API keys (local-template fallback is available if providers are unavailable)
-
-Install dependencies:
-
+```bash
 python -m pip install -r requirements.txt
-
-Set the API keys as environment variables before running the generator.
-
-Run:
-
 python main.py
+```
 
-Visual Matching
+Set provider keys as environment variables before running locally.
 
-The project uses a local SigLIP-based visual matcher to help rank footage thumbnails. It is not equivalent to full video-frame verification.
+## Important notes
 
-SigLIP ranks available footage thumbnails locally. If it cannot load, metadata ranking is used and the report does not claim SigLIP verification.
-
-AI visual verification is attempted when providers are configured. If verification services are unavailable, or no suitable footage can be selected, the pipeline creates an topic-aware 2D explanatory illustration locally with Pillow and FFmpeg. Fallback diagrams cover selected subject families (for example hydrothermal vents, Earth layers, space, microbes, volcanoes, animals, and climate). Rainforest scenes have separate illustrations for the forest floor, jaguars and leafcutter ants, winding rivers, drought, and leaf transpiration. Scene-local visual queries take priority over broad topic wording, and word-boundary matching prevents false matches such as “planetary” being mistaken for “planet”. Unknown subjects use an explicit input-process-outcome diagram rather than claiming to depict literal footage. These are explanatory illustrations, not photorealistic 3D. The production report includes candidate counts and fallback failure details where applicable.
-
-Rendering Pipeline
-
-- Scene durations are allocated according to narration length.
-- Footage is formatted for vertical 9:16 output.
-- Visual treatments include restrained camera motion and contrast/saturation adjustments. Final encoding uses the medium x264 preset by default to favor quality over minimum render time.
-- Diagram scenes use original Pillow-generated cards.
-- Captions use Edge TTS word-boundary timings.
-- FFmpeg handles final video rendering and encoding.
-
-Important Notes
-
-- Review factual claims and footage relevance before publishing.
-- Automated topic generation is not a substitute for editorial fact-checking.
-- Pixabay and Pexels asset availability varies by topic.
-- NASA footage availability varies by topic and source.
-- "credits.txt" records selected sources where available.
-- API quotas and provider availability may affect generation.
-- Always verify the generated MP4 before publishing.
-
-## Narration duration safety
-The generator measures the rendered voice-over audio, rather than relying only on the script word count. If the measured narration falls slightly outside 70-90 seconds, it applies a small pitch-preserving FFmpeg `atempo` adjustment toward 71 or 89 seconds. Word subtitle timing and sentence/scene timing are scaled by the measured audio-duration change. Large deviations requiring an `atempo` value outside 0.85-1.15 are rejected rather than distorted.
-
-Narration is generated and duration-checked before footage searches begin, so an invalid voice-over does not waste footage API calls. Footage sources that return HTTP 401, 403, or 429 are disabled for the remainder of that run to prevent repeated failed requests.
+- Verify the generated MP4 and `credits.txt` before publishing.
+- Check each source page and any applicable license terms, especially for monetized/commercial publishing.
+- AI-generated scripts still need editorial fact-checking.
+- Provider availability, quotas, and topic-specific footage coverage can affect whether all eight scenes can be completed.

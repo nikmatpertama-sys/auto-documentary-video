@@ -7,7 +7,6 @@ import asyncio
 import hashlib
 import tempfile
 import subprocess
-import textwrap
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -21,9 +20,21 @@ from ai_router import (
     verify_images,
 )
 from visual_matcher import rank_candidates
-from visual_fallback import create_fallback_video
 from narration_timing import duration_correction
 from source_policy import source_failure_reason
+from hook_overlay import create_hook_overlay
+from caption_timing import align_boundary_text, build_phrase_groups, karaoke_phrase, group_bounds
+from reference_visuals import (
+    needs_reference_visual,
+    validate_reference_candidate,
+    query_match_ratio,
+)
+from source_visuals import (
+    nasa_image_search,
+    commons_image_search,
+    download_reference_image,
+    compose_reference_frame,
+)
 
 # ============================================================
 # CONFIG
@@ -61,7 +72,8 @@ MIN_CLIP_WIDTH = 640
 MAX_CLIP_BYTES = 180 * 1024 * 1024
 
 # AI visual verification is attempted when providers are available. The
-# default permits local visual fallback when verification services are down.
+# Visuals are sourced from footage libraries or published institutional assets.
+# No procedural fallback diagram is used by the production path.
 VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "false").strip().lower() not in (
     "0", "false", "no", "off"
 )
@@ -174,6 +186,8 @@ Return ONLY valid JSON in this exact structure:
 "narration":"complete spoken narration segment for this scene",
 "visual_query":"specific searchable real-world footage phrase, 3-6 words",
 "visual_queries":["alternate specific shot query","second alternate shot query"],
+"visual_mode":"footage or trusted_reference",
+"reference_query":"search phrase for an existing published map/chart/diagram, or empty",
 "source_label":"verified institution name or empty",
 "source_url":"official URL or empty"
 }}
@@ -187,7 +201,9 @@ Requirements:
 - Divide the complete spoken story across the 8 scene narration fields, in order.
 - Do not omit story content between scenes or repeat whole sentences.
 - The combined scene narration should form a coherent 160-185 word script.
-- Prefer concrete, relevant real-world footage. If footage is unavailable, the local fallback will create a topic-aware explanatory illustration.
+- Prefer concrete, relevant real-world footage.
+- If a scene needs a scientific diagram, chart, map, table, data graphic, satellite map, anatomy plate, explanatory animation, scientific illustration, or other evidence visual, set visual_mode to "trusted_reference" and provide a focused reference_query for an already-published visual from a recognised scientific/government/university source.
+- Never invent, draw, approximate, or procedurally fabricate scientific data, maps, diagrams, tables, animations, or mechanisms. Use an actual published source asset with attribution. If no suitable source asset can be verified, use relevant real footage or stop with a clear diagnostic; do not create a substitute diagram.
 - Each scene must focus on ONE practical, searchable footage shot.
 - visual_query must describe one dominant visible subject, ideally 3-7 words.
 - NEVER combine several things that are unlikely to appear in one clip (for example: a rainstorm + Amazon forest floor + orchids + jaguar).
@@ -242,8 +258,10 @@ def _local_documentary_plan(topic):
             "visual_query": query,
             "visual_queries": [
                 f"{subject} realistic documentary footage",
-                f"{subject} educational illustration",
+                f"{subject} published scientific reference",
             ],
+            "visual_mode": "footage",
+            "reference_query": f"{subject} published institutional reference visual",
         })
     plan = {
         "title": f"Understanding {subject}",
@@ -287,7 +305,18 @@ def gemini_plan(topic):
                 raise ValueError(f"Scene {scene_index} needs two independent visual_queries.")
             scene["visual_query"] = visual_query
             scene["visual_queries"] = alternatives[:2]
-            scene["visual_type"] = "footage"
+            requested_mode = str(scene.get("visual_mode") or "footage").strip().lower()
+            if requested_mode not in {"footage", "trusted_reference"}:
+                requested_mode = "footage"
+            scene["visual_mode"] = (
+                "footage" if scene_index == 1 else
+                "trusted_reference" if requested_mode == "trusted_reference" or needs_reference_visual(scene, scene_index)
+                else "footage"
+            )
+            scene["reference_query"] = re.sub(
+                r"\s+", " ", str(scene.get("reference_query") or visual_query)
+            ).strip()
+            scene["visual_type"] = scene["visual_mode"]
             narrations.append(narration)
 
         candidate["script"] = " ".join(narrations).strip()
@@ -1619,6 +1648,174 @@ Return only JSON: {{"relevant": true, "confidence": 0.0, "reason": "brief visibl
     )
 
 
+def fetch_trusted_reference_visual(scene, scene_number, visual_provider_names):
+    """Fetch an already-published institutional visual; never generate a diagram."""
+    raw_queries = [
+        scene.get("reference_query", ""),
+        scene.get("visual_query", ""),
+    ]
+    raw_queries.extend(scene.get("visual_queries", [])[:2])
+    queries = []
+    seen_queries = set()
+    for value in raw_queries:
+        query = clean_query(str(value or ""))
+        if query and query.lower() not in seen_queries:
+            queries.append(query)
+            seen_queries.add(query.lower())
+    if not queries:
+        return None, "No reference search query was supplied."
+
+    candidates = {}
+    search_errors = []
+    for query in queries[:2]:
+        for source_name, search_fn in (
+            ("NASA", nasa_image_search),
+            ("Wikimedia Commons", commons_image_search),
+        ):
+            try:
+                for item in search_fn(query, limit=5):
+                    item_query = query
+                    identity = f"{item.get('source')}:{item.get('id')}"
+                    ok, reason = validate_reference_candidate(item, item_query, min_match=0.45)
+                    if not ok:
+                        continue
+                    score = query_match_ratio(
+                        " ".join([
+                            str(item.get("title", "")), str(item.get("metadata", "")),
+                            str(item.get("publisher", "")), str(item.get("creator", "")),
+                        ]), item_query,
+                    )
+                    if item.get("source") == "NASA":
+                        score += 0.08
+                    previous = candidates.get(identity)
+                    if previous is None or score > previous[0]:
+                        candidates[identity] = (score, item, item_query)
+            except Exception as exc:
+                status = getattr(getattr(exc, "response", None), "status_code", None)
+                search_errors.append(f"{source_name} image search ({query}): HTTP {status or 'error'} {str(exc)[:180]}")
+
+    ranked = sorted(candidates.values(), key=lambda row: row[0], reverse=True)
+    if not ranked:
+        reason = "No reusable visual with an identifiable institutional origin matched the scene."
+        if search_errors:
+            reason += " Search diagnostics: " + " | ".join(search_errors[:3])
+        return None, reason
+
+    image_path = FOOT / f"scene_{scene_number:02d}_reference_asset.jpg"
+    frame_path = FOOT / f"scene_{scene_number:02d}_reference_frame.jpg"
+    for score, candidate, query in ranked[:5]:
+        try:
+            width, height = download_reference_image(candidate["url"], image_path)
+            verification_method = "institutional source metadata"
+            verification_reason = (
+                f"Published source metadata match {score:.2f}; original scientific graphic/photo retained without redrawing."
+            )
+            vision_confidence = None
+
+            if visual_provider_names:
+                prompt = f"""Check whether this attached published reference image visibly matches the intended documentary scene.
+Requested reference: {query}
+Scene narration: {scene.get('narration', '')}
+Image title/source metadata: {candidate.get('title', '')} | {candidate.get('metadata', '')}
+Do not infer content from the title alone. Inspect the pixels. Accept only if the visible subject actually matches the requested reference. Return JSON: {{"relevant":true,"confidence":0.0,"reason":"visible evidence"}}."""
+                try:
+                    vision = verify_images([image_path.read_bytes()], prompt)
+                    if not vision.get("accepted") or float(vision.get("confidence", 0.0)) < VISION_MIN_CONFIDENCE:
+                        image_path.unlink(missing_ok=True)
+                        print(
+                            f"Scene {scene_number}: rejected published reference "
+                            f"{candidate.get('title', '')!r}; visual verification failed."
+                        )
+                        continue
+                    verification_method = f"{vision['provider']} ({vision['model']}) Vision"
+                    vision_confidence = float(vision["confidence"])
+                    verification_reason = str(vision["reason"])
+                except VisionServiceUnavailable as exc:
+                    # NASA's first-party library and institutional-source Commons records
+                    # may still be used when their source metadata is specific and strong.
+                    if score < 0.62:
+                        image_path.unlink(missing_ok=True)
+                        search_errors.append(f"Vision unavailable and source match too weak: {str(exc)[:160]}")
+                        continue
+                    verification_method = "institutional metadata only (Vision provider unavailable)"
+                    verification_reason = (
+                        f"No pixel verification: Vision service unavailable. "
+                        f"First-party/institutional source metadata match {score:.2f}."
+                    )
+
+            source_label = str(
+                candidate.get("publisher") or candidate.get("source") or "Institutional source"
+            )[:100]
+            compose_reference_frame(
+                image_path,
+                frame_path,
+                str(candidate.get("title") or scene.get("visual_query") or "Published visual reference"),
+                source_label,
+                str(candidate.get("original_source_url") or candidate.get("page_url") or ""),
+            )
+
+            scene["media_file"] = str(frame_path)
+            scene["visual_type"] = "trusted_reference_image"
+            scene["selected_footage_source"] = candidate.get("source")
+            scene["selected_footage_tags"] = candidate.get("metadata", "")
+            scene["selected_footage_url"] = candidate.get("page_url", "")
+            scene["source_label"] = source_label
+            scene["source_url"] = candidate.get("page_url", "")
+            scene["visual_verification"] = {
+                "method": verification_method,
+                "confidence": vision_confidence,
+                "reason": verification_reason,
+                "query": query,
+                "source_title": candidate.get("title", ""),
+                "license": candidate.get("license", ""),
+                "license_url": candidate.get("license_url", ""),
+                "resolution": f"{width}x{height}",
+            }
+            scene["visual_reference"] = {
+                "title": candidate.get("title", ""),
+                "publisher": source_label,
+                "creator": candidate.get("creator", ""),
+                "source_page": candidate.get("page_url", ""),
+                "original_source": candidate.get("original_source_url", ""),
+                "license": candidate.get("license", ""),
+                "license_url": candidate.get("license_url", ""),
+                "media_url": candidate.get("url", ""),
+            }
+            credit = (
+                f"Scene {scene_number} | Published reference visual | "
+                f"Title: {candidate.get('title', '')} | Publisher/source: {source_label} | "
+                f"Creator: {candidate.get('creator', 'Not supplied')} | "
+                f"Source page: {candidate.get('page_url', '')} | "
+                f"Original source: {candidate.get('original_source_url', '')} | "
+                f"License/usage: {candidate.get('license', 'See source page')} | "
+                f"License terms: {candidate.get('license_url') or 'See source page'} | "
+                f"NASA usage guidelines: {'https://www.nasa.gov/nasa-brand-center/images-and-media/' if candidate.get('source') == 'NASA' else 'Not applicable'} | "
+                f"Verification: {verification_method}"
+            )
+            return {"credit": credit, "candidate": candidate}, verification_reason
+        except Exception as exc:
+            image_path.unlink(missing_ok=True)
+            frame_path.unlink(missing_ok=True)
+            search_errors.append(f"{candidate.get('source')} {candidate.get('id')}: {str(exc)[:220]}")
+
+    reason = "Institutional candidates were found, but none could be downloaded and verified."
+    if search_errors:
+        reason += " Diagnostics: " + " | ".join(search_errors[:4])
+    return None, reason
+
+
+def render_reference_image_scene(source, duration, output):
+    """Hold a published reference image in the video without inventing content."""
+    run([
+        "ffmpeg", "-y", "-loop", "1", "-framerate", str(FPS),
+        "-i", str(source), "-t", f"{duration:.3f}",
+        "-vf", f"fps={FPS},format=yuv420p",
+        "-an", "-c:v", "libx264", "-preset", X264_PRESET,
+        "-crf", "19", "-r", str(FPS), "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart", str(output),
+    ])
+
+
 def fetch_footage(plan):
     credits = []
     used_ids = set()
@@ -1655,6 +1852,24 @@ def fetch_footage(plan):
 
     for i, scene in enumerate(plan["scenes"], 1):
         scene["visual_type"] = "footage"
+
+        # Maps, charts, diagrams and data visuals must come from a published
+        # institutional source. Never replace them with a home-made schematic.
+        if needs_reference_visual(scene, i):
+            print(f"Scene {i}: searching for a published institutional reference visual first.")
+            reference, reference_reason = fetch_trusted_reference_visual(
+                scene, i, visual_provider_names
+            )
+            if reference:
+                credits.append(reference["credit"])
+                selected_tag_sets.append(str(reference["candidate"].get("metadata", "")))
+                print(f"Scene {i}: accepted sourced reference — {reference_reason}")
+                continue
+            scene["reference_visual_diagnostics"] = reference_reason
+            print(
+                f"Scene {i}: no suitable published source visual found; "
+                "will try relevant real footage. No synthetic diagram will be generated."
+            )
 
         raw_queries = [
             scene.get("visual_query", "")
@@ -1919,101 +2134,73 @@ def fetch_footage(plan):
 
                 break
 
+            except VisionVerificationError as exc:
+                vision_service_unavailable = True
+                message = str(exc)
+                download_errors.append(
+                    f"{hit.get('source')} {hit.get('id')}: Vision unavailable: {message}"
+                )
+                # The previous workflow stopped at the first Vision outage and
+                # drew an unrelated procedural scene, even when more candidates
+                # existed. Keep a candidate only when its own metadata has a
+                # strong exact match; clearly report that pixels were not checked.
+                coverage = matched / max(1, total)
+                if score >= 0.52 and coverage >= 0.50:
+                    selected = (
+                        score, hit, query, matched, total, None,
+                        "AI Vision provider unavailable; accepted only on strong scene-specific source metadata. Pixel verification was not completed.",
+                        "Metadata-only after Vision outage",
+                    )
+                    print(
+                        f"Scene {i}: accepting {hit.get('source')} only on strict metadata match "
+                        f"({score:.2f}, {matched}/{total}); visual verification unavailable."
+                    )
+                    break
+                destination.unlink(missing_ok=True)
+                print(
+                    f"Scene {i}: Vision unavailable and metadata match too weak "
+                    f"({score:.2f}, {matched}/{total}); trying the next candidate."
+                )
+                continue
+
             except Exception as exc:
                 message = str(exc)
-
                 download_errors.append(
-                    f"{hit.get('source')} "
-                    f"{hit.get('id')}: {message}"
+                    f"{hit.get('source')} {hit.get('id')}: {message}"
                 )
-
                 print(
                     f"Scene {i}: candidate rejected/skipped "
                     f"({hit.get('source')}): {message[:350]}"
                 )
-
-                destination.unlink(
-                    missing_ok=True
-                )
-
-                if isinstance(exc, VisionVerificationError):
-                    vision_service_unavailable = True
-                    print(
-                        f"Scene {i}: AI Vision unavailable; switching to "
-                        "local illustrated fallback for this scene."
-                    )
-                    break
+                destination.unlink(missing_ok=True)
 
         if selected is None:
             if not ranked:
-                reason = (
-                    "No candidate passed the metadata relevance filter."
-                )
-
-            elif checked >= min(
-                len(ranked),
-                VISION_CANDIDATE_LIMIT
-            ):
-                reason = (
-                    f"None of the {checked} candidates checked from "
-                    f"{len(ranked)} metadata-ranked candidates passed "
-                    "visual verification or downloaded successfully."
-                )
-
+                reason = "No candidate passed the metadata relevance filter."
             else:
                 reason = (
-                    "No candidate could be downloaded and visually verified."
+                    f"None of {checked} attempted candidates could be downloaded "
+                    "and accepted under the visual verification policy."
                 )
-
+            if vision_service_unavailable:
+                reason = "AI Vision verification was unavailable. " + reason
             if download_errors:
-                reason += (
-                    " Details: "
-                    + " | ".join(download_errors[:4])
-                )
-
-            fallback_reason = (
-                "AI visual verification unavailable. " + reason
-                if vision_service_unavailable
-                else reason
-            )
-            if download_errors:
-                fallback_reason += " Candidate diagnostics: " + " | ".join(download_errors[:4])
-            fallback_reason = fallback_reason[:1600]
-            print(
-                f"Scene {i}: no usable real footage. Creating original "
-                f"local visual fallback. Reason: {fallback_reason}"
-            )
-            fallback_path = FOOT / f"scene_{i:02d}_fallback.mp4"
-            create_fallback_video(
-                scene=scene,
-                scene_number=i,
-                output=fallback_path,
-                duration=max(5.0, float(scene.get("estimated_duration", 8.0) or 8.0)),
-                topic=TOPIC,
-            )
-            scene["media_file"] = str(fallback_path)
-            scene["visual_type"] = "topic_aware_2d_illustration"
-            scene["selected_footage_source"] = "Local procedural visual fallback"
-            scene["selected_footage_tags"] = ""
-            scene["selected_footage_url"] = ""
-            scene["visual_verification"] = {
-                "method": "local procedural 2D graphic",
-                "confidence": None,
-                "reason": fallback_reason,
-                "query": str(scene.get("visual_query", "")),
-            }
+                reason += " Diagnostics: " + " | ".join(download_errors[:4])
+            if scene.get("reference_visual_diagnostics"):
+                reason += " Reference search: " + str(scene["reference_visual_diagnostics"])
             scene["visual_fallback_diagnostics"] = {
                 "metadata_candidate_count": len(ranked),
                 "checked_candidate_count": checked,
                 "vision_service_unavailable": vision_service_unavailable,
                 "candidate_errors": download_errors[:4],
-                "reason": fallback_reason,
+                "reason": reason[:1800],
+                "synthetic_diagram_created": False,
             }
-            credits.append(
-                f"Scene {i} | Original local procedural 2D motion graphic | "
-                "Generated by this project with Pillow and FFmpeg; no stock footage used."
+            raise RuntimeError(
+                f"Scene {i} has no verified relevant footage or trusted published visual. "
+                "The generator intentionally did not invent a replacement diagram. "
+                f"Details: {reason[:1200]}"
             )
-            continue
 
         (
             score,
@@ -2216,10 +2403,16 @@ def build_voice_and_subs(script):
             duration = ffprobe_duration(wav_path)
             sentence_start = cursor
 
-            for event in boundaries:
+            aligned_boundaries = align_boundary_text(sentence, boundaries)
+            if not aligned_boundaries:
+                raise RuntimeError(
+                    f"Could not align Edge TTS word timings to sentence {index + 1}."
+                )
+            for event in aligned_boundaries:
                 word_events.append({
                     **event,
-                    "offset": cursor + event["offset"]
+                    "offset": cursor + event["offset"],
+                    "sentence_index": index,
                 })
 
             wav_parts.append(wav_path)
@@ -2342,68 +2535,41 @@ def build_voice_and_subs(script):
             str(OUT / "voiceover.mp3")
         ])
 
-        groups = []
-        current = []
-
-        for event in word_events:
-            current.append(event)
-
-            if (
-                len(current) >= 5
-                or re.search(
-                    r'[.!?]["\']?$',
-                    event["text"]
-                )
-            ):
-                groups.append(current)
-                current = []
-
-        if current:
-            groups.append(current)
+        groups = build_phrase_groups(word_events)
+        if not groups:
+            raise RuntimeError("Caption phrase builder produced no readable groups.")
 
         lines = [
             "[Script Info]",
-            "Title: Cinematic Documentary Captions",
+            "Title: Word-synchronized documentary captions",
             "ScriptType: v4.00+",
-            "WrapStyle: 2",
+            "WrapStyle: 0",
             "ScaledBorderAndShadow: yes",
             "PlayResX: 1080",
             "PlayResY: 1920",
             "[V4+ Styles]",
             "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-            "Style: Default,DejaVu Sans,49,&H00FFFFFF,&H000000FF,&H00101A25,&H90000000,-1,0,0,0,100,100,0,0,1,4,1,2,75,75,500,1",
+            # White phrase text with a restrained amber karaoke fill. Karaoke
+            # timestamps follow the actual Edge TTS word boundaries.
+            "Style: Default,DejaVu Sans,48,&H00FFFFFF,&H0000D7FF,&H00101A25,&H9A07121D,-1,0,0,0,100,100,0,0,1,3.2,1.6,2,80,80,355,1",
             "[Events]",
-            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
         ]
 
-        for group in groups:
-            start = group[0]["offset"]
+        for group_index, group in enumerate(groups):
+            start, end = group_bounds(group)
+            if group_index + 1 < len(groups):
+                next_start, _ = group_bounds(groups[group_index + 1])
+                end = min(end + 0.10, max(start + 0.35, next_start - 0.02), total_duration)
+            else:
+                end = min(end + 0.10, total_duration)
 
-            end = max(
-                group[-1]["offset"] + group[-1]["duration"],
-                start + 0.45
-            )
-
-            phrase = " ".join(
-                x["text"] for x in group
-            )
-
-            phrase = r"\N".join(
-                textwrap.wrap(
-                    phrase,
-                    width=29,
-                    break_long_words=False
-                )
-            )
-
-            phrase = (
-                phrase.replace("{", r"\{")
-                .replace("}", r"\}")
-            )
-
+            phrase = karaoke_phrase(group)
+            if not phrase:
+                continue
             lines.append(
-                f"Dialogue: 0,{ass_time(start)},"
-                f"{ass_time(end)},Default,,0,0,0,,{phrase}"
+                f"Dialogue: 0,{ass_time(start)},{ass_time(end)},"
+                f"Default,,0,0,0,,{phrase}"
             )
 
         (OUT / "captions.ass").write_text(
@@ -2414,6 +2580,12 @@ def build_voice_and_subs(script):
         Path("timing.json").write_text(
             json.dumps({
                 "sentences": sentence_events,
+                "word_events": word_events,
+                "caption_groups": [
+                    {"start": group_bounds(group)[0], "end": group_bounds(group)[1],
+                     "text": " ".join(word["text"] for word in group)}
+                    for group in groups
+                ],
                 "total_duration": total_duration
             }, indent=2),
             encoding="utf-8"
@@ -2480,7 +2652,8 @@ def render_footage_scene(
     source,
     duration,
     output,
-    hook_text=None
+    hook_text=None,
+    hook_title=None,
 ):
     source_duration = ffprobe_duration(source)
 
@@ -2500,35 +2673,33 @@ def render_footage_scene(
         f"fps={FPS},setsar=1,format=yuv420p"
     )
 
+    cmd = ["ffmpeg", "-y", *loop_args, "-i", str(source)]
     if hook_text:
-        hook_file = OUT / "hook.txt"
-
-        hook_file.write_text(
-            hook_text,
-            encoding="utf-8"
+        overlay_file = OUT / "opening_hook_overlay.png"
+        layout = create_hook_overlay(
+            title=str(hook_title or ""),
+            hook=str(hook_text),
+            output=overlay_file,
+            width=W,
+            height=H,
         )
-
-        vf += (
-            ",drawbox=x=0:y=170:w=1080:h=420:"
-            "color=black@0.38:t=fill:"
-            "enable='between(t,0.6,4.5)'"
-
-            f",drawtext=fontfile=/usr/share/fonts/truetype/dejavu/"
-            f"DejaVuSans-Bold.ttf:textfile={hook_file}:"
-            "fontcolor=white:fontsize=66:line_spacing=14:"
-            "borderw=2:bordercolor=black@0.65:"
-            "x=70:y=260:"
-            "alpha='if(lt(t,1.0),(t-0.6)/0.4,"
-            "if(gt(t,4.1),(4.5-t)/0.4,1))':"
-            "enable='between(t,0.6,4.5)'"
+        Path("opening_layout.json").write_text(
+            json.dumps(layout, indent=2, ensure_ascii=False), encoding="utf-8"
         )
+        cmd += ["-loop", "1", "-framerate", str(FPS), "-i", str(overlay_file)]
+        graph = (
+            f"[0:v]{vf}[base];"
+            f"[1:v]format=rgba,"
+            "fade=t=in:st=0:d=0.30:alpha=1,"
+            "fade=t=out:st=3.65:d=0.45:alpha=1[hook];"
+            "[base][hook]overlay=0:0:enable='between(t,0.0,4.3)'[v]"
+        )
+        cmd += ["-filter_complex", graph, "-map", "[v]"]
+    else:
+        cmd += ["-vf", vf]
 
-    cmd = [
-        "ffmpeg", "-y",
-        *loop_args,
-        "-i", str(source),
+    cmd += [
         "-t", f"{duration:.3f}",
-        "-vf", vf,
         "-an",
         "-c:v", "libx264",
         "-preset", X264_PRESET,
@@ -2536,9 +2707,8 @@ def render_footage_scene(
         "-r", str(FPS),
         "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
-        str(output)
+        str(output),
     ]
-
     run(cmd)
 
 
@@ -2617,27 +2787,23 @@ def render(plan, sentence_events, total_duration):
         source = scene.get("media_file")
 
         if source and Path(source).exists():
-            hook = None
-
-            if i == 1:
-                hook = re.sub(
-                    r"[^A-Za-z0-9 ,.!?\-]",
-                    "",
-                    str(plan.get("hook") or "")
-                )[:90]
-
-            render_footage_scene(
-                source,
-                duration,
-                output,
-                hook
-            )
+            if scene.get("visual_type") == "trusted_reference_image":
+                render_reference_image_scene(source, duration, output)
+            else:
+                hook = str(plan.get("hook") or "") if i == 1 else None
+                hook_title = str(plan.get("title") or "") if i == 1 else None
+                render_footage_scene(
+                    source,
+                    duration,
+                    output,
+                    hook,
+                    hook_title,
+                )
 
         else:
             raise RuntimeError(
-                f"Scene {i} has no approved real-world footage. "
-                "Rendering stopped rather than substituting a diagram "
-                "or unrelated visual."
+                f"Scene {i} has no approved footage or published reference visual. "
+                "Rendering stopped rather than inventing a diagram or using unrelated media."
             )
 
         segment_files.append(output)
@@ -2759,7 +2925,7 @@ def main():
             "production target is 70-90s."
         )
 
-    print("3/4 Searching and ranking relevant footage...")
+    print("3/4 Searching for relevant footage and trusted published reference visuals...")
     fetch_footage(plan)
 
     print("4/4 Rendering scenes to actual narration timing...")
@@ -2794,12 +2960,15 @@ def main():
         verification = scene.get("visual_verification") or {}
         if not media_path.is_file():
             raise RuntimeError(f"Production report check: Scene {scene_index} footage is missing.")
+        verification_method_normalized = str(verification.get("method", "")).lower().replace("-", " ")
+        metadata_only_accepted = "metadata only" in verification_method_normalized
         if (
             VISION_REQUIRED
             and scene.get("visual_type") != "generated_2d_motion_graphic"
             and verification.get("confidence") is None
+            and not metadata_only_accepted
         ):
-            raise RuntimeError(f"Production report check: Scene {scene_index} is not visually verified.")
+            raise RuntimeError(f"Production report check: Scene {scene_index} is not visually verified or explicitly metadata-qualified.")
         scene_record = {
             "scene": scene_index,
             "visual_file": str(media_path),
@@ -2809,6 +2978,10 @@ def main():
         }
         if scene.get("visual_fallback_diagnostics"):
             scene_record["visual_fallback_diagnostics"] = scene["visual_fallback_diagnostics"]
+        if scene.get("visual_reference"):
+            scene_record["visual_reference"] = scene["visual_reference"]
+        if scene.get("reference_visual_diagnostics"):
+            scene_record["reference_visual_diagnostics"] = scene["reference_visual_diagnostics"]
         scene_records.append(scene_record)
 
     if len(scene_records) != 8:
@@ -2826,10 +2999,19 @@ def main():
                 for item in scene_records
             )
         ) if VISION_REQUIRED else None,
-        "local_illustration_scene_count": sum(
-            1 for item in scene_records
-            if item.get("visual_verification", {}).get("method") == "local procedural 2D graphic"
+        "local_illustration_scene_count": 0,
+        "trusted_reference_scene_count": sum(
+            1 for item in scene_records if item.get("visual_type") == "trusted_reference_image"
         ),
+        "metadata_only_scene_count": sum(
+            1 for item in scene_records
+            if "metadata only" in str(item.get("visual_verification", {}).get("method", "")).lower().replace("-", " ")
+        ),
+        "opening_title_layout": (
+            json.loads(Path("opening_layout.json").read_text(encoding="utf-8"))
+            if Path("opening_layout.json").is_file() else None
+        ),
+        "caption_group_count": len((json.loads(Path("timing.json").read_text(encoding="utf-8"))).get("caption_groups", [])),
         "scenes": scene_records,
         "final_video": {
             "path": str(final_path),
