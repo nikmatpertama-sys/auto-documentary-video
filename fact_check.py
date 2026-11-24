@@ -696,6 +696,41 @@ def discover_trusted_source_urls(
     return urls[:limit]
 
 
+def wikipedia_source_pool(titles: list[str], limit: int = 24) -> list[str]:
+    """Return real trusted pages cited by the given Wikipedia articles.
+
+    Used to hand the planner a list of pages that are known to exist, so
+    narration is grounded in pages this run can actually fetch instead of
+    invented institution paths that answer 404.
+    """
+    urls: list[str] = []
+    usable_titles = [str(title).strip() for title in titles if str(title).strip()][:3]
+    for title in usable_titles:
+        try:
+            page = _wikipedia_get(
+                {"action": "parse", "page": title, "prop": "externallinks"}
+            )
+        except Exception:
+            continue
+        for link in page.get("parse", {}).get("externallinks", []) or []:
+            if not isinstance(link, str):
+                continue
+            cleaned = link.split("#", 1)[0].strip()
+            lowered = cleaned.lower()
+            if not cleaned or "web.archive.org" in lowered:
+                continue
+            if lowered.endswith(SKIP_SOURCE_EXTENSIONS):
+                continue
+            if is_trusted_source_url(cleaned) and cleaned not in urls:
+                urls.append(cleaned)
+    if usable_titles:
+        print(
+            f"Source pool: {len(urls)} trusted page(s) cited by "
+            f"{', '.join(usable_titles)[:120]}."
+        )
+    return urls[:limit]
+
+
 def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
     claims = validate_fact_claims(plan)
     fetched: dict[str, dict] = {}

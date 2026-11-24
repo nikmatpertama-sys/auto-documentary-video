@@ -27,7 +27,12 @@ from ai_router import (
 from visual_matcher import rank_candidates
 from narration_timing import duration_correction
 from source_policy import source_failure_reason
-from fact_check import FactCheckError, validate_planner_source_urls, verify_documentary_facts
+from fact_check import (
+    FactCheckError,
+    validate_planner_source_urls,
+    verify_documentary_facts,
+    wikipedia_source_pool,
+)
 from sentence_utils import split_sentences
 from scene_normalization import normalize_scene_count
 from visual_search_expansion import (
@@ -188,12 +193,22 @@ def normalize_words(text):
 # AI DOCUMENTARY PLANNER
 # ============================================================
 
-def documentary_prompt(topic):
+def documentary_prompt(topic, source_pool=None):
+    pool_block = ""
+    if source_pool:
+        listing = "\n".join(f"- {url}" for url in source_pool)
+        pool_block = f"""
+VERIFIED SOURCE PAGES. Each page below was published by a trusted institution
+and was confirmed to exist. Every fact_claims[].source_urls entry MUST be
+copied exactly from this list; never invent another URL. If these pages cannot
+support a sentence, rewrite or drop that sentence instead of guessing a page.
+{listing}
+"""
     return f"""Create an original, evidence-backed English mini-documentary
 for a vertical 9:16 video.
 
 TOPIC: {topic}
-
+{pool_block}
 Target spoken length: 160-185 words, approximately 70-90 seconds including
 natural pauses. Create exactly 8 sequential scenes.
 
@@ -257,9 +272,38 @@ SCENE AND VISUAL RULES:
 """
 
 
-def gemini_plan(topic):
+def discover_source_pool(topic):
+    """Return trusted pages that exist for this topic.
+
+    The planner used to invent institution URLs that answered 404. Asking for
+    the Wikipedia articles covering the topic and then taking the institution
+    pages those articles cite gives planning a list of pages that this run can
+    actually fetch.
+    """
+    prompt = (
+        "Name the two or three English Wikipedia article titles most likely to "
+        "cite authoritative published sources about this documentary topic: "
+        f"{topic}\n"
+        'Return ONLY JSON: {"articles":["Exact article title","..."]}'
+    )
+    value, provider, model = generate_json(prompt)
+    titles = [
+        str(item).strip()
+        for item in (value.get("articles") or [])
+        if str(item).strip()
+    ]
+    if not titles:
+        return []
+    print(
+        f"Source pool articles suggested by {provider}/{model}: "
+        + ", ".join(titles[:3])
+    )
+    return wikipedia_source_pool(titles, limit=24)
+
+
+def gemini_plan(topic, source_pool=None):
     """Generate and validate a complete 8-scene plan through the AI router."""
-    prompt = documentary_prompt(topic)
+    prompt = documentary_prompt(topic, source_pool)
 
     def validate_plan(candidate):
         if not isinstance(candidate, dict):
@@ -3307,8 +3351,18 @@ def _run_pipeline():
             "Provider charges are possible for this run."
         )
     print("1/7 Writing and validating the documentary script...")
+    diagnostics.STAGES.begin("source_pool", topic=TOPIC)
+    source_pool = []
+    try:
+        source_pool = discover_source_pool(TOPIC)
+    except Exception as exc:
+        print(
+            "Source pool discovery skipped: "
+            f"{type(exc).__name__}: {str(exc)[:200]}"
+        )
+    diagnostics.STAGES.complete(urls=len(source_pool))
     diagnostics.STAGES.begin("script_generation", topic=TOPIC)
-    plan = gemini_plan(TOPIC)
+    plan = gemini_plan(TOPIC, source_pool)
     if not str(plan.get("script", "")).strip() or len(plan["script"].split()) < 100:
         raise RuntimeError("Script quality gate failed: narration is empty or too short for production.")
     # The opening card is proven to fit before any narration, vision or encode
