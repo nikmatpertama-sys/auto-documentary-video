@@ -7,6 +7,7 @@ from fact_check import (
     select_relevant_excerpt,
     source_organization_domain,
     validate_fact_claims,
+    validate_planner_source_urls,
     verify_documentary_facts,
 )
 from sentence_utils import split_sentences
@@ -46,6 +47,24 @@ class FactCheckTests(unittest.TestCase):
         self.assertTrue(is_trusted_source_url("https://earthobservatory.nasa.gov/features/amazon"))
         self.assertTrue(is_trusted_source_url("https://www.noaa.gov/climate"))
 
+
+    def test_planner_preflight_accepts_direct_https_trusted_sources(self):
+        urls = validate_planner_source_urls(
+            1,
+            ["https://www.nasa.gov/example", "https://www.noaa.gov/example"],
+        )
+        self.assertEqual(len(urls), 2)
+
+    def test_planner_preflight_rejects_untrusted_url_before_fact_fetch(self):
+        with self.assertRaisesRegex(
+            ValueError,
+            r"outside the trusted HTTPS allowlist.*http://untrusted\.example",
+        ):
+            validate_planner_source_urls(1, ["http://untrusted.example/fact"])
+
+    def test_planner_preflight_rejects_non_https_known_host(self):
+        with self.assertRaisesRegex(ValueError, r"http://www\.nasa\.gov"):
+            validate_planner_source_urls(1, ["http://www.nasa.gov/fact"])
 
     def test_subdomains_of_one_institution_are_not_independent_sources(self):
         self.assertEqual(

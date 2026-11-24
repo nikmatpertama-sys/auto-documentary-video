@@ -24,7 +24,7 @@ from ai_router import (
 from visual_matcher import rank_candidates
 from narration_timing import duration_correction
 from source_policy import source_failure_reason
-from fact_check import FactCheckError, verify_documentary_facts
+from fact_check import FactCheckError, validate_planner_source_urls, verify_documentary_facts
 from sentence_utils import split_sentences
 from scene_normalization import normalize_scene_count
 from visual_search_expansion import (
@@ -198,7 +198,7 @@ Return ONLY valid JSON in this exact structure:
     {{
       "scene":1,
       "sentence":"an exact complete factual sentence copied from scene narration",
-      "source_urls":["https://trusted-primary-source.example/page"]
+      "source_urls":["https://www.nasa.gov/"]
     }}
   ]
 }}
@@ -207,6 +207,8 @@ SCRIPT AND FACTUAL ACCURACY RULES:
 - The combined scene narration is the complete script, in order, and must total 160-185 words.
 - Every narration sentence must be listed in fact_claims as its exact complete sentence with source URLs. This deliberately includes scientific, biological, geographic, historical, statistical, causal, medical, legal, date/quantity, and descriptive claims so no sentence escapes evidence review. Do not leave any narration sentence uncited.
 - For each claim, provide direct source-page URLs from recognised primary institutions, government agencies, universities, scientific publishers, peer-reviewed journals, or established reference institutions. Prefer primary research or official datasets where possible.
+- Source URL hosts must pass the application's allowlist: use HTTPS on recognised .gov, .edu, .int, or .ac.uk hosts, or established institutions such as nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org, britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int, un.org, or worldbank.org. The JSON example URL is illustrative only; never copy it unless that exact page directly supports the claim.
+- Do not provide HTTP URLs, search-engine result pages, URL shorteners, redirector URLs, social-media posts, or invented example domains. A source URL that fails host validation will be rejected and regenerated.
 - Do not invent a source, title, author, DOI, URL, statistic, date, percentage, measurement, causal relationship, or quotation. Cite only pages you genuinely know exist and directly support the exact claim. If a claim cannot be confidently sourced, remove it or express a clearly non-factual question/transition instead.
 - Quantitative claims (numbers, percentages, measurements, ranges, dates with material significance) require at least TWO independent trusted source hosts in source_urls. Do not repeat two pages from the same site as independent confirmation.
 - Use restrained, precise wording. Distinguish correlation from causation, regional facts from global facts, estimates from measurements, and current facts from historical facts.
@@ -331,9 +333,12 @@ def gemini_plan(topic):
                 raise ValueError(f"Fact claim {claim_index} has an empty sentence.")
             if " ".join(normalize_words(quoted_sentence)) not in " ".join(normalize_words(scenes[scene_number - 1]["narration"])):
                 raise ValueError(f"Fact claim {claim_index} is not copied from its scene narration.")
-            source_urls = claim.get("source_urls")
-            if not isinstance(source_urls, list) or not source_urls:
-                raise ValueError(f"Fact claim {claim_index} has no source URLs.")
+            # Validate source host and HTTPS policy inside the planner callback.
+            # This lets ai_router issue its one bounded same-provider repair instead
+            # of waiting until the later fact-check stage to fail the entire run.
+            claim["source_urls"] = validate_planner_source_urls(
+                claim_index, claim.get("source_urls")
+            )
         try:
             assign_scene_sentence_ranges(candidate)
         except Exception as exc:

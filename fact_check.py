@@ -122,6 +122,55 @@ def is_trusted_source_url(url: str) -> bool:
         return False
 
 
+def validate_planner_source_urls(claim_index: int, source_urls) -> list[str]:
+    """Preflight planner citations so bad URLs trigger the router's bounded repair."""
+    if not isinstance(source_urls, list) or not source_urls:
+        raise ValueError(
+            f"Fact claim {claim_index} has no source URLs; provide direct HTTPS evidence pages."
+        )
+
+    normalized = []
+    for raw_url in source_urls:
+        if not isinstance(raw_url, str) or not raw_url.strip():
+            raise ValueError(
+                f"Fact claim {claim_index} contains an empty or non-text source URL."
+            )
+        value = raw_url.strip()
+        if value not in normalized:
+            normalized.append(value)
+
+    if len(normalized) > MAX_SOURCES_PER_CLAIM:
+        raise ValueError(
+            f"Fact claim {claim_index} exceeds the {MAX_SOURCES_PER_CLAIM}-source limit."
+        )
+
+    invalid_endpoints = []
+    for value in normalized:
+        if is_trusted_source_url(value):
+            continue
+        try:
+            parsed = urlparse(value)
+            scheme = (parsed.scheme or "missing-scheme").lower()
+            host = (parsed.hostname or "missing-host").lower().rstrip(".")
+            endpoint = f"{scheme}://{host}"
+        except (TypeError, ValueError):
+            endpoint = "unparseable-url"
+        if endpoint not in invalid_endpoints:
+            invalid_endpoints.append(endpoint)
+
+    if invalid_endpoints:
+        hosts = ", ".join(invalid_endpoints[:3])
+        raise ValueError(
+            f"Fact claim {claim_index} has source URL endpoint(s) outside the trusted "
+            f"HTTPS allowlist: {hosts}. Use direct HTTPS pages on recognised institutions; "
+            "accepted examples include nasa.gov, noaa.gov, usgs.gov, nature.com, "
+            "science.org, pnas.org, britannica.com, nationalgeographic.com, si.edu, "
+            "fao.org, ipcc.ch, who.int, un.org, and qualifying .gov, .edu, .int, or "
+            ".ac.uk hosts. Do not use search-result pages, URL shorteners, or redirects."
+        )
+    return normalized
+
+
 class _VisibleTextParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -322,18 +371,10 @@ def validate_fact_claims(plan: dict) -> list[dict]:
             raise FactCheckError(f"Duplicate fact claim in scene {scene_number}.")
         seen.add(identity)
 
-        urls = item.get("source_urls")
-        if not isinstance(urls, list) or not urls:
-            raise FactCheckError(f"Fact claim {index} has no source URLs.")
-        urls = list(dict.fromkeys(str(url).strip() for url in urls if str(url).strip()))
-        if not urls:
-            raise FactCheckError(f"Fact claim {index} has no valid source URLs.")
-        if len(urls) > MAX_SOURCES_PER_CLAIM:
-            raise FactCheckError(
-                f"Fact claim {index} exceeds the {MAX_SOURCES_PER_CLAIM}-source limit."
-            )
-        if any(not is_trusted_source_url(url) for url in urls):
-            raise FactCheckError(f"Fact claim {index} includes a non-trusted or non-HTTPS source URL.")
+        try:
+            urls = validate_planner_source_urls(index, item.get("source_urls"))
+        except ValueError as exc:
+            raise FactCheckError(str(exc)) from exc
         unique_urls.update(urls)
         if len(unique_urls) > MAX_UNIQUE_SOURCE_PAGES:
             raise FactCheckError(
