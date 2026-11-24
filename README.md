@@ -34,9 +34,26 @@ Optional GitHub Actions secrets:
 - `PEXELS_API_KEY`
 - `COVERR_API_KEY`
 
+### Running this for free
+
+Nothing in this project requires a paid subscription. The whole pipeline can run on free tiers and free software:
+
+| Part | Cost | What you need |
+| --- | --- | --- |
+| Script writing and fact review | Free tier | One key from Groq (https://console.groq.com), Google AI Studio Gemini (https://aistudio.google.com/apikey), or OpenRouter free models (https://openrouter.ai/keys) |
+| Vision verification | Free tier | The same Groq / Gemini / OpenRouter key; OpenRouter defaults to `:free` vision models |
+| Stock footage | Free | Pexels (https://www.pexels.com/api/), Pixabay (https://pixabay.com/api/docs/) and Coverr keys are free to create; NASA and Wikimedia need no key |
+| Narration | Free | Edge TTS, no account |
+| Rendering | Free | FFmpeg runs on the runner; the encoding itself costs nothing |
+| GitHub Actions | Free minutes | Public repositories run free; private repositories get a monthly free minute allowance |
+
+`DEEPSEEK_API_KEY` is the only prepaid-balance provider here. It is optional: if you never create that secret, no DeepSeek route is registered and no charge can occur. Free-tier routes are tried first (`AI_FACT_PROVIDER_ORDER` defaults to Gemini → Groq → OpenRouter → DeepSeek), so a zero-cost setup is the default.
+
+No keys at all and no money: `python scripts/offline_render_check.py` renders a real 1080 × 1920 MP4 with free Edge TTS and locally generated clips, which verifies encoding, muxing, captions and duration alignment without any API call.
+
 A 429 now pauses a provider for a bounded window (honouring `Retry-After`, default 180 s, `AI_RATE_LIMIT_COOLDOWN_SECONDS`) instead of deleting it for the whole run; only an explicitly exhausted quota, billing or authentication failure disables a provider. Transient 5xx/network failures cool a route down for `AI_TRANSIENT_COOLDOWN_SECONDS` (default 300 s) and get one bounded retry pass. DeepSeek's chat endpoint is text-only, so it is only used for vision when `DEEPSEEK_VISION_MODEL` is set explicitly.
 
-Text, fact-check, and visual AI providers depend on valid keys, model availability, service status, and quota. The factual review uses its own provider order/cooldown (`AI_FACT_PROVIDER_ORDER`, defaulting to DeepSeek → Gemini → Groq → OpenRouter) so a script-writing provider outage does not automatically disable the fact-review route. Stock-footage providers are independently disabled for the remainder of a run after authentication, permission, or rate-limit errors (HTTP 401, 403, or 429). For text/fact generation, Groq, DeepSeek, and OpenRouter explicitly request JSON mode; a malformed or validator-rejected response receives one targeted repair attempt on the same provider before failover. HTTP 402 billing errors are reported separately and skip that provider for the current run. This improves recovery but cannot replenish a provider balance or guarantee service availability.
+Text, fact-check, and visual AI providers depend on valid keys, model availability, service status, and quota. The factual review uses its own provider order/cooldown (`AI_FACT_PROVIDER_ORDER`, defaulting to Gemini → Groq → OpenRouter → DeepSeek) so a script-writing provider outage does not automatically disable the fact-review route, and free-tier routes are exhausted before the prepaid one. Stock-footage providers are independently disabled for the remainder of a run after authentication, permission, or rate-limit errors (HTTP 401, 403, or 429). For text/fact generation, Groq, DeepSeek, and OpenRouter explicitly request JSON mode; a malformed or validator-rejected response receives one targeted repair attempt on the same provider before failover. HTTP 402 billing errors are reported separately and skip that provider for the current run. This improves recovery but cannot replenish a provider balance or guarantee service availability.
 
 ## Visual sourcing policy
 

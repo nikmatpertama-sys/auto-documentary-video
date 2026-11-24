@@ -67,6 +67,19 @@ class AIRouterTests(unittest.TestCase):
         self.assertEqual(model, "deepseek-flash")
         self.assertIn("api.deepseek.com", post.call_args.args[0])
 
+    def test_default_fact_order_keeps_the_prepaid_provider_last(self):
+        with patch.dict(os.environ, {
+            "GROQ_API_KEY": "test-groq",
+            "GEMINI_API_KEY": "test-gemini",
+            "OPENROUTER_API_KEY": "test-openrouter",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+        }, clear=True):
+            providers = [route.provider for route in ai_router._routes("fact")]
+
+        # A zero-cost setup must never reach the prepaid balance route first.
+        self.assertEqual(providers[-1], "deepseek")
+        self.assertLess(providers.index("gemini"), providers.index("deepseek"))
+
     def test_insufficient_balance_is_reported_as_billing_not_outage(self):
         empty_balance = FakeResponse(402, {
             "error": {"message": "Insufficient Balance"}

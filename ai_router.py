@@ -109,7 +109,9 @@ def _routes(task: str) -> list[Route]:
         order = _order("AI_TEXT_PROVIDER_ORDER", "groq,deepseek,gemini,openrouter")
     elif task == "fact":
         # Keep fact review on an independent provider order/cooldown from script writing.
-        order = _order("AI_FACT_PROVIDER_ORDER", "deepseek,gemini,groq,openrouter")
+        # Free-tier routes come first and DeepSeek, the only prepaid-balance
+        # provider, is the last resort so a zero-cost setup is the default.
+        order = _order("AI_FACT_PROVIDER_ORDER", "gemini,groq,openrouter,deepseek")
     else:
         order = _order("AI_VISION_PROVIDER_ORDER", "groq,deepseek,gemini,openrouter")
 

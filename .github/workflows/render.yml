@@ -130,7 +130,7 @@ jobs:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
           AI_TEXT_PROVIDER_ORDER: groq,deepseek,gemini,openrouter
-          AI_FACT_PROVIDER_ORDER: deepseek,gemini,groq,openrouter
+          AI_FACT_PROVIDER_ORDER: gemini,groq,openrouter,deepseek
           AI_VISION_PROVIDER_ORDER: groq,gemini,openrouter
           GROQ_MODEL: openai/gpt-oss-120b
           GROQ_VISION_MODEL: qwen/qwen3.8-27b
