@@ -452,7 +452,7 @@ def _openai_request(
         # ceiling, so a 7,000-token budget plus the planner prompt was rejected
         # with HTTP 413 before the model ever ran. The documentary plan needs
         # roughly 1,500 output tokens, so 3,000 keeps real headroom.
-        payload["max_tokens"] = 7000 if route.provider != "groq" else 3000
+        payload["max_tokens"] = 7000
 
         # All OpenAI-compatible text routes used by this project support JSON
         # mode. Asking for it is particularly important for OpenRouter's free
@@ -472,8 +472,16 @@ def _openai_request(
             payload["reasoning"] = {"effort": "low"}
 
         if route.provider == "groq":
+            # The free plan counts prompt plus completion budget against an
+            # 8,000 tokens-per-minute ceiling. A fixed large budget was rejected
+            # with HTTP 413, while a too-small budget truncated the JSON and
+            # Groq's json_object mode answered HTTP 400 "Failed to validate
+            # JSON". Size the budget from the actual prompt instead.
             payload.pop("max_tokens", None)
-            payload["max_completion_tokens"] = 3000
+            approx_prompt_tokens = max(1, len(prompt) // 4)
+            payload["max_completion_tokens"] = min(
+                4500, max(1500, 8000 - approx_prompt_tokens - 600)
+            )
     else:
         payload["max_tokens"] = 600 if route.provider != "groq" else 500
 
