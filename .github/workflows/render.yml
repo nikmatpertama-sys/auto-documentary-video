@@ -160,9 +160,13 @@ jobs:
           GROQ_MODEL: openai/gpt-oss-120b
           GROQ_VISION_MODEL: qwen/qwen3.8-27b
           DEEPSEEK_MODEL: deepseek-flash
-          GEMINI_MODEL: gemini-3.8-flash
+          # 3.8 Flash was answering 503 (high demand) on the free tier, while
+          # 3.5 Flash-Lite has a much larger free daily request allowance.
+          GEMINI_MODEL: gemini-3.5-flash-lite
           GEMINI_VISION_MODEL: gemini-3.5-flash-lite
-          GEMINI_MODEL_FALLBACKS: gemini-3.5-flash-lite,gemini-3.8-flash,gemini-2.5-flash,gemini-2.0-flash
+          GEMINI_MODEL_FALLBACKS: gemini-3.8-flash,gemini-2.5-flash,gemini-2.0-flash
+          # Groq's per-minute token window needs a full minute to recover.
+          AI_RATE_LIMIT_COOLDOWN_SECONDS: "60"
           OPENROUTER_MODEL: openrouter/free
           OPENROUTER_VISION_MODEL: nvidia/nemotron-3.5-super-vl:free
           OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free

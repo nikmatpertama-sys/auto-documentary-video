@@ -448,7 +448,11 @@ def _openai_request(
     }
 
     if task in ("text", "fact"):
-        payload["max_tokens"] = 7000
+        # Groq's free plan counts the completion budget against a 8,000 TPM
+        # ceiling, so a 7,000-token budget plus the planner prompt was rejected
+        # with HTTP 413 before the model ever ran. The documentary plan needs
+        # roughly 1,500 output tokens, so 3,000 keeps real headroom.
+        payload["max_tokens"] = 7000 if route.provider != "groq" else 3000
 
         # All OpenAI-compatible text routes used by this project support JSON
         # mode. Asking for it is particularly important for OpenRouter's free
@@ -460,17 +464,16 @@ def _openai_request(
         if route.provider == "deepseek":
             payload["thinking"] = {"type": "disabled"}
 
-        if (
-            route.provider == "openrouter"
-            and route.model == "baidu/ernie-5.5-flash-preview:free"
-        ):
-            # ERNIE accepts OpenRouter's reasoning controls. Low effort reserves
-            # most of the completion budget for the required structured JSON.
+        if route.provider == "openrouter":
+            # The free router can select a reasoning model that spends the whole
+            # completion budget thinking and returns empty content with
+            # finish_reason=length. Low effort reserves that budget for the
+            # required structured JSON.
             payload["reasoning"] = {"effort": "low"}
 
         if route.provider == "groq":
             payload.pop("max_tokens", None)
-            payload["max_completion_tokens"] = 7000
+            payload["max_completion_tokens"] = 3000
     else:
         payload["max_tokens"] = 600 if route.provider != "groq" else 500
 
