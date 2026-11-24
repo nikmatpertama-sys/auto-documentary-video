@@ -95,6 +95,18 @@ class FactCheckTests(unittest.TestCase):
         excerpt = select_relevant_excerpt(page, "Researchers measured rainfall variation across the Amazon basin")
         self.assertIn("rainfall variation", excerpt)
 
+    def test_one_lexical_anchor_is_enough_to_send_excerpt_to_semantic_auditor(self):
+        page = (
+            "A long institutional research overview about climate systems and ecology. "
+            "Researchers describe Amazon moisture cycling and atmospheric transport across the basin. "
+            "The report also explains its methods, observations, limitations, and regional context."
+        )
+        excerpt = select_relevant_excerpt(
+            page,
+            "Scientists describe how forest moisture returns to the atmosphere.",
+        )
+        self.assertIn("moisture", excerpt)
+
     def test_exact_complete_claim_sentences_are_required(self):
         plan = self._plan("The Amazon basin contains extensive tropical rainforest habitat.")
         claims = validate_fact_claims(plan)
@@ -158,6 +170,82 @@ class FactCheckTests(unittest.TestCase):
         self.assertEqual(report["claim_count"], 3)
         self.assertEqual(report["supported_claim_count"], 3)
         self.assertEqual(len(report["sources"]), 3)
+
+    def test_irrelevant_first_source_does_not_prevent_trying_next_source(self):
+        import fact_check
+        from unittest.mock import patch
+
+        plan = self._plan(
+            "The Amazon basin contains extensive tropical rainforest habitat.",
+            ["https://www.nasa.gov/irrelevant", "https://www.noaa.gov/relevant"],
+        )
+        source_pages = {
+            "https://www.nasa.gov/irrelevant": {
+                "requested_url": "https://www.nasa.gov/irrelevant",
+                "url": "https://www.nasa.gov/irrelevant",
+                "host": "www.nasa.gov",
+                "status_code": 200,
+                "content_type": "text/html",
+                "title": "NASA unrelated page",
+                "text": "A page about spacecraft engineering and orbital observations. " * 12,
+            },
+            "https://www.noaa.gov/relevant": {
+                "requested_url": "https://www.noaa.gov/relevant",
+                "url": "https://www.noaa.gov/relevant",
+                "host": "www.noaa.gov",
+                "status_code": 200,
+                "content_type": "text/html",
+                "title": "Amazon rainforest research",
+                "text": (
+                    "The Amazon basin contains extensive tropical rainforest habitat and supports biodiversity. "
+                    "Seasonal changes influence rainfall across the region. "
+                ) * 8,
+            },
+            "https://www.noaa.gov/example": {
+                "requested_url": "https://www.noaa.gov/example",
+                "url": "https://www.noaa.gov/example",
+                "host": "www.noaa.gov",
+                "status_code": 200,
+                "content_type": "text/html",
+                "title": "NOAA Amazon rainforest research",
+                "text": (
+                    "Seasonal changes influence rainfall across the region and researchers study climate. "
+                ) * 12,
+            },
+            "https://www.usgs.gov/example": {
+                "requested_url": "https://www.usgs.gov/example",
+                "url": "https://www.usgs.gov/example",
+                "host": "www.usgs.gov",
+                "status_code": 200,
+                "content_type": "text/html",
+                "title": "USGS moisture research",
+                "text": "Researchers study moisture movement to understand regional climate. " * 12,
+            },
+        }
+
+        def fake_checker(_prompt, validator=None):
+            payload = {
+                "overall_status": "pass",
+                "claim_verdicts": [
+                    {"claim_id": "C1", "status": "supported", "evidence_urls": ["https://www.noaa.gov/relevant"], "reason": "Relevant NOAA passage supports the claim."},
+                    {"claim_id": "C2", "status": "supported", "evidence_urls": ["https://www.noaa.gov/example"], "reason": "Relevant NOAA passage supports the claim."},
+                    {"claim_id": "C3", "status": "supported", "evidence_urls": ["https://www.usgs.gov/example"], "reason": "Relevant USGS passage supports the claim."},
+                ],
+                "uncited_factual_sentences": [],
+                "coverage_note": "All claims are supported by relevant fetched excerpts.",
+            }
+            return validator(payload), "deepseek", "deepseek-flash"
+
+        with patch.object(fact_check, "fetch_source_page", side_effect=lambda url: source_pages[url]):
+            report = verify_documentary_facts(plan, fake_checker)
+
+        self.assertEqual(report["status"], "passed")
+        failed_source = next(
+            item for item in report["sources"]
+            if item.get("requested_url") == "https://www.nasa.gov/irrelevant"
+        )
+        self.assertEqual(failed_source["status"], "not_usable")
+        self.assertIn("https://www.noaa.gov/relevant", report["claims"][0]["source_urls"])
 
     def test_fact_coverage_backstop_blocks_uncited_numeric_sentence(self):
         plan = self._plan("The Amazon basin contains extensive tropical rainforest habitat.")

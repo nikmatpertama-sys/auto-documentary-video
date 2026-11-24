@@ -247,9 +247,13 @@ def select_relevant_excerpt(page_text: str, claim: str, max_chars: int = 1900) -
         if overlap:
             ranked.append((overlap / max(1, len(claim_words)), overlap, index, sentence))
     ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
-    if not ranked or ranked[0][1] < min(2, len(claim_words)):
+    # Keep a one-content-word candidate for the independent semantic auditor.
+    # Requiring two exact token overlaps here was a brittle lexical gate: trusted
+    # sources often use a synonym or a different grammatical form. The separate
+    # fact-audit model still has to judge the complete meaning from this excerpt.
+    if not ranked or ranked[0][1] < 1:
         raise FactCheckError(
-            "Fetched source page has no sufficiently relevant passage for this exact claim."
+            "Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected."
         )
     chosen = []
     used = 0
@@ -474,6 +478,7 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
 
     for claim in claims:
         claim_sources = []
+        source_failures = []
         for url in claim["source_urls"]:
             try:
                 if url not in fetched:
@@ -481,19 +486,16 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
                 page = fetched[url]
                 excerpt = select_relevant_excerpt(page["text"], claim["sentence"])
             except FactCheckError as exc:
-                failure_report = {
-                    "status": "blocked",
-                    "method": "trusted-source fetch + independent evidence-grounded AI audit",
-                    "claim_count": len(claims),
-                    "blocked_at_claim": claim["id"],
-                    "source_fetch_failure": {
-                        "claim_id": claim["id"],
-                        "requested_url": url,
-                        "reason": str(exc)[:1200],
-                    },
-                    "sources": source_records,
-                }
-                raise FactCheckError(str(exc), report=failure_report) from exc
+                # A planner may provide several candidate sources. One related-but-
+                # insufficient page must not prevent checking the remaining URLs.
+                source_failures.append({"requested_url": url, "reason": str(exc)[:600]})
+                source_records.append({
+                    "claim_id": claim["id"],
+                    "requested_url": url,
+                    "status": "not_usable",
+                    "reason": str(exc)[:600],
+                })
+                continue
             source_data = {
                 "url": page["url"],
                 "title": page["title"],
@@ -509,7 +511,46 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
                 "http_status": page["status_code"],
                 "page_title": page["title"],
                 "excerpt": excerpt[:900],
+                "status": "usable",
             })
+
+        if not claim_sources:
+            failure_report = {
+                "status": "blocked",
+                "method": "trusted-source fetch + independent evidence-grounded AI audit",
+                "claim_count": len(claims),
+                "blocked_at_claim": claim["id"],
+                "source_fetch_failures": source_failures,
+                "sources": source_records,
+            }
+            reasons = "; ".join(
+                f"{item['requested_url']}: {item['reason']}" for item in source_failures
+            )
+            raise FactCheckError(
+                f"No supplied trusted source yielded a relevant evidence passage for {claim['id']}. {reasons}",
+                report=failure_report,
+            )
+
+        quantitative = bool(
+            QUANTITATIVE_RE.search(claim["sentence"])
+            or re.search(r"\b\d+(?:[,.]\d+)?\b", claim["sentence"])
+        )
+        relevant_organizations = {source_organization_domain(source["url"]) for source in claim_sources}
+        if quantitative and len(relevant_organizations) < 2:
+            failure_report = {
+                "status": "blocked",
+                "method": "trusted-source fetch + independent evidence-grounded AI audit",
+                "claim_count": len(claims),
+                "blocked_at_claim": claim["id"],
+                "source_fetch_failures": source_failures,
+                "usable_source_organizations": sorted(relevant_organizations),
+                "sources": source_records,
+            }
+            raise FactCheckError(
+                f"Quantitative claim {claim['id']} needs relevant evidence from two distinct trusted source organizations; "
+                f"only {len(relevant_organizations)} supplied source organization(s) produced a relevant passage.",
+                report=failure_report,
+            )
         assembled.append({**claim, "sources": claim_sources})
 
     prompt = build_fact_check_prompt(str(plan.get("script", "")), assembled)

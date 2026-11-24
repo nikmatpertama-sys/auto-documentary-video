@@ -48,7 +48,7 @@ Tests cover title wrapping and Unicode punctuation, complete word preservation w
 
 ## Install
 
-Upload this ZIP to the repository root on branch `project1` using the exact filename `auto-documentary-video-upgrade.zip`, commit it, then run **Hybrid Documentary Generator** from branch `project1`.
+Upload this ZIP to the repository root on branch `project1` using the exact filename `project1-10.5.zip`, commit it, then run **Hybrid Documentary Generator** from branch `project1`.
 
 
 ## Changes in Pass 5 — voice-over is the master reference

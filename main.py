@@ -198,7 +198,7 @@ Return ONLY valid JSON in this exact structure:
     {{
       "scene":1,
       "sentence":"an exact complete factual sentence copied from scene narration",
-      "source_urls":["https://www.nasa.gov/"]
+      "source_urls":["https://www.nasa.gov/direct-evidence-page", "https://www.noaa.gov/independent-evidence-page"]
     }}
   ]
 }}
@@ -206,7 +206,7 @@ Return ONLY valid JSON in this exact structure:
 SCRIPT AND FACTUAL ACCURACY RULES:
 - The combined scene narration is the complete script, in order, and must total 160-185 words.
 - Every narration sentence must be listed in fact_claims as its exact complete sentence with source URLs. This deliberately includes scientific, biological, geographic, historical, statistical, causal, medical, legal, date/quantity, and descriptive claims so no sentence escapes evidence review. Do not leave any narration sentence uncited.
-- For each claim, provide direct source-page URLs from recognised primary institutions, government agencies, universities, scientific publishers, peer-reviewed journals, or established reference institutions. Prefer primary research or official datasets where possible.
+- For each claim, aim to provide TWO direct source-page URLs from recognised institutions so the verifier can try an alternate if one page is unavailable or uses different wording. Prefer independent organisations when possible. Do not invent URLs; if only one genuinely known direct page exists, provide that one rather than fabricating another.
 - Source URL hosts must pass the application's allowlist: use HTTPS on recognised .gov, .edu, .int, or .ac.uk hosts, or established institutions such as nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org, britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int, un.org, or worldbank.org. The JSON example URL is illustrative only; never copy it unless that exact page directly supports the claim.
 - Do not provide HTTP URLs, search-engine result pages, URL shorteners, redirector URLs, social-media posts, or invented example domains. A source URL that fails host validation will be rejected and regenerated.
 - Do not invent a source, title, author, DOI, URL, statistic, date, percentage, measurement, causal relationship, or quotation. Cite only pages you genuinely know exist and directly support the exact claim. If a claim cannot be confidently sourced, remove it or express a clearly non-factual question/transition instead.

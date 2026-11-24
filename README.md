@@ -17,7 +17,7 @@ Automated vertical mini-documentary generator using AI-assisted story planning, 
 
 Switch the repository branch selector to `project1` before uploading the upgrade ZIP or running **Actions → Hybrid Documentary Generator → Run workflow**. The self-upgrade workflow commits to the currently selected branch. Do not run it from `main`.
 
-Upload the file `auto-documentary-video-upgrade.zip` to the repository root, commit it, and run the workflow with branch `project1`. Enter the documentary topic in the workflow input.
+Upload the file `project1-10.5.zip` to the repository root, commit it, and run the workflow with branch `project1`. Enter the documentary topic in the workflow input.
 
 Optional GitHub Actions secrets:
 
