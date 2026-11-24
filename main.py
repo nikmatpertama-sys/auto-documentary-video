@@ -19,6 +19,7 @@ import diagnostics
 from ai_router import (
     VisionServiceUnavailable,
     configured_vision_provider_names,
+    free_tier_only,
     generate_json,
     generate_fact_json,
     verify_images,
@@ -3295,6 +3296,16 @@ def _run_pipeline():
     print(
         "AI text provider secrets available: " + (", ".join(configured_keys) or "none")
     )
+    if free_tier_only():
+        print(
+            "Cost policy: free-tier only. Paid routes (DeepSeek and paid "
+            "OpenRouter models) are excluded from this run."
+        )
+    else:
+        print(
+            "Cost policy: PAID ROUTES ENABLED via AI_ALLOW_PAID_PROVIDERS. "
+            "Provider charges are possible for this run."
+        )
     print("1/7 Writing and validating the documentary script...")
     diagnostics.STAGES.begin("script_generation", topic=TOPIC)
     plan = gemini_plan(TOPIC)

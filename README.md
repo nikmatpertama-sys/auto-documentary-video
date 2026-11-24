@@ -47,9 +47,15 @@ Nothing in this project requires a paid subscription. The whole pipeline can run
 | Rendering | Free | FFmpeg runs on the runner; the encoding itself costs nothing |
 | GitHub Actions | Free minutes | Public repositories run free; private repositories get a monthly free minute allowance |
 
-`DEEPSEEK_API_KEY` is the only prepaid-balance provider here. It is optional: if you never create that secret, no DeepSeek route is registered and no charge can occur. Free-tier routes are tried first (`AI_FACT_PROVIDER_ORDER` defaults to Gemini → Groq → OpenRouter → DeepSeek), so a zero-cost setup is the default.
+`DEEPSEEK_API_KEY` is the only prepaid-balance provider here, and paid OpenRouter slugs can bill as well. Both are excluded by default: `AI_ALLOW_PAID_PROVIDERS` is `false`, so the router logs that it skipped them and continues with free-tier routes only. DeepSeek is not even part of the default provider order. A prepaid key sitting in GitHub Secrets therefore cannot be charged by a normal run. The startup log states the active cost policy, and the run stops with a clear error if no free-tier route succeeds — it never silently falls back to a paid one.
+
+OpenRouter is additionally filtered by model slug in free mode: only `openrouter/free` and `*:free` slugs are registered, so a paid slug configured by mistake is skipped with a log line. Gemini model IDs change between releases; a retired ID returning 404 is retried against `GEMINI_MODEL_FALLBACKS` (`gemini-3.5-flash-lite` → `gemini-3.8-flash` → `gemini-2.5-flash` → `gemini-2.0-flash`) instead of failing the run.
 
 No keys at all and no money: `python scripts/offline_render_check.py` renders a real 1080 × 1920 MP4 with free Edge TTS and locally generated clips, which verifies encoding, muxing, captions and duration alignment without any API call.
+
+### Agent-driven runs (`ci-run` branch)
+
+A push to the `ci-run` branch starts the same pipeline with the topic in `ci-topic.txt`, without using the Run-workflow form. Only that branch publishes `stage_report.json`, `failure_report.json`, `plan.json`, the fact-check report and a trimmed `pipeline.log` to the `ci-diagnostics` branch, so a failed run can be inspected without downloading artifacts. The job never commits to `project1` or `main`.
 
 A 429 now pauses a provider for a bounded window (honouring `Retry-After`, default 180 s, `AI_RATE_LIMIT_COOLDOWN_SECONDS`) instead of deleting it for the whole run; only an explicitly exhausted quota, billing or authentication failure disables a provider. Transient 5xx/network failures cool a route down for `AI_TRANSIENT_COOLDOWN_SECONDS` (default 300 s) and get one bounded retry pass. DeepSeek's chat endpoint is text-only, so it is only used for vision when `DEEPSEEK_VISION_MODEL` is set explicitly.
 

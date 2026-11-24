@@ -7,10 +7,16 @@ on:
         description: "Documentary topic / idea (English or Indonesian)"
         required: true
         type: string
+  # Pushing to the ci-run branch renders ci-topic.txt without the Run-workflow
+  # form, which is how an agent-driven run is started. It only publishes the
+  # redacted diagnostics below, never application code.
+  push:
+    branches: [ci-run]
 
-# The job only reads the repository; it never commits or pushes.
+# Write access exists only so a ci-run run can publish its redacted reports to
+# the ci-diagnostics branch for inspection. No step commits to project1 or main.
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: documentary-${{ github.workflow }}-${{ github.ref }}
@@ -119,9 +125,24 @@ jobs:
           python -m unittest discover -s tests -v
           python healthcheck.py
 
+      - name: Resolve documentary topic
+        id: resolve-topic
+        run: |
+          set -euo pipefail
+          TOPIC="${{ inputs.topic }}"
+          if [ -z "${TOPIC// /}" ] && [ -f ci-topic.txt ]; then
+            TOPIC="$(head -c 300 ci-topic.txt | tr '\n' ' ')"
+          fi
+          if [ -z "${TOPIC// /}" ]; then
+            echo "No topic supplied." >&2
+            exit 1
+          fi
+          echo "topic=$TOPIC" >> "$GITHUB_OUTPUT"
+          echo "Run topic: $TOPIC"
+
       - name: Generate documentary
         env:
-          INPUT_TOPIC: ${{ inputs.topic }}
+          INPUT_TOPIC: ${{ steps.resolve-topic.outputs.topic }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -129,14 +150,19 @@ jobs:
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
-          AI_TEXT_PROVIDER_ORDER: groq,deepseek,gemini,openrouter
-          AI_FACT_PROVIDER_ORDER: gemini,groq,openrouter,deepseek
-          AI_VISION_PROVIDER_ORDER: groq,gemini,openrouter
+          # Free-tier only: DeepSeek draws on a prepaid balance and paid
+          # OpenRouter slugs can bill, so both stay excluded unless this is
+          # explicitly switched on.
+          AI_ALLOW_PAID_PROVIDERS: "false"
+          AI_TEXT_PROVIDER_ORDER: gemini,groq,openrouter
+          AI_FACT_PROVIDER_ORDER: gemini,groq,openrouter
+          AI_VISION_PROVIDER_ORDER: gemini,groq,openrouter
           GROQ_MODEL: openai/gpt-oss-120b
           GROQ_VISION_MODEL: qwen/qwen3.8-27b
           DEEPSEEK_MODEL: deepseek-flash
           GEMINI_MODEL: gemini-3.8-flash
-          GEMINI_VISION_MODEL: gemini-3.8-flash
+          GEMINI_VISION_MODEL: gemini-3.5-flash-lite
+          GEMINI_MODEL_FALLBACKS: gemini-3.5-flash-lite,gemini-3.8-flash,gemini-2.5-flash,gemini-2.0-flash
           OPENROUTER_MODEL: openrouter/free
           OPENROUTER_VISION_MODEL: nvidia/nemotron-3.5-super-vl:free
           OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free
@@ -220,3 +246,42 @@ jobs:
             echo "===== last 120 log lines ====="
             tail -n 120 output/pipeline.log
           fi
+
+      - name: Publish redacted diagnostics for ci-run
+        if: always() && github.ref_name == 'ci-run'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          PUBLISH=$(mktemp -d)
+          if ! git clone --depth 1 --branch ci-diagnostics \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$PUBLISH" 2>/dev/null; then
+            git clone --depth 1 \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$PUBLISH"
+            git -C "$PUBLISH" checkout --orphan ci-diagnostics
+            git -C "$PUBLISH" rm -rf . >/dev/null 2>&1 || true
+          fi
+          rm -rf "$PUBLISH/latest"
+          mkdir -p "$PUBLISH/latest/output"
+          for report in failure_report.json stage_report.json production_report.json \
+              fact_check_report.json plan.json timing.json credits.txt \
+              voiceover_manifest.json opening_layout.json; do
+            [ -f "$report" ] && cp "$report" "$PUBLISH/latest/"
+          done
+          if [ -f output/pipeline.log ]; then
+            tail -n 3000 output/pipeline.log > "$PUBLISH/latest/output/pipeline.log"
+          fi
+          if [ -f output/offline_render_evidence.json ]; then
+            cp output/offline_render_evidence.json "$PUBLISH/latest/output/"
+          fi
+          printf 'run=%s\nsha=%s\nbranch=%s\njob_status=%s\n' \
+            "${GITHUB_RUN_ID}" "${GITHUB_SHA}" "${GITHUB_REF_NAME}" \
+            "${{ job.status }}" > "$PUBLISH/latest/RUN.txt"
+          git -C "$PUBLISH" add -A
+          git -C "$PUBLISH" -c user.name='documentary-ci' \
+            -c user.email='ci@users.noreply.github.com' \
+            commit -m "Diagnostics for run ${GITHUB_RUN_ID}" || {
+              echo "Nothing to publish."
+              exit 0
+            }
+          git -C "$PUBLISH" push origin HEAD:ci-diagnostics

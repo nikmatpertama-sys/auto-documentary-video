@@ -26,6 +26,8 @@ class AIRouterTests(unittest.TestCase):
         ai_router._DISABLED_ROUTES.clear()
         ai_router._COOLDOWN_UNTIL.clear()
         ai_router._PROVIDER_COOLDOWN_UNTIL.clear()
+        ai_router._GEMINI_WORKING_MODEL.clear()
+        ai_router._FREE_ONLY_WARNED.clear()
 
     def test_text_429_fails_over_to_deepseek(self):
         raw_plan = {"ok": True, "scenes": []}
@@ -39,6 +41,7 @@ class AIRouterTests(unittest.TestCase):
             "AI_TEXT_PROVIDER_ORDER": "groq,deepseek",
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True), patch("ai_router.requests.post", side_effect=[rate_limited, deepseek_response]) as post, redirect_stdout(logs):
             value, provider, model = ai_router.generate_json("Return JSON")
 
@@ -59,6 +62,7 @@ class AIRouterTests(unittest.TestCase):
             "AI_FACT_PROVIDER_ORDER": "deepseek",
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True), patch("ai_router.requests.post", return_value=response) as post:
             value, provider, model = ai_router.generate_fact_json("Verify claims")
 
@@ -67,18 +71,75 @@ class AIRouterTests(unittest.TestCase):
         self.assertEqual(model, "deepseek-flash")
         self.assertIn("api.deepseek.com", post.call_args.args[0])
 
-    def test_default_fact_order_keeps_the_prepaid_provider_last(self):
+    def test_free_tier_mode_skips_the_prepaid_provider(self):
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "deepseek,groq",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "false",
+            "GROQ_API_KEY": "test-groq",
+        }, clear=True):
+            providers = [route.provider for route in ai_router._routes("text")]
+
+        self.assertEqual(providers, ["groq"])
+
+    def test_prepaid_provider_is_registered_only_after_opt_in(self):
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "deepseek,groq",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
+            "GROQ_API_KEY": "test-groq",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
+        }, clear=True):
+            providers = [route.provider for route in ai_router._routes("text")]
+
+        self.assertEqual(providers, ["deepseek", "groq"])
+
+    def test_paid_openrouter_slug_is_skipped_in_free_tier_mode(self):
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "openrouter",
+            "OPENROUTER_API_KEY": "test-openrouter",
+            "OPENROUTER_MODEL": "openai/gpt-oss-120b",
+            "OPENROUTER_TEXT_FALLBACK_MODEL": "baidu/ernie-5.5-flash-preview:free",
+        }, clear=True):
+            models = [route.model for route in ai_router._routes("text")]
+
+        self.assertNotIn("openai/gpt-oss-120b", models)
+        self.assertIn("baidu/ernie-5.5-flash-preview:free", models)
+
+    def test_gemini_retired_model_falls_back_to_the_next_free_model(self):
+        missing = FakeResponse(404, {"error": {"message": "models/gemini-3.8-flash is not found"}})
+        valid = FakeResponse(200, {
+            "candidates": [{"content": {"parts": [{"text": json.dumps({"ready": True})}]}}]
+        })
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "gemini",
+            "GEMINI_API_KEY": "test-gemini-key",
+            "GEMINI_MODEL": "gemini-3.8-flash",
+            "GEMINI_MODEL_FALLBACKS": "gemini-3.5-flash-lite,gemini-2.5-flash",
+        }, clear=True), patch(
+            "ai_router.requests.post", side_effect=[missing, valid]
+        ) as post:
+            value, provider, _model = ai_router.generate_json("Return JSON")
+
+        self.assertEqual(value, {"ready": True})
+        self.assertEqual(provider, "gemini")
+        self.assertIn("gemini-3.8-flash", post.call_args_list[0].args[0])
+        self.assertIn("gemini-3.5-flash-lite", post.call_args_list[1].args[0])
+
+    def test_default_fact_order_never_includes_the_prepaid_provider(self):
         with patch.dict(os.environ, {
             "GROQ_API_KEY": "test-groq",
             "GEMINI_API_KEY": "test-gemini",
             "OPENROUTER_API_KEY": "test-openrouter",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True):
             providers = [route.provider for route in ai_router._routes("fact")]
 
-        # A zero-cost setup must never reach the prepaid balance route first.
-        self.assertEqual(providers[-1], "deepseek")
-        self.assertLess(providers.index("gemini"), providers.index("deepseek"))
+        # A zero-cost setup must never reach the prepaid balance route by
+        # default, not even when paid usage has been opted into.
+        self.assertNotIn("deepseek", providers)
+        self.assertEqual(providers[0], "gemini")
 
     def test_insufficient_balance_is_reported_as_billing_not_outage(self):
         empty_balance = FakeResponse(402, {
@@ -91,6 +152,7 @@ class AIRouterTests(unittest.TestCase):
         with patch.dict(os.environ, {
             "AI_TEXT_PROVIDER_ORDER": "deepseek,groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
             "GROQ_API_KEY": "test-groq",
         }, clear=True), patch(
             "ai_router.requests.post", side_effect=[empty_balance, valid]
@@ -137,6 +199,7 @@ class AIRouterTests(unittest.TestCase):
             "AI_TEXT_PROVIDER_ORDER": "groq,deepseek,gemini,openrouter",
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
             "GEMINI_API_KEY": "test-gemini",
             "OPENROUTER_API_KEY": "test-openrouter",
         }, clear=True), patch(
@@ -184,6 +247,7 @@ class AIRouterTests(unittest.TestCase):
             "AI_VISION_PROVIDER_ORDER": "groq,deepseek",
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True), patch("ai_router.requests.post", return_value=rate_limited):
             with self.assertRaises(ai_router.VisionServiceUnavailable):
                 ai_router.verify_images([b"frame"], "Check footage")
@@ -198,6 +262,7 @@ class AIRouterTests(unittest.TestCase):
         with patch.dict(os.environ, {
             "AI_TEXT_PROVIDER_ORDER": "deepseek",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True), patch("ai_router.requests.post", side_effect=[temporary, healthy]) as post, patch("ai_router.time.sleep") as sleep:
             value, provider, model = ai_router.generate_json("Return JSON")
         self.assertEqual(value, raw_plan)
@@ -214,6 +279,7 @@ class AIRouterTests(unittest.TestCase):
             "AI_TEXT_PROVIDER_ORDER": "groq,deepseek",
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True), patch(
             "ai_router.requests.post",
             side_effect=[ai_router.requests.exceptions.Timeout("read timeout"), healthy],
@@ -296,6 +362,7 @@ class AIRouterTests(unittest.TestCase):
             "AI_TEXT_PROVIDER_ORDER": "groq,deepseek",
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True), patch(
             "ai_router.requests.post",
             side_effect=[invalid_one, invalid_two, valid_deepseek],
@@ -418,6 +485,7 @@ class AIRouterTests(unittest.TestCase):
         with patch.dict(os.environ, {
             "AI_TEXT_PROVIDER_ORDER": "deepseek",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True), patch("ai_router.requests.post", return_value=bad_request), redirect_stdout(logs):
             with self.assertRaises(ai_router.ProviderRoutingError):
                 ai_router.generate_json("Return JSON")
@@ -447,6 +515,8 @@ class AIRouterFailoverTests(unittest.TestCase):
         ai_router._DISABLED_ROUTES.clear()
         ai_router._COOLDOWN_UNTIL.clear()
         ai_router._PROVIDER_COOLDOWN_UNTIL.clear()
+        ai_router._GEMINI_WORKING_MODEL.clear()
+        ai_router._FREE_ONLY_WARNED.clear()
 
     def _ok(self, payload):
         return FakeResponse(200, {
@@ -457,6 +527,7 @@ class AIRouterFailoverTests(unittest.TestCase):
         with patch.dict(os.environ, {
             "AI_VISION_PROVIDER_ORDER": "deepseek",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True):
             self.assertEqual(ai_router._routes("vision"), [])
             self.assertEqual(ai_router.configured_vision_provider_names(), [])
@@ -467,6 +538,7 @@ class AIRouterFailoverTests(unittest.TestCase):
         with patch.dict(os.environ, {
             "AI_VISION_PROVIDER_ORDER": "deepseek",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
             "DEEPSEEK_VISION_MODEL": "deepseek-vl",
         }, clear=True):
             routes = ai_router._routes("vision")
@@ -479,6 +551,7 @@ class AIRouterFailoverTests(unittest.TestCase):
             "AI_TEXT_PROVIDER_ORDER": "groq,deepseek",
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }
         with patch.dict(os.environ, env, clear=True), patch(
             "ai_router.requests.post",
@@ -506,6 +579,7 @@ class AIRouterFailoverTests(unittest.TestCase):
             "AI_TEXT_PROVIDER_ORDER": "groq,deepseek",
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
+            "AI_ALLOW_PAID_PROVIDERS": "true",
         }, clear=True), patch(
             "ai_router.requests.post",
             side_effect=[exhausted, self._ok({"ok": True})],

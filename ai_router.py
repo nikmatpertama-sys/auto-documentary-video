@@ -83,6 +83,45 @@ def _order(name: str, default: str) -> list[str]:
     return list(dict.fromkeys(x for x in values if x))
 
 
+# --- Free-tier policy -------------------------------------------------------
+# The pipeline is expected to run without spending money. DeepSeek is the only
+# route here that draws on a prepaid balance, and OpenRouter also serves paid
+# model slugs, so both stay out of the run unless an operator explicitly opts
+# in. Free-tier providers (Gemini AI Studio, Groq Free plan, OpenRouter ":free"
+# models) are always allowed.
+_PAID_PROVIDERS = {"deepseek"}
+_FREE_ONLY_WARNED: set[str] = set()
+
+
+def paid_providers_allowed() -> bool:
+    """True only when the operator explicitly accepts possible charges."""
+    return _env("AI_ALLOW_PAID_PROVIDERS", "false").lower() in {
+        "1", "true", "yes", "on",
+    }
+
+
+def free_tier_only() -> bool:
+    """True when this process may only use zero-cost provider routes."""
+    return not paid_providers_allowed()
+
+
+def _is_free_model(model: str) -> bool:
+    """Whether an OpenRouter slug is billed at $0."""
+    slug = str(model or "").strip().lower()
+    return slug == "openrouter/free" or slug.endswith(":free")
+
+
+def _skip_paid_route(provider: str, model: str) -> None:
+    label = f"{provider}/{model}"
+    if label in _FREE_ONLY_WARNED:
+        return
+    _FREE_ONLY_WARNED.add(label)
+    print(
+        f"Free-tier mode: {label} is not used because it can incur charges. "
+        "Set AI_ALLOW_PAID_PROVIDERS=true only if paid usage is acceptable."
+    )
+
+
 def _vision_min_confidence() -> float:
     """Keep the production Vision floor at 0.72; configuration may only make it stricter."""
     try:
@@ -106,17 +145,19 @@ def configured_vision_provider_names() -> list[str]:
 
 def _routes(task: str) -> list[Route]:
     if task == "text":
-        order = _order("AI_TEXT_PROVIDER_ORDER", "groq,deepseek,gemini,openrouter")
+        order = _order("AI_TEXT_PROVIDER_ORDER", "gemini,groq,openrouter")
     elif task == "fact":
         # Keep fact review on an independent provider order/cooldown from script writing.
-        # Free-tier routes come first and DeepSeek, the only prepaid-balance
-        # provider, is the last resort so a zero-cost setup is the default.
-        order = _order("AI_FACT_PROVIDER_ORDER", "gemini,groq,openrouter,deepseek")
+        order = _order("AI_FACT_PROVIDER_ORDER", "gemini,groq,openrouter")
     else:
-        order = _order("AI_VISION_PROVIDER_ORDER", "groq,deepseek,gemini,openrouter")
+        order = _order("AI_VISION_PROVIDER_ORDER", "gemini,groq,openrouter")
 
+    paid_allowed = paid_providers_allowed()
     routes: list[Route] = []
     for provider in order:
+        if provider in _PAID_PROVIDERS and not paid_allowed:
+            _skip_paid_route(provider, "configured")
+            continue
         if provider == "groq":
             key = _env("GROQ_API_KEY")
             model = _env(
@@ -195,6 +236,17 @@ def _routes(task: str) -> list[Route]:
                             "https://openrouter.ai/api/v1/chat/completions",
                             "openai",
                         ))
+    if not paid_allowed:
+        # OpenRouter is filtered by slug as well, because a paid slug under the
+        # same key would silently bill the account.
+        allowed: list[Route] = []
+        for route in routes:
+            if route.provider == "openrouter" and not _is_free_model(route.model):
+                _skip_paid_route(route.provider, route.model)
+                continue
+            allowed.append(route)
+        routes = allowed
+
     return routes
 
 
@@ -530,6 +582,24 @@ class _HTTPFailure(Exception):
         super().__init__(f"HTTP {status}: {detail}")
 
 
+_GEMINI_WORKING_MODEL: dict[str, str] = {}
+
+
+def _gemini_model_candidates(preferred: str) -> list[str]:
+    """Free-tier Gemini models to try, most preferred first."""
+    fallbacks = [
+        item.strip()
+        for item in _env(
+            "GEMINI_MODEL_FALLBACKS",
+            "gemini-3.5-flash-lite,gemini-3.8-flash,gemini-2.5-flash,gemini-2.0-flash",
+        ).split(",")
+        if item.strip()
+    ]
+    preferred = str(preferred or "").strip()
+    models = ([preferred] if preferred else []) + fallbacks
+    return list(dict.fromkeys(models)) or ["gemini-3.8-flash"]
+
+
 def _gemini_request(
     route: Route,
     prompt: str,
@@ -556,15 +626,35 @@ def _gemini_request(
         },
     }
 
-    response = requests.post(
-        route.endpoint,
-        headers={
-            "x-goog-api-key": route.api_key,
-            "Content-Type": "application/json",
-        },
-        json=payload,
-        timeout=(12, 50 if task == "vision" else 120),
-    )
+    headers = {
+        "x-goog-api-key": route.api_key,
+        "Content-Type": "application/json",
+    }
+    timeout = (12, 50 if task == "vision" else 120)
+
+    # Gemini model IDs change between releases. A model name that this key no
+    # longer serves answers 404, which used to end the whole run. Try the next
+    # configured free model instead, and remember the one that worked.
+    models = _gemini_model_candidates(_GEMINI_WORKING_MODEL.get(task) or route.model)
+    response = None
+    for index, model in enumerate(models):
+        endpoint = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{model}:generateContent"
+        )
+        response = requests.post(
+            endpoint, headers=headers, json=payload, timeout=timeout
+        )
+        if response.status_code != 404 or index == len(models) - 1:
+            if response.status_code < 400:
+                _GEMINI_WORKING_MODEL[task] = model
+            break
+        print(
+            f"Gemini model {model} is not available for this key; "
+            f"trying {models[index + 1]}."
+        )
+
+    assert response is not None
 
     if response.status_code >= 400:
         raise _HTTPFailure(
@@ -783,6 +873,11 @@ def _route(
 
     if not routes:
         message = "No configured AI key for this task."
+        if free_tier_only():
+            message += (
+                " Free-tier mode is on, so paid routes (DeepSeek and paid "
+                "OpenRouter models) were deliberately not used."
+            )
     elif not errors:
         message = "All configured providers are disabled or cooling down."
     else:
