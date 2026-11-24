@@ -337,7 +337,7 @@ class FactCheckTests(unittest.TestCase):
             {"noaa.gov", "fao.org"},
         )
 
-    def test_recovered_source_must_be_from_a_new_independent_organization(self):
+    def test_recovery_allows_a_different_page_on_an_already_tried_institution(self):
         from fact_check import _recover_independent_source_urls
 
         def fake_checker(_prompt, validator=None):
@@ -345,13 +345,29 @@ class FactCheckTests(unittest.TestCase):
                 "source_urls": ["https://earthobservatory.nasa.gov/new-report"]
             }), "deepseek", "deepseek-test"
 
-        with self.assertRaisesRegex(ValueError, "already tried"):
+        urls, _provider, _model = _recover_independent_source_urls(
+            {
+                "id": "C1",
+                "sentence": "The measured area is 20 percent of the regional estimate.",
+            },
+            ["https://www.nasa.gov/old-report", "https://www.noaa.gov/old-report"],
+            fake_checker,
+        )
+
+        self.assertEqual(urls, ["https://earthobservatory.nasa.gov/new-report"])
+
+    def test_recovery_rejects_a_url_already_attempted(self):
+        from fact_check import _recover_independent_source_urls
+
+        def fake_checker(_prompt, validator=None):
+            return validator({
+                "source_urls": ["https://www.nasa.gov/old-report"]
+            }), "deepseek", "deepseek-test"
+
+        with self.assertRaisesRegex(ValueError, "already attempted"):
             _recover_independent_source_urls(
-                {
-                    "id": "C1",
-                    "sentence": "The measured area is 20 percent of the regional estimate.",
-                },
-                ["https://www.nasa.gov/old-report", "https://www.noaa.gov/old-report"],
+                {"id": "C1", "sentence": "The measured area is 20 percent of the region."},
+                ["https://www.nasa.gov/old-report"],
                 fake_checker,
             )
 

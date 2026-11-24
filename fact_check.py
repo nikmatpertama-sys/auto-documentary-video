@@ -286,7 +286,17 @@ def fetch_source_page(url: str, timeout=(10, 25), max_bytes=3_000_000, attempt: 
         for redirect_count in range(MAX_SOURCE_REDIRECTS + 1):
             with requests.get(
                 current_url,
-                headers={"User-Agent": "AutoDocumentaryFactChecker/1.0 (source verification)"},
+                headers={
+                    # Several institutional sites reject non-browser agents
+                    # with 403, which looked like a missing source page.
+                    "User-Agent": (
+                        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 "
+                        "AutoDocumentaryFactChecker/1.0"
+                    ),
+                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept-Language": "en-US,en;q=0.9",
+                },
                 timeout=timeout,
                 allow_redirects=False,
                 stream=True,
@@ -348,7 +358,12 @@ def fetch_source_page(url: str, timeout=(10, 25), max_bytes=3_000_000, attempt: 
             )
             time.sleep(3)
             return fetch_source_page(url, timeout=timeout, max_bytes=max_bytes, attempt=attempt + 1)
-        raise FactCheckError(f"Could not fetch evidence source {current_url}: {type(exc).__name__}") from exc
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        status_note = f" (HTTP {status})" if status else ""
+        raise FactCheckError(
+            f"Could not fetch evidence source {current_url}: "
+            f"{type(exc).__name__}{status_note}"
+        ) from exc
 
 
 def validate_fact_claims(plan: dict) -> list[dict]:
@@ -513,8 +528,10 @@ Rules:
 - Use only recognised trusted institutions on .gov, .edu, .int, .ac.uk, or the
   established-source allowlist. Do not use search pages, homepages, shorteners, blogs,
   or redirector URLs.
-- Every returned URL must belong to an organisation DIFFERENT from all organisations
-  already listed above, and returned URLs must be from different organisations.
+- A different page on an organisation listed above is allowed, but return at
+  most one page per organisation and prefer organisations not yet tried.
+  Independent-source requirements for quantitative claims are checked separately
+  after the pages are fetched.
 - Never invent a URL. Return an empty list when you cannot confidently name one.
 - Do not return any URL already attempted.
 """
@@ -526,15 +543,153 @@ Rules:
         if len(raw_urls) > max_urls:
             raise ValueError("Source recovery returned too many candidate URLs.")
         urls = validate_planner_source_urls(claim["id"], raw_urls) if raw_urls else []
+        # A different page on the same institution is a legitimate recovery: the
+        # planner's exact path may not exist while another page on that domain
+        # does. Independence for quantitative claims is enforced after fetching.
+        attempted = {url.rstrip("/") for url in attempted_urls}
+        if any(url in attempted for url in urls):
+            raise ValueError("Recovered URL was already attempted for this claim.")
         organizations = [source_organization_domain(url) for url in urls]
         if len(set(organizations)) != len(organizations):
             raise ValueError("Recovered URLs are not from distinct source organizations.")
-        if any(org in existing_organizations for org in organizations):
-            raise ValueError("Recovered URL repeats an organization already tried for this claim.")
         return {"source_urls": urls}
 
     value, provider, model = generate_fact_json(prompt, validator=validate_recovery)
     return value["source_urls"], provider, model
+
+
+WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
+WIKIPEDIA_HEADERS = {
+    "User-Agent": "AutoDocumentaryVideo/3.0 (trusted-source discovery)",
+}
+DISCOVERY_ATTEMPTS_PER_CLAIM = 4
+QUESTION_WORDS = {
+    "how", "why", "what", "when", "where", "which", "does", "did", "can",
+    "could", "would", "should", "entire", "really", "actually", "into",
+}
+SKIP_SOURCE_EXTENSIONS = (
+    ".pdf", ".zip", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+    ".mp4", ".mp3", ".jpg", ".jpeg", ".png", ".gif",
+)
+ANCHOR_RE = re.compile(r'<a[^>]+href="([^"#]+)[^"]*"[^>]*>(.*?)</a>', re.S)
+_DISCOVERY_CACHE: dict[str, list[str]] = {}
+
+
+def _plain_text(fragment: str) -> str:
+    return html.unescape(re.sub(r"<[^>]+>", " ", str(fragment or ""))).strip()
+
+
+def _wikipedia_get(params: dict) -> dict:
+    response = requests.get(
+        WIKIPEDIA_API,
+        params={**params, "format": "json"},
+        headers=WIKIPEDIA_HEADERS,
+        timeout=(10, 25),
+    )
+    response.raise_for_status()
+    data = response.json()
+    return data if isinstance(data, dict) else {}
+
+
+def discover_trusted_source_urls(
+    sentence: str,
+    limit: int = DISCOVERY_ATTEMPTS_PER_CLAIM,
+    context: str = "",
+) -> list[str]:
+    """Find real trusted-institution URLs cited for this claim on Wikipedia.
+
+    AI planners frequently invent institution URLs, and a hallucinated page
+    answers 404 no matter how the request is made. Wikipedia article citations
+    are a free index of pages that were actually published by USGS, EPA, NASA,
+    universities and similar bodies, so they are used as candidate URLs only:
+    each one is still fetched and judged by the normal evidence pipeline.
+    """
+    keywords = [
+        word
+        for word in re.findall(r"[a-z]{4,}", str(sentence or "").lower())
+        if word not in STOPWORDS
+    ]
+    # A long literal sentence makes Wikipedia's search return unrelated
+    # articles, so look up several short phrases: the topic's own subject
+    # words, the claim's most distinctive words, and the two combined. Each
+    # phrase contributes the citations of its two best-matching articles.
+    context_words = [
+        word
+        for word in re.findall(r"[a-z]{4,}", str(context or "").lower())
+        if word not in STOPWORDS and word not in QUESTION_WORDS
+    ]
+    distinctive = sorted(dict.fromkeys(keywords), key=len, reverse=True)[:1]
+    subject = context_words[:2]
+    queries: list[str] = []
+    for phrase in (
+        " ".join(subject),
+        " ".join(subject + distinctive),
+    ):
+        phrase = phrase.strip()[:200]
+        if phrase and phrase not in queries:
+            queries.append(phrase)
+    if not queries:
+        return []
+
+    cache_key = "|".join(queries)
+    if cache_key in _DISCOVERY_CACHE:
+        return _DISCOVERY_CACHE[cache_key][:limit]
+
+    titles: list[str] = []
+    for query in queries:
+        try:
+            search = _wikipedia_get(
+                {"action": "query", "list": "search", "srsearch": query, "srlimit": 2}
+            )
+        except Exception as exc:
+            print(f"Fact-check source discovery unavailable: {type(exc).__name__}")
+            break
+        for item in search.get("query", {}).get("search", []) or []:
+            title = str(item.get("title") or "")
+            if title and title not in titles and "disambiguation" not in title.lower():
+                titles.append(title)
+
+    scored: dict[str, int] = {}
+    for title in titles[:5]:
+        try:
+            page = _wikipedia_get(
+                {"action": "parse", "page": title, "prop": "externallinks|text"}
+            )
+        except Exception:
+            continue
+        parsed = page.get("parse", {}) or {}
+        anchors: dict[str, str] = {}
+        for href, label in ANCHOR_RE.findall(str(parsed.get("text", {}).get("*", ""))):
+            anchors.setdefault(href, "").join((_plain_text(label), " "))
+        for link in parsed.get("externallinks", []) or []:
+            if not isinstance(link, str):
+                continue
+            cleaned = link.split("#", 1)[0].strip()
+            lowered = cleaned.lower()
+            if not cleaned or "web.archive.org" in lowered:
+                continue
+            if lowered.endswith(SKIP_SOURCE_EXTENSIONS):
+                continue
+            if not is_trusted_source_url(cleaned):
+                continue
+            label = anchors.get(cleaned, "").lower()
+            text = (cleaned + " " + label).lower()
+            scored[cleaned] = max(
+                scored.get(cleaned, 0),
+                sum(1 for word in keywords if word in text),
+            )
+
+    # A .gov page is not automatically about this claim: rank the citations by
+    # how many of the claim's own words appear in the link URL or its anchor
+    # text, so a page about sediment trapping beats a generic flood page.
+    urls = sorted(scored, key=lambda link: scored[link], reverse=True)
+
+    _DISCOVERY_CACHE[cache_key] = urls
+    print(
+        "Fact-check source discovery: "
+        f"{len(urls)} trusted candidate URL(s) cited by related Wikipedia articles."
+    )
+    return urls[:limit]
 
 
 def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
@@ -620,6 +775,30 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
                 }
             except Exception as exc:
                 source_recovery["failure"] = f"{type(exc).__name__}: {str(exc)[:700]}"
+
+            # A model asked for source URLs tends to invent plausible paths on
+            # real institutions, which answer 404. Fall back to URLs that
+            # Wikipedia articles actually cite for these keywords, so recovery
+            # can still succeed when the planner's URLs do not exist.
+            still_short = not claim_sources or (
+                quantitative and len(relevant_organizations) < 2
+            )
+            if still_short and remaining_page_budget > 0:
+                discovered = discover_trusted_source_urls(
+                    claim["sentence"],
+                    context=str(plan.get("topic") or ""),
+                    limit=min(MAX_RECOVERY_SOURCES_PER_CLAIM * 2, remaining_page_budget),
+                )
+                source_recovery["discovered_urls"] = discovered
+                for url in discovered:
+                    if url in attempted_urls:
+                        continue
+                    attempted_urls.append(url)
+                    try_source(url, source_kind="discovered")
+                relevant_organizations = {
+                    source_organization_domain(source["url"])
+                    for source in claim_sources
+                }
 
         if not claim_sources:
             failure_report = {
