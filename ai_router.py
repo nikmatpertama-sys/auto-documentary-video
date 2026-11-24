@@ -848,16 +848,24 @@ def _route(
             except (ValueError, KeyError, TypeError) as exc:
                 if task in ("text", "fact") and not repair_used:
                     repair_used = True
-                    if route.provider == "groq" and "incomplete" in str(exc).lower():
+                    if route.provider == "groq":
                         # The first request already consumed most of Groq's
                         # 8,000 tokens-per-minute free-plan window, so an
                         # immediate second request would be rejected with 429
                         # instead of repairing anything.
-                        print(
-                            "AI router: waiting 60s for the Groq free-plan "
-                            "token window before the repair attempt."
-                        )
-                        time.sleep(60)
+                        try:
+                            groq_wait = float(
+                                _env("AI_GROQ_REPAIR_WAIT_SECONDS", "60") or "60"
+                            )
+                        except (TypeError, ValueError):
+                            groq_wait = 60.0
+                        if groq_wait > 0:
+                            print(
+                                "AI router: waiting "
+                                f"{groq_wait:.0f}s for the Groq free-plan token "
+                                "window before the repair attempt."
+                            )
+                            time.sleep(groq_wait)
                     request_prompt = _repair_prompt(prompt, exc)
                     print(
                         f"AI router: {route.provider}/{route.model} returned "

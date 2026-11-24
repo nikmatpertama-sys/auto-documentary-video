@@ -298,7 +298,7 @@ def discover_source_pool(topic):
         f"Source pool articles suggested by {provider}/{model}: "
         + ", ".join(titles[:3])
     )
-    return wikipedia_source_pool(titles, limit=24)
+    return wikipedia_source_pool(titles, limit=12)
 
 
 def gemini_plan(topic, source_pool=None):

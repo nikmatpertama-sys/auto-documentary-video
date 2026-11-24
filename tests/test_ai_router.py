@@ -325,6 +325,7 @@ class AIRouterTests(unittest.TestCase):
         with patch.dict(os.environ, {
             "AI_TEXT_PROVIDER_ORDER": "groq",
             "GROQ_API_KEY": "test-groq",
+            "AI_GROQ_REPAIR_WAIT_SECONDS": "0",
         }, clear=True), patch(
             "ai_router.requests.post", side_effect=[invalid, valid]
         ) as post:
@@ -367,6 +368,7 @@ class AIRouterTests(unittest.TestCase):
             "GROQ_API_KEY": "test-groq",
             "DEEPSEEK_API_KEY": "test-deepseek",
             "AI_ALLOW_PAID_PROVIDERS": "true",
+            "AI_GROQ_REPAIR_WAIT_SECONDS": "0",
         }, clear=True), patch(
             "ai_router.requests.post",
             side_effect=[invalid_one, invalid_two, valid_deepseek],
