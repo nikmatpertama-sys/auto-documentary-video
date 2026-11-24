@@ -853,7 +853,10 @@ def pexels_search(query):
         params={
             "query": query,
             "per_page": 20,
-            "size": "medium"
+            # "medium" caps results at ~1280px wide, which forced a 2.7x upscale
+            # to fill a 1080x1920 frame. Ask for large renditions and still keep
+            # a lower-resolution fallback when no HD file exists.
+            "size": "large"
         },
         timeout=35
     )
@@ -883,8 +886,12 @@ def pexels_search(query):
         if not files:
             continue
 
-        # files are already sorted by quality and closeness to 1920px.
-        file = files[0]
+        # files are already sorted by quality and closeness to 1920px; prefer a
+        # true HD rendition when the listing offers one.
+        high_resolution = [
+            f for f in files if int(f.get("width") or 0) >= 1920
+        ]
+        file = (high_resolution or files)[0]
 
         slug = re.sub(
             r"[-_/]+",
@@ -1654,6 +1661,44 @@ def extract_vision_frames(video_path, frame_count=3):
     return frame_paths
 
 
+def static_clip_ratio(video_path, freeze_db=-60, min_freeze=1.0):
+    """Return the fraction of the clip that is a frozen frame.
+
+    A still image packaged as a video passes every metadata and pixel check but
+    makes a documentary scene look broken. FFmpeg's freezedetect reports each
+    frozen span, so the ratio is measured on the real timeline.
+    """
+    duration = ffprobe_duration(video_path)
+    if duration <= 0:
+        return 0.0
+    try:
+        result = subprocess.run(
+            [
+                FFMPEG, "-hide_banner", "-nostats", "-i", str(video_path),
+                "-vf", f"freezedetect=n={freeze_db}dB:d={min_freeze}",
+                "-map", "0:v:0", "-f", "null", "-",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return 0.0
+    output = result.stderr or ""
+    spans = [float(value) for value in re.findall(r"freeze_duration:\s*([0-9.]+)", output)]
+    frozen = sum(spans)
+    # A freeze that runs until the end of the file never emits freeze_end or
+    # freeze_duration, which is exactly the still-image-as-video case this check
+    # exists to catch. Account for that open-ended tail explicitly.
+    starts = [float(value) for value in re.findall(r"freeze_start:\s*([0-9.]+)", output)]
+    ends = [float(value) for value in re.findall(r"freeze_end:\s*([0-9.]+)", output)]
+    if starts and (not ends or starts[-1] > ends[-1]):
+        frozen += max(0.0, duration - starts[-1])
+    if frozen <= 0:
+        return 0.0
+    return min(1.0, frozen / duration)
+
+
 def verify_footage_visually(video_path, scene, query, candidate_metadata=""):
     """Check actual sampled pixels; any provider outage means this candidate cannot pass."""
     frames = extract_vision_frames(video_path, frame_count=4)
@@ -1855,6 +1900,49 @@ def render_reference_image_scene(source, duration, output):
         "-crf", "19", "-r", str(FPS), "-pix_fmt", "yuv420p",
         "-movflags", "+faststart", str(output),
     ])
+
+
+def format_scene_credit(
+    scene_number,
+    hit,
+    *,
+    score,
+    matched,
+    total,
+    vision_confidence=None,
+    vision_reason="",
+    vision_provider="",
+):
+    """One plain-text credit line per scene for credits.txt.
+
+    A stray trailing comma once turned the verification text into a Python
+    tuple repr; this function keeps the line a single readable string and
+    strips newlines so the file stays one credit per line.
+    """
+    reason = " ".join(str(vision_reason or "").split())
+    if vision_confidence is not None:
+        vision_credit = (
+            f" | Visual verification: {vision_provider} "
+            f"{float(vision_confidence):.2f} — {reason}"
+        )
+    else:
+        vision_credit = " | Visual verification: NOT VERIFIED (production should stop)"
+
+    attribution = (
+        "Attribution: Coverr (https://coverr.co); "
+        if str(hit.get("source")) == "Coverr"
+        else ""
+    )
+    return (
+        f"Scene {scene_number} | {hit.get('source')} | "
+        f"Creator: {hit.get('creator', 'Unknown')} | "
+        f"Source: {hit.get('page_url', '')} | "
+        f"{attribution}"
+        f"Metadata relevance: {float(score):.2f} "
+        f"({matched}/{total} query concepts)"
+        f"{vision_credit} | "
+        f"License: {hit.get('license', 'Check source page')}"
+    )
 
 
 def fetch_footage(plan):
@@ -2152,6 +2240,18 @@ def fetch_footage(plan):
                     print(f"Scene {i}: exact duplicate media bytes rejected across footage sources.")
                     continue
 
+                frozen_ratio = static_clip_ratio(destination)
+                if frozen_ratio >= 0.65:
+                    destination.unlink(missing_ok=True)
+                    download_errors.append(
+                        f"{hit.get('source')} {hit.get('id')}: {frozen_ratio:.0%} of the clip is a frozen frame"
+                    )
+                    print(
+                        f"Scene {i}: rejected near-static clip "
+                        f"({frozen_ratio:.0%} frozen) from {hit.get('source')}."
+                    )
+                    continue
+
                 if visual_provider_names:
                     candidate_metadata = " | ".join([
                         str(hit.get("metadata", "")),
@@ -2312,23 +2412,17 @@ def fetch_footage(plan):
             "query": query,
         }
 
-        vision_credit = (
-            f" | Visual verification: "
-            f"{vision_provider} {vision_confidence:.2f} — "
-            f"{' '.join(str(vision_reason).split())}"
-            if vision_confidence is not None
-            else " | Visual verification: NOT VERIFIED (production should stop)"
-        )
-
         credits.append(
-            f"Scene {i} | {hit.get('source')} | "
-            f"Creator: {hit.get('creator', 'Unknown')} | "
-            f"Source: {hit.get('page_url', '')} | "
-            f"{('Attribution: Coverr (https://coverr.co); ' if hit.get('source') == 'Coverr' else '')}"
-            f"Metadata relevance: {score:.2f} "
-            f"({matched}/{total} query concepts)"
-            f"{vision_credit} | "
-            f"License: {hit.get('license', 'Check source page')}"
+            format_scene_credit(
+                i,
+                hit,
+                score=score,
+                matched=matched,
+                total=total,
+                vision_confidence=vision_confidence,
+                vision_reason=vision_reason,
+                vision_provider=vision_provider,
+            )
         )
 
         print(
@@ -3101,7 +3195,10 @@ def render(plan, sentence_events, total_duration):
     # streams are now padded to the locked VO duration (cloned frames + silence)
     # so the MP4 always carries the complete narration.
     audio_filter = (
-        "[1:a]highpass=f=65,lowpass=f=15000,"
+        "[1:a]highpass=f=70,lowpass=f=13500,"
+        # Tame the 6-9 kHz band that Edge TTS can render as a thin whine before
+        # the compressor and limiter, keeping the narration deep and cinematic.
+        "equalizer=f=7500:width_type=q:width=1.2:g=-3,"
         "acompressor=threshold=-22dB:ratio=2.0:"
         "attack=25:release=250:makeup=1.15,"
         "alimiter=limit=0.88,"

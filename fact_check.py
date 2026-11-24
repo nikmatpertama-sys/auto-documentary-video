@@ -10,6 +10,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import time
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlparse
 
@@ -76,7 +77,10 @@ STOPWORDS = {
 MAX_FACT_CLAIMS = 16  # Eight scenes, at most two narration sentences per scene.
 MAX_SOURCES_PER_CLAIM = 3
 MAX_RECOVERY_SOURCES_PER_CLAIM = 2
-MAX_UNIQUE_SOURCE_PAGES = 24
+# A single page budget must cover planned URLs *and* recovery attempts for every
+# claim. The previous limit of 24 could be exhausted by six claims, after which
+# recovery silently had no budget and later claims were blocked as unverifiable.
+MAX_UNIQUE_SOURCE_PAGES = MAX_FACT_CLAIMS * (MAX_SOURCES_PER_CLAIM + MAX_RECOVERY_SOURCES_PER_CLAIM)
 MAX_SOURCE_REDIRECTS = 5
 
 QUANTITATIVE_RE = re.compile(
@@ -269,8 +273,12 @@ def select_relevant_excerpt(page_text: str, claim: str, max_chars: int = 1900) -
     return " ".join(chosen)[:max_chars]
 
 
-def fetch_source_page(url: str, timeout=(10, 25), max_bytes=3_000_000) -> dict:
-    """Fetch a trusted source page while validating each redirect before following it."""
+def fetch_source_page(url: str, timeout=(10, 25), max_bytes=3_000_000, attempt: int = 0) -> dict:
+    """Fetch a trusted source page while validating each redirect before following it.
+
+    One bounded retry absorbs transient institution-side 5xx responses and
+    read timeouts; a permanently unavailable page still fails closed.
+    """
     if not is_trusted_source_url(url):
         raise FactCheckError(f"Source URL is not on the trusted HTTPS allowlist: {url}")
     current_url = url
@@ -330,6 +338,16 @@ def fetch_source_page(url: str, timeout=(10, 25), max_bytes=3_000_000) -> dict:
     except FactCheckError:
         raise
     except requests.RequestException as exc:
+        transient = isinstance(
+            exc, (requests.exceptions.Timeout, requests.exceptions.ConnectionError)
+        ) or (getattr(getattr(exc, "response", None), "status_code", 0) or 0) >= 500
+        if attempt < 1 and transient:
+            print(
+                f"Fact-check source temporarily unavailable ({type(exc).__name__}); "
+                "retrying once in 3s."
+            )
+            time.sleep(3)
+            return fetch_source_page(url, timeout=timeout, max_bytes=max_bytes, attempt=attempt + 1)
         raise FactCheckError(f"Could not fetch evidence source {current_url}: {type(exc).__name__}") from exc
 
 
