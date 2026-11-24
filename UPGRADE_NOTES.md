@@ -154,3 +154,12 @@ Visual and operational changes:
 - `healthcheck.py`: FFmpeg, ffprobe, libass, libx264, CPU PyTorch, requests, Pillow, SentencePiece and protobuf passed. The isolated build container lacks `edge_tts` and `transformers`; both are declared in `requirements.txt` and are installed by GitHub Actions.
 - No live GitHub Actions run, actual provider call, source-page fetch for a real topic, or external stock-footage download was executed here. Production rendering still requires the configured provider secrets and real Actions environment.
 - AI fact-checking cannot offer a mathematical guarantee. The evidence excerpts and verdicts must be reviewed before publishing, especially for high-stakes or time-sensitive statements.
+
+
+## Pass 10.1 — structured-output and provider recovery patch
+
+The failed run `122778749468` stopped during documentary planning. Groq returned JSON but the Scene 3 `visual_focus` did not overlap sufficiently with its primary query; DeepSeek returned `Insufficient Balance`; Gemini returned HTTP 503/high demand; and OpenRouter returned an unreadable response. No VO, footage search, or MP4 render began.
+
+Pass 10.1 adds explicit JSON mode for Groq/DeepSeek/OpenRouter text and fact requests, one targeted same-provider repair after malformed JSON or validator rejection, more precise OpenRouter-compatible response parsing diagnostics, and a distinct HTTP 402 insufficient-balance condition. The prompt also asks for at least half the `visual_focus` tokens to appear verbatim in `visual_query`, matching the existing strict validator. Vision REJECT handling, the 0.72 visual-confidence floor, source evidence requirements, and fail-closed behavior are unchanged.
+
+Validation: Python compilation passed and **71/71** unit tests passed, including a combined regression case that reproduces the provider failure order from the Actions log and recovers through OpenRouter after a targeted repair. No live API request or Actions render has been run here. DeepSeek account balance must be resolved by the account owner; external Gemini 503s cannot be prevented by project code. See `PASS10_1_ROUTING_VALIDATION.md`.

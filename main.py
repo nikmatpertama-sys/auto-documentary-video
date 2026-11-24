@@ -217,6 +217,7 @@ SCENE AND VISUAL RULES:
 - Exactly 8 scenes, same order as the script, 1-2 sentences per scene.
 - Each scene must communicate ONE main factual idea and one dominant visible subject. Do not list several species, places, objects, or unrelated processes in one scene.
 - The chosen visual_focus and visual_query must represent the central subject of the entire scene narration, not just a minor word in it. A generic forest/river/sky shot is not acceptable for a scene whose main subject is a named animal, plant, machine, person, or specific process.
+- Make visual_focus 2-6 concrete words and repeat at least half of those words verbatim in visual_query (case-insensitive); choose wording that can be searched as real footage. Do not use a synonym in visual_query when the exact visual_focus term can be included naturally.
 - Any named organism, object, or specific action in a scene must be the visual focus or be removed from that scene's narration. Do not narrate an orchid, hummingbird, and jaguar together while showing only an orchid.
 - Scene 1 must be real moving footage, not a diagram. The first spoken sentence is a curiosity hook of at most 12 words.
 - visual_query must describe real footage a camera can capture. Never put map, chart, graph, diagram, table, infographic, illustration, animation, graphic, or visualization in visual_query or visual_queries.

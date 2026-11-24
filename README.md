@@ -29,7 +29,7 @@ Optional GitHub Actions secrets:
 - `PEXELS_API_KEY`
 - `COVERR_API_KEY`
 
-Text, fact-check, and visual AI providers depend on valid keys, model availability, service status, and quota. The factual review uses its own provider order/cooldown (`AI_FACT_PROVIDER_ORDER`, defaulting to DeepSeek → Gemini → Groq → OpenRouter) so a script-writing provider outage does not automatically disable the fact-review route. Stock-footage providers are independently disabled for the remainder of a run after authentication, permission, or rate-limit errors (HTTP 401, 403, or 429).
+Text, fact-check, and visual AI providers depend on valid keys, model availability, service status, and quota. The factual review uses its own provider order/cooldown (`AI_FACT_PROVIDER_ORDER`, defaulting to DeepSeek → Gemini → Groq → OpenRouter) so a script-writing provider outage does not automatically disable the fact-review route. Stock-footage providers are independently disabled for the remainder of a run after authentication, permission, or rate-limit errors (HTTP 401, 403, or 429). For text/fact generation, Groq, DeepSeek, and OpenRouter explicitly request JSON mode; a malformed or validator-rejected response receives one targeted repair attempt on the same provider before failover. HTTP 402 billing errors are reported separately and skip that provider for the current run. This improves recovery but cannot replenish a provider balance or guarantee service availability.
 
 ## Visual sourcing policy
 
@@ -94,6 +94,12 @@ Set provider keys as environment variables before running locally.
 - Check each source page and any applicable license terms, especially for monetized/commercial publishing.
 - Review the fetched evidence excerpts and independent verdict in `production_report.json` before publishing; AI-assisted verification reduces hallucination risk but cannot replace editorial judgement.
 - Provider availability, quotas, and topic-specific footage coverage can affect whether all eight scenes can be completed.
+
+## Latest routing reliability patch — Pass 10.1
+
+The failed Actions run `122778749468` showed a Groq scene-focus validation mismatch, DeepSeek insufficient balance, Gemini HTTP 503, and an unreadable OpenRouter response. Pass 10.1 addresses the software-side causes without weakening fact or visual checks: text/fact routes use JSON mode where supported; a schema-invalid response gets one targeted retry on that same provider; OpenRouter response parsing reports specific structural problems; and HTTP 402 is clearly reported as a billing condition. The planner prompt explicitly aligns `visual_focus` wording with `visual_query` so it satisfies the existing deterministic validator. See `PASS10_1_ROUTING_VALIDATION.md` for the exact evidence and test coverage.
+
+This cannot repair an empty DeepSeek balance or force an external provider to recover from HTTP 503. If all routes remain unavailable or produce invalid plans after the bounded repair, generation still stops rather than generating unsupported narration.
 
 ### Historical reliability notes (superseded where noted)
 

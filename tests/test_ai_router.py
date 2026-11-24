@@ -65,6 +65,88 @@ class AIRouterTests(unittest.TestCase):
         self.assertEqual(model, "deepseek-flash")
         self.assertIn("api.deepseek.com", post.call_args.args[0])
 
+    def test_insufficient_balance_is_reported_as_billing_not_outage(self):
+        empty_balance = FakeResponse(402, {
+            "error": {"message": "Insufficient Balance"}
+        })
+        valid = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": True})}}]
+        })
+        logs = StringIO()
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "deepseek,groq",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+            "GROQ_API_KEY": "test-groq",
+        }, clear=True), patch(
+            "ai_router.requests.post", side_effect=[empty_balance, valid]
+        ), redirect_stdout(logs):
+            value, provider, _model = ai_router.generate_json("Return one JSON object")
+
+        self.assertEqual(value, {"ready": True})
+        self.assertEqual(provider, "groq")
+        self.assertIn("insufficient balance/payment", logs.getvalue())
+        self.assertNotIn("temporarily unavailable", logs.getvalue())
+
+    def test_combined_provider_failure_pattern_recovers_at_openrouter(self):
+        # Mirrors the failed Actions run: Groq returns a schema-invalid plan,
+        # DeepSeek has no balance, Gemini is temporarily unavailable, and the
+        # first OpenRouter response is malformed. The bounded repair calls
+        # should let OpenRouter recover without weakening plan validation.
+        groq_invalid_first = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": False})}}]
+        })
+        groq_invalid_retry = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": False})}}]
+        })
+        deepseek_no_balance = FakeResponse(402, {
+            "error": {"message": "Insufficient Balance"}
+        })
+        gemini_unavailable = FakeResponse(503, {
+            "error": {"message": "service is experiencing high demand"}
+        })
+        openrouter_bad_json = FakeResponse(200, {
+            "choices": [{"message": {"content": "not a JSON object"}}]
+        })
+        openrouter_repaired = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": True})}}]
+        })
+
+        def validator(value):
+            if value.get("ready") is not True:
+                raise ValueError(
+                    "Scene 3 visual_focus is not represented by its primary visual_query."
+                )
+            return value
+
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "groq,deepseek,gemini,openrouter",
+            "GROQ_API_KEY": "test-groq",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+            "GEMINI_API_KEY": "test-gemini",
+            "OPENROUTER_API_KEY": "test-openrouter",
+        }, clear=True), patch(
+            "ai_router.requests.post",
+            side_effect=[
+                groq_invalid_first,
+                groq_invalid_retry,
+                deepseek_no_balance,
+                gemini_unavailable,
+                openrouter_bad_json,
+                openrouter_repaired,
+            ],
+        ) as post:
+            value, provider, _model = ai_router.generate_json(
+                "Return the source-backed plan", validator=validator
+            )
+
+        self.assertEqual(value, {"ready": True})
+        self.assertEqual(provider, "openrouter")
+        self.assertEqual(post.call_count, 6)
+        self.assertEqual(
+            post.call_args_list[-1].kwargs["json"]["response_format"],
+            {"type": "json_object"},
+        )
+
     def test_valid_visual_reject_does_not_trigger_provider_fallback(self):
         reject = {"relevant": False, "confidence": 0.94, "reason": "Requested animal not visible"}
         response = FakeResponse(200, {
@@ -145,6 +227,92 @@ class AIRouterTests(unittest.TestCase):
         parts = kwargs["json"]["contents"][0]["parts"]
         self.assertTrue(any("inline_data" in part for part in parts))
         self.assertTrue(result["accepted"])
+
+    def test_validator_failure_retries_same_provider_once_with_targeted_repair(self):
+        invalid = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": False})}}]
+        })
+        valid = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": True})}}]
+        })
+
+        def validator(value):
+            if value.get("ready") is not True:
+                raise ValueError("Scene 3 visual_focus is not represented by its primary visual_query.")
+            return value
+
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "groq",
+            "GROQ_API_KEY": "test-groq",
+        }, clear=True), patch(
+            "ai_router.requests.post", side_effect=[invalid, valid]
+        ) as post:
+            value, provider, _model = ai_router.generate_json(
+                "Return a documentary plan", validator=validator
+            )
+
+        self.assertEqual(value, {"ready": True})
+        self.assertEqual(provider, "groq")
+        self.assertEqual(post.call_count, 2)
+        first_payload = post.call_args_list[0].kwargs["json"]
+        retry_payload = post.call_args_list[1].kwargs["json"]
+        self.assertEqual(first_payload["response_format"], {"type": "json_object"})
+        retry_prompt = retry_payload["messages"][1]["content"]
+        self.assertIn("STRICT OUTPUT REPAIR REQUIRED", retry_prompt)
+        self.assertIn("visual_focus", retry_prompt)
+
+    def test_unrepaired_groq_schema_falls_through_to_deepseek(self):
+        invalid_one = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": False})}}]
+        })
+        invalid_two = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": False})}}]
+        })
+        valid_deepseek = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps({"ready": True})}}]
+        })
+
+        def validator(value):
+            if value.get("ready") is not True:
+                raise ValueError("plan schema rejected")
+            return value
+
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "groq,deepseek",
+            "GROQ_API_KEY": "test-groq",
+            "DEEPSEEK_API_KEY": "test-deepseek",
+        }, clear=True), patch(
+            "ai_router.requests.post",
+            side_effect=[invalid_one, invalid_two, valid_deepseek],
+        ) as post:
+            value, provider, _model = ai_router.generate_json(
+                "Return a documentary plan", validator=validator
+            )
+
+        self.assertEqual(value, {"ready": True})
+        self.assertEqual(provider, "deepseek")
+        self.assertEqual(post.call_count, 3)
+        self.assertIn("api.groq.com", post.call_args_list[0].args[0])
+        self.assertIn("api.groq.com", post.call_args_list[1].args[0])
+        self.assertIn("api.deepseek.com", post.call_args_list[2].args[0])
+
+    def test_openrouter_text_route_requests_json_mode(self):
+        valid = {"title": "Test", "scenes": []}
+        response = FakeResponse(200, {
+            "choices": [{"message": {"content": json.dumps(valid)}}]
+        })
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "openrouter",
+            "OPENROUTER_API_KEY": "test-openrouter",
+        }, clear=True), patch("ai_router.requests.post", return_value=response) as post:
+            value, provider, _model = ai_router.generate_json("Return one JSON object")
+
+        self.assertEqual(value, valid)
+        self.assertEqual(provider, "openrouter")
+        self.assertEqual(
+            post.call_args.kwargs["json"]["response_format"],
+            {"type": "json_object"},
+        )
 
     def test_text_route_cooldown_does_not_block_same_model_vision(self):
         temporary = FakeResponse(503, {"error": {"message": "text service unavailable"}})

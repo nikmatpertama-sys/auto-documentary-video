@@ -189,6 +189,13 @@ def _mark_failure(task: str, route: Route, status: int | None, detail: str) -> N
             f"AI router: {route.provider} authentication/permission error "
             f"(HTTP {status}); provider disabled for this task for this run."
         )
+    elif status == 402:
+        _DISABLED_PROVIDERS.add(provider_key)
+        print(
+            f"AI router: {route.provider} reports insufficient balance/payment "
+            "(HTTP 402); provider skipped for this task for the rest of this run. "
+            "Check the provider account balance or billing status."
+        )
     elif status in (400, 404, 413, 415, 422):
         _DISABLED_ROUTES.add(route_key)
         print(
@@ -317,8 +324,14 @@ def _openai_request(
     if task in ("text", "fact"):
         payload["max_tokens"] = 7000
 
-        if route.provider == "deepseek":
+        # All OpenAI-compatible text routes used by this project support JSON
+        # mode. Asking for it is particularly important for OpenRouter's free
+        # router: it can then select only models advertising structured-output
+        # support rather than relying on a prose-only instruction.
+        if route.provider in ("groq", "deepseek", "openrouter"):
             payload["response_format"] = {"type": "json_object"}
+
+        if route.provider == "deepseek":
             payload["thinking"] = {"type": "disabled"}
 
         if route.provider == "groq":
@@ -349,26 +362,65 @@ def _openai_request(
 
     try:
         data = response.json()
-        content = data["choices"][0]["message"].get("content")
-
-        if isinstance(content, list):
-            content = "\n".join(
-                str(item.get("text", ""))
-                for item in content
-                if isinstance(item, dict)
-            )
-
-        content = str(content or "").strip()
-
-        if not content:
-            raise ValueError("empty message content")
-
-        return content
-
-    except Exception as exc:
+    except (ValueError, TypeError) as exc:
+        content_type = ""
+        try:
+            content_type = str(response.headers.get("Content-Type", ""))[:80]
+        except Exception:
+            pass
         raise ValueError(
-            f"Unreadable OpenAI-compatible response ({type(exc).__name__})"
+            "response body was not JSON "
+            f"(HTTP {response.status_code}, content-type={content_type or 'unknown'})"
         ) from exc
+
+    if not isinstance(data, dict):
+        raise ValueError("provider response root is not a JSON object")
+
+    if data.get("error"):
+        detail = str(data.get("error"))[:240]
+        detail = detail.replace(route.api_key, "[REDACTED]")
+        raise ValueError(f"provider returned an error object: {detail}")
+
+    choices = data.get("choices")
+    if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+        raise ValueError(
+            "provider response has no chat-completion choices "
+            f"(top-level keys={','.join(sorted(data.keys())[:12])})"
+        )
+
+    message = choices[0].get("message")
+    if not isinstance(message, dict):
+        raise ValueError("first provider choice has no assistant message object")
+
+    content = message.get("content")
+    if content is None and isinstance(message.get("parsed"), dict):
+        content = json.dumps(message["parsed"], ensure_ascii=False)
+
+    if isinstance(content, list):
+        text_parts = []
+        for item in content:
+            if isinstance(item, str):
+                text_parts.append(item)
+            elif isinstance(item, dict):
+                text_value = item.get("text")
+                if text_value is None and isinstance(item.get("content"), str):
+                    text_value = item["content"]
+                if text_value:
+                    text_parts.append(str(text_value))
+        content = "\n".join(text_parts)
+    elif isinstance(content, dict):
+        content = content.get("text", "")
+
+    content = str(content or "").strip()
+    if not content:
+        finish_reason = str(choices[0].get("finish_reason", "unknown"))[:60]
+        message_keys = ",".join(sorted(message.keys())[:12])
+        raise ValueError(
+            "provider returned empty assistant content "
+            f"(finish_reason={finish_reason}, message_keys={message_keys})"
+        )
+
+    return content
 
 
 class _HTTPFailure(Exception):
@@ -449,6 +501,21 @@ def _request(
     return _openai_request(route, prompt, images, task=task)
 
 
+def _repair_prompt(original_prompt: str, error: Exception) -> str:
+    """Ask the same provider once to repair a malformed/invalid structured reply."""
+    detail = re.sub(r"\s+", " ", str(error or "invalid response")).strip()
+    detail = detail[:600] or "invalid response"
+    return (
+        f"{original_prompt}\n\n"
+        "STRICT OUTPUT REPAIR REQUIRED: Your previous response was rejected by "
+        "the application's JSON parser or validation rules. Regenerate the "
+        "ENTIRE response from scratch, preserving the required schema and all "
+        "requirements. Fix this exact validation issue: "
+        f"{detail}. Return only one complete valid JSON object. Do not add "
+        "Markdown fences, commentary, or explanations."
+    )
+
+
 def _route(
     task: str,
     prompt: str,
@@ -470,109 +537,129 @@ def _route(
             f"for {task}..."
         )
 
-        try:
-            route_images = images
+        route_images = images
+        if images and route.provider == "groq":
+            route_images = [images[len(images) // 2]]
+        elif images:
+            route_images = [images[0], images[-1]]
 
-            if images and route.provider == "groq":
-                route_images = [images[len(images) // 2]]
-            elif images:
-                route_images = [images[0], images[-1]]
+        # A semantically invalid but parseable response is not proof that the
+        # provider is unavailable. Retry that same route once with the exact
+        # validation error before consuming another provider's quota.
+        request_prompt = prompt
+        repair_used = False
 
-            raw = _request(route, prompt, route_images, task)
-            value: Any = _extract_json(raw)
+        while True:
+            try:
+                raw = _request(route, request_prompt, route_images, task)
+                value: Any = _extract_json(raw)
 
-            if validator:
-                value = validator(value)
+                if validator:
+                    value = validator(value)
 
-            if task == "vision":
-                if not isinstance(value, dict):
-                    raise ValueError("vision response is not a JSON object")
+                if task == "vision":
+                    if not isinstance(value, dict):
+                        raise ValueError("vision response is not a JSON object")
 
-                relevant = value.get("relevant")
-                confidence = value.get("confidence")
+                    relevant = value.get("relevant")
+                    confidence = value.get("confidence")
 
-                if not isinstance(relevant, bool) or isinstance(confidence, bool):
-                    raise ValueError(
-                        "vision response needs boolean relevant and numeric confidence"
+                    if not isinstance(relevant, bool) or isinstance(confidence, bool):
+                        raise ValueError(
+                            "vision response needs boolean relevant and numeric confidence"
+                        )
+
+                    confidence = float(confidence)
+                    if not 0 <= confidence <= 1:
+                        raise ValueError(
+                            "vision confidence must be between 0 and 1"
+                        )
+
+                    reason = re.sub(
+                        r"\s+",
+                        " ",
+                        str(value.get("reason", "No reason provided")),
+                    ).strip()[:400]
+
+                    result = {
+                        "relevant": relevant,
+                        "confidence": confidence,
+                        "reason": reason,
+                        "accepted": (
+                            relevant
+                            and confidence >= _vision_min_confidence()
+                        ),
+                        "provider": route.provider,
+                        "model": route.model,
+                    }
+
+                    print(
+                        f"AI router: {route.provider}/{route.model} "
+                        f"visual verdict={'PASS' if result['accepted'] else 'REJECT'} "
+                        f"({confidence:.2f})."
                     )
-
-                confidence = float(confidence)
-
-                if not 0 <= confidence <= 1:
-                    raise ValueError(
-                        "vision confidence must be between 0 and 1"
-                    )
-
-                reason = re.sub(
-                    r"\s+",
-                    " ",
-                    str(value.get("reason", "No reason provided")),
-                ).strip()[:400]
-
-                result = {
-                    "relevant": relevant,
-                    "confidence": confidence,
-                    "reason": reason,
-                    "accepted": (
-                        relevant
-                        and confidence >= _vision_min_confidence()
-                    ),
-                    "provider": route.provider,
-                    "model": route.model,
-                }
+                    return result, route.provider, route.model
 
                 print(
                     f"AI router: {route.provider}/{route.model} "
-                    f"visual verdict={'PASS' if result['accepted'] else 'REJECT'} "
-                    f"({confidence:.2f})."
+                    f"returned a valid {task} response."
                 )
+                return value, route.provider, route.model
 
-                return result, route.provider, route.model
+            except _HTTPFailure as exc:
+                errors.append(
+                    f"{route.provider}/{route.model}: HTTP {exc.status}"
+                )
+                _mark_failure(task, route, exc.status, exc.detail)
+                if exc.status in (408, 500, 502, 503, 504):
+                    transient_routes.append(route)
+                break
 
-            print(
-                f"AI router: {route.provider}/{route.model} "
-                f"returned a valid {task} response."
-            )
-
-            return value, route.provider, route.model
-
-        except _HTTPFailure as exc:
-            errors.append(
-                f"{route.provider}/{route.model}: HTTP {exc.status}"
-            )
-            _mark_failure(task, route, exc.status, exc.detail)
-
-            if exc.status in (408, 500, 502, 503, 504):
+            except (
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectionError,
+            ) as exc:
+                errors.append(
+                    f"{route.provider}/{route.model}: {type(exc).__name__}"
+                )
+                _mark_failure(task, route, None, "network timeout/connection error")
                 transient_routes.append(route)
+                break
 
-        except (
-            requests.exceptions.Timeout,
-            requests.exceptions.ConnectionError,
-        ) as exc:
-            errors.append(
-                f"{route.provider}/{route.model}: {type(exc).__name__}"
-            )
-            _mark_failure(task, route, None, "network timeout/connection error")
-            transient_routes.append(route)
+            except requests.exceptions.RequestException as exc:
+                errors.append(
+                    f"{route.provider}/{route.model}: {type(exc).__name__}"
+                )
+                _mark_failure(task, route, None, "request transport error")
+                transient_routes.append(route)
+                break
 
-        except (ValueError, KeyError, TypeError) as exc:
-            errors.append(
-                f"{route.provider}/{route.model}: invalid response ({exc})"
-            )
-            _DISABLED_ROUTES.add((task, route.route_id))
-            print(
-                f"AI router: {route.provider}/{route.model} returned "
-                f"invalid data; trying another provider. {exc}"
-            )
+            except (ValueError, KeyError, TypeError) as exc:
+                if task in ("text", "fact") and not repair_used:
+                    repair_used = True
+                    request_prompt = _repair_prompt(prompt, exc)
+                    print(
+                        f"AI router: {route.provider}/{route.model} returned "
+                        "invalid JSON/schema; retrying this provider once with "
+                        "a targeted correction."
+                    )
+                    continue
 
-        except requests.exceptions.RequestException as exc:
-            errors.append(
-                f"{route.provider}/{route.model}: {type(exc).__name__}"
-            )
-            _mark_failure(task, route, None, "request transport error")
-            transient_routes.append(route)
+                errors.append(
+                    f"{route.provider}/{route.model}: invalid response ({exc})"
+                )
+                _DISABLED_ROUTES.add((task, route.route_id))
+                print(
+                    f"AI router: {route.provider}/{route.model} returned "
+                    f"invalid data after the bounded repair attempt; trying "
+                    f"another provider. {exc}"
+                )
+                break
 
     if transient_routes and not _transient_retry:
+        # Retry only the routes that produced a transient transport/server
+        # failure. Authentication, billing, quota, and malformed-output routes
+        # are not retried as if they were temporary server outages.
         print(
             f"AI router: all available {task} routes had transient errors; "
             "one bounded retry in 5s."
