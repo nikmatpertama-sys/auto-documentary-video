@@ -3112,6 +3112,17 @@ def validate_final_video(path, expected_duration):
             f"Final audio track is {audio_duration:.2f}s while the video is {duration:.2f}s; "
             "the narration is truncated or padded incorrectly."
         )
+    # A container duration can match while the picture track stopped early,
+    # which leaves a frozen last frame for the rest of the narration.
+    try:
+        video_duration = float(video.get("duration") or 0)
+    except (TypeError, ValueError):
+        video_duration = 0.0
+    if video_duration and abs(video_duration - expected_duration) > DURATION_TOLERANCE_SECONDS:
+        raise RuntimeError(
+            f"Final picture track ends at {video_duration:.2f}s but the narration runs "
+            f"{expected_duration:.2f}s; frames were dropped during the final encode."
+        )
     if not (OUT / "voiceover.mp3").is_file() or (OUT / "voiceover.mp3").stat().st_size < 1000:
         raise RuntimeError("Voice-over MP3 is missing or incomplete.")
     if not (OUT / "captions.ass").is_file() or (OUT / "captions.ass").stat().st_size < 100:
@@ -3205,9 +3216,12 @@ def render(plan, sentence_events, total_duration):
         "loudnorm=I=-16:TP=-1.5:LRA=9,"
         f"aresample=48000,apad=whole_dur={total_duration:.3f}[a]"
     )
+    # Do not add trim= or setpts=PTS-STARTPTS here: on FFmpeg 8 a trim/setpts
+    # after tpad silently dropped the last ~8s of frames (the tail then showed a
+    # frozen image while the audio kept playing). `-t` alone trims both padded
+    # streams to the locked narration length.
     video_filter = (
         "[0:v]tpad=stop_mode=clone:stop_duration=3,"
-        f"trim=duration={total_duration:.3f},setpts=PTS-STARTPTS,"
         f"subtitles={OUT}/captions.ass,format=yuv420p[v]"
     )
 

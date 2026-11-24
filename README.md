@@ -8,16 +8,21 @@ Automated vertical mini-documentary generator using AI-assisted story planning, 
 - `plan.json` — script, scene plan, selected media and provenance metadata.
 - `credits.txt` — asset creator, source page, license/usage information, and visual-verification status.
 - `production_report.json` — per-scene source, mandatory pixel-verification results, reference visual details, opening layout, voice-over QA, scene timing, subtitle-alignment diagnostics, and the complete narrative fact-check report.
-- `fact_check_report.json` — fetched trusted-source pages, cited narration sentences, independent fact-check verdicts, and evidence excerpts. It is written in the Actions runner workspace; the current workflow uploads the complete embedded copy inside `production_report.json`, not this file separately.
+- `fact_check_report.json` — fetched trusted-source pages, cited narration sentences, independent fact-check verdicts, and evidence excerpts. Uploaded both on success and on failure.
+- `stage_report.json` — per-stage timings, status, and a runtime/environment summary. Written for every run, successful or not.
+- `failure_report.json` — written only when a run stops early: the failing stage, error type/message, redacted traceback, and the stage timeline. Credentials are scrubbed before anything is written.
+- `opening_layout.json` — measured opening title/hook card layout that was validated before narration was generated.
 - `voiceover_manifest.json` — validated VO duration, audio-stream/loudness checks, voice settings, VO-anchored scene windows, and measured-versus-estimated word-timing coverage. The complete manifest is embedded in the uploaded `production_report.json`.
 - `timing.json` — sentence events, word-level timings, timing source for every word, and caption phrase groups.
 - `output/voiceover.mp3` and `output/captions.ass` — final voice-over and VO-synchronized subtitle file.
 
 ## GitHub Actions setup
 
-Switch the repository branch selector to `project1` before uploading the upgrade ZIP or running **Actions → Hybrid Documentary Generator → Run workflow**. The self-upgrade workflow commits to the currently selected branch. Do not run it from `main`.
+Switch the repository branch selector to `project1` before running **Actions → Hybrid Documentary Generator → Run workflow**. Do not run it from `main`.
 
-Upload the file `project1-10.5.zip` to the repository root, commit it, and run the workflow with branch `project1`. Enter the documentary topic in the workflow input.
+A bundled upgrade ZIP in the repository root (for example `project1-10.7.zip`) is unpacked into the runner workspace for that run only. The workflow never commits or pushes: a render job must not mutate the branch it is building from.
+
+On failure the job uploads a `documentary-diagnostics-<run>` artifact with `failure_report.json`, `stage_report.json`, `output/pipeline.log`, every report written so far and any partial media, then prints the failing stage and the last 120 log lines in the job summary. Both success and failure artifacts are configured, so a red run is diagnosable without re-running it.
 
 Optional GitHub Actions secrets:
 
@@ -28,6 +33,8 @@ Optional GitHub Actions secrets:
 - `PIXABAY_API_KEY`
 - `PEXELS_API_KEY`
 - `COVERR_API_KEY`
+
+A 429 now pauses a provider for a bounded window (honouring `Retry-After`, default 180 s, `AI_RATE_LIMIT_COOLDOWN_SECONDS`) instead of deleting it for the whole run; only an explicitly exhausted quota, billing or authentication failure disables a provider. Transient 5xx/network failures cool a route down for `AI_TRANSIENT_COOLDOWN_SECONDS` (default 300 s) and get one bounded retry pass. DeepSeek's chat endpoint is text-only, so it is only used for vision when `DEEPSEEK_VISION_MODEL` is set explicitly.
 
 Text, fact-check, and visual AI providers depend on valid keys, model availability, service status, and quota. The factual review uses its own provider order/cooldown (`AI_FACT_PROVIDER_ORDER`, defaulting to DeepSeek → Gemini → Groq → OpenRouter) so a script-writing provider outage does not automatically disable the fact-review route. Stock-footage providers are independently disabled for the remainder of a run after authentication, permission, or rate-limit errors (HTTP 401, 403, or 429). For text/fact generation, Groq, DeepSeek, and OpenRouter explicitly request JSON mode; a malformed or validator-rejected response receives one targeted repair attempt on the same provider before failover. HTTP 402 billing errors are reported separately and skip that provider for the current run. This improves recovery but cannot replenish a provider balance or guarantee service availability.
 
@@ -77,6 +84,18 @@ The pipeline now has a strict master-reference order:
 - Each phrase uses word-level ASS karaoke timing, highlighting the current spoken word.
 - Small VO duration deviations may be corrected with pitch-preserving FFmpeg `atempo`; all scene, sentence, and word timestamps are scaled by the measured duration change. Large deviations are rejected rather than forcing unnatural speech.
 - Technical audio checks verify that the VO file is present, non-silent, has a supported sample rate, and does not exceed the clipping threshold. They cannot replace a human listening review for pronunciation, voice character, or subjective naturalness; the MP3 is included in the GitHub artifact for that review.
+
+## Offline render verification
+
+```bash
+python scripts/offline_render_check.py --preset medium
+```
+
+This runs the real production functions — `build_voiceover` (free Edge TTS when reachable), `build_subtitles_from_voice`, `attach_voice_timing_to_scenes`, `render` and `validate_final_video` — against real FFmpeg at 1080 × 1920 with locally generated placeholder clips, so it makes **no paid API calls** and needs no stock-footage keys. It writes `output/offline_render_evidence.json` with ffprobe measurements for the picture track, audio track, duration delta, subtitle alignment coverage and render time.
+
+It verifies encoding, muxing, caption burn-in and duration alignment. It does **not** verify footage relevance, visual verification, or fact-checking, which need the real provider keys; those run only in the workflow.
+
+Useful environment overrides: `FFMPEG_BIN`/`FFPROBE_BIN` for a bundled FFmpeg build, `HOOK_FONT_PATH`/`HOOK_FONT_BOLD_PATH` to force a specific TrueType font for the opening card (DejaVu Sans is bundled in `assets/fonts`), and `AI_RATE_LIMIT_COOLDOWN_SECONDS`/`AI_TRANSIENT_COOLDOWN_SECONDS` for provider pause lengths.
 
 ## Local setup
 

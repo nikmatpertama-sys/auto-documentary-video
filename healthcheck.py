@@ -48,6 +48,24 @@ def main():
     except Exception as exc:
         failures.append(f"FFmpeg filter check: {exc}")
 
+    # The opening card must never fall back to an unreadable bitmap font.
+    try:
+        from hook_overlay import _font_path
+        print(f"Opening overlay font: {_font_path(True)}")
+    except Exception as exc:
+        failures.append(f"opening overlay font: {exc}")
+
+    # Eight 1080x1920 clips plus segments and the final encode need headroom;
+    # running out of disk mid-render used to look like a random FFmpeg failure.
+    try:
+        import shutil
+        free_gb = shutil.disk_usage(".").free / (1024 ** 3)
+        print(f"Free disk: {free_gb:.1f} GB")
+        if free_gb < 2.0:
+            failures.append(f"only {free_gb:.1f} GB free disk space; at least 2 GB is required")
+    except OSError as exc:
+        print(f"Disk space check skipped: {type(exc).__name__}")
+
     if failures:
         print("Health check failed:")
         for failure in failures:

@@ -8,8 +8,9 @@ on:
         required: true
         type: string
 
+# The job only reads the repository; it never commits or pushes.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: documentary-${{ github.workflow }}-${{ github.ref }}
@@ -87,7 +88,11 @@ jobs:
           python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2,<3"
 
       - name: Install Python dependencies
-        run: python -m pip install -r requirements.txt
+        run: |
+          set -euo pipefail
+          python -m pip install --no-input -r requirements.txt
+          python -m pip check
+          python -m pip freeze > pip-freeze.txt
 
       - name: Restore SigLIP model cache
         uses: actions/cache@v6
@@ -162,6 +167,7 @@ jobs:
             voiceover_manifest.json
             opening_layout.json
             stage_report.json
+            pip-freeze.txt
             output/voiceover.mp3
             output/captions.ass
           if-no-files-found: error
@@ -187,6 +193,7 @@ jobs:
             output/captions.ass
             output/voiceover.mp3
             output/voiceover_manifest.json
+            pip-freeze.txt
           if-no-files-found: ignore
           retention-days: 14
 

@@ -377,6 +377,13 @@ class RenderPipelineTests(unittest.TestCase):
             self.assertAlmostEqual(
                 float(audio["duration"]), total_duration, delta=main.DURATION_TOLERANCE_SECONDS
             )
+            # The video stream must also reach the end of the narration. A trim
+            # or setpts filter once dropped the final seconds of frames while
+            # the audio kept playing, leaving a frozen tail that a container
+            # duration check alone would not catch.
+            self.assertAlmostEqual(
+                float(video["duration"]), total_duration, delta=main.DURATION_TOLERANCE_SECONDS
+            )
 
 
 class DiagnosticsTests(unittest.TestCase):
