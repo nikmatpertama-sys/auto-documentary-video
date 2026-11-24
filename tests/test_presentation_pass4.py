@@ -61,13 +61,50 @@ class CaptionTimingTests(unittest.TestCase):
         self.assertEqual(aligned[3]["text"], "Amazon,")
         self.assertEqual(aligned[-1]["text"], "rain.")
 
-    def test_unmatched_tts_words_fail_instead_of_silently_dropping_caption_words(self):
-        with self.assertRaises(ValueError):
-            align_boundary_text(
-                "This caption has missing words.",
-                [{"text": "This", "offset": 0.0, "duration": 0.2},
-                 {"text": "caption", "offset": 0.3, "duration": 0.2}],
-            )
+    def test_two_missing_edge_boundaries_are_estimated_without_dropping_words(self):
+        words = [
+            "Deep", "inside", "the", "Amazon", "forest", "billions", "of", "leaves",
+            "release", "water", "vapor", "into", "the", "warm", "air", "above",
+            "the", "green", "canopy", "each", "morning", "before", "clouds", "form",
+        ]
+        sentence = " ".join(words) + "."
+        missing = {5, 17}
+        boundaries = [
+            {"text": word, "offset": index * 0.28, "duration": 0.18}
+            for index, word in enumerate(words) if index not in missing
+        ]
+        aligned = align_boundary_text(sentence, boundaries, audio_duration=7.0)
+        self.assertEqual(len(aligned), 24)
+        self.assertEqual(sum(x["timing_source"] == "edge_tts" for x in aligned), 22)
+        self.assertEqual(sum(x["timing_source"] == "estimated" for x in aligned), 2)
+        self.assertEqual(aligned[5]["text"], "billions")
+        self.assertEqual(aligned[17]["text"], "green")
+        self.assertTrue(all(0 <= x["offset"] < 7.0 for x in aligned))
+        self.assertTrue(all(x["duration"] > 0 for x in aligned))
+        self.assertTrue(all(a["offset"] <= b["offset"] for a, b in zip(aligned, aligned[1:])))
+
+    def test_missing_all_word_boundaries_uses_measured_sentence_audio(self):
+        sentence = "The forest releases moisture into the atmosphere."
+        aligned = align_boundary_text(sentence, [], audio_duration=3.2)
+        self.assertEqual(len(aligned), 7)
+        self.assertTrue(all(x["timing_source"] == "estimated" for x in aligned))
+        self.assertAlmostEqual(aligned[0]["offset"], 0.0)
+        self.assertLessEqual(aligned[-1]["offset"] + aligned[-1]["duration"], 3.2 + 1e-6)
+
+    def test_extra_provider_boundary_is_ignored_without_shifting_words(self):
+        aligned = align_boundary_text(
+            "Leaves release water vapor.",
+            [
+                {"text": "Leaves", "offset": 0.0, "duration": 0.2},
+                {"text": "noise", "offset": 0.2, "duration": 0.1},
+                {"text": "release", "offset": 0.3, "duration": 0.2},
+                {"text": "water", "offset": 0.6, "duration": 0.2},
+                {"text": "vapor", "offset": 0.9, "duration": 0.3},
+            ],
+            audio_duration=1.4,
+        )
+        self.assertEqual([x["text"] for x in aligned], ["Leaves", "release", "water", "vapor."])
+        self.assertEqual(sum(x["timing_source"] == "edge_tts" for x in aligned), 4)
 
     def test_phrase_groups_follow_clause_and_sentence_boundaries(self):
         sentence1 = "Deep within the Amazon, trees summon their own rain."

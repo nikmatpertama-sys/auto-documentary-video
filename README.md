@@ -7,9 +7,10 @@ Automated vertical mini-documentary generator using AI-assisted story planning, 
 - `documentary.mp4` — 1080 × 1920, 30 FPS, H.264/AAC.
 - `plan.json` — script, scene plan, selected media and provenance metadata.
 - `credits.txt` — asset creator, source page, license/usage information, and visual-verification status.
-- `production_report.json` — per-scene source, verification method, reference visual details, opening layout, and caption-group count.
-- `timing.json` — sentence events, word-level timings, and caption phrase groups.
-- `output/voiceover.mp3` and `output/captions.ass` — final voice-over and word-synchronized subtitle file.
+- `production_report.json` — per-scene source, verification method, reference visual details, opening layout, voice-over QA, scene timing, and subtitle-alignment diagnostics.
+- `voiceover_manifest.json` — validated VO duration, audio-stream/loudness checks, voice settings, VO-anchored scene windows, and measured-versus-estimated word-timing coverage. The same manifest is embedded in `production_report.json` for access from the current Actions artifact.
+- `timing.json` — sentence events, word-level timings, timing source for every word, and caption phrase groups.
+- `output/voiceover.mp3` and `output/captions.ass` — final voice-over and VO-synchronized subtitle file.
 
 ## GitHub Actions setup
 
@@ -45,14 +46,21 @@ The local SigLIP model may rank stock-footage thumbnails. It is not equivalent t
 
 The opening title/hook is rendered as a separate transparent Pillow overlay. Text is wrapped using actual pixel widths, preserves Unicode punctuation (including curly apostrophes), and is checked before rendering. The first scene is forced to use moving footage so the opening card is always available. The build fails clearly if supplied title/hook text cannot fit safely; it does not silently clip words at the screen edge.
 
-## Narration and subtitles
+## Production order: script → voice-over → everything else
 
-- Narration uses Edge TTS word-boundary events.
-- Word timings are aligned back to the original script so punctuation is retained.
-- Captions are grouped by punctuation, clause boundaries, timing gaps, and phrase length—not fixed five-word chunks.
-- Each phrase uses word-level ASS karaoke timing from the TTS boundaries, with the currently spoken word highlighted.
-- If a word cannot be aligned reliably to a TTS boundary, caption generation stops instead of silently omitting or drifting that word.
-- If actual voice-over duration is slightly outside 70–90 seconds, a small pitch-preserving FFmpeg `atempo` adjustment may normalize it, and all word/sentence timestamps are scaled by the measured duration change. Larger deviations are rejected rather than forcing unnatural speech.
+The pipeline now has a strict master-reference order:
+
+1. Generate and validate the complete script and its eight scene passages.
+2. Generate the complete voice-over audio independently of subtitles and footage.
+3. Validate the actual VO file with ffprobe and FFmpeg loudness analysis (audio stream, sample rate, duration, mean level, and peak level). If the audio fails, the run stops before footage search or visual API work.
+4. Lock the measured VO sentence timeline as the master timing reference and attach scene start/end windows to it.
+5. Build subtitles from the final VO. Edge TTS word boundaries are used where present; omitted events are estimated only inside the measured sentence audio duration, using adjacent reliable timings and word-length/syllable weighting. No script word is dropped. The timing report shows measured and estimated word counts.
+6. Search for scene visuals against the already-locked narration map, then render cuts and title/overlay timing to that same timeline.
+
+- Captions are grouped by punctuation, clause boundaries, timing gaps, and phrase length—not fixed word counts.
+- Each phrase uses word-level ASS karaoke timing, highlighting the current spoken word.
+- Small VO duration deviations may be corrected with pitch-preserving FFmpeg `atempo`; all scene, sentence, and word timestamps are scaled by the measured duration change. Large deviations are rejected rather than forcing unnatural speech.
+- Technical audio checks verify that the VO file is present, non-silent, has a supported sample rate, and does not exceed the clipping threshold. They cannot replace a human listening review for pronunciation, voice character, or subjective naturalness; the MP3 is included in the GitHub artifact for that review.
 
 ## Local setup
 
