@@ -128,6 +128,34 @@ class AIRouterTests(unittest.TestCase):
         self.assertTrue(any("inline_data" in part for part in parts))
         self.assertTrue(result["accepted"])
 
+    def test_text_route_cooldown_does_not_block_same_model_vision(self):
+        temporary = FakeResponse(503, {"error": {"message": "text service unavailable"}})
+        valid_vision = {"relevant": True, "confidence": 0.93, "reason": "Requested subject is visible"}
+        vision_response = FakeResponse(200, {
+            "candidates": [{"content": {"parts": [{"text": json.dumps(valid_vision)}]}}]
+        })
+
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "gemini",
+            "AI_VISION_PROVIDER_ORDER": "gemini",
+            "GEMINI_API_KEY": "test-gemini-key",
+            "GEMINI_MODEL": "gemini-3.8-flash",
+            "GEMINI_VISION_MODEL": "gemini-3.8-flash",
+        }, clear=True), patch(
+            "ai_router.requests.post",
+            side_effect=[temporary, temporary, vision_response],
+        ) as post, patch("ai_router.time.sleep"):
+            with self.assertRaises(ai_router.ProviderRoutingError):
+                ai_router.generate_json("Return a JSON plan")
+
+            # The text call has cooled down the same model name. Its Vision route
+            # must remain usable because the two tasks have independent health state.
+            result = ai_router.verify_images([b"frame-a", b"frame-b"], "Verify this frame")
+
+        self.assertTrue(result["accepted"])
+        self.assertEqual(result["provider"], "gemini")
+        self.assertEqual(post.call_count, 3)
+
     def test_echoed_api_key_is_redacted_from_error_logs(self):
         from contextlib import redirect_stdout
         from io import StringIO

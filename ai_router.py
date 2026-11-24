@@ -39,9 +39,11 @@ class Route:
         return f"{self.provider}:{self.model}"
 
 
-_DISABLED_PROVIDERS: set[str] = set()
-_DISABLED_ROUTES: set[str] = set()
-_COOLDOWN_UNTIL: dict[str, float] = {}
+# Provider health is isolated by task. A text-generation outage must not put
+# the same provider/model on cooldown for image verification (and vice versa).
+_DISABLED_PROVIDERS: set[tuple[str, str]] = set()
+_DISABLED_ROUTES: set[tuple[str, str]] = set()
+_COOLDOWN_UNTIL: dict[tuple[str, str], float] = {}
 _TRANSIENT_COOLDOWN_SECONDS = 3600
 
 
@@ -156,30 +158,33 @@ def _safe_detail(response: requests.Response) -> str:
     return message[:240] or f"HTTP {response.status_code}"
 
 
-def _mark_failure(route: Route, status: int | None, detail: str) -> None:
+def _mark_failure(task: str, route: Route, status: int | None, detail: str) -> None:
     detail = str(detail or "").replace(route.api_key, "[REDACTED]")
     detail = re.sub(r"(?i)Bearer\s+[^ ,;]+", "Bearer [REDACTED]", detail)
 
+    provider_key = (task, route.provider)
+    route_key = (task, route.route_id)
+
     if status == 429:
-        _DISABLED_PROVIDERS.add(route.provider)
+        _DISABLED_PROVIDERS.add(provider_key)
         print(
             f"AI router: {route.provider} rate/quota limit (HTTP 429); "
-            "provider skipped for the rest of this run."
+            "provider skipped for this task for the rest of this run."
         )
     elif status in (401, 403):
-        _DISABLED_PROVIDERS.add(route.provider)
+        _DISABLED_PROVIDERS.add(provider_key)
         print(
             f"AI router: {route.provider} authentication/permission error "
-            f"(HTTP {status}); provider disabled for this run."
+            f"(HTTP {status}); provider disabled for this task for this run."
         )
     elif status in (400, 404, 413, 415, 422):
-        _DISABLED_ROUTES.add(route.route_id)
+        _DISABLED_ROUTES.add(route_key)
         print(
             f"AI router: route {route.route_id} rejected configuration/request "
             f"(HTTP {status}); trying another route. {detail}"
         )
     elif status is not None or detail:
-        _COOLDOWN_UNTIL[route.route_id] = (
+        _COOLDOWN_UNTIL[route_key] = (
             time.monotonic() + _TRANSIENT_COOLDOWN_SECONDS
         )
         print(
@@ -187,7 +192,7 @@ def _mark_failure(route: Route, status: int | None, detail: str) -> None:
             f"switching provider. {detail}"
         )
     else:
-        _COOLDOWN_UNTIL[route.route_id] = (
+        _COOLDOWN_UNTIL[route_key] = (
             time.monotonic() + _TRANSIENT_COOLDOWN_SECONDS
         )
         print(
@@ -196,10 +201,12 @@ def _mark_failure(route: Route, status: int | None, detail: str) -> None:
         )
 
 
-def _usable(route: Route) -> bool:
-    if route.provider in _DISABLED_PROVIDERS or route.route_id in _DISABLED_ROUTES:
+def _usable(task: str, route: Route) -> bool:
+    provider_key = (task, route.provider)
+    route_key = (task, route.route_id)
+    if provider_key in _DISABLED_PROVIDERS or route_key in _DISABLED_ROUTES:
         return False
-    if _COOLDOWN_UNTIL.get(route.route_id, 0) > time.monotonic():
+    if _COOLDOWN_UNTIL.get(route_key, 0) > time.monotonic():
         return False
     return True
 
@@ -443,7 +450,7 @@ def _route(
     routes = _routes(task)
 
     for route in routes:
-        if not _usable(route):
+        if not _usable(task, route):
             continue
 
         print(
@@ -523,7 +530,7 @@ def _route(
             errors.append(
                 f"{route.provider}/{route.model}: HTTP {exc.status}"
             )
-            _mark_failure(route, exc.status, exc.detail)
+            _mark_failure(task, route, exc.status, exc.detail)
 
             if exc.status in (408, 500, 502, 503, 504):
                 transient_routes.append(route)
@@ -535,14 +542,14 @@ def _route(
             errors.append(
                 f"{route.provider}/{route.model}: {type(exc).__name__}"
             )
-            _mark_failure(route, None, "network timeout/connection error")
+            _mark_failure(task, route, None, "network timeout/connection error")
             transient_routes.append(route)
 
         except (ValueError, KeyError, TypeError) as exc:
             errors.append(
                 f"{route.provider}/{route.model}: invalid response ({exc})"
             )
-            _DISABLED_ROUTES.add(route.route_id)
+            _DISABLED_ROUTES.add((task, route.route_id))
             print(
                 f"AI router: {route.provider}/{route.model} returned "
                 f"invalid data; trying another provider. {exc}"
@@ -552,7 +559,7 @@ def _route(
             errors.append(
                 f"{route.provider}/{route.model}: {type(exc).__name__}"
             )
-            _mark_failure(route, None, "request transport error")
+            _mark_failure(task, route, None, "request transport error")
             transient_routes.append(route)
 
     if transient_routes and not _transient_retry:
@@ -563,7 +570,7 @@ def _route(
         time.sleep(5)
 
         for route in transient_routes:
-            _COOLDOWN_UNTIL.pop(route.route_id, None)
+            _COOLDOWN_UNTIL.pop((task, route.route_id), None)
 
         return _route(
             task,

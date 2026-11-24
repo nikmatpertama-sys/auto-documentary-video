@@ -103,3 +103,10 @@ Pass 7 adds:
 
 ### Limits
 The new search stage has not yet been exercised against the user's live GitHub Actions credentials or the external footage APIs. It improves discovery when the initial result pool is sparse; it cannot guarantee a usable clip when providers are rate-limited or no genuinely relevant footage exists. The visual verifier remains authoritative, so a scene can still stop with a diagnostic rather than use unrelated footage.
+
+
+## Pass 8 — isolate text and vision provider health
+
+The latest run showed that transient text-generation failures could place a matching model route on cooldown before footage verification began. Pass 8 scopes provider disable flags, route disable flags, and cooldown timers to the task (`text` or `vision`). Vision can now attempt its configured DeepSeek/Gemini routes even when those same model routes encountered errors during script generation. Visual acceptance thresholds and the conservative outage policy are unchanged. A regression test covers a text-route cooldown followed by successful use of the same model for vision.
+
+See `PASS8_VALIDATION_REPORT.md` for the log-based diagnosis, validation results, and live-runtime caveat.
