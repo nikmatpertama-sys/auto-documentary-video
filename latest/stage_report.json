@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-24T18:27:00+00:00",
+  "generated_at": "2026-11-24T18:35:37+00:00",
   "environment": {
     "python": "3.11.18",
-    "platform": "Linux-7.0.0-1016-aws-x86_64-with-glibc2.43",
+    "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
     "machine": "x86_64",
     "cpu_count": 4,
     "cwd": "/home/runner/work/auto-documentary-video/auto-documentary-video",
@@ -27,36 +27,36 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 154.962,
+    "total_elapsed_seconds": 79.601,
     "stage_count": 3,
     "failed_stage": "script_generation",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-24T18:24:26+00:00",
+        "started_at": "2026-11-24T18:34:18+00:00",
         "details": {},
-        "duration_seconds": 0.001
+        "duration_seconds": 0.002
       },
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-24T18:24:26+00:00",
+        "started_at": "2026-11-24T18:34:18+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
-          "urls": "24"
+          "urls": "12"
         },
-        "duration_seconds": 20.083
+        "duration_seconds": 0.916
       },
       {
         "stage": "script_generation",
         "status": "failed",
-        "started_at": "2026-11-24T18:24:46+00:00",
+        "started_at": "2026-11-24T18:34:19+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems"
         },
-        "duration_seconds": 134.739,
-        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: invalid response (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: invalid response (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role))"
+        "duration_seconds": 78.501,
+        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: invalid response (Scene narration totals 103 words; expected 150-195 for a 70-90 second narration.); openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: HTTP 503"
       }
     ]
   }
