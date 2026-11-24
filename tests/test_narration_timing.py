@@ -34,6 +34,13 @@ class NarrationTimingTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     duration_correction(value)
 
+    def test_legitimate_short_script_is_stretched_instead_of_failing(self):
+        # 58s of speech still needs a pitch-preserving stretch to reach 70s; the
+        # floor must accept it rather than failing after TTS has been paid for.
+        result = duration_correction(58.0)
+        self.assertAlmostEqual(result["target_duration"], 71.0)
+        self.assertGreaterEqual(result["atempo"], 0.80)
+
 
 if __name__ == "__main__":
     unittest.main()

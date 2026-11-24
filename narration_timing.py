@@ -6,7 +6,10 @@ MIN_DURATION_SECONDS = 70.0
 MAX_DURATION_SECONDS = 90.0
 LOW_TARGET_SECONDS = 71.0
 HIGH_TARGET_SECONDS = 89.0
-MIN_SAFE_ATEMPO = 0.85
+# FFmpeg's atempo preserves pitch, so a slightly wider floor is safe and stops
+# a legitimate 150-160 word script (about 57-60s of speech) from failing the run
+# with "aggressive tempo change" after the TTS stage has already been paid for.
+MIN_SAFE_ATEMPO = 0.80
 MAX_SAFE_ATEMPO = 1.15
 
 
