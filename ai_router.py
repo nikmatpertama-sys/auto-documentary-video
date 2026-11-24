@@ -1206,11 +1206,18 @@ def generate_fact_json(
     return _route("fact", prompt, validator=validator, stage=stage)
 
 
-def verify_images(frames: list[bytes], prompt: str) -> dict[str, Any]:
-    """Verify clip frames. A valid REJECT is returned, not routed around."""
+def verify_images(
+    frames: list[bytes], prompt: str, stage: str = "visual_verification"
+) -> dict[str, Any]:
+    """Verify clip frames. A valid REJECT is returned, not routed around.
+
+    The stage label keeps a vision provider that failed on one scene from being
+    excluded for every later scene in the same run.
+    """
     result, _provider, _model = _route(
         "vision",
         prompt,
         images=frames,
+        stage=stage,
     )
     return result

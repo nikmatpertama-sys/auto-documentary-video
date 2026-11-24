@@ -8,6 +8,7 @@ URL is fetched, redirected safely, and its visible page text is inspected.
 from __future__ import annotations
 
 import html
+import inspect
 import json
 import re
 import time
@@ -85,6 +86,14 @@ MAX_RECOVERY_SOURCES_PER_CLAIM = 2
 # recovery silently had no budget and later claims were blocked as unverifiable.
 MAX_UNIQUE_SOURCE_PAGES = MAX_FACT_CLAIMS * (MAX_SOURCES_PER_CLAIM + MAX_RECOVERY_SOURCES_PER_CLAIM)
 MAX_SOURCE_REDIRECTS = 5
+# A run may rewrite at most this many unsupported claims before failing closed.
+MAX_CLAIM_REPAIRS = 2
+MIN_SCRIPT_WORDS = 150
+MAX_SCRIPT_WORDS = 195
+
+# Hosts that answered 401/403 during this run are not asked again: an institution
+# that blocks one request blocks the rest, and retrying only burns the run budget.
+_HOST_UNAVAILABLE: dict[str, str] = {}
 
 QUANTITATIVE_RE = re.compile(
     r"(?i)(?:\b\d+(?:[,.]\d+)?\s*(?:%|percent|per cent|million|billion|trillion|"
@@ -96,6 +105,124 @@ QUANTITATIVE_RE = re.compile(
 
 def normalize_text(value: str) -> str:
     return " ".join(re.findall(r"[a-z0-9]+", str(value or "").lower()))
+
+
+_NUMBER_RE = re.compile(r"\d+(?:[.,]\d+)?")
+
+
+def claim_numbers(sentence: str) -> list[str]:
+    """Return the numeric values a claim asserts, normalized for page matching."""
+    values: list[str] = []
+    for match in _NUMBER_RE.finditer(str(sentence or "")):
+        value = match.group(0).replace(",", "")
+        if value not in values:
+            values.append(value)
+    return values
+
+
+def number_present(text: str, value: str) -> bool:
+    """Whether a passage states this exact value (``75``, ``75%``, ``75 percent``)."""
+    wanted = str(value)
+    for match in _NUMBER_RE.finditer(str(text or "")):
+        if match.group(0).replace(",", "") == wanted:
+            return True
+    return False
+
+
+_NUMERIC_UNITS = (
+    "%|percent|per cent|million|billion|trillion|thousand|"
+    "km|kilomet(?:er|re)s?|miles?|met(?:er|re)s?|feet|ft|degrees?|°[cf]|"
+    "years?|months?|days?|hours?|minutes?|tons?|tonnes?|kg|grams?|lit(?:er|re)s?"
+)
+_NUMERIC_CLAIM_RE = re.compile(
+    rf"(?i)(\d+(?:[.,]\d+)?)\s*({_NUMERIC_UNITS})"
+)
+
+
+def _normalize_unit(unit: str) -> str:
+    value = str(unit or "").strip().lower()
+    if value in {"%", "percent", "per cent"}:
+        return "percent"
+    if value.endswith("s") and value not in {"percent", "degrees", ""}:
+        value = value[:-1]
+    return value
+
+
+def claim_number_requirements(sentence: str) -> list[dict]:
+    """Return value+unit pairs a claim asserts, so 75% is not matched by 75th."""
+    requirements: list[dict] = []
+    for match in _NUMERIC_CLAIM_RE.finditer(str(sentence or "")):
+        requirement = {
+            "value": match.group(1).replace(",", ""),
+            "unit": _normalize_unit(match.group(2)),
+        }
+        if requirement not in requirements:
+            requirements.append(requirement)
+    if requirements:
+        return requirements
+    return [{"value": value, "unit": ""} for value in claim_numbers(sentence)]
+
+
+def _as_requirement(item) -> dict:
+    if isinstance(item, dict):
+        return {
+            "value": str(item.get("value", "")),
+            "unit": _normalize_unit(item.get("unit", "")),
+        }
+    return {"value": str(item), "unit": ""}
+
+
+def number_requirement_present(text: str, requirement) -> bool:
+    """Whether a passage states this value with the claimed unit.
+
+    A percentile such as "75th percentile" is not a "75%" claim, so the unit is
+    checked directly next to the digits instead of anywhere on the page.
+    """
+    requirement = _as_requirement(requirement)
+    wanted = requirement["value"]
+    unit = requirement["unit"]
+    for match in _NUMBER_RE.finditer(str(text or "")):
+        if match.group(0).replace(",", "") != wanted:
+            continue
+        tail = str(text)[match.end(): match.end() + 24].strip().lower()
+        if unit:
+            if unit == "percent" and (
+                tail.startswith("%")
+                or tail.startswith("percent")
+                or tail.startswith("per cent")
+            ):
+                return True
+            if tail.startswith(unit):
+                return True
+            continue
+        if re.match(r"(?:th|st|nd|rd)\b", tail):
+            continue
+        if tail[:1].isdigit():
+            continue
+        return True
+    return False
+
+
+def claim_evidence_gate(page_text: str, claim: str) -> None:
+    """Reject a fetched page that is not actually about this claim.
+
+    A page that answers HTTP 200 is not evidence. The previous check accepted a
+    single shared word, so an unrelated NCBI record mentioning "forest" was
+    treated as support for a rainfall/surface-temperature sentence. Requiring a
+    real share of the claim's content terms (two, or one for a one-term claim)
+    keeps unrelated pages out before the audit model ever sees them.
+    """
+    claim_words = _content_words(claim)
+    if not claim_words:
+        raise FactCheckError("Claim has no meaningful searchable terms for source matching.")
+    shared = claim_words & _content_words(page_text)
+    required = min(2, len(claim_words))
+    if len(shared) < required:
+        raise FactCheckError(
+            "Fetched page is about a different subject: it shares "
+            f"{len(shared)} of the claim's {len(claim_words)} content terms"
+            f" (needs {required})."
+        )
 
 
 def source_organization_domain(url_or_host: str) -> str:
@@ -193,6 +320,22 @@ class _VisibleTextParser(HTMLParser):
         tag = tag.lower()
         if tag == "title":
             self.in_title = True
+        if tag == "meta":
+            # Journal pages keep the abstract in citation_* metadata even when
+            # the visible article body is rendered by JavaScript. Treat that
+            # publisher-supplied abstract as page text so scientific sources are
+            # not discarded as "too little readable text".
+            values = {str(key).lower(): str(value or "") for key, value in attrs}
+            name = (values.get("name") or values.get("property") or "").strip().lower()
+            content = re.sub(r"\s+", " ", values.get("content", "")).strip()
+            if content and name in {
+                "description", "og:description", "citation_abstract",
+                "citation_title", "dc.description", "dcterms.abstract",
+                "abstract",
+            }:
+                self.parts.append(content)
+                if name == "citation_title":
+                    self.title_parts.append(content)
         if tag in self.skip_tags:
             self.skip_depth += 1
 
@@ -215,12 +358,26 @@ class _VisibleTextParser(HTMLParser):
 
 def extract_page_text(content: bytes, content_type: str) -> tuple[str, str]:
     kind = str(content_type or "").lower()
-    if not any(value in kind for value in ("text/html", "application/xhtml+xml", "text/plain")):
+    if not any(
+        value in kind
+        for value in (
+            "text/html", "application/xhtml+xml", "text/plain",
+            "application/xml", "text/xml",
+        )
+    ):
         raise FactCheckError(f"Unsupported evidence content type: {kind or 'unknown'}")
     decoded = content.decode("utf-8", errors="replace")
     if "text/plain" in kind:
         title = ""
         text = decoded
+    elif "xml" in kind:
+        # NCBI E-utilities return the real article as JATS XML; its plain text is
+        # the full abstract and body, which HTML extraction cannot reach because
+        # the article page itself is behind an anti-bot challenge.
+        title_match = re.search(r"<article-title[^>]*>(.*?)</article-title>", decoded, re.S)
+        title = re.sub(r"<[^>]+>", " ", title_match.group(1)) if title_match else ""
+        body = re.sub(r"<(ref-list|back|table-wrap|graphic)[^>]*>.*?</\1>", " ", decoded, flags=re.S)
+        text = re.sub(r"<[^>]+>", " ", body)
     else:
         parser = _VisibleTextParser()
         parser.feed(decoded)
@@ -228,6 +385,11 @@ def extract_page_text(content: bytes, content_type: str) -> tuple[str, str]:
         title = " ".join(parser.title_parts).strip()
         text = " ".join(parser.parts)
     text = re.sub(r"\s+", " ", html.unescape(text)).strip()
+    lowered = text[:4000].lower()
+    if "recaptcha" in lowered and "challenge" in lowered or "enable javascript" in lowered and len(text) < 1500:
+        raise FactCheckError(
+            "Evidence source returned an anti-bot challenge page instead of article text."
+        )
     if len(text) < 250:
         raise FactCheckError("Evidence page contains too little readable text for verification.")
     return title[:240], text[:120_000]
@@ -240,8 +402,15 @@ def _content_words(text: str) -> set[str]:
     }
 
 
-def select_relevant_excerpt(page_text: str, claim: str, max_chars: int = 1900) -> str:
-    """Select a claim-relevant passage from fetched page text, not a model summary."""
+def select_relevant_excerpt(
+    page_text: str, claim: str, max_chars: int = 1900, required_numbers=(),
+) -> str:
+    """Select a claim-relevant passage from fetched page text, not a model summary.
+
+    ``required_numbers`` makes a numeric claim evidence-driven: the excerpt must
+    contain the claimed value, because a passage about the same topic without
+    the number cannot establish a percentage, date or measurement.
+    """
     claim_words = _content_words(claim)
     if not claim_words:
         raise FactCheckError("Claim has no meaningful searchable terms for source matching.")
@@ -274,6 +443,38 @@ def select_relevant_excerpt(page_text: str, claim: str, max_chars: int = 1900) -
         used += addition
         if used >= max_chars * 0.75:
             break
+    numbers = [_as_requirement(value) for value in (required_numbers or ()) if value]
+    if numbers:
+        missing = [
+            requirement
+            for requirement in numbers
+            if not number_requirement_present(" ".join(chosen), requirement)
+        ]
+        if missing:
+            supporting = [
+                sentence.strip()
+                for sentence in sentences
+                if len(sentence.strip()) >= 20
+                and all(
+                    number_requirement_present(sentence, requirement)
+                    for requirement in numbers
+                )
+            ]
+            if not supporting:
+                raise FactCheckError(
+                    "Fetched page does not state the claimed value(s) "
+                    + ", ".join(item["value"] for item in missing)
+                    + "; a numeric claim needs a passage containing that number."
+                )
+            supporting.sort(
+                key=lambda sentence: len(_content_words(sentence) & claim_words),
+                reverse=True,
+            )
+            chosen = [supporting[0]] + chosen
+            used = sum(len(item) + 1 for item in chosen)
+            while used > max_chars and len(chosen) > 1:
+                chosen.pop()
+                used = sum(len(item) + 1 for item in chosen)
     return " ".join(chosen)[:max_chars]
 
 
@@ -558,8 +759,93 @@ Rules:
             raise ValueError("Recovered URLs are not from distinct source organizations.")
         return {"source_urls": urls}
 
-    value, provider, model = generate_fact_json(prompt, validator=validate_recovery)
+    value, provider, model = _call_fact_json(
+        generate_fact_json, prompt, validate_recovery, "fact_check_source_recovery"
+    )
     return value["source_urls"], provider, model
+
+
+def _call_fact_json(generate_fact_json, prompt, validator, stage):
+    """Call the fact route with a stage label when the router accepts one.
+
+    Stage-scoped provider health is what stops a rate limit while auditing one
+    claim from disabling the fact route for the rest of the run. Test doubles
+    with the older two-argument signature keep working.
+    """
+    try:
+        parameters = inspect.signature(generate_fact_json).parameters
+    except (TypeError, ValueError):
+        parameters = {}
+    if "stage" in parameters:
+        return generate_fact_json(prompt, validator=validator, stage=stage)
+    return generate_fact_json(prompt, validator=validator)
+
+
+EUROPEPMC_SEARCH = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+# The PMC HTML page is protected by a reCAPTCHA challenge, so the same record is
+# read through the free NCBI E-utilities full-text endpoint on the same trusted
+# .gov host. It returns the article's own abstract and body as JATS XML.
+PMC_ARTICLE_URL = (
+    "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+    "?db=pmc&id={pmcid}&rettype=xml"
+)
+_SCHOLARLY_CACHE: dict[str, list[str]] = {}
+
+
+def discover_scholarly_source_urls(sentence: str, limit: int = 2) -> list[str]:
+    """Find peer-reviewed full texts for this claim through Europe PMC.
+
+    Europe PMC is a free, keyless REST service. Its PMC records resolve to
+    pmc.ncbi.nlm.nih.gov, which is on the trusted allowlist and serves full text
+    that HTML extraction can read, so this is the fallback when the planner's
+    URLs are 404 and Wikipedia citations do not cover the claim.
+    """
+    limit = max(0, int(limit))
+    if limit < 1:
+        return []
+    terms = [
+        word for word in dict.fromkeys(re.findall(r"[a-z]{4,}", str(sentence or "").lower()))
+        if word not in STOPWORDS and word not in QUESTION_WORDS
+    ][:5]
+    if len(terms) < 2:
+        return []
+    query = " AND ".join(terms[:4])
+    if query in _SCHOLARLY_CACHE:
+        return _SCHOLARLY_CACHE[query][:limit]
+    try:
+        response = requests.get(
+            EUROPEPMC_SEARCH,
+            params={
+                "query": query,
+                "format": "json",
+                "pageSize": 10,
+                "resultType": "lite",
+            },
+            headers={"User-Agent": WIKIPEDIA_HEADERS["User-Agent"]},
+            timeout=(10, 25),
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except Exception as exc:
+        print(f"Fact-check scholarly discovery unavailable: {type(exc).__name__}")
+        return []
+    results = ((payload or {}).get("resultList") or {}).get("result") or []
+    urls: list[str] = []
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        pmcid = str(item.get("pmcid") or "").strip()
+        if not pmcid.startswith("PMC"):
+            continue
+        url = PMC_ARTICLE_URL.format(pmcid=pmcid)
+        if is_trusted_source_url(url) and url not in urls:
+            urls.append(url)
+    _SCHOLARLY_CACHE[query] = urls
+    print(
+        "Fact-check scholarly discovery: "
+        f"{len(urls)} open-access article page(s) found for the claim terms."
+    )
+    return urls[:limit]
 
 
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
@@ -643,7 +929,7 @@ def discover_trusted_source_urls(
     for query in queries:
         try:
             search = _wikipedia_get(
-                {"action": "query", "list": "search", "srsearch": query, "srlimit": 2}
+                {"action": "query", "list": "search", "srsearch": query, "srlimit": 3}
             )
         except Exception as exc:
             print(f"Fact-check source discovery unavailable: {type(exc).__name__}")
@@ -654,7 +940,7 @@ def discover_trusted_source_urls(
                 titles.append(title)
 
     scored: dict[str, int] = {}
-    for title in titles[:5]:
+    for title in titles[:6]:
         try:
             page = _wikipedia_get(
                 {"action": "parse", "page": title, "prop": "externallinks|text"}
@@ -696,6 +982,31 @@ def discover_trusted_source_urls(
     return urls[:limit]
 
 
+def wikipedia_search_titles(query: str, limit: int = 3) -> list[str]:
+    """Find the Wikipedia articles about a topic when the planner names none.
+
+    Without a source pool the planner tends to invent institution URLs that
+    answer 404, so a deterministic search keeps planning grounded in pages that
+    exist even when the model's article suggestions fail validation.
+    """
+    query = re.sub(r"\s+", " ", str(query or "")).strip()[:200]
+    if not query:
+        return []
+    try:
+        search = _wikipedia_get(
+            {"action": "query", "list": "search", "srsearch": query, "srlimit": max(1, limit)}
+        )
+    except Exception as exc:
+        print(f"Source pool article search unavailable: {type(exc).__name__}")
+        return []
+    titles: list[str] = []
+    for item in ((search.get("query") or {}).get("search") or []):
+        title = str((item or {}).get("title") or "").strip()
+        if title and "disambiguation" not in title.lower() and title not in titles:
+            titles.append(title)
+    return titles[:limit]
+
+
 def wikipedia_source_pool(titles: list[str], limit: int = 24) -> list[str]:
     """Return real trusted pages cited by the given Wikipedia articles.
 
@@ -731,9 +1042,19 @@ def wikipedia_source_pool(titles: list[str], limit: int = 24) -> list[str]:
     return urls[:limit]
 
 
-def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
+class _UnverifiableClaimError(FactCheckError):
+    """One claim could not be evidenced; the planner may still rewrite it."""
+
+    def __init__(self, message, report=None, claim=None, attempted_urls=None):
+        super().__init__(message, report=report)
+        self.claim = dict(claim or {})
+        self.attempted_urls = list(attempted_urls or [])
+
+
+def _verify_documentary_pass(plan: dict, generate_fact_json, fetched: dict) -> dict:
     claims = validate_fact_claims(plan)
-    fetched: dict[str, dict] = {}
+    if not fetched:
+        _HOST_UNAVAILABLE.clear()
     assembled = []
     source_records = []
 
@@ -744,12 +1065,30 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
 
         def try_source(url, source_kind="planned"):
             try:
+                host = (urlparse(url).hostname or "").lower()
+                if host in _HOST_UNAVAILABLE:
+                    raise FactCheckError(
+                        "Source host was already blocked in this run "
+                        f"({_HOST_UNAVAILABLE[host]}); it was not requested again."
+                    )
                 if url not in fetched:
                     fetched[url] = fetch_source_page(url)
                 page = fetched[url]
-                excerpt = select_relevant_excerpt(page["text"], claim["sentence"])
+                # A 200 response only proves the page exists; it must also be
+                # about this claim before the auditor can treat it as evidence.
+                claim_evidence_gate(page["text"], claim["sentence"])
+                excerpt = select_relevant_excerpt(
+                    page["text"],
+                    claim["sentence"],
+                    required_numbers=claim_number_requirements(claim["sentence"]),
+                )
             except FactCheckError as exc:
                 reason = str(exc)[:600]
+                host = (urlparse(url).hostname or "").lower()
+                if host and ("HTTP 403" in reason or "HTTP 401" in reason):
+                    _HOST_UNAVAILABLE.setdefault(
+                        host, "institution returned HTTP 401/403 for this run"
+                    )
                 source_failures.append({"requested_url": url, "reason": reason, "source_kind": source_kind})
                 source_records.append({
                     "claim_id": claim["id"],
@@ -839,6 +1178,36 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
                     for source in claim_sources
                 }
 
+            # Last free fallback: query the open-access literature index for the
+            # claim's own terms. Peer-reviewed PMC pages are far more likely to
+            # contain the specific process or measurement than a Wikipedia-cited
+            # general page, and they are fetched and gated exactly like any other
+            # candidate.
+            still_short = not claim_sources or (
+                quantitative and len(relevant_organizations) < 2
+            )
+            if still_short:
+                used_pages = {
+                    item.get("requested_url") for item in source_records
+                    if item.get("requested_url")
+                } | set(attempted_urls)
+                remaining_page_budget = max(0, MAX_UNIQUE_SOURCE_PAGES - len(used_pages))
+                if remaining_page_budget > 0:
+                    scholarly = discover_scholarly_source_urls(
+                        claim["sentence"],
+                        limit=min(MAX_RECOVERY_SOURCES_PER_CLAIM, remaining_page_budget),
+                    )
+                    source_recovery["scholarly_urls"] = scholarly
+                    for url in scholarly:
+                        if url in attempted_urls:
+                            continue
+                        attempted_urls.append(url)
+                        try_source(url, source_kind="scholarly")
+                    relevant_organizations = {
+                        source_organization_domain(source["url"])
+                        for source in claim_sources
+                    }
+
         if not claim_sources:
             failure_report = {
                 "status": "blocked",
@@ -846,6 +1215,7 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
                 "claim_count": len(claims),
                 "blocked_at_claim": claim["id"],
                 "blocked_claim_sentence": claim["sentence"],
+                "failure_reason": "no relevant evidence passage from a fetched trusted page",
                 "source_fetch_failures": source_failures,
                 "source_recovery": source_recovery,
                 "sources": source_records,
@@ -853,9 +1223,11 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
             reasons = "; ".join(
                 f"{item['requested_url']}: {item['reason']}" for item in source_failures
             )
-            raise FactCheckError(
+            raise _UnverifiableClaimError(
                 f"No supplied or recovered trusted source yielded a relevant evidence passage for {claim['id']}. {reasons}",
                 report=failure_report,
+                claim=claim,
+                attempted_urls=attempted_urls,
             )
 
         if quantitative and len(relevant_organizations) < 2:
@@ -865,16 +1237,19 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
                 "claim_count": len(claims),
                 "blocked_at_claim": claim["id"],
                 "blocked_claim_sentence": claim["sentence"],
+                "failure_reason": "quantitative claim lacked a second independent organisation",
                 "source_fetch_failures": source_failures,
                 "usable_source_organizations": sorted(relevant_organizations),
                 "source_recovery": source_recovery,
                 "sources": source_records,
             }
-            raise FactCheckError(
+            raise _UnverifiableClaimError(
                 f"Quantitative claim {claim['id']} needs relevant evidence from two distinct trusted source organizations; "
                 f"only {len(relevant_organizations)} supplied or recovered source organization(s) produced a relevant passage. "
                 f"Source recovery: {source_recovery.get('failure') or 'no additional relevant independent source found.'}",
                 report=failure_report,
+                claim=claim,
+                attempted_urls=attempted_urls,
             )
         assembled.append({**claim, "source_urls": attempted_urls, "sources": claim_sources})
 
@@ -927,7 +1302,9 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
         return value
 
     try:
-        verdict, provider, model = generate_fact_json(prompt, validator=validate_response)
+        verdict, provider, model = _call_fact_json(
+            generate_fact_json, prompt, validate_response, "fact_check_audit"
+        )
     except Exception as exc:
         failure_report = {
             "status": "blocked",
@@ -975,9 +1352,181 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
         ]
         if uncited:
             reasons.append(f"{len(uncited)} uncited factual sentence(s)")
-        raise FactCheckError(
-            "Narration did not pass evidence validation. " + "; ".join(reasons[:8]),
-            report=report,
-        )
+        message = "Narration did not pass evidence validation. " + "; ".join(reasons[:8])
+        blocked_claim = None
+        if failed:
+            blocked_claim = next(
+                (claim for claim in claims if claim["id"] == failed[0].get("claim_id")),
+                None,
+            )
+        if blocked_claim is not None:
+            audit_report = dict(report)
+            audit_report["blocked_at_claim"] = blocked_claim["id"]
+            audit_report["blocked_claim_sentence"] = blocked_claim["sentence"]
+            audit_report["failure_reason"] = reasons[0] if reasons else "claim not supported"
+            audit_report["status"] = "blocked"
+            raise _UnverifiableClaimError(
+                message,
+                report=audit_report,
+                claim=blocked_claim,
+                attempted_urls=blocked_claim.get("source_urls"),
+            )
+        raise FactCheckError(message, report=report)
     return report
+
+
+def _repair_evidence(claim: dict, fetched: dict, attempted_urls) -> list[dict]:
+    """Give the planner the passages this run actually fetched for the claim."""
+    evidence = []
+    urls = []
+    for url in list(attempted_urls or []) + list(claim.get("source_urls") or []):
+        if url and url not in urls:
+            urls.append(url)
+    for url in urls:
+        page = fetched.get(url)
+        if not page:
+            continue
+        try:
+            excerpt = select_relevant_excerpt(
+                page["text"], claim["sentence"], max_chars=900
+            )
+        except FactCheckError:
+            excerpt = str(page.get("text", ""))[:900]
+        evidence.append(
+            {
+                "url": page["url"],
+                "title": page["title"],
+                "excerpt": excerpt,
+            }
+        )
+    return evidence
+
+
+def _apply_claim_repair(plan: dict, claim: dict, replacement, rejected: set[str]) -> dict:
+    """Rewrite or remove one unsupported narration sentence in place."""
+    if not isinstance(replacement, dict):
+        raise ValueError("Claim repair must return a JSON object with a sentence.")
+    scenes = plan.get("scenes") or []
+    scene_index = int(claim.get("scene") or 0) - 1
+    if not 0 <= scene_index < len(scenes):
+        raise ValueError("Claim repair targets a scene outside the plan.")
+    original_sentence = re.sub(r"\s+", " ", str(claim.get("sentence", ""))).strip()
+    original_key = normalize_text(original_sentence)
+    new_sentence = re.sub(r"\s+", " ", str(replacement.get("sentence") or "")).strip()
+    if new_sentence:
+        if not new_sentence.endswith((".", "!", "?")):
+            raise ValueError("A repaired claim must be one complete narration sentence.")
+        if normalize_text(new_sentence) == original_key:
+            raise ValueError("Claim repair returned the same unsupported sentence.")
+        if normalize_text(new_sentence) in rejected:
+            raise ValueError("Claim repair repeated a sentence that already failed.")
+    raw_urls = replacement.get("source_urls") or []
+    if not isinstance(raw_urls, list):
+        raise ValueError("Claim repair source_urls must be a list.")
+    urls = validate_planner_source_urls(claim.get("id", "C1"), raw_urls) if raw_urls else []
+
+    parts = [
+        part.strip()
+        for part in split_sentences(str(scenes[scene_index].get("narration", "")))
+        if part.strip()
+    ]
+    if not any(normalize_text(part) == original_key for part in parts):
+        raise ValueError("Claim repair could not find its sentence in the scene narration.")
+    if new_sentence:
+        rebuilt = [new_sentence if normalize_text(part) == original_key else part for part in parts]
+    else:
+        rebuilt = [part for part in parts if normalize_text(part) != original_key]
+    if not rebuilt:
+        raise ValueError("Removing this claim would leave its scene without narration.")
+    scenes[scene_index]["narration"] = " ".join(rebuilt)
+    plan["script"] = " ".join(
+        str(scene.get("narration", "")).strip() for scene in scenes
+    ).strip()
+    word_count = len(plan["script"].split())
+    if not MIN_SCRIPT_WORDS <= word_count <= MAX_SCRIPT_WORDS:
+        raise ValueError(
+            f"Claim repair would leave {word_count} words; the production target is "
+            f"{MIN_SCRIPT_WORDS}-{MAX_SCRIPT_WORDS}."
+        )
+
+    ledger = plan.get("fact_claims") or []
+    entry = next(
+        (
+            item for item in ledger
+            if isinstance(item, dict)
+            and int(item.get("scene") or 0) == scene_index + 1
+            and normalize_text(item.get("sentence", "")) == original_key
+        ),
+        None,
+    )
+    if entry is None:
+        raise ValueError("Claim repair could not find the claim ledger entry.")
+    rejected.add(original_key)
+    if new_sentence:
+        entry["sentence"] = new_sentence
+        entry["source_urls"] = urls
+        status = "rewritten"
+    else:
+        ledger.remove(entry)
+        status = "removed"
+    return {
+        "claim_id": claim.get("id"),
+        "scene": scene_index + 1,
+        "original_sentence": original_sentence,
+        "replacement_sentence": new_sentence,
+        "replacement_source_urls": urls,
+        "status": status,
+    }
+
+
+def verify_documentary_facts(plan: dict, generate_fact_json, repair_claim=None) -> dict:
+    """Audit every narration claim against fetched trusted evidence.
+
+    When ``repair_claim`` is supplied, a claim that no fetched page can support
+    is handed back to the planner, which must rewrite it to match the evidence or
+    remove it. The run still fails closed once the repair budget is spent, and no
+    verification standard is relaxed: the rewritten sentence goes through the
+    same fetch, gate and independent audit as every other claim.
+    """
+    fetched: dict[str, dict] = {}
+    repairs: list[dict] = []
+    rejected: set[str] = set()
+    _HOST_UNAVAILABLE.clear()
+    while True:
+        try:
+            report = _verify_documentary_pass(plan, generate_fact_json, fetched)
+        except _UnverifiableClaimError as exc:
+            if repair_claim is None:
+                raise FactCheckError(str(exc), report=exc.report) from None
+            report = dict(exc.report or {})
+            report["claim_repairs"] = repairs
+            if len(repairs) >= MAX_CLAIM_REPAIRS or not exc.claim:
+                report["repair_exhausted"] = True
+                raise FactCheckError(str(exc), report=report) from None
+            evidence = _repair_evidence(exc.claim, fetched, exc.attempted_urls)
+            try:
+                replacement = repair_claim(
+                    dict(exc.claim),
+                    {"report": exc.report, "evidence": evidence},
+                    plan,
+                )
+                applied = _apply_claim_repair(plan, exc.claim, replacement, rejected)
+            except Exception as repair_exc:
+                report["repair_failure"] = (
+                    f"{type(repair_exc).__name__}: {str(repair_exc)[:700]}"
+                )
+                raise FactCheckError(
+                    f"{exc} Claim repair failed: {type(repair_exc).__name__}: "
+                    f"{str(repair_exc)[:700]}",
+                    report=report,
+                ) from repair_exc
+            repairs.append(applied)
+            print(
+                "Fact-check claim repair: "
+                f"{applied['claim_id']} {applied['status']} for scene {applied['scene']}."
+            )
+            continue
+        if repairs:
+            report["claim_repairs"] = repairs
+        return report
 
