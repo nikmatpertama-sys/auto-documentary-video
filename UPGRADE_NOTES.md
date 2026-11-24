@@ -170,3 +170,14 @@ Validation: Python compilation passed and **71/71** unit tests passed, including
 The latest failure stopped before footage or rendering because Groq's plan returned a scene count other than eight. Pass 10.3 adds a bounded structural recovery step: it splits only a two-sentence scene whose two sentences both name the same visible focus, or merges adjacent one-sentence scenes only when their visible subjects and footage queries materially overlap. It preserves all narration and remaps every evidence-ledger scene index. Unsafe cases are not auto-rewritten; they continue through the strict validator, targeted provider repair, and multi-provider failover.
 
 Validation: `python -m py_compile *.py tests/*.py` passed; `python -m unittest discover -s tests -q` passed **77/77 tests**. Live API and GitHub Actions rendering were not run; this patch cannot restore an empty DeepSeek balance or override external 503/429 limits.
+
+
+## Pass 10.6 — independent source recovery for factual evidence
+
+The latest Actions run `122860196337` correctly extracted `project1-10.5.zip`, installed the package on branch `project1`, and passed all 82 tests. Planning produced 189 words across 8 scenes. Production then stopped before TTS because quantitative claim C1 had relevant text from only one of the supplied source organisations. The same log also recorded provider-side Groq HTTP 429, DeepSeek HTTP 402 (insufficient balance/payment), and Gemini service/timeout errors; these were routing conditions, not the final exception that stopped the run.
+
+Pass 10.6 adds one bounded attempt to recover additional trusted source-page candidates when a claim has no usable page, or when a quantitative claim still has fewer than two relevant independent organisations. The recovery route is not treated as evidence: returned URLs must still pass the HTTPS allowlist and organisation-independence checks, be fetched directly with safe redirect handling, and yield a relevant excerpt from the actual page. The separate final fact auditor must still support the exact claim from fetched excerpts. Quantitative claims are no longer rejected before retrieval merely because the planner began with one URL; the two-organisation requirement is enforced after source recovery and page inspection. If recovery fails, the run remains blocked.
+
+Failure diagnostics now print the exact blocked narration sentence, recovered candidate URLs/provider outcome, and recent source fetch/excerpt failures into the Actions log, in addition to writing `fact_check_report.json`.
+
+Validation: Python compilation passed; **84/84 unit tests passed**, including successful recovery from one initial source and rejection of a recovered subdomain belonging to an already-tried institution. Live provider calls, live source retrieval, and a full GitHub Actions render were not run locally.

@@ -247,6 +247,114 @@ class FactCheckTests(unittest.TestCase):
         self.assertEqual(failed_source["status"], "not_usable")
         self.assertIn("https://www.noaa.gov/relevant", report["claims"][0]["source_urls"])
 
+    def test_quantitative_claim_recovers_a_third_independent_source_before_blocking(self):
+        import fact_check
+        from unittest.mock import patch
+
+        quantitative_sentence = "The measured area is 20 percent of the regional estimate."
+        plan = self._plan(
+            quantitative_sentence,
+            ["https://www.noaa.gov/quantitative"],
+        )
+        plan["scenes"][0]["narration"] = quantitative_sentence
+        plan["script"] = " ".join(scene["narration"] for scene in plan["scenes"])
+        source_pages = {
+            "https://www.nasa.gov/irrelevant": {
+                "requested_url": "https://www.nasa.gov/irrelevant",
+                "url": "https://www.nasa.gov/irrelevant",
+                "host": "www.nasa.gov", "status_code": 200,
+                "content_type": "text/html", "title": "Unrelated NASA page",
+                "text": "A page about spacecraft and orbital engineering. " * 12,
+            },
+            "https://www.noaa.gov/quantitative": {
+                "requested_url": "https://www.noaa.gov/quantitative",
+                "url": "https://www.noaa.gov/quantitative",
+                "host": "www.noaa.gov", "status_code": 200,
+                "content_type": "text/html", "title": "NOAA regional estimate",
+                "text": ("The measured area is 20 percent of the regional estimate. "
+                         "The report describes the survey methods and geographic scope. ") * 8,
+            },
+            "https://www.fao.org/recovered": {
+                "requested_url": "https://www.fao.org/recovered",
+                "url": "https://www.fao.org/recovered",
+                "host": "www.fao.org", "status_code": 200,
+                "content_type": "text/html", "title": "FAO regional measurement",
+                "text": ("The measured area is 20 percent of the regional estimate. "
+                         "The assessment explains its methods and regional coverage. ") * 8,
+            },
+            "https://www.noaa.gov/example": {
+                "requested_url": "https://www.noaa.gov/example",
+                "url": "https://www.noaa.gov/example",
+                "host": "www.noaa.gov", "status_code": 200,
+                "content_type": "text/html", "title": "NOAA seasonal climate",
+                "text": "Seasonal changes influence rainfall across the region. " * 12,
+            },
+            "https://www.usgs.gov/example": {
+                "requested_url": "https://www.usgs.gov/example",
+                "url": "https://www.usgs.gov/example",
+                "host": "www.usgs.gov", "status_code": 200,
+                "content_type": "text/html", "title": "USGS moisture research",
+                "text": "Researchers study moisture movement to understand regional climate. " * 12,
+            },
+        }
+        calls = []
+
+        def fake_checker(prompt, validator=None):
+            calls.append(prompt)
+            if "Find up to" in prompt and "ADDITIONAL direct source-page URLs" in prompt:
+                value = validator({"source_urls": ["https://www.fao.org/recovered"]})
+                return value, "gemini", "gemini-test"
+            payload = {
+                "overall_status": "pass",
+                "claim_verdicts": [
+                    {"claim_id": "C1", "status": "supported",
+                     "evidence_urls": ["https://www.noaa.gov/quantitative", "https://www.fao.org/recovered"],
+                     "reason": "Both independent fetched excerpts directly support the numeric claim."},
+                    {"claim_id": "C2", "status": "supported",
+                     "evidence_urls": ["https://www.noaa.gov/example"],
+                     "reason": "The excerpt directly supports the sentence."},
+                    {"claim_id": "C3", "status": "supported",
+                     "evidence_urls": ["https://www.usgs.gov/example"],
+                     "reason": "The excerpt directly supports the sentence."},
+                ],
+                "uncited_factual_sentences": [],
+                "coverage_note": "All sentences are supported by fetched evidence.",
+            }
+            return validator(payload), "deepseek", "deepseek-test"
+
+        with patch.object(fact_check, "fetch_source_page", side_effect=lambda url: source_pages[url]):
+            report = verify_documentary_facts(plan, fake_checker)
+
+        self.assertEqual(report["status"], "passed")
+        self.assertEqual(len(calls), 2)
+        recovered = next(
+            item for item in report["sources"]
+            if item.get("requested_url") == "https://www.fao.org/recovered"
+        )
+        self.assertEqual(recovered["source_kind"], "recovered")
+        self.assertEqual(
+            {fact_check.source_organization_domain(url) for url in report["claims"][0]["verified_evidence_urls"]},
+            {"noaa.gov", "fao.org"},
+        )
+
+    def test_recovered_source_must_be_from_a_new_independent_organization(self):
+        from fact_check import _recover_independent_source_urls
+
+        def fake_checker(_prompt, validator=None):
+            return validator({
+                "source_urls": ["https://earthobservatory.nasa.gov/new-report"]
+            }), "deepseek", "deepseek-test"
+
+        with self.assertRaisesRegex(ValueError, "already tried"):
+            _recover_independent_source_urls(
+                {
+                    "id": "C1",
+                    "sentence": "The measured area is 20 percent of the regional estimate.",
+                },
+                ["https://www.nasa.gov/old-report", "https://www.noaa.gov/old-report"],
+                fake_checker,
+            )
+
     def test_fact_coverage_backstop_blocks_uncited_numeric_sentence(self):
         plan = self._plan("The Amazon basin contains extensive tropical rainforest habitat.")
         plan["scenes"][0]["narration"] = (
@@ -257,15 +365,15 @@ class FactCheckTests(unittest.TestCase):
         with self.assertRaisesRegex(FactCheckError, "uncited numeric statement"):
             validate_fact_claims(plan)
 
-    def test_quantitative_claim_requires_two_independent_trusted_hosts(self):
+    def test_quantitative_claim_with_one_candidate_source_can_reach_recovery(self):
         plan = self._plan(
             "The measured area is 20 percent of the regional estimate.",
             ["https://www.nasa.gov/example"],
         )
         plan["scenes"][0]["narration"] = "The measured area is 20 percent of the regional estimate."
         plan["script"] = " ".join(scene["narration"] for scene in plan["scenes"])
-        with self.assertRaisesRegex(FactCheckError, "two distinct trusted source organizations"):
-            validate_fact_claims(plan)
+        claims = validate_fact_claims(plan)
+        self.assertEqual(claims[0]["source_urls"], ["https://www.nasa.gov/example"])
 
     def test_sentence_splitter_keeps_decimal_measurements_and_common_abbreviations(self):
         result = split_sentences("The figure reached 20.5 percent. Dr. Silva reviewed the U.S. data. It changed.")
@@ -286,15 +394,19 @@ class FactCheckTests(unittest.TestCase):
         with self.assertRaisesRegex(FactCheckError, "uncited narration sentence"):
             validate_fact_claims(plan)
 
-    def test_numeric_claim_does_not_count_two_subdomains_as_independent_sources(self):
+    def test_numeric_claim_with_two_subdomains_reaches_recovery_not_final_approval(self):
         plan = self._plan(
             "The measured area is 20 percent of the regional estimate.",
             ["https://www.nasa.gov/example", "https://earthobservatory.nasa.gov/example"],
         )
         plan["scenes"][0]["narration"] = "The measured area is 20 percent of the regional estimate."
         plan["script"] = " ".join(scene["narration"] for scene in plan["scenes"])
-        with self.assertRaisesRegex(FactCheckError, "two distinct trusted source organizations"):
-            validate_fact_claims(plan)
+        claims = validate_fact_claims(plan)
+        self.assertEqual(len(claims[0]["source_urls"]), 2)
+        self.assertEqual(
+            {fact_check_domain for fact_check_domain in map(source_organization_domain, claims[0]["source_urls"])},
+            {"nasa.gov"},
+        )
 
     def test_untrusted_redirect_is_rejected_before_following_it(self):
         import fact_check

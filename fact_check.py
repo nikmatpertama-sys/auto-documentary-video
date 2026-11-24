@@ -75,6 +75,7 @@ STOPWORDS = {
 
 MAX_FACT_CLAIMS = 16  # Eight scenes, at most two narration sentences per scene.
 MAX_SOURCES_PER_CLAIM = 3
+MAX_RECOVERY_SOURCES_PER_CLAIM = 2
 MAX_UNIQUE_SOURCE_PAGES = 24
 MAX_SOURCE_REDIRECTS = 5
 
@@ -384,13 +385,9 @@ def validate_fact_claims(plan: dict) -> list[dict]:
             raise FactCheckError(
                 f"The fact ledger exceeds the {MAX_UNIQUE_SOURCE_PAGES}-page fetch safety limit."
             )
-        has_number = bool(re.search(r"\b\d+(?:[,.]\d+)?\b", sentence))
-        if (QUANTITATIVE_RE.search(sentence) or has_number) and len(
-            {source_organization_domain(url) for url in urls}
-        ) < 2:
-            raise FactCheckError(
-                f"Quantitative claim {index} needs at least two distinct trusted source organizations."
-            )
+        # Initial planner URLs are candidates, not proof. A quantitative claim
+        # may start with one usable source; the verifier below must recover and
+        # fetch a second independent organisation before the claim can pass.
         normalized.append({
             "id": f"C{index}",
             "scene": scene_number,
@@ -470,6 +467,58 @@ Return ONLY JSON in this exact shape:
 Pass only when every supplied claim is supported, every factual assertion in the script is covered by the supplied exact claims, and there are no contradictions or insufficient claims. Never invent supporting evidence or URLs."""
 
 
+def _recover_independent_source_urls(
+    claim: dict, attempted_urls: list[str], generate_fact_json, max_urls: int = MAX_RECOVERY_SOURCES_PER_CLAIM
+):
+    """Ask the independent fact route for additional candidate URLs, then validate them.
+
+    Returned URLs are candidates only: they are not evidence until fetched, checked
+    for trusted redirects, and shown to contain a relevant passage for this claim.
+    """
+    max_urls = min(MAX_RECOVERY_SOURCES_PER_CLAIM, max(0, int(max_urls)))
+    if max_urls < 1:
+        return [], "", ""
+    existing_organizations = {
+        source_organization_domain(url) for url in attempted_urls
+    }
+    prompt = f"""Find up to {max_urls} ADDITIONAL direct source-page URLs
+from trusted scientific, governmental, or educational institutions that may directly
+support this exact documentary sentence. We already tried these source organizations:
+{json.dumps(sorted(existing_organizations))}
+
+EXACT CLAIM: {claim['sentence']}
+
+Return ONLY JSON: {{"source_urls":["https://...", "https://..."]}}
+Rules:
+- Each URL must be a real, direct HTTPS article/report/dataset page that you genuinely
+  know exists and that explicitly discusses the exact claim, not just the broad topic.
+- Use only recognised trusted institutions on .gov, .edu, .int, .ac.uk, or the
+  established-source allowlist. Do not use search pages, homepages, shorteners, blogs,
+  or redirector URLs.
+- Every returned URL must belong to an organisation DIFFERENT from all organisations
+  already listed above, and returned URLs must be from different organisations.
+- Never invent a URL. Return an empty list when you cannot confidently name one.
+- Do not return any URL already attempted.
+"""
+
+    def validate_recovery(value):
+        if not isinstance(value, dict) or not isinstance(value.get("source_urls"), list):
+            raise ValueError("Source recovery must return a JSON object with source_urls list.")
+        raw_urls = value["source_urls"]
+        if len(raw_urls) > max_urls:
+            raise ValueError("Source recovery returned too many candidate URLs.")
+        urls = validate_planner_source_urls(claim["id"], raw_urls) if raw_urls else []
+        organizations = [source_organization_domain(url) for url in urls]
+        if len(set(organizations)) != len(organizations):
+            raise ValueError("Recovered URLs are not from distinct source organizations.")
+        if any(org in existing_organizations for org in organizations):
+            raise ValueError("Recovered URL repeats an organization already tried for this claim.")
+        return {"source_urls": urls}
+
+    value, provider, model = generate_fact_json(prompt, validator=validate_recovery)
+    return value["source_urls"], provider, model
+
+
 def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
     claims = validate_fact_claims(plan)
     fetched: dict[str, dict] = {}
@@ -479,30 +528,35 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
     for claim in claims:
         claim_sources = []
         source_failures = []
-        for url in claim["source_urls"]:
+        attempted_urls = list(claim["source_urls"])
+
+        def try_source(url, source_kind="planned"):
             try:
                 if url not in fetched:
                     fetched[url] = fetch_source_page(url)
                 page = fetched[url]
                 excerpt = select_relevant_excerpt(page["text"], claim["sentence"])
             except FactCheckError as exc:
-                # A planner may provide several candidate sources. One related-but-
-                # insufficient page must not prevent checking the remaining URLs.
-                source_failures.append({"requested_url": url, "reason": str(exc)[:600]})
+                reason = str(exc)[:600]
+                source_failures.append({"requested_url": url, "reason": reason, "source_kind": source_kind})
                 source_records.append({
                     "claim_id": claim["id"],
                     "requested_url": url,
                     "status": "not_usable",
-                    "reason": str(exc)[:600],
+                    "source_kind": source_kind,
+                    "reason": reason,
                 })
-                continue
+                return
             source_data = {
                 "url": page["url"],
                 "title": page["title"],
                 "host": page["host"],
                 "excerpt": excerpt,
             }
-            claim_sources.append(source_data)
+            # A redirect may land at an organisation different from the requested
+            # host. Count the final, validated destination for independence.
+            if all(source["url"] != source_data["url"] for source in claim_sources):
+                claim_sources.append(source_data)
             source_records.append({
                 "claim_id": claim["id"],
                 "requested_url": page["requested_url"],
@@ -511,8 +565,43 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
                 "http_status": page["status_code"],
                 "page_title": page["title"],
                 "excerpt": excerpt[:900],
+                "source_kind": source_kind,
                 "status": "usable",
             })
+
+        for url in attempted_urls:
+            try_source(url)
+
+        quantitative = bool(
+            QUANTITATIVE_RE.search(claim["sentence"])
+            or re.search(r"\b\d+(?:[,.]\d+)?\b", claim["sentence"])
+        )
+        relevant_organizations = {source_organization_domain(source["url"]) for source in claim_sources}
+        source_recovery = {"attempted": False, "candidate_urls": [], "failure": ""}
+        if not claim_sources or (quantitative and len(relevant_organizations) < 2):
+            source_recovery["attempted"] = True
+            all_attempted_urls = {
+                item.get("requested_url") for item in source_records if item.get("requested_url")
+            } | set(attempted_urls)
+            remaining_page_budget = max(0, MAX_UNIQUE_SOURCE_PAGES - len(all_attempted_urls))
+            try:
+                recovered_urls, recovery_provider, recovery_model = _recover_independent_source_urls(
+                    claim, attempted_urls, generate_fact_json,
+                    max_urls=min(MAX_RECOVERY_SOURCES_PER_CLAIM, remaining_page_budget),
+                )
+                source_recovery.update({
+                    "provider": recovery_provider,
+                    "model": recovery_model,
+                    "candidate_urls": recovered_urls,
+                })
+                for url in recovered_urls:
+                    attempted_urls.append(url)
+                    try_source(url, source_kind="recovered")
+                relevant_organizations = {
+                    source_organization_domain(source["url"]) for source in claim_sources
+                }
+            except Exception as exc:
+                source_recovery["failure"] = f"{type(exc).__name__}: {str(exc)[:700]}"
 
         if not claim_sources:
             failure_report = {
@@ -520,38 +609,38 @@ def verify_documentary_facts(plan: dict, generate_fact_json) -> dict:
                 "method": "trusted-source fetch + independent evidence-grounded AI audit",
                 "claim_count": len(claims),
                 "blocked_at_claim": claim["id"],
+                "blocked_claim_sentence": claim["sentence"],
                 "source_fetch_failures": source_failures,
+                "source_recovery": source_recovery,
                 "sources": source_records,
             }
             reasons = "; ".join(
                 f"{item['requested_url']}: {item['reason']}" for item in source_failures
             )
             raise FactCheckError(
-                f"No supplied trusted source yielded a relevant evidence passage for {claim['id']}. {reasons}",
+                f"No supplied or recovered trusted source yielded a relevant evidence passage for {claim['id']}. {reasons}",
                 report=failure_report,
             )
 
-        quantitative = bool(
-            QUANTITATIVE_RE.search(claim["sentence"])
-            or re.search(r"\b\d+(?:[,.]\d+)?\b", claim["sentence"])
-        )
-        relevant_organizations = {source_organization_domain(source["url"]) for source in claim_sources}
         if quantitative and len(relevant_organizations) < 2:
             failure_report = {
                 "status": "blocked",
                 "method": "trusted-source fetch + independent evidence-grounded AI audit",
                 "claim_count": len(claims),
                 "blocked_at_claim": claim["id"],
+                "blocked_claim_sentence": claim["sentence"],
                 "source_fetch_failures": source_failures,
                 "usable_source_organizations": sorted(relevant_organizations),
+                "source_recovery": source_recovery,
                 "sources": source_records,
             }
             raise FactCheckError(
                 f"Quantitative claim {claim['id']} needs relevant evidence from two distinct trusted source organizations; "
-                f"only {len(relevant_organizations)} supplied source organization(s) produced a relevant passage.",
+                f"only {len(relevant_organizations)} supplied or recovered source organization(s) produced a relevant passage. "
+                f"Source recovery: {source_recovery.get('failure') or 'no additional relevant independent source found.'}",
                 report=failure_report,
             )
-        assembled.append({**claim, "sources": claim_sources})
+        assembled.append({**claim, "source_urls": attempted_urls, "sources": claim_sources})
 
     prompt = build_fact_check_prompt(str(plan.get("script", "")), assembled)
     expected_ids = {claim["id"] for claim in claims}

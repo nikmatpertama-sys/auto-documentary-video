@@ -3070,6 +3070,23 @@ def main():
             Path("fact_check_report.json").write_text(
                 json.dumps(exc.report, indent=2, ensure_ascii=False), encoding="utf-8"
             )
+            blocked_sentence = exc.report.get("blocked_claim_sentence")
+            if blocked_sentence:
+                print(f"Fact-check blocked sentence: {blocked_sentence}")
+            recovery = exc.report.get("source_recovery") or {}
+            if recovery.get("attempted"):
+                print(
+                    "Fact-check source recovery: "
+                    f"provider={recovery.get('provider', 'unavailable')}; "
+                    f"candidates={recovery.get('candidate_urls', [])}; "
+                    f"failure={recovery.get('failure') or 'no relevant independent source found'}"
+                )
+            for source in exc.report.get("sources", [])[-8:]:
+                print(
+                    "Fact-check source diagnostic: "
+                    f"{source.get('status')} | {source.get('requested_url')} | "
+                    f"{source.get('reason') or source.get('page_title', '')}"
+                )
         raise RuntimeError(
             "The documentary script was blocked because its factual claims were not "
             "fully confirmed by fetched trusted sources. No voice-over or video was produced. "
