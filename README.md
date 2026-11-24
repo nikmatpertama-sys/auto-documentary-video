@@ -116,3 +116,9 @@ When the initial footage search returns fewer than five metadata-qualified candi
 ### Pass 9 footage-first visual planning — retained and tightened by Pass 10
 
 Pass 9 prevents generic natural-process scenes from being forced into map/chart searches. The planner keeps `visual_query` and its alternatives focused on real footage; published maps/charts are reserved for narration that contains a concrete quantitative, geographic-distribution, or internal-structure evidence need. If a reference asset is not found, footage queries strip graphic-artifact terms and expand rainforest/rainfall searches into real shots (rain falling in forest, raindrops on leaves, and rain over canopy). Pass 10 retains this footage-first behavior while enforcing mandatory pixel verification against the full scene narration.
+
+## Pass 10.3 — conservative scene-count recovery
+
+If a planning model returns a near-miss scene count, the planner now attempts a deterministic, lossless repair before using the existing same-provider retry and multi-provider fallback. It may split a two-sentence scene only when both complete sentences independently name the same visual focus. It may merge adjacent one-sentence scenes only when their dominant visual subjects, footage queries, and visual modes match closely. Evidence-ledger scene indices are remapped with the narration. The repair never invents narration, deletes a scene, weakens factual checks, lowers the Vision threshold, or accepts a rejected clip. If the transformation is not clearly safe, the original strict validation and provider failover remain in force.
+
+Local validation for this patch: Python compilation passed and all 77 unit tests passed, including four new scene-normalization regression tests. No live provider request or GitHub Actions render was performed in this environment; provider balances, rate limits, and current service availability remain external dependencies.

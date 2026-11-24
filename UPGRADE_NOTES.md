@@ -163,3 +163,10 @@ The failed run `122778749468` stopped during documentary planning. Groq returned
 Pass 10.1 adds explicit JSON mode for Groq/DeepSeek/OpenRouter text and fact requests, one targeted same-provider repair after malformed JSON or validator rejection, more precise OpenRouter-compatible response parsing diagnostics, and a distinct HTTP 402 insufficient-balance condition. The prompt also asks for at least half the `visual_focus` tokens to appear verbatim in `visual_query`, matching the existing strict validator. Vision REJECT handling, the 0.72 visual-confidence floor, source evidence requirements, and fail-closed behavior are unchanged.
 
 Validation: Python compilation passed and **71/71** unit tests passed, including a combined regression case that reproduces the provider failure order from the Actions log and recovers through OpenRouter after a targeted repair. No live API request or Actions render has been run here. DeepSeek account balance must be resolved by the account owner; external Gemini 503s cannot be prevented by project code. See `PASS10_1_ROUTING_VALIDATION.md`.
+
+
+## Pass 10.3 — conservative scene-count recovery
+
+The latest failure stopped before footage or rendering because Groq's plan returned a scene count other than eight. Pass 10.3 adds a bounded structural recovery step: it splits only a two-sentence scene whose two sentences both name the same visible focus, or merges adjacent one-sentence scenes only when their visible subjects and footage queries materially overlap. It preserves all narration and remaps every evidence-ledger scene index. Unsafe cases are not auto-rewritten; they continue through the strict validator, targeted provider repair, and multi-provider failover.
+
+Validation: `python -m py_compile *.py tests/*.py` passed; `python -m unittest discover -s tests -q` passed **77/77 tests**. Live API and GitHub Actions rendering were not run; this patch cannot restore an empty DeepSeek balance or override external 503/429 limits.

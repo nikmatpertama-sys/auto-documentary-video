@@ -26,6 +26,7 @@ from narration_timing import duration_correction
 from source_policy import source_failure_reason
 from fact_check import FactCheckError, verify_documentary_facts
 from sentence_utils import split_sentences
+from scene_normalization import normalize_scene_count
 from visual_search_expansion import (
     build_visual_search_fallbacks,
     effective_candidate_limit,
@@ -240,9 +241,24 @@ def gemini_plan(topic):
     def validate_plan(candidate):
         if not isinstance(candidate, dict):
             raise ValueError("Plan response is not a JSON object.")
+        # Some models return a near-miss scene count despite the explicit
+        # schema. Recover only when narration can be split/merged losslessly
+        # around the same visible subject; otherwise keep the strict repair
+        # and provider-fallback path.
+        original_scenes = candidate.get("scenes") if isinstance(candidate, dict) else None
+        original_count = len(original_scenes) if isinstance(original_scenes, list) else None
+        candidate = normalize_scene_count(candidate, target_count=8)
         scenes = candidate.get("scenes")
+        if isinstance(scenes, list) and len(scenes) == 8 and original_count != 8:
+            print(
+                f"Plan structure repair: safely normalized {original_count} scenes to 8; "
+                "narration and evidence claims were preserved."
+            )
         if not isinstance(scenes, list) or len(scenes) != 8:
-            raise ValueError("Expected exactly 8 scenes.")
+            actual = len(scenes) if isinstance(scenes, list) else "missing"
+            raise ValueError(
+                f"Expected exactly 8 scenes; received {actual} and no safe scene-count repair was possible."
+            )
 
         narrations = []
         for scene_index, scene in enumerate(scenes, 1):
@@ -308,7 +324,7 @@ def gemini_plan(topic):
             if not isinstance(claim, dict):
                 raise ValueError(f"Fact claim {claim_index} must be a JSON object.")
             scene_number = int(claim.get("scene", 0))
-            if not 1 <= scene_number <= 8:
+            if not 1 <= scene_number <= len(scenes):
                 raise ValueError(f"Fact claim {claim_index} has an invalid scene number.")
             quoted_sentence = re.sub(r"\s+", " ", str(claim.get("sentence", ""))).strip()
             if not quoted_sentence or normalize_words(quoted_sentence) == []:
