@@ -29,3 +29,7 @@ voiceover_manifest.json
 opening_layout.json
 opening_hook_overlay.png
 .hf-cache/
+
+# Local recovery backups and bundled toolchain symlinks
+.backups/
+.tools/

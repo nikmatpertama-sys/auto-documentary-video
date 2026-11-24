@@ -1,21 +1,65 @@
 """Pixel-measured, Unicode-safe opening title/hook overlay."""
 from __future__ import annotations
 
+import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Iterable
 
 from PIL import Image, ImageDraw, ImageFont
 
+BUNDLED_FONT_DIR = Path(__file__).resolve().parent / "assets" / "fonts"
+
+
+def _font_candidates(bold: bool) -> list[Path]:
+    """Return every usable TrueType path, most portable source first.
+
+    The DejaVu faces are bundled with the repository so the overlay never
+    silently degrades to Pillow's tiny bitmap default on a runner or container
+    that forgot to install system fonts (that fallback produced unreadable
+    title cards).
+    """
+    filename = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
+    candidates: list[Path] = []
+
+    configured = os.getenv(
+        "HOOK_FONT_BOLD_PATH" if bold else "HOOK_FONT_PATH", ""
+    ).strip()
+    if configured:
+        candidates.append(Path(configured).expanduser())
+
+    candidates.append(BUNDLED_FONT_DIR / filename)
+    candidates.extend([
+        Path("/usr/share/fonts/truetype/dejavu") / filename,
+        Path("/usr/share/fonts/TTF") / filename,
+        Path("/usr/share/fonts/dejavu") / filename,
+        Path("/usr/local/share/fonts") / filename,
+    ])
+    candidates.append(
+        Path("/usr/share/fonts/truetype/liberation2")
+        / ("LiberationSans-Bold.ttf" if bold else "LiberationSans-Regular.ttf")
+    )
+    candidates.append(
+        Path("/usr/share/fonts/truetype/liberation")
+        / ("LiberationSans-Bold.ttf" if bold else "LiberationSans-Regular.ttf")
+    )
+    return candidates
+
+
+@lru_cache(maxsize=64)
+def _font_path(bold: bool) -> str:
+    for candidate in _font_candidates(bold):
+        if candidate.is_file():
+            return str(candidate)
+    raise RuntimeError(
+        "No TrueType font is available for the opening overlay. Install "
+        "fonts-dejavu-core or set HOOK_FONT_PATH/HOOK_FONT_BOLD_PATH; a bitmap "
+        "fallback would produce an unreadable title card."
+    )
+
 
 def _load_font(size: int, bold: bool = True):
-    candidates = [
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
-    ]
-    for candidate in candidates:
-        if Path(candidate).is_file():
-            return ImageFont.truetype(candidate, size=size)
-    return ImageFont.load_default()
+    return ImageFont.truetype(_font_path(bold), size=size)
 
 
 def _wrap_by_pixels(text: str, font, draw: ImageDraw.ImageDraw, max_width: int) -> list[str]:

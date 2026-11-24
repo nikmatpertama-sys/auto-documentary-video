@@ -14,6 +14,8 @@ from urllib.parse import urlparse
 import requests
 import edge_tts
 
+import diagnostics
+
 from ai_router import (
     VisionServiceUnavailable,
     configured_vision_provider_names,
@@ -57,6 +59,11 @@ CACHE = Path(".api-cache")
 for folder in (OUT, FOOT, CACHE):
     folder.mkdir(parents=True, exist_ok=True)
 
+# Media tool paths are overridable so the pipeline can run against a bundled
+# FFmpeg build (containers without a system package) without editing code.
+FFMPEG = os.getenv("FFMPEG_BIN", "").strip() or "ffmpeg"
+FFPROBE = os.getenv("FFPROBE_BIN", "").strip() or "ffprobe"
+
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
 PEXELS_KEY = os.getenv("PEXELS_API_KEY", "").strip()
 COVERR_API_KEY = os.getenv("COVERR_API_KEY", "").strip()
@@ -79,6 +86,12 @@ SENTENCE_GAP = 0.30
 HOOK_GAP = 0.70
 ENDING_HOLD = 1.25
 
+# The final MP4 must match the locked narration length closely; a wider window
+# hides truncated audio, which is exactly the failure this gate exists to catch.
+DURATION_TOLERANCE_SECONDS = 0.40
+MAX_HOOK_WORDS = 12
+MAX_TITLE_WORDS = 12
+
 MIN_CLIP_WIDTH = 640
 MAX_CLIP_BYTES = 180 * 1024 * 1024
 
@@ -86,6 +99,13 @@ MAX_CLIP_BYTES = 180 * 1024 * 1024
 # acceptance is intentionally disabled: provider outages stop the run rather than
 # silently lowering the documentary quality gate.
 VISION_REQUIRED = True
+_requested_vision_required = os.getenv("FOOTAGE_VISION_REQUIRED", "").strip().lower()
+if _requested_vision_required in {"0", "false", "no", "off"}:
+    print(
+        "Configuration notice: FOOTAGE_VISION_REQUIRED="
+        f"{_requested_vision_required!r} was ignored; pixel-level visual "
+        "verification is mandatory for this production pipeline."
+    )
 
 # The checked-in workflow still exports a legacy value of 5. Enforce a
 # production minimum of 8 candidates in code so that old workflow settings
@@ -141,7 +161,7 @@ def ffprobe_duration(path):
     try:
         result = subprocess.run(
             [
-                "ffprobe", "-v", "error",
+                FFPROBE, "-v", "error",
                 "-show_entries", "format=duration",
                 "-of", "default=noprint_wrappers=1:nokey=1",
                 str(path),
@@ -431,6 +451,91 @@ def assign_scene_sentence_ranges(plan):
         raise RuntimeError(
             "Some script sentences are not assigned to a scene."
         )
+
+
+# ============================================================
+# OPENING TITLE AND HOOK
+# ============================================================
+
+def _clean_opening_text(value, limit_words):
+    text = " ".join(str(value or "").replace("\n", " ").split()).strip()
+    words = text.split()
+    truncated = len(words) > limit_words
+    if truncated:
+        words = words[:limit_words]
+        text = " ".join(words).rstrip(",;:")
+    return text, truncated
+
+
+def prepare_opening(plan):
+    """Validate and pre-render the opening title/hook before narration is paid for.
+
+    Rendering used to fail at scene 1 when the planner supplied an oversized
+    hook or no title at all. Validating, safely shortening and pre-rendering the
+    overlay here proves the card fits before TTS, vision or encoding work starts.
+    """
+    sentences = split_sentences(plan.get("script") or "")
+    first_sentence = sentences[0] if sentences else ""
+
+    title, title_truncated = _clean_opening_text(
+        plan.get("title") or TOPIC or first_sentence, MAX_TITLE_WORDS
+    )
+    hook, hook_truncated = _clean_opening_text(
+        plan.get("hook") or first_sentence, MAX_HOOK_WORDS
+    )
+    if not hook:
+        raise RuntimeError(
+            "The plan has no opening hook and the script has no first sentence "
+            "to derive one from."
+        )
+
+    adjustments = []
+    if not str(plan.get("title") or "").strip():
+        adjustments.append("title derived from topic/script")
+    elif title_truncated:
+        adjustments.append("title trimmed to fit the opening card")
+    if not str(plan.get("hook") or "").strip():
+        adjustments.append("hook derived from the first script sentence")
+    elif hook_truncated:
+        adjustments.append(f"hook shortened to {MAX_HOOK_WORDS} words")
+
+    overlay_path = OUT / "opening_overlay.png"
+    layout = None
+    for _attempt in range(5):
+        try:
+            layout = create_hook_overlay(
+                title=title, hook=hook, output=overlay_path, width=W, height=H
+            )
+            break
+        except ValueError as exc:
+            words = hook.split()
+            if len(words) <= 6:
+                raise RuntimeError(
+                    "Opening overlay cannot be rendered even after shortening "
+                    f"the hook: {exc}"
+                ) from exc
+            hook = " ".join(words[:-2]).rstrip(",;:") + "…"
+            adjustments.append("hook shortened further to fit the opening card")
+
+    plan["title"] = title
+    plan["hook"] = hook
+    plan["opening_overlay"] = {
+        "path": str(overlay_path),
+        "adjustments": adjustments,
+        "layout": layout,
+    }
+    Path("opening_layout.json").write_text(
+        json.dumps(layout, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    Path("plan.json").write_text(
+        json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    print(
+        f"Opening validated before TTS: title={len(title.split())} word(s), "
+        f"hook={len(hook.split())} word(s)"
+        + (f" ({'; '.join(adjustments)})." if adjustments else ".")
+    )
+    return plan["opening_overlay"]
 
 
 # ============================================================
@@ -1477,11 +1582,8 @@ def extract_vision_frames(video_path, frame_count=3):
             "Downloaded candidate has no readable video duration."
         )
 
-    fractions = (
-        0.20,
-        0.50,
-        0.80
-    )[:max(2, min(3, frame_count))]
+    frame_slots = max(2, min(4, int(frame_count)))
+    fractions = (0.15, 0.40, 0.65, 0.85)[:frame_slots]
 
     timestamps = []
 
@@ -1510,7 +1612,7 @@ def extract_vision_frames(video_path, frame_count=3):
 
             result = subprocess.run(
                 [
-                    "ffmpeg", "-y",
+                    FFMPEG, "-y",
                     "-hide_banner",
                     "-loglevel", "error",
                     "-ss", f"{timestamp:.3f}",
@@ -1746,7 +1848,7 @@ Inspect the pixels, not the title alone. Accept only if the actual visible subje
 def render_reference_image_scene(source, duration, output):
     """Hold a published reference image in the video without inventing content."""
     run([
-        "ffmpeg", "-y", "-loop", "1", "-framerate", str(FPS),
+        FFMPEG, "-y", "-loop", "1", "-framerate", str(FPS),
         "-i", str(source), "-t", f"{duration:.3f}",
         "-vf", f"fps={FPS},format=yuv420p",
         "-an", "-c:v", "libx264", "-preset", X264_PRESET,
@@ -2213,9 +2315,9 @@ def fetch_footage(plan):
         vision_credit = (
             f" | Visual verification: "
             f"{vision_provider} {vision_confidence:.2f} — "
-            f"{vision_reason}"
+            f"{' '.join(str(vision_reason).split())}"
             if vision_confidence is not None
-            else " | Visual verification: NOT VERIFIED (production should stop)",
+            else " | Visual verification: NOT VERIFIED (production should stop)"
         )
 
         credits.append(
@@ -2277,7 +2379,7 @@ def probe_voiceover_quality(path, expected_duration):
     try:
         probe = subprocess.run(
             [
-                "ffprobe", "-v", "error", "-show_streams", "-show_format",
+                FFPROBE, "-v", "error", "-show_streams", "-show_format",
                 "-of", "json", str(path),
             ],
             capture_output=True,
@@ -2313,7 +2415,7 @@ def probe_voiceover_quality(path, expected_duration):
 
     volume = subprocess.run(
         [
-            "ffmpeg", "-hide_banner", "-i", str(path),
+            FFMPEG, "-hide_banner", "-i", str(path),
             "-af", "volumedetect", "-f", "null", "-",
         ],
         capture_output=True,
@@ -2378,7 +2480,7 @@ def build_voiceover(script):
 
         opening_silence = OUT / "opening_silence.wav"
         run([
-            "ffmpeg", "-y", "-f", "lavfi",
+            FFMPEG, "-y", "-f", "lavfi",
             "-i", "anullsrc=r=48000:cl=stereo",
             "-t", str(OPENING_LEAD), "-c:a", "pcm_s16le", str(opening_silence),
         ])
@@ -2434,7 +2536,7 @@ def build_voiceover(script):
                 )
 
             run([
-                "ffmpeg", "-y", "-i", str(mp3_path),
+                FFMPEG, "-y", "-i", str(mp3_path),
                 "-ar", "48000", "-ac", "2", "-c:a", "pcm_s16le", str(wav_path),
             ])
             clip_duration = ffprobe_duration(wav_path)
@@ -2458,7 +2560,7 @@ def build_voiceover(script):
             gap = HOOK_GAP if index == 0 else SENTENCE_GAP
             silence = OUT / f"gap_{index:02d}.wav"
             run([
-                "ffmpeg", "-y", "-f", "lavfi",
+                FFMPEG, "-y", "-f", "lavfi",
                 "-i", "anullsrc=r=48000:cl=stereo",
                 "-t", str(gap), "-c:a", "pcm_s16le", str(silence),
             ])
@@ -2471,7 +2573,7 @@ def build_voiceover(script):
         last_gap.unlink(missing_ok=True)
         ending = OUT / "ending_hold.wav"
         run([
-            "ffmpeg", "-y", "-f", "lavfi",
+            FFMPEG, "-y", "-f", "lavfi",
             "-i", "anullsrc=r=48000:cl=stereo",
             "-t", str(ENDING_HOLD), "-c:a", "pcm_s16le", str(ending),
         ])
@@ -2484,7 +2586,7 @@ def build_voiceover(script):
         )
         voice_path = OUT / "voiceover.wav"
         run([
-            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat),
+            FFMPEG, "-y", "-f", "concat", "-safe", "0", "-i", str(concat),
             "-c:a", "pcm_s16le", "-ar", "48000", "-ac", "2", str(voice_path),
         ])
 
@@ -2494,7 +2596,7 @@ def build_voiceover(script):
         if correction is not None:
             paced_path = OUT / "voiceover_paced.wav"
             run([
-                "ffmpeg", "-y", "-i", str(voice_path),
+                FFMPEG, "-y", "-i", str(voice_path),
                 "-af", f"atempo={correction['atempo']:.8f}",
                 "-ar", "48000", "-ac", "2", "-c:a", "pcm_s16le", str(paced_path),
             ])
@@ -2530,7 +2632,7 @@ def build_voiceover(script):
 
         mp3_output = OUT / "voiceover.mp3"
         run([
-            "ffmpeg", "-y", "-i", str(voice_path),
+            FFMPEG, "-y", "-i", str(voice_path),
             "-c:a", "libmp3lame", "-b:a", "192k", str(mp3_output),
         ])
         return {
@@ -2818,7 +2920,7 @@ def render_footage_scene(
         f"fps={FPS},setsar=1,format=yuv420p"
     )
 
-    cmd = ["ffmpeg", "-y", *loop_args, "-i", str(source)]
+    cmd = [FFMPEG, "-y", *loop_args, "-i", str(source)]
     if hook_text:
         overlay_file = OUT / "opening_hook_overlay.png"
         layout = create_hook_overlay(
@@ -2865,7 +2967,7 @@ def validate_final_video(path, expected_duration):
     try:
         result = subprocess.run(
             [
-                "ffprobe", "-v", "error", "-show_streams", "-show_format",
+                FFPROBE, "-v", "error", "-show_streams", "-show_format",
                 "-of", "json", str(path),
             ],
             capture_output=True,
@@ -2898,9 +3000,23 @@ def validate_final_video(path, expected_duration):
             f"Final video dimensions are {video.get('width')}x{video.get('height')}; expected {W}x{H}."
         )
     duration = float((details.get("format") or {}).get("duration", 0) or 0)
-    if duration < 5 or duration < expected_duration * 0.90:
+    if duration < 5:
         raise RuntimeError(
-            f"Final video duration {duration:.2f}s is shorter than expected ({expected_duration:.2f}s)."
+            f"Final video duration {duration:.2f}s is not a complete documentary."
+        )
+    if abs(duration - expected_duration) > DURATION_TOLERANCE_SECONDS:
+        raise RuntimeError(
+            f"Final video duration {duration:.2f}s does not match the locked narration "
+            f"{expected_duration:.2f}s (tolerance ±{DURATION_TOLERANCE_SECONDS:.2f}s)."
+        )
+    try:
+        audio_duration = float(audio.get("duration") or 0)
+    except (TypeError, ValueError):
+        audio_duration = 0.0
+    if audio_duration and abs(audio_duration - duration) > DURATION_TOLERANCE_SECONDS + 0.15:
+        raise RuntimeError(
+            f"Final audio track is {audio_duration:.2f}s while the video is {duration:.2f}s; "
+            "the narration is truncated or padded incorrectly."
         )
     if not (OUT / "voiceover.mp3").is_file() or (OUT / "voiceover.mp3").stat().st_size < 1000:
         raise RuntimeError("Voice-over MP3 is missing or incomplete.")
@@ -2970,7 +3086,7 @@ def render(plan, sentence_events, total_duration):
     base = OUT / "video_base.mp4"
 
     run([
-        "ffmpeg", "-y",
+        FFMPEG, "-y",
         "-f", "concat",
         "-safe", "0",
         "-i", str(concat),
@@ -2980,21 +3096,30 @@ def render(plan, sentence_events, total_duration):
 
     final = Path("documentary.mp4")
 
+    # Concatenating eight independent x264 encodes can land a few frames short
+    # of the narration length; the old `-t` cut then truncated the audio. Both
+    # streams are now padded to the locked VO duration (cloned frames + silence)
+    # so the MP4 always carries the complete narration.
     audio_filter = (
         "[1:a]highpass=f=65,lowpass=f=15000,"
         "acompressor=threshold=-22dB:ratio=2.0:"
         "attack=25:release=250:makeup=1.15,"
         "alimiter=limit=0.88,"
         "loudnorm=I=-16:TP=-1.5:LRA=9,"
-        "aresample=48000[a]"
+        f"aresample=48000,apad=whole_dur={total_duration:.3f}[a]"
+    )
+    video_filter = (
+        "[0:v]tpad=stop_mode=clone:stop_duration=3,"
+        f"trim=duration={total_duration:.3f},setpts=PTS-STARTPTS,"
+        f"subtitles={OUT}/captions.ass,format=yuv420p[v]"
     )
 
     run([
-        "ffmpeg", "-y",
+        FFMPEG, "-y",
         "-i", str(base),
         "-i", str(OUT / "voiceover.wav"),
         "-filter_complex",
-        f"[0:v]subtitles={OUT}/captions.ass[v];{audio_filter}",
+        f"{video_filter};{audio_filter}",
         "-map", "[v]",
         "-map", "[a]",
         "-t", f"{total_duration:.3f}",
@@ -3040,8 +3165,10 @@ def prune_api_cache(max_bytes=300 * 1024 * 1024):
     except OSError as exc:
         print(f"Cache pruning skipped: {type(exc).__name__}")
 
-def main():
+def _run_pipeline():
+    diagnostics.STAGES.begin("cache_prune")
     prune_api_cache()
+    diagnostics.STAGES.complete()
     if not TOPIC:
         raise RuntimeError("Enter a topic in the GitHub Actions Run workflow form.")
     configured_keys = [
@@ -3058,11 +3185,17 @@ def main():
         "AI text provider secrets available: " + (", ".join(configured_keys) or "none")
     )
     print("1/7 Writing and validating the documentary script...")
+    diagnostics.STAGES.begin("script_generation", topic=TOPIC)
     plan = gemini_plan(TOPIC)
     if not str(plan.get("script", "")).strip() or len(plan["script"].split()) < 100:
         raise RuntimeError("Script quality gate failed: narration is empty or too short for production.")
+    # The opening card is proven to fit before any narration, vision or encode
+    # work is paid for, so an oversized hook can no longer fail at scene 1.
+    opening = prepare_opening(plan)
+    diagnostics.STAGES.complete(words=len(plan["script"].split()))
 
     print("2/7 Fetching trusted source pages and auditing every factual assertion...")
+    diagnostics.STAGES.begin("fact_check", claims=len(plan.get("fact_claims") or []))
     try:
         fact_report = verify_documentary_facts(plan, generate_fact_json)
     except FactCheckError as exc:
@@ -3105,9 +3238,11 @@ def main():
     Path("plan.json").write_text(
         json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8"
     )
+    diagnostics.STAGES.complete(status=fact_report["status"])
     # Stage 3 produces the complete narration independently of captions and
     # visuals. The audio is measured and approved before expensive visual work.
     print("3/7 Generating the complete voice-over (no subtitle/visual work yet)...")
+    diagnostics.STAGES.begin("voiceover", sentences=len(plan["script"].split()))
     voice = build_voiceover(plan["script"])
     sentence_events = voice["sentence_events"]
     total_duration = voice["total_duration"]
@@ -3115,14 +3250,22 @@ def main():
         raise RuntimeError(
             f"Validated voice-over duration is {total_duration:.2f}s; production target is 70-90s."
         )
+    diagnostics.STAGES.complete(duration_seconds=round(total_duration, 3))
 
     print("4/7 Locking the final VO timeline as the master production reference...")
+    diagnostics.STAGES.begin("timeline_lock")
     attach_voice_timing_to_scenes(plan, voice)
+    diagnostics.STAGES.complete()
 
     print("5/7 Building phrase subtitles from the validated VO timing...")
+    diagnostics.STAGES.begin("subtitles")
     caption_result = build_subtitles_from_voice(voice)
+    diagnostics.STAGES.complete(
+        caption_groups=(caption_result.get("alignment") or {}).get("caption_group_count")
+    )
 
     print("6/7 Searching for footage and trusted published visuals against the VO scene map...")
+    diagnostics.STAGES.begin("footage")
     fetch_footage(plan)
     with Path("credits.txt").open("a", encoding="utf-8") as credit_file:
         credit_file.write("\nFACT-CHECK SOURCES\n")
@@ -3132,13 +3275,18 @@ def main():
                     f"{claim['id']} | Scene {claim['scene']} | {claim['sentence']} | {source_url}\n"
                 )
 
+    diagnostics.STAGES.complete()
+
     print("7/7 Rendering every scene to the locked VO timeline...")
+    diagnostics.STAGES.begin("render", total_duration=round(total_duration, 3))
     render(
         plan,
         sentence_events,
         total_duration
     )
+    diagnostics.STAGES.complete()
 
+    diagnostics.STAGES.begin("production_report")
     final_path = Path("documentary.mp4")
     required_outputs = (
         final_path,
@@ -3258,6 +3406,8 @@ def main():
         },
         "voiceover_file": str(OUT / "voiceover.mp3"),
         "captions_file": str(OUT / "captions.ass"),
+        "opening": opening,
+        "diagnostics": diagnostics.STAGES.summary(),
         "artifact_upload": "pending GitHub Actions upload step",
     }
     Path("production_report.json").write_text(
@@ -3265,11 +3415,36 @@ def main():
         encoding="utf-8",
     )
 
+    diagnostics.STAGES.complete()
+    diagnostics.write_stage_report("stage_report.json")
+
     print(
         "7/7 Production files validated: "
         "documentary.mp4, plan.json, fact_check_report.json, voiceover_manifest.json, "
         "credits.txt, timing.json, production_report.json. GitHub Actions will upload artifacts next."
     )
+
+
+def main():
+    """Run the pipeline and always leave structured failure diagnostics behind."""
+    try:
+        _run_pipeline()
+    except BaseException as exc:
+        try:
+            written = diagnostics.write_failure_report(
+                "failure_report.json",
+                exc,
+                context={"topic": TOPIC, "vision_required": VISION_REQUIRED},
+            )
+            print(f"[diagnostics] Failure report written to {written}")
+        except Exception as report_exc:  # diagnostics must never mask the real error
+            print(f"[diagnostics] Could not write failure report: {type(report_exc).__name__}")
+        raise
+    finally:
+        try:
+            diagnostics.write_stage_report("stage_report.json")
+        except Exception as report_exc:
+            print(f"[diagnostics] Could not write stage report: {type(report_exc).__name__}")
 
 
 if __name__ == "__main__":
