@@ -1,0 +1,22 @@
+{
+  "path": "output/opening_overlay.png",
+  "title_lines": [
+    "BEAVERS: NATURE’S RIVER ENGINEERS"
+  ],
+  "hook_lines": [
+    "What if a single animal",
+    "could rewrite a river's",
+    "destiny?"
+  ],
+  "title_text": "Beavers: Nature’s River Engineers",
+  "hook_text": "What if a single animal could rewrite a river's destiny?",
+  "title_font_size": 27,
+  "hook_font_size": 62,
+  "max_text_width": 880,
+  "card_bounds": [
+    48,
+    150,
+    1032,
+    470
+  ]
+}

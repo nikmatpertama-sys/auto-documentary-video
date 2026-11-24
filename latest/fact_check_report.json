@@ -1,0 +1,92 @@
+{
+  "status": "blocked",
+  "method": "trusted-source fetch + independent evidence-grounded AI audit",
+  "claim_count": 8,
+  "blocked_at_claim": "C3",
+  "blocked_claim_sentence": "By slowing water flow, beaver dams cause sediments to settle, markedly reducing downstream erosion and clarifying the channel over time.",
+  "source_fetch_failures": [
+    {
+      "requested_url": "https://www.usgs.gov/centers/pcmsc/science/beaver-impacts-sediment",
+      "reason": "Could not fetch evidence source https://www.usgs.gov/centers/pcmsc/science/beaver-impacts-sediment: HTTPError",
+      "source_kind": "planned"
+    },
+    {
+      "requested_url": "https://www.epa.gov/wetlands/beaver-wetlands",
+      "reason": "Could not fetch evidence source https://www.epa.gov/wetlands/beaver-wetlands: HTTPError",
+      "source_kind": "planned"
+    }
+  ],
+  "source_recovery": {
+    "attempted": true,
+    "candidate_urls": [],
+    "failure": "",
+    "provider": "openrouter",
+    "model": "openrouter/free"
+  },
+  "sources": [
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.usgs.gov/centers/whcmsc/science/beaver-dams",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://www.usgs.gov/centers/whcmsc/science/beaver-dams: HTTPError"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.nationalgeographic.com/animals/mammals/facts/beaver",
+      "resolved_url": "https://www.nationalgeographic.com/animals/mammals/facts/beaver",
+      "host": "www.nationalgeographic.com",
+      "http_status": 200,
+      "page_title": "Beaver | National Geographic",
+      "excerpt": "Least concern LC NT VU EN CR EW EX Least Concern Extinct Current Population Trend : Stable Beavers are famously busy, and they turn their talents to reengineering the landscape as few other animals can. Felling and gnawing trees with their strong teeth and powerful jaws, they create massive log, branch, and mud structures to block streams and turn fields and forests into the large ponds that beavers love. When sites are available, beavers burrow in the banks of rivers and lakes. But they also transform less suitable habitats by building dams. They are often strategically located in the middle of ponds and can only be reached by underwater entrances. Beavers are among the largest of rodents. Aquatic Adaptations These large rodents move with an ungainly waddle on land but are graceful in the water, where they use their large, webbed rear feet like swimming fins, and their paddle-shaped tai",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://www.fws.gov/midwest/Beaver-Management.html",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://www.fws.gov/midwest/Beaver-Management.html: HTTPError"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://www.britannica.com/animal/beaver-mammal",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://www.britannica.com/animal/beaver-mammal: HTTPError"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://www.epa.gov/wetlands/constructed-wetlands",
+      "resolved_url": "https://www.epa.gov/wetlands/constructed-wetlands",
+      "host": "www.epa.gov",
+      "http_status": 200,
+      "page_title": "Constructed Wetlands | US EPA Lock Primary navigation Open Sidenav Menu Close Sidenav Menu expand or collapse the child menu expand or collapse the child menu expand or collapse the child menu expand or collapse the child menu expand or col",
+      "excerpt": "Constructed Treatment Wetlands (PDF) (2 pp, 269 K, About PDF ) Constructed Treatment Wetlands Factsheet (pdf) (262.48 KB, August 2004) Guiding Principles for Constructed Treatment Wetlands: Providing for Water Quality and Wildlife Habitat (October 2000) (pdf) (4 MB) The document includes: Guiding principles for siting, design, construction, operation, maintenance and monitoring of constructed treatment wetlands Information on current Agency policies, permits, regulations and resources Answers to common questions The Guiding Principles were developed by the Interagency Workgroup on Constructed Wetlands (U.S. Environmental Protection Agency, Army Corps of Engineers, Fish and Wildlife Service, Natural Resources Conservation Services, National Marine Fisheries Service and Bureau of Reclamation). Constructed Wetlands for Wastewater Treatment and Wildlife Habitat: 17 Case Studies (EPA832-R-93-",
+      "source_kind": "recovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://www.usgs.gov/mission-areas/ecosystems/science/created-wetlands",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.usgs.gov/mission-areas/ecosystems/science/created-wetlands: HTTPError"
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://www.usgs.gov/centers/pcmsc/science/beaver-impacts-sediment",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://www.usgs.gov/centers/pcmsc/science/beaver-impacts-sediment: HTTPError"
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://www.epa.gov/wetlands/beaver-wetlands",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://www.epa.gov/wetlands/beaver-wetlands: HTTPError"
+    }
+  ]
+}
