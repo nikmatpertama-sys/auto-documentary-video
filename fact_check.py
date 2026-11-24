@@ -62,7 +62,10 @@ TRUSTED_EXACT_HOSTS = {
     "cam.ac.uk", "www.cam.ac.uk",
 }
 
-TRUSTED_SUFFIXES = (".gov", ".edu", ".int", ".ac.uk")
+# .fed.us is the legacy namespace for United States federal agencies (for
+# example fs.fed.us), so a plan that cites one is citing a real institution
+# rather than an untrusted host.
+TRUSTED_SUFFIXES = (".gov", ".edu", ".int", ".ac.uk", ".fed.us")
 
 STOPWORDS = {
     "about", "after", "again", "also", "among", "because", "been", "being",
@@ -171,7 +174,8 @@ def validate_planner_source_urls(claim_index: int, source_urls) -> list[str]:
             "accepted examples include nasa.gov, noaa.gov, usgs.gov, nature.com, "
             "science.org, pnas.org, britannica.com, nationalgeographic.com, si.edu, "
             "fao.org, ipcc.ch, who.int, un.org, and qualifying .gov, .edu, .int, or "
-            ".ac.uk hosts. Do not use search-result pages, URL shorteners, or redirects."
+            ".ac.uk or .fed.us hosts. Do not use search-result pages, URL shorteners, "
+            "or redirects."
         )
     return normalized
 

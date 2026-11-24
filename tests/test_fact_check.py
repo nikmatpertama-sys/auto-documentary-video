@@ -48,6 +48,10 @@ class FactCheckTests(unittest.TestCase):
         self.assertTrue(is_trusted_source_url("https://www.noaa.gov/climate"))
 
 
+    def test_legacy_federal_fed_us_hosts_are_trusted(self):
+        self.assertTrue(is_trusted_source_url("https://www.fs.fed.us/research/beaver"))
+        self.assertFalse(is_trusted_source_url("https://fs.fed.us.evil.example/beaver"))
+
     def test_planner_preflight_accepts_direct_https_trusted_sources(self):
         urls = validate_planner_source_urls(
             1,
