@@ -1,0 +1,134 @@
+{
+  "status": "blocked",
+  "method": "trusted-source fetch + independent evidence-grounded AI audit",
+  "claim_count": 8,
+  "blocked_at_claim": "C3",
+  "blocked_claim_sentence": "These vapor streams merge into colossal “flying rivers” that drift eastward, transporting moisture across the continent and sustaining distant savannas.",
+  "source_fetch_failures": [
+    {
+      "requested_url": "https://www.britannica.com/place/Amazon-River",
+      "reason": "Could not fetch evidence source https://www.britannica.com/place/Amazon-River: HTTPError (HTTP 403)",
+      "source_kind": "planned"
+    },
+    {
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6756188",
+      "reason": "Evidence page contains too little readable text for verification.",
+      "source_kind": "planned"
+    },
+    {
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1559840",
+      "reason": "Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.",
+      "source_kind": "discovered"
+    },
+    {
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/16048771",
+      "reason": "Evidence page contains too little readable text for verification.",
+      "source_kind": "discovered"
+    },
+    {
+      "requested_url": "https://www.transtats.bts.gov/fuel.asp",
+      "reason": "Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.",
+      "source_kind": "discovered"
+    },
+    {
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/18757271",
+      "reason": "Evidence page contains too little readable text for verification.",
+      "source_kind": "discovered"
+    }
+  ],
+  "source_recovery": {
+    "attempted": true,
+    "candidate_urls": [],
+    "failure": "ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: HTTP 503",
+    "discovered_urls": [
+      "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1559840",
+      "https://pubmed.ncbi.nlm.nih.gov/16048771",
+      "https://www.transtats.bts.gov/fuel.asp",
+      "https://pubmed.ncbi.nlm.nih.gov/18757271"
+    ]
+  },
+  "sources": [
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.britannica.com/place/Amazon-Rainforest",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://www.britannica.com/place/Amazon-Rainforest: HTTPError (HTTP 403)"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC6327247/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Reconstructing the Deep Population History of Central and South America - PMC Lock",
+      "excerpt": "Reconstructing the Deep Population History of Central and South America - PMC Skip to main content An official website of the United States government Here's how you know Here's how you know Official websites use .gov A .gov website belongs to an official government organization in the United States. The original studies that documented these two deep lineages fit models in which Central and South Americans were of entirely ANC-A ancestry ( Rasmussen et al., 2014 , Reich et al., 2012 ). For most samples, no indigenous community lived near the sites or indicated a connection to the analyzed skeletons, with the exception of a community living near the site of Laguna Chica in Argentina, which approved the study after consultation and participated in the rescue excavation. We detect long-standing continuity between ancient and present-day Native Americans in each of the regions of South Amer",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC6327247/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Reconstructing the Deep Population History of Central and South America - PMC Lock",
+      "excerpt": "the gene flow itself could have occurred thousands of years before and the ancestry deriving from it could have persisted in a region of South America not yet sampled with ancient DNA. PMC Copyright notice PMCID: PMC6327247 PMID: 30415837 Summary We report genome-wide ancient DNA from 49 individuals forming four parallel time transects in Belize, Brazil, the Central Andes, and the Southern Cone, each dating to at least ∼9,000 years ago. This population was inferred to have diversified 17,500–14,600 calendar years before present (BP) ( Moreno-Mayar et al., 2018a ) into two branches that have been called “ Southern Native American ” or “ Ancestral A ” ( ANC-A ) and “ Northern Native American ” or “ Ancestral B ” ( ANC-B ) ( Moreno-Mayar et al., 2018a , Raghavan et al., 2015 , Rasmussen et al., 2014 , Reich et al., 2012 , Scheib et al., 2018 ). We took a case-by-case approach in each region",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6878948",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC6878948/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "The Current Genomic Landscape of Western South America: Andes, Amazonia, and Pacific Coast - PMC Lock",
+      "excerpt": "We aim at tracing genetic connections over the scattered and widespread diffusion of representative Andean and Amazonian languages, focusing in particular on a vast region where different varieties of Quechua are spoken. This “Amazonian North” ancestry is found in a transitional environment: this region spanning parts of Colombia and Ecuador is in fact geographically close to the Northern Andes, but its populations are traditionally associated with the Amazonian cultural domain. In the Chachapoyas region (North-East Andes), a number of structured societies flourished from the 12th to the 15th centuries ( Church and Von Hagen 2008 ). The populations of Amazonia therefore display different demographic histories, rather than a uniform history of small sample size (according to the ROH profiles), and are connected by sharing of IBD blocks within the region. This genetic diversity complements",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://www.britannica.com/place/Amazon-River",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://www.britannica.com/place/Amazon-River: HTTPError (HTTP 403)"
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6756188",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1559840",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected."
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/16048771",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://www.transtats.bts.gov/fuel.asp",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected."
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/18757271",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Evidence page contains too little readable text for verification."
+    }
+  ]
+}

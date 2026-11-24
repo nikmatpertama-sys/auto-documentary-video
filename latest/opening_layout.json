@@ -1,0 +1,24 @@
+{
+  "path": "output/opening_overlay.png",
+  "title_lines": [
+    "THE AMAZON RAINFOREST: THE MYSTERIOUS FOREST",
+    "THAT CREATES ITS OWN RAIN"
+  ],
+  "hook_lines": [
+    "Deep within the Amazon,",
+    "towering trees summon",
+    "their own rain, turning",
+    "the"
+  ],
+  "title_text": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain",
+  "hook_text": "Deep within the Amazon, towering trees summon their own rain, turning the",
+  "title_font_size": 27,
+  "hook_font_size": 62,
+  "max_text_width": 880,
+  "card_bounds": [
+    48,
+    150,
+    1032,
+    564
+  ]
+}

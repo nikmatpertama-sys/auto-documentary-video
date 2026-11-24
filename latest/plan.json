@@ -1,0 +1,243 @@
+{
+  "title": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain",
+  "hook": "Deep within the Amazon, towering trees summon their own rain, turning the",
+  "script": "Deep within the Amazon, towering trees summon their own rain, turning the forest into a living cloud factory where humidity never ceases. Billions of leaves continuously transpire water, releasing moisture that climbs thousands of meters before cooling and forming clouds that fuel the region’s perpetual monsoon. These vapor streams merge into colossal “flying rivers” that drift eastward, transporting moisture across the continent and sustaining distant savannas. When the airborne water condenses, it falls as rain that feeds the Amazon River, the planet’s largest discharge, supporting millions of people downstream. The river’s immense flow nourishes flooded forests, swamps, and even the dark waters of the Rio Negro, replenishing vital fish stocks. This forest‑driven rainfall stabilizes regional temperatures, creating a cooling effect that influences global climate patterns and moderates atmospheric carbon. From apex predators like jaguars to microscopic insects, every species relies on the steady water cycle for their breeding and feeding. Safeguarding this self‑sustaining engine is essential for preserving worldwide weather stability and countless human lives, for agriculture, health, and economies worldwide.",
+  "scenes": [
+    {
+      "narration": "Deep within the Amazon, towering trees summon their own rain, turning the forest into a living cloud factory where humidity never ceases.",
+      "visual_focus": "towering Amazon trees",
+      "visual_query": "towering Amazon trees canopy",
+      "visual_queries": [
+        "Amazon rainforest canopy aerial",
+        "tall trees rainforest sunrise"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "towering Amazon trees canopy",
+      "source_label": "Encyclopedia Britannica",
+      "source_url": "https://www.britannica.com/place/Amazon-Rainforest",
+      "visual_type": "footage",
+      "sentence_start": 0,
+      "sentence_end": 0
+    },
+    {
+      "narration": "Billions of leaves continuously transpire water, releasing moisture that climbs thousands of meters before cooling and forming clouds that fuel the region’s perpetual monsoon.",
+      "visual_focus": "leaf transpiration process",
+      "visual_query": "leaf transpiration closeup rainforest",
+      "visual_queries": [
+        "rainforest leaf water vapor",
+        "tree leaf condensation footage"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "leaf transpiration closeup rainforest",
+      "source_label": "NCBI",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247",
+      "visual_type": "footage",
+      "sentence_start": 1,
+      "sentence_end": 1
+    },
+    {
+      "narration": "These vapor streams merge into colossal “flying rivers” that drift eastward, transporting moisture across the continent and sustaining distant savannas.",
+      "visual_focus": "flying rivers concept",
+      "visual_query": "flying rivers Amazon aerial",
+      "visual_queries": [
+        "Amazon moisture transport view",
+        "aerial view river vapor flow"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "flying rivers Amazon aerial",
+      "source_label": "Encyclopedia Britannica",
+      "source_url": "https://www.britannica.com/place/Amazon-River",
+      "visual_type": "footage",
+      "sentence_start": 2,
+      "sentence_end": 2
+    },
+    {
+      "narration": "When the airborne water condenses, it falls as rain that feeds the Amazon River, the planet’s largest discharge, supporting millions of people downstream.",
+      "visual_focus": "Amazon River discharge",
+      "visual_query": "Amazon River massive flow",
+      "visual_queries": [
+        "Amazon River floodplain aerial",
+        "river water volume Amazon"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "Amazon River massive flow",
+      "source_label": "Encyclopedia Britannica",
+      "source_url": "https://www.britannica.com/place/Amazon-River",
+      "visual_type": "footage",
+      "sentence_start": 3,
+      "sentence_end": 3
+    },
+    {
+      "narration": "The river’s immense flow nourishes flooded forests, swamps, and even the dark waters of the Rio Negro, replenishing vital fish stocks.",
+      "visual_focus": "Rio Negro waters",
+      "visual_query": "Rio Negro dark water",
+      "visual_queries": [
+        "Rio Negro river view",
+        "dark water Amazon tributary"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "Rio Negro dark water",
+      "source_label": "Encyclopedia Britannica",
+      "source_url": "https://www.britannica.com/place/Amazon-Rainforest",
+      "visual_type": "footage",
+      "sentence_start": 4,
+      "sentence_end": 4
+    },
+    {
+      "narration": "This forest‑driven rainfall stabilizes regional temperatures, creating a cooling effect that influences global climate patterns and moderates atmospheric carbon.",
+      "visual_focus": "rainforest cooling effect",
+      "visual_query": "rainforest cooling aerial",
+      "visual_queries": [
+        "Amazon canopy temperature",
+        "forest cooling effect footage"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "rainforest cooling aerial",
+      "source_label": "NCBI",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7192477",
+      "visual_type": "footage",
+      "sentence_start": 5,
+      "sentence_end": 5
+    },
+    {
+      "narration": "From apex predators like jaguars to microscopic insects, every species relies on the steady water cycle for their breeding and feeding.",
+      "visual_focus": "jaguar in rainforest",
+      "visual_query": "jaguar moving rainforest",
+      "visual_queries": [
+        "jaguar tracking forest",
+        "jaguar prowling Amazon"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "jaguar moving rainforest",
+      "source_label": "NCBI",
+      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11774006",
+      "visual_type": "footage",
+      "sentence_start": 6,
+      "sentence_end": 6
+    },
+    {
+      "narration": "Safeguarding this self‑sustaining engine is essential for preserving worldwide weather stability and countless human lives, for agriculture, health, and economies worldwide.",
+      "visual_focus": "global climate impact",
+      "visual_query": "global climate impact forest",
+      "visual_queries": [
+        "world weather map forest influence",
+        "global climate change forest footage"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "global climate impact forest",
+      "source_label": "PubMed",
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/37990807",
+      "visual_type": "footage",
+      "sentence_start": 7,
+      "sentence_end": 7
+    }
+  ],
+  "fact_claims": [
+    {
+      "scene": 1,
+      "sentence": "Deep within the Amazon, towering trees summon their own rain, turning the forest into a living cloud factory where humidity never ceases.",
+      "source_urls": [
+        "https://www.britannica.com/place/Amazon-Rainforest",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247"
+      ]
+    },
+    {
+      "scene": 2,
+      "sentence": "Billions of leaves continuously transpire water, releasing moisture that climbs thousands of meters before cooling and forming clouds that fuel the region’s perpetual monsoon.",
+      "source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6878948"
+      ]
+    },
+    {
+      "scene": 3,
+      "sentence": "These vapor streams merge into colossal “flying rivers” that drift eastward, transporting moisture across the continent and sustaining distant savannas.",
+      "source_urls": [
+        "https://www.britannica.com/place/Amazon-River",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6756188"
+      ]
+    },
+    {
+      "scene": 4,
+      "sentence": "When the airborne water condenses, it falls as rain that feeds the Amazon River, the planet’s largest discharge, supporting millions of people downstream.",
+      "source_urls": [
+        "https://www.britannica.com/place/Amazon-River",
+        "https://pubmed.ncbi.nlm.nih.gov/30415837"
+      ]
+    },
+    {
+      "scene": 5,
+      "sentence": "The river’s immense flow nourishes flooded forests, swamps, and even the dark waters of the Rio Negro, replenishing vital fish stocks.",
+      "source_urls": [
+        "https://www.britannica.com/place/Amazon-Rainforest",
+        "https://pubmed.ncbi.nlm.nih.gov/31350885"
+      ]
+    },
+    {
+      "scene": 6,
+      "sentence": "This forest‑driven rainfall stabilizes regional temperatures, creating a cooling effect that influences global climate patterns and moderates atmospheric carbon.",
+      "source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7192477",
+        "https://www.britannica.com/place/Amazon-Rainforest"
+      ]
+    },
+    {
+      "scene": 7,
+      "sentence": "From apex predators like jaguars to microscopic insects, every species relies on the steady water cycle for their breeding and feeding.",
+      "source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11774006",
+        "https://www.britannica.com/place/Amazon-Rainforest"
+      ]
+    },
+    {
+      "scene": 8,
+      "sentence": "Safeguarding this self‑sustaining engine is essential for preserving worldwide weather stability and countless human lives, for agriculture, health, and economies worldwide.",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/37990807",
+        "https://www.britannica.com/place/Amazon-Rainforest"
+      ]
+    }
+  ],
+  "ai_provider": {
+    "provider": "groq",
+    "model": "openai/gpt-oss-120b"
+  },
+  "opening_overlay": {
+    "path": "output/opening_overlay.png",
+    "adjustments": [
+      "hook shortened to 12 words"
+    ],
+    "layout": {
+      "path": "output/opening_overlay.png",
+      "title_lines": [
+        "THE AMAZON RAINFOREST: THE MYSTERIOUS FOREST",
+        "THAT CREATES ITS OWN RAIN"
+      ],
+      "hook_lines": [
+        "Deep within the Amazon,",
+        "towering trees summon",
+        "their own rain, turning",
+        "the"
+      ],
+      "title_text": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain",
+      "hook_text": "Deep within the Amazon, towering trees summon their own rain, turning the",
+      "title_font_size": 27,
+      "hook_font_size": 62,
+      "max_text_width": 880,
+      "card_bounds": [
+        48,
+        150,
+        1032,
+        564
+      ]
+    }
+  }
+}
