@@ -76,3 +76,10 @@ Upload this ZIP to the repository root on branch `project1` using the exact file
 
 ## Pass 5 validation caveat
 The local integrated test uses eSpeak-generated test speech behind a fake Edge TTS interface because the real `edge-tts` package and external TTS service are not available in the isolated build environment. This verifies orchestration, media handling, timing repair, and audio QA logic; it does not certify Edge's pronunciation or naturalness. The real Edge TTS/GitHub Actions run still needs validation in the user's repository.
+
+## Pass 6 — resilient footage selection during AI Vision outages
+
+- Increased the default footage verification candidate scan from 5 to 8 (still capped at 8) so a weak first batch does not prematurely stop a scene.
+- When every configured Vision provider is temporarily unavailable, candidate acceptance now evaluates both the original visual-search query and the actual scene narration. Strong narration-context metadata can qualify footage even when a camera/source-specific query such as “NASA Landsat satellite image” is too restrictive.
+- Weak candidates remain rejected. The fallback never treats an unavailable Vision response as a visual PASS and records that pixel verification was not completed.
+- Added isolated policy tests for strong direct matches, narration-context matches, weak candidates, and single-keyword false matches.

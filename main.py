@@ -23,6 +23,7 @@ from ai_router import (
 from visual_matcher import rank_candidates
 from narration_timing import duration_correction
 from source_policy import source_failure_reason
+from visual_outage_policy import metadata_fallback_decision
 from hook_overlay import create_hook_overlay
 from caption_timing import align_boundary_text, build_phrase_groups, karaoke_phrase, group_bounds
 from reference_visuals import (
@@ -81,7 +82,7 @@ VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "false").strip().lower() 
 
 # Search more of the metadata-ranked pool before declaring a scene impossible.
 VISION_CANDIDATE_LIMIT = max(
-    1, min(8, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "5")))
+    1, min(8, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "8")))
 )
 
 try:
@@ -2145,22 +2146,32 @@ def fetch_footage(plan):
                 # drew an unrelated procedural scene, even when more candidates
                 # existed. Keep a candidate only when its own metadata has a
                 # strong exact match; clearly report that pixels were not checked.
-                coverage = matched / max(1, total)
-                if score >= 0.52 and coverage >= 0.50:
+                narration_score, narration_matched, narration_total = relevance_score(
+                    hit,
+                    scene.get("narration", ""),
+                    scene.get("narration", ""),
+                )
+                acceptable, fallback_reason = metadata_fallback_decision(
+                    score, matched, total,
+                    narration_score, narration_matched, narration_total,
+                )
+                if acceptable:
                     selected = (
                         score, hit, query, matched, total, None,
-                        "AI Vision provider unavailable; accepted only on strong scene-specific source metadata. Pixel verification was not completed.",
+                        "AI Vision providers were temporarily unavailable; accepted using "
+                        + fallback_reason
+                        + ". Pixel verification was not completed.",
                         "Metadata-only after Vision outage",
                     )
                     print(
-                        f"Scene {i}: accepting {hit.get('source')} only on strict metadata match "
-                        f"({score:.2f}, {matched}/{total}); visual verification unavailable."
+                        f"Scene {i}: accepting {hit.get('source')} with conservative "
+                        f"metadata fallback — {fallback_reason}; visual verification unavailable."
                     )
                     break
                 destination.unlink(missing_ok=True)
                 print(
-                    f"Scene {i}: Vision unavailable and metadata match too weak "
-                    f"({score:.2f}, {matched}/{total}); trying the next candidate."
+                    f"Scene {i}: Vision unavailable; candidate rejected — "
+                    f"{fallback_reason}; trying the next candidate."
                 )
                 continue
 

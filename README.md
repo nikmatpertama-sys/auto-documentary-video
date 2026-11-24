@@ -79,3 +79,7 @@ Set provider keys as environment variables before running locally.
 - Check each source page and any applicable license terms, especially for monetized/commercial publishing.
 - AI-generated scripts still need editorial fact-checking.
 - Provider availability, quotas, and topic-specific footage coverage can affect whether all eight scenes can be completed.
+
+### Pass 6 reliability update
+
+The default footage scan now checks up to eight ranked candidates. If all configured AI Vision providers are temporarily unavailable, the generator can still accept a candidate only when its source metadata strongly matches either the scene's visual query or the actual narration. Weak matches remain rejected; the log explicitly marks metadata-only acceptance so it is not confused with pixel-level verification.
