@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-11-25T18:24:40+00:00",
+  "generated_at": "2026-11-25T18:44:14+00:00",
   "status": "failed",
-  "failed_stage": "fact_check",
+  "failed_stage": "footage",
   "error_type": "RuntimeError",
-  "error_message": "The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C3=insufficient: The provided excerpt contains isotopic data measurements for plant specimens and does not contain details about dams slowing currents, sediment settling, soil enrichment, or supporting plant communities.; C4=insufficient: The excerpts mention raised water levels, food caching, and local biodiversity impact generally, but do not state that raised ponds attract fish, amphibians, and waterfowl that would otherwise bypass the stream.; C5=insufficient: The excerpt mentions dissolved nitrates in water-logged soils and fossil faunal remains, but does not evidence groundwater recharge, infiltration during dry periods, or maintaining stream flow.; C6=insufficient: The excerpt discusses subfossil plant carbon/nitrogen isotopic ratios and paleodietary studies, but does not verify carbon storage in wetlands, comparisons to fast-flowing rivers, or climate mitigation.; C7=insufficient: The provided sources do not mention early-successional forests or tree harvesting providing food and shelter specifically for deer, squirrels, and birds.; C8=insufficient: While the source calls beavers ecosystem engineers affecting hydrology and biodiversity, it does not support the specific narrative assertions about engineering resilience and abundance for future generations to cherish today.",
+  "error_message": "Scene 1 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 8 attempted candidates could be downloaded and accepted under the visual verification policy.",
   "context": {
     "topic": "How beavers reshape entire river ecosystems",
     "vision_required": "True"
   },
-  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3827, in _run_pipeline\n    fact_report = verify_documentary_facts(\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py\", line 1529, in verify_documentary_facts\n    raise FactCheckError(str(exc), report=report) from None\nfact_check.FactCheckError: Narration did not pass evidence validation. C3=insufficient: The provided excerpt contains isotopic data measurements for plant specimens and does not contain details about dams slowing currents, sediment settling, soil enrichment, or supporting plant communities.; C4=insufficient: The excerpts mention raised water levels, food caching, and local biodiversity impact generally, but do not state that raised ponds attract fish, amphibians, and waterfowl that would otherwise bypass the stream.; C5=insufficient: The excerpt mentions dissolved nitrates in water-logged soils and fossil faunal remains, but does not evidence groundwater recharge, infiltration during dry periods, or maintaining stream flow.; C6=insufficient: The excerpt discusses subfossil plant carbon/nitrogen isotopic ratios and paleodietary studies, but does not verify carbon storage in wetlands, comparisons to fast-flowing rivers, or climate mitigation.; C7=insufficient: The provided sources do not mention early-successional forests or tree harvesting providing food and shelter specifically for deer, squirrels, and birds.; C8=insufficient: While the source calls beavers ecosystem engineers affecting hydrology and biodiversity, it does not support the specific narrative assertions about engineering resilience and abundance for future generations to cherish today.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4070, in main\n    _run_pipeline()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3856, in _run_pipeline\n    raise RuntimeError(\nRuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C3=insufficient: The provided excerpt contains isotopic data measurements for plant specimens and does not contain details about dams slowing currents, sediment settling, soil enrichment, or supporting plant communities.; C4=insufficient: The excerpts mention raised water levels, food caching, and local biodiversity impact generally, but do not state that raised ponds attract fish, amphibians, and waterfowl that would otherwise bypass the stream.; C5=insufficient: The excerpt mentions dissolved nitrates in water-logged soils and fossil faunal remains, but does not evidence groundwater recharge, infiltration during dry periods, or maintaining stream flow.; C6=insufficient: The excerpt discusses subfossil plant carbon/nitrogen isotopic ratios and paleodietary studies, but does not verify carbon storage in wetlands, comparisons to fast-flowing rivers, or climate mitigation.; C7=insufficient: The provided sources do not mention early-successional forests or tree harvesting providing food and shelter specifically for deer, squirrels, and birds.; C8=insufficient: While the source calls beavers ecosystem engineers affecting hydrology and biodiversity, it does not support the specific narrative assertions about engineering resilience and abundance for future generations to cherish today.\n",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4127, in main\n    _run_pipeline()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3965, in _run_pipeline\n    fetch_footage(plan)\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 2810, in fetch_footage\n    raise RuntimeError(\nRuntimeError: Scene 1 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 8 attempted candidates could be downloaded and accepted under the visual verification policy.\n",
   "environment": {
     "python": "3.11.18",
-    "platform": "Linux-7.0.0-1018-aws-x86_64-with-glibc2.43",
+    "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
     "machine": "x86_64",
     "cpu_count": 4,
     "cwd": "/home/runner/work/auto-documentary-video/auto-documentary-video",
@@ -37,21 +37,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 386.507,
-    "stage_count": 5,
-    "failed_stage": "fact_check",
+    "total_elapsed_seconds": 611.711,
+    "stage_count": 9,
+    "failed_stage": "footage",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-25T18:18:14+00:00",
+        "started_at": "2026-11-25T18:34:03+00:00",
         "details": {},
         "duration_seconds": 0.001
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-25T18:18:14+00:00",
+        "started_at": "2026-11-25T18:34:03+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -61,33 +61,67 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-25T18:18:14+00:00",
+        "started_at": "2026-11-25T18:34:03+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "urls": "12",
           "excerpts": "3"
         },
-        "duration_seconds": 6.775
+        "duration_seconds": 8.31
       },
       {
         "stage": "script_generation",
         "status": "completed",
-        "started_at": "2026-11-25T18:18:21+00:00",
+        "started_at": "2026-11-25T18:34:11+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
-          "words": "176"
+          "words": "170"
         },
-        "duration_seconds": 113.231
+        "duration_seconds": 172.425
       },
       {
         "stage": "fact_check",
-        "status": "failed",
-        "started_at": "2026-11-25T18:20:14+00:00",
+        "status": "completed",
+        "started_at": "2026-11-25T18:37:03+00:00",
         "details": {
-          "claims": "8"
+          "claims": "8",
+          "status": "passed"
         },
-        "duration_seconds": 266.419,
-        "error": "RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C3=insufficient: The provided excerpt contains isotopic data measurements for plant specimens and does not contain details about dams slowing currents, sediment settling, soil enrichment, or supporting plant communities.; C4=insufficient: The excerpts mention raised water levels, food caching, and local biodiversity impact generally, but do not state that raised ponds attract fish, amphibians, and waterfowl that would otherwise bypass the stream.; C5=insufficient: The excerpt mentions dissolved nitrates in water-logged soils and fossil faunal remains, but does not evidence groundwater recharge, infiltration during dry periods, or maintaining stream flow.; C6=insufficient: The excerpt discusses subfossil plant carbon/nitrogen isotopic ratios and paleodietary studies, but does not verify carbon storage in wetlands, comparisons to fast-flowing rivers, or climate mitigation.; C7=insufficient: The provided sources do not mention early-successional forests or tree harvesting providing food and shelter specifically for deer, squirrels, and birds.; C8=insufficient: While the source calls beavers ecosystem engineers affecting hydrology and biodiversity, it does not support the specific narrative assertions about engineering resilience and abundance for future generations to cherish today."
+        "duration_seconds": 3.206
+      },
+      {
+        "stage": "voiceover",
+        "status": "completed",
+        "started_at": "2026-11-25T18:37:07+00:00",
+        "details": {
+          "sentences": "170",
+          "duration_seconds": "87.684"
+        },
+        "duration_seconds": 12.54
+      },
+      {
+        "stage": "timeline_lock",
+        "status": "completed",
+        "started_at": "2026-11-25T18:37:19+00:00",
+        "details": {},
+        "duration_seconds": 0.001
+      },
+      {
+        "stage": "subtitles",
+        "status": "completed",
+        "started_at": "2026-11-25T18:37:19+00:00",
+        "details": {
+          "caption_groups": "37"
+        },
+        "duration_seconds": 0.004
+      },
+      {
+        "stage": "footage",
+        "status": "failed",
+        "started_at": "2026-11-25T18:37:19+00:00",
+        "details": {},
+        "duration_seconds": 415.133,
+        "error": "RuntimeError: Scene 1 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 8 attempted candidates could be downloaded and accepted under the visual verification policy."
       }
     ]
   }

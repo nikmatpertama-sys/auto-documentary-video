@@ -1,17 +1,17 @@
 {
   "path": "output/opening_overlay.png",
   "title_lines": [
-    "BEAVERS: NATURE’S ENGINEERS RESHAPING RIVERS"
+    "BEAVER ENGINEERS: HOW CASTOR RESHAPES RIVER",
+    "WORLDS"
   ],
   "hook_lines": [
-    "Beavers, nature’s",
-    "architects, transform",
-    "flowing rivers into",
-    "thriving wetlands with",
-    "just wood"
+    "Beavers, the world’s",
+    "most industrious",
+    "rodents, reshape rivers",
+    "by building dams that"
   ],
-  "title_text": "Beavers: Nature’s Engineers Reshaping Rivers",
-  "hook_text": "Beavers, nature’s architects, transform flowing rivers into thriving wetlands with just wood",
+  "title_text": "Beaver Engineers: How Castor reshapes River Worlds",
+  "hook_text": "Beavers, the world’s most industrious rodents, reshape rivers by building dams that",
   "title_font_size": 27,
   "hook_font_size": 62,
   "max_text_width": 880,
@@ -19,6 +19,6 @@
     48,
     150,
     1032,
-    606
+    564
   ]
 }
