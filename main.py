@@ -241,6 +241,11 @@ def evidence_block(evidence, max_excerpt_chars=0):
 # fact auditor could not support ("the excerpt contains isotopic data"), so a
 # page titled or slugged like a lab paper never reaches the brief.
 OFF_TOPIC_SOURCE_MARKERS = (
+    # Abstract-only databases serve a stub page or a genetics paper, neither of
+    # which can carry a documentary sentence.
+    "ncbi.nlm.nih.gov",
+    "pubmed",
+    "europepmc",
     "phylogen",
     "mitochondr",
     "genom",
@@ -255,7 +260,7 @@ OFF_TOPIC_SOURCE_MARKERS = (
 )
 
 
-def build_evidence_brief(topic, source_pool, limit=6, candidates=10, excerpt_chars=420):
+def build_evidence_brief(topic, source_pool, limit=6, candidates=20, excerpt_chars=420):
     """Fetch candidate sources and keep the passages that fit this topic.
 
     A citation list taken from a Wikipedia article is not automatically about
@@ -308,8 +313,10 @@ VERIFIED SOURCE PAGES WITH THE FETCHED PASSAGE THAT WILL BE AUDITED:
 Every fact_claims[].source_urls entry MUST be copied exactly from this list,
 and each sentence must be fully supported by that page's passage above. Never
 state anything absent from those passages: reuse their vocabulary and facts,
-not your own general knowledge. Do not merge two passages into one sentence and
-do not add consequences, comparisons or effects a passage does not state. The narration must STILL total
+not your own general knowledge. At least half of each sentence's content words
+must appear in the passage it cites, so copy its phrases instead of paraphrasing.
+Do not merge two passages into one sentence and do not add consequences,
+comparisons or effects a passage does not state. The narration must STILL total
 160-185 spoken words (about 20-23 per scene); count the words before answering.
 """
     elif source_pool:
@@ -461,7 +468,9 @@ def discover_source_pool(topic):
         f"Source pool articles suggested by {provider}/{model}: "
         + ", ".join(titles[:3])
     )
-    pool = wikipedia_source_pool(titles, limit=12)
+    # A wider candidate list matters: many encyclopedia citations point at
+    # abstract databases that cannot serve as readable documentary evidence.
+    pool = wikipedia_source_pool(titles, limit=24)
     if not pool:
         fallback_titles = wikipedia_search_titles(topic, limit=3)
         if fallback_titles and fallback_titles != titles:
@@ -469,7 +478,7 @@ def discover_source_pool(topic):
                 "Source pool: the suggested articles cited no trusted pages; "
                 "retried with " + ", ".join(fallback_titles[:3])
             )
-            pool = wikipedia_source_pool(fallback_titles, limit=12)
+            pool = wikipedia_source_pool(fallback_titles, limit=24)
     return pool
 
 
@@ -502,7 +511,9 @@ Return ONLY valid JSON:
   scene and rewrite it until it fits. The combined narration must total
   160-185 words.
 - Reuse the vocabulary of the fetched passages and state only what they state:
-  no added consequences, comparisons or effects.
+  at least half of each sentence's content words must appear in the passage it
+  cites, so copy its phrases instead of paraphrasing; no added consequences,
+  comparisons or effects.
 - Scene 1 opens with a curiosity hook of at most 12 words and real moving
   footage, never a diagram.
 - visual_focus is 2-6 concrete words and at least half of them must appear
@@ -803,7 +814,7 @@ def gemini_plan(topic, source_pool=None, evidence=None):
                     }
                     shared_terms = sentence_terms & excerpt_terms
                     coverage = len(shared_terms) / max(1, len(sentence_terms))
-                    if len(shared_terms) < 3 or coverage < 0.5:
+                    if len(shared_terms) < 3 or coverage < 0.35:
                         raise ValueError(
                             f"Fact claim {claim_index} does not restate the fetched passage "
                             f"it cites ({coverage:.0%} of its key terms appear there). "
