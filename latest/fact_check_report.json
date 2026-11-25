@@ -1,402 +1,184 @@
 {
   "status": "blocked",
   "method": "trusted-source fetch + independent evidence-grounded AI audit",
-  "fact_checker": {
-    "provider": "groq",
-    "model": "openai/gpt-oss-120b"
-  },
   "claim_count": 8,
-  "supported_claim_count": 0,
-  "failed_claims": [
-    {
-      "claim_id": "C1",
-      "status": "insufficient",
-      "evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/"
-      ],
-      "reason": "The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation."
-    },
-    {
-      "claim_id": "C2",
-      "status": "insufficient",
-      "evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC5335264/"
-      ],
-      "reason": "The excerpt focuses on beaver phylogenetic lineage and exploitation history, not on dam effects on groundwater or floodplain soils."
-    },
-    {
-      "claim_id": "C3",
-      "status": "insufficient",
-      "evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC7403313/"
-      ],
-      "reason": "The excerpt describes fossil beaver sites and paleo‑ecology, without any data on modern pond depth, thermal refuges, or fish survival."
-    },
-    {
-      "claim_id": "C4",
-      "status": "insufficient",
-      "evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3030560/"
-      ],
-      "reason": "The excerpt is about mitochondrial genomes and specimen collection, not about sediment trapping, water clarity, or nutrient delivery."
-    },
-    {
-      "claim_id": "C5",
-      "status": "insufficient",
-      "evidence_urls": [
-        "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
-        "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru"
-      ],
-      "reason": "Both sources discuss biodiversity in broad human‑health or forest‑management contexts; they do not provide evidence that beaver activity raises biodiversity of amphibians, waterfowl, or mammals."
-    },
-    {
-      "claim_id": "C6",
-      "status": "insufficient",
-      "evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3030560/"
-      ],
-      "reason": "The excerpt again deals with beaver mitochondrial genetics, not with carbon storage in pond sediments."
-    },
-    {
-      "claim_id": "C7",
-      "status": "insufficient",
-      "evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/"
-      ],
-      "reason": "The excerpt mentions rodent diversification and does not address water chemistry or nitrogen changes caused by beaver dams."
-    },
-    {
-      "claim_id": "C8",
-      "status": "insufficient",
-      "evidence_urls": [
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
-      ],
-      "reason": "Both sources provide taxonomic information on beaver species; they contain no statements about beavers reshaping rivers or ecosystem services."
-    }
-  ],
-  "uncited_factual_sentences": [],
-  "coverage_note": "All supplied claims lack direct supporting evidence in the fetched excerpts, resulting in insufficient verification. No additional factual sentences were found outside the claimed list.",
-  "claims": [
-    {
-      "id": "C1",
-      "scene": 1,
-      "sentence": "Beavers engineer wetlands, turning fast streams into tranquil ponds that spark cascading ecological change, and creating habitats for countless species today.",
-      "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383",
-        "https://pubmed.ncbi.nlm.nih.gov/22697210"
-      ],
-      "status": "insufficient",
-      "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/"
-      ],
-      "reason": "The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation."
-    },
-    {
-      "id": "C2",
-      "scene": 2,
-      "sentence": "Their dams slow water, raising local groundwater tables and expanding floodplain soils, nurturing riparian plants, feeding insects, and protecting towns nearby.",
-      "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264",
-        "https://pubmed.ncbi.nlm.nih.gov/28256552"
-      ],
-      "status": "insufficient",
-      "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC5335264/"
-      ],
-      "reason": "The excerpt focuses on beaver phylogenetic lineage and exploitation history, not on dam effects on groundwater or floodplain soils."
-    },
-    {
-      "id": "C3",
-      "scene": 3,
-      "sentence": "Beaver ponds increase water depth, creating thermal refuges that boost fish survival during winter, especially for species like trout and salmon.",
-      "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313",
-        "https://pubmed.ncbi.nlm.nih.gov/32753594"
-      ],
-      "status": "insufficient",
-      "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC7403313/"
-      ],
-      "reason": "The excerpt describes fossil beaver sites and paleo‑ecology, without any data on modern pond depth, thermal refuges, or fish survival."
-    },
-    {
-      "id": "C4",
-      "scene": 4,
-      "sentence": "The standing water traps sediments, improving downstream water clarity and reducing erosion, while also delivering nutrient‑rich silt to floodplain gardens everywhere.",
-      "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560",
-        "https://pubmed.ncbi.nlm.nih.gov/21307956"
-      ],
-      "status": "insufficient",
-      "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3030560/"
-      ],
-      "reason": "The excerpt is about mitochondrial genomes and specimen collection, not about sediment trapping, water clarity, or nutrient delivery."
-    },
-    {
-      "id": "C5",
-      "scene": 5,
-      "sentence": "Beaver activity raises biodiversity, supporting amphibians, waterfowl, and mammals that rely on wetland resources, through abundant food, shelter, and breeding sites.",
-      "source_urls": [
-        "https://journals.iupui.edu/index.php/ias/article/download/7219/7239",
-        "https://pubmed.ncbi.nlm.nih.gov/18777567"
-      ],
-      "status": "insufficient",
-      "verified_evidence_urls": [
-        "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
-        "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru"
-      ],
-      "reason": "Both sources discuss biodiversity in broad human‑health or forest‑management contexts; they do not provide evidence that beaver activity raises biodiversity of amphibians, waterfowl, or mammals."
-    },
-    {
-      "id": "C6",
-      "scene": 6,
-      "sentence": "Beaver‑created ponds trap organic material, leading to long‑term carbon storage in saturated soils.",
-      "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560"
-      ],
-      "status": "insufficient",
-      "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3030560/"
-      ],
-      "reason": "The excerpt again deals with beaver mitochondrial genetics, not with carbon storage in pond sediments."
-    },
-    {
-      "id": "C7",
-      "scene": 7,
-      "sentence": "Beaver dams can change water chemistry, sometimes increasing nitrogen concentrations downstream, which can affect downstream aquatic communities.",
-      "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383"
-      ],
-      "status": "insufficient",
-      "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/"
-      ],
-      "reason": "The excerpt mentions rodent diversification and does not address water chemistry or nitrogen changes caused by beaver dams."
-    },
-    {
-      "id": "C8",
-      "scene": 8,
-      "sentence": "Ultimately, beavers act as ecosystem engineers, reshaping rivers into resilient, productive landscapes for generations that sustain wildlife, water quality, and livelihoods.",
-      "source_urls": [
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
-      ],
-      "status": "insufficient",
-      "verified_evidence_urls": [
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
-      ],
-      "reason": "Both sources provide taxonomic information on beaver species; they contain no statements about beavers reshaping rivers or ecosystem services."
-    }
-  ],
+  "fact_checker_failure": "ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 400; openrouter/baidu/ernie-5.5-flash-preview:free: HTTP 400; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: HTTP 413",
   "sources": [
     {
       "claim_id": "C1",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
       "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. A theoritical ecological model of size distributions among species of animals. It is based on 11 mitochondrial and nuclear genes that covers 1,265 species, i.e. Species diversity is the result of the balance between speciation and extinction whereas morphological disparity is primarily a consequence of adaptation [ 1 - 3 ]. The use of dated phylogenetic trees in combination with knowledge on species assemblies allows us to (1) estimate speciation and extinction rates [ 6 ], (2) detect shifts in diversification rates [ 7 , 8 ], (3) test diversification constancy through time [ 9 , 10 ] and (4) study the link between biological traits and diversification within clades [ 11 , 12 ]. As a result rodents represent nearly half of the current mammali",
+      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. As a result rodents represent nearly half of the current mammalian diversity with more than 2,261 species organized into 474 genera [ 13 ]. Imbalance and shifts in diversification rate within rodents Whole-tree tests conducted on the complete species sampling indicate significant variation in diversification rates among rodent lineages (Table 4 , Figure 3 ). Muroid rodents comprise 28% of mammal species and this superfamily [ 13 ] is larger than any other non-rodent orders. Methods Taxonomy All species names followed the rodents classification of Carleton and Musser [ 132 ]. The resulting dataset represents 100% of the families (33 families), 81% of the genera (387 of 474 genera), and 56% of the species (1,265 of 2,261 species) of rodents cur",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C1",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/22697210",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
-    },
-    {
-      "claim_id": "C2",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC5335264/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "The Beaver’s Phylogenetic Lineage Illuminated by Retroposon Reads - PMC The Beaver’s Phylogenetic Lineage Illuminated by Retroposon Reads Lock",
-      "excerpt": "Using a local version of the RepeatMasker, we extracted potential phylogenetically informative SINE markers from these 133,796 long contigs ( Fig. Unfortunately, as impressive as beavers are at modifying their local environment, they have been vulnerable to exploitation by humans especially in the nineteenth century. Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers ( Castor ), one of the largest rodent species. Functional evolution of the feeding system in rodents. Masticatory muscle anatomy and feeding efficiency of the American beaver, Castor canadensis (Rodentia, Castoridae).",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C2",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/28256552",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
-    },
-    {
-      "claim_id": "C3",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC7403313/",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
       "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "The remains of a complex faunal community were discovered at the Beaver Pond site, including beaver ( Dipoides sp., see below), three-toed horse, bear, badger, “deerlet”, water fowl, fish and a rabbit relative 10 , 22 . Dam building and food caching behaviours appear to be specializations for cold winter survival and may have evolved in response to late Neogene northern cooling. The only definitive evidence of woodcutting in extinct beavers is from the Pliocene-aged High Arctic Beaver Pond fossil site, which preserves evidence of beaver-cut wood and a possible dam-core associated with the extinct beaver genus, Dipoides (species not yet described) 9 – 11 . The appearance of woodcutting in Dipoides sp., a distant relative of Castor , implies that this behaviour originated 20 to 24 Ma ago, in a group of semiaquatic beavers that includes both extant species (C astor canadensis and Castor fib",
+      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. The only definitive evidence of woodcutting in extinct beavers is from the Pliocene-aged High Arctic Beaver Pond fossil site, which preserves evidence of beaver-cut wood and a possible dam-core associated with the extinct beaver genus, Dipoides (species not yet described) 9 – 11 . The appearance of woodcutting in Dipoides sp., a distant relative of Castor , implies that this behaviour originated 20 to 24 Ma ago, in a group of semiaquatic beavers that includes both extant species (C astor canadensis and Castor fiber ), the small Holarctic genus Dipoides , and the North American Ice Age giant beaver Castoroides 7 , 9 , 12 . The identified plant species in this study concur with previous interpretations that this was an open-forest landscape int",
       "source_kind": "planned",
       "status": "usable"
     },
     {
-      "claim_id": "C3",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/32753594",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
-    },
-    {
-      "claim_id": "C4",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3030560/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "Mitochondrial Genomes Reveal Slow Rates of Molecular Evolution and the Timing of Speciation in Beavers (Castor), One of the Largest Rodent Species - PMC Mitochondrial Genomes Reveal Slow Rates of Molecular Evolution and the Timing of Specia",
-      "excerpt": "In contrast, an earlier analysis of complete mitochondrial genome sequences did not recover Anomalurus within the mouse-related clade [18] , possibly due to reducing the sequences to the coding regions for some of the phylogenetic inferences. belorussicus / orientoeuropaeus , birulai , tuvinicus and pohlei consisted of beaver tail skin or hair that was obtained from live animals captured with nets, live traps, and at night with a search light and netting from a boat.",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C4",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/21307956",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://journals.iupui.edu/index.php/ias/article/download/7219/7239",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Could not fetch evidence source https://journals.iupui.edu/index.php/ias/article/download/7219/7239: SSLError"
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/18777567",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://www.usgs.gov/centers/whcmsc/science/beaver-dams-increase-wetland-habitat-and-biodiversity",
-      "status": "not_usable",
-      "source_kind": "recovered",
-      "reason": "Could not fetch evidence source https://www.usgs.gov/centers/whcmsc/science/beaver-dams-increase-wetland-habitat-and-biodiversity: HTTPError (HTTP 404)"
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://www.fs.fed.us/biology/landscape/Beaver_Ecology_and_Wildlife.pdf",
-      "status": "not_usable",
-      "source_kind": "recovered",
-      "reason": "Could not fetch evidence source https://www.fs.fed.us/biology/landscape/Beaver_Ecology_and_Wildlife.pdf: ConnectionError"
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
-      "resolved_url": "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
-      "host": "www.who.int",
-      "http_status": 200,
-      "page_title": "Biodiversity",
-      "excerpt": "Human health relies on ecosystem resources, products and services (such as fresh water, food and fuel sources; Sustainable, healthy food systems Biodiversity serves as the foundation of healthy sustainable food systems. It directly influences the availability and nutritional value of food, as a diverse range of plant and animal species, ecosystems, and genetic resources contributes to healthier, more resilient food production. Nutrition and biodiversity are interconnected at various levels, from ecosystems that provide food to the genetic diversity within species. Biodiversity offers a genetic pool for developing resilient and sustainable food crops, livestock and marine species. Preserving biodiversity in agricultural landscapes promotes sustainable food systems capable of producing nutritious food with minimal environmental impact. Habitat simplification (the selective removal of speci",
-      "source_kind": "discovered",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://www.iucnredlist.org/resources/summary-statistics",
-      "status": "not_usable",
-      "source_kind": "discovered",
-      "reason": "Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again."
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru",
-      "resolved_url": "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru",
-      "host": "reliefweb.int",
-      "http_status": 200,
-      "page_title": "The State of the World’s Forests 2020: Forests, biodiversity and people [EN/AR/RU] - World | ReliefWeb UN OCHA",
-      "excerpt": "It is intended to complement The State of the World’s Biodiversity for Food and Agriculture , released by the Food and Agriculture Organization of the United Nations (FAO) in February 2019; Ironically, the resilience of human food systems and their capacity to adapt to future change depends on that very biodiversity – including dryland-adapted shrub and tree species that help combat desertification, forest-dwelling insects, bats and bird species that pollinate crops, trees with extensive root systems in mountain ecosystems that prevent soil erosion, and mangrove species that provide resilience against flooding in coastal areas. The forest-specialist index, based on 455 monitored populations of 268 forest mammals, amphibians, reptiles and birds, fell by 53 percent between 1970 and 2014, an annual rate of decline of 1.7 percent. On a positive note, the Nagoya Protocol on Access to Genetic ",
-      "source_kind": "discovered",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://www.britannica.com/science/biodiversity-loss",
-      "status": "not_usable",
-      "source_kind": "discovered",
-      "reason": "Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again."
-    },
-    {
-      "claim_id": "C6",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3030560/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "Mitochondrial Genomes Reveal Slow Rates of Molecular Evolution and the Timing of Speciation in Beavers (Castor), One of the Largest Rodent Species - PMC Mitochondrial Genomes Reveal Slow Rates of Molecular Evolution and the Timing of Specia",
-      "excerpt": "Not only the phylogenetic placement of beavers within rodents is not completely understood, little is also known about the timing of the speciation event leading to the two extant beaver species. However, the substitution rate estimates for the tip branches leading to the individual subspecies are very similar to the overall estimate for the branch from the MRCA of all rodents to the tips of the beaver branches, suggesting that for this evolutionary lineage, time-dependent variation in substitution rates is negligible. Correlates of substitution rates with lifespan are not fully explained to date [21] , but natural selection could have acted to reduce the mutation rate in mitochondria of long lived taxa such as the beaver [37] , [38] . Methodology/Principal Findings We sequenced complete mitochondrial genomes from both extant beaver species and used these sequences to place beavers in th",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C7",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "They underwent an adaptive radiation in South America during the Miocene with scansorial ( Capromys ), fossorial (Ctenomyidae), terrestrial ( Trinomys ), semi aquatic ( Myocastor ) and arboreal ( Echimys ) representatives. Simultaneously, most of the relatives of extant species played a major role in rodent communities during that period, in particular the Muridae and Cricetidae (Figure 2 and 3 ). The effects of Cenozoic global change on squirrel phylogeny. Causes of lineage decline in the Aplodontidae: testing for the influence of physical and biological change.",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C8",
+      "claim_id": "C2",
       "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
       "resolved_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
       "host": "www.itis.gov",
       "http_status": 200,
       "page_title": "ITIS - Report: Castor fiber",
-      "excerpt": "Contact Us Data Access and Tools Data Access Information ITIS Tools Advanced Search Web Services Web Service Information Description of ITIS Web Services Developing a Client ITIS Solr Web Services ITIS Solr WS Examples Hierarchical Report Compare Names Get ITIS Data Full Database Download Instructions Database Files Download Data in TWB Format Become a Data Partner Contribute Taxonomic Workbench Help Go to Print Version Castor fiber Linnaeus, 1758 Taxonomic Serial No.: 573165 (Download Help) Castor fiber TSN 573165 Taxonomy and Nomenclature Kingdom: Animalia Taxonomic Rank: Species Synonym(s): Castor fiber fiber Linnaeus, 1758 Castor fiber galliae Geoffroy, 1803 Castor fiber albicus Matschie, 1907 Castor fiber vistulanus Matschie, 1907 Castor fiber pohlei Serebrennikov, 1929 Castor fiber birulai Serebrennikov, 1929 Castor fiber tuvinicus Lavrov, 1969 Castor fiber belorussicus Lavrov, 198",
+      "excerpt": "Wood, 1955 Family Castoridae Hemprich, 1820 – Beavers Genus Castor Linnaeus, 1758 – beavers Species Castor fiber Linnaeus, 1758 – Eurasian Beaver References Expert(s): Expert: Don E. Contact Us Data Access and Tools Data Access Information ITIS Tools Advanced Search Web Services Web Service Information Description of ITIS Web Services Developing a Client ITIS Solr Web Services ITIS Solr WS Examples Hierarchical Report Compare Names Get ITIS Data Full Database Download Instructions Database Files Download Data in TWB Format Become a Data Partner Contribute Taxonomic Workbench Help Go to Print Version Castor fiber Linnaeus, 1758 Taxonomic Serial No.: 573165 (Download Help) Castor fiber TSN 573165 Taxonomy and Nomenclature Kingdom: Animalia Taxonomic Rank: Species Synonym(s): Castor fiber fiber Linnaeus, 1758 Castor fiber galliae Geoffroy, 1803 Castor fiber albicus Matschie, 1907 Castor fib",
       "source_kind": "planned",
       "status": "usable"
     },
     {
-      "claim_id": "C8",
+      "claim_id": "C2",
       "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
       "resolved_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
       "host": "www.itis.gov",
       "http_status": 200,
       "page_title": "ITIS - Report: Castor canadensis",
-      "excerpt": "Wood, 1955 Family Castoridae Hemprich, 1820 – Beavers Genus Castor Linnaeus, 1758 – beavers Species Castor canadensis Kuhl, 1820 – castor, American Beaver, Castor Americano, North American Beaver References Expert(s): Expert: Alfred L. 166 Page(s): 79 Publisher: United States Department of the Interior Fish and Wildlife Service Publication Place: Washington, D.C., USA ISBN/ISSN: Notes: Reference for: Castor canadensis Author(s)/Editor(s): Burgin, Connor J., Don E. Publication Date: 2016 Article/Chapter Title: Family Castoridae (Beavers) Journal/Book Name, Vol. While every effort has been made to provide the most reliable and up-to-date information available, ultimate legal requirements with respect to species are contained in provisions of treaties to which the United States is a party, wildlife statutes, regulations, and any applicable notices that have been published in the Federal Reg",
+      "excerpt": "Wood, 1955 Family Castoridae Hemprich, 1820 – Beavers Genus Castor Linnaeus, 1758 – beavers Species Castor canadensis Kuhl, 1820 – castor, American Beaver, Castor Americano, North American Beaver References Expert(s): Expert: Alfred L. Monotremata to Rodentia Page(s): 631 Publisher: Lynx Edicions Publication Place: Barcelona ISBN/ISSN: 978-84-16728-343 Notes: Reference for: Castor canadensis , North American Beaver [English] Author(s)/Editor(s): Busher, P. 6: Lagomorphs and Rodents I Page(s): 150-168 Publisher: Lynx Edicions Publication Place: Barcelona, Spain ISBN/ISSN: 978-84-941892-34 Notes: Reference for: Castor canadensis , North American Beaver [English] Author(s)/Editor(s): Wilson, Don E., and DeeAnn M. Upmeyer Reference for: Castor canadensis , American Beaver [English] Geographic Information Geographic Division: North America Middle America Jurisdiction/Origin: Continental US, N",
       "source_kind": "planned",
       "status": "usable"
-    }
-  ],
-  "blocked_at_claim": "C1",
-  "blocked_claim_sentence": "Beavers engineer wetlands, turning fast streams into tranquil ponds that spark cascading ecological change, and creating habitats for countless species today.",
-  "failure_reason": "C1=insufficient: The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation.",
-  "claim_repairs": [
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern beavers ( Castor ) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. These behaviours have a profound effect on regional hydrology, nutrient flow across the landscape, and local biodiversity, thus making them exemplary “ecosystem engineers” 2 – 4 . In particular, how Castor ’s distinctive comp",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
+      "excerpt": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Development of phylogenetic methods that do not rely on fossils for the study of evolutionary processes through time have revolutionized the field of evolutionary biology and resulted in an unprecedented expansion of our knowledge about the tree of ... Development of phylogenetic methods that do not rely on fossils for the study of evolutionary processes through time have revolutionized the field of evolutionary biology and resulted in an unprecedented expansion of our knowledge about the tree of ... PMC Copyright notice PMCID: PMC3532383 PMID: 22697210 Abstract Background Development of phylogenetic methods that do not rely on fossils for the study of evolutionary processes through time have revolutionized the field of evolutionary",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C4",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "Subject terms: Palaeoecology, Biogeochemistry, Phylogenetics Introduction Beavers today are renowned for their woodcutting behaviour and construction abilities. Woodcutting behavior in beavers (Castoridae, Rodentia): estimating ecological performance in a modern and a fossil taxon. Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. In a phylogenetic context, the isotopic evidence implies that woodcutting and consumption of woody plants can be traced back to a small-bodied, semiaquatic Miocene castorid, suggesting that beavers have been consuming woody plants for over 20 million years. The only definitive e",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C4",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
+      "excerpt": "These small to medium-sized placentals have spread over all continents (except Antarctica) and most islands, where they occupy virtually all terrestrial ecosystems from tropical rainforests and deserts to the arctic tundra. We therefore expect that a more robust framework for rodent molecular phylogeny may benefit from a gene concatenation approach as illustrated by the family-level supermatrix tree of Meredith et al. Supplementary Material Additional file 1 Figure S1. Click here for file (15.5KB, xls) Additional file 18 Loci used in each molecular dating analysis (see Material and Methods). Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. The phylogeny of Cetartiodactyla: the importance of dense taxon sampling, missing data, and the remarkable promise of cytochrome b to provide reliable sp",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
+      "excerpt": "These small to medium-sized placentals have spread over all continents (except Antarctica) and most islands, where they occupy virtually all terrestrial ecosystems from tropical rainforests and deserts to the arctic tundra. Throughout the Cenozoic, rodents underwent an extraordinary adaptive radiation. Using the topological imbalances and the time line we discuss the potential role of different diversification factors that might have shaped the rodents radiation. Conclusions The present glimpse on the diversification pattern of rodents can be used for further comparative meta-analyses. Our results show that rodents experienced shifts in diversification rate regularly through the Tertiary, but at different periods for each clade. As a result rodents represent nearly half of the current mammalian diversity with more than 2,261 species organized into 474 genera [ 13 ]. Rodents also display ",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "If burrowing behaviour in semiaquatic castorids is the primitive condition, it is likely Dipoides burrowed as well, as seen in other semiaquatic rodents today such as Castor , but also Crossomys (earless water rat), Myocastor (nutria), and Ondatra (muskrat) 92 . Subject terms: Palaeoecology, Biogeochemistry, Phylogenetics Introduction Beavers today are renowned for their woodcutting behaviour and construction abilities. Castoridae is a diverse family of herbivorous Holarctic rodents, originating during the late Eocene 7 – 9 . Ellesmere Island today is a polar desert, with sparse flora and very little precipitation 24 . Pliocene-age sites with similar fauna and flora community composition are very rare—Idaho in mid-continent North America, and the high altitude Yushe Basin, in northeastern China are the only known sites with similar (but not equivalent) faunal assemblages 37 , 38 . The id",
+      "source_kind": "planned",
+      "status": "usable"
+    },
     {
       "claim_id": "C6",
-      "scene": 6,
-      "original_sentence": "These engineered wetlands sequester carbon, storing organic matter in saturated soils for decades, thereby mitigating climate change and enhancing carbon budgets.",
-      "replacement_sentence": "Beaver‑created ponds trap organic material, leading to long‑term carbon storage in saturated soils.",
-      "replacement_source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560"
-      ],
-      "status": "rewritten"
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
+      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. We assumed prior Yule speciation process and an uncorrelated lognormal distribution for the molecular clock model [ 156 ]. A relaxed molecular clock dating approach provided a time framework for speciation events. However, a resurgence of interest in rodent phylogeny using molecular markers, most notably mitochondrial markers [ 20 - 23 ], nuclear genes [ 16 , 24 - 30 ] and retroposed elements [ 31 ], has provided a new insight of familial relationships and has challenged traditional classifications based on myological ( e.g. However, several extensive mitochondrial molecular studies of other mammalian orders have been performed for Primates [ 64 - 66 ], Carnivora [ 67 ], Cetartiodactyla [ 68 , 69 ] and Chiroptera [ 70 ]. The molecular superma",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Hence, reconstructing the diet of herbivores that lived thousands or millions of years ago can be problematic when using isotopic data, as is very rare to find sufficiently preserved coeval plant material and faunal remains from the same geologic locality. © The Author(s) 2020 Open Access This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptat",
+      "source_kind": "planned",
+      "status": "usable"
     },
     {
       "claim_id": "C7",
-      "scene": 7,
-      "original_sentence": "Beaver colonies also influence stream chemistry, lowering nitrate levels through plant uptake, which benefits downstream ecosystems and reduces algal bloom risk.",
-      "replacement_sentence": "Beaver dams can change water chemistry, sometimes increasing nitrogen concentrations downstream, which can affect downstream aquatic communities.",
-      "replacement_source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383"
-      ],
-      "status": "rewritten"
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5335264/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5335264/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "The Beaver’s Phylogenetic Lineage Illuminated by Retroposon Reads - PMC The Beaver’s Phylogenetic Lineage Illuminated by Retroposon Reads Lock",
+      "excerpt": "While molecular sequence support for placing beaver together with kangaroo rat within the mouse-related clade, a group comprising Myodonta (e.g., mice, blind mole-rats, jerboas), Anomaluromorpha (scaly-tailed squirrels and springhares), and Castorimorpha (beavers, pocket gophers, kangaroo rats/mice), has accumulated 6 , 7 , so far only a single retroposon marker supported for placing the beaver inside this clade 5 . Comparative results provided significant support for a clear relationship between beavers (Castoridae) and kangaroo rat-related species (Geomyoidea) (p < 0.0015, six markers, no conflicting data) within a significantly supported mouse-related clade (including Myodonta, Anomaluromorpha, and Castorimorpha) (p < 0.0015, six markers, no conflicting data). To test the sister-group relationship between Castoridae and Geomyoidea (the Castorimorpha clade) to the exclusion of Myodonta",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
+      "excerpt": "The Myodonta + Anomaluroidea and the Castorimorpha clade are grouped in the mouse-related clade (BP =57%). In the second group, the mouse-related clade and Ctenohystrica have the majority of generic divergences and SDR through the Neogene. We identified a number of shifts in diversification rates within the major clades: two in Castorimorpha, three in Ctenohystrica, 6 within the squirrel-related clade and 24 in the Myomorpha clade. Four main clades (Figure 1 and Additional file 1 : Figure S1) are recovered : (1) the Ctenohystrica (BP = 100% , Additional file 2 : Figure S2 and Additional file 3 : Figure S3), (2) a squirrel-related clade (BP = 100%, Additional file 4 : Figure S4 and Additional file 5 : Figure S5), (3) the Castorimorpha (BP = 100%, Additional file 6 : Figure S6) and (4) the Myodonta + Anomaluroidea (BP = 66%, Additional file 7 : Figure S7, Additional file 8 : Figure S8, Add",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "Financial support for this research was provided by a Natural Sciences and Engineering Research Council Discovery grant (F.J.L.), Canada Research Chairs program (F.J.L.), Canada Foundation for Innovation (F.J.L.) and the Ontario Research Fund (F.J.L.). Ecological impact of beavers Castor fiber and Castor canadensis and their ability to modify ecosystems. Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
+      "excerpt": "These small to medium-sized placentals have spread over all continents (except Antarctica) and most islands, where they occupy virtually all terrestrial ecosystems from tropical rainforests and deserts to the arctic tundra. Thus, mitochondrial genes have been sequenced for most of the available species within our dataset, and mitochondrial markers like CYTB (with 1152 sequenced taxa; Because extinction processes may have biased the interpretation of SDR, future studies should incorporate fossil data in supermatrix/supertree inferences. Due to the size of this dataset many taxa suffer from large amount of missing data, but all share at least one mitochondrial or nuclear gene, thus avoiding the problem of non overlapping sequences [ 142 ]. Default prior distributions were used for all other parameters, and two independant MCMC chains were ran for 200 million generations. Mitochondrial geno",
+      "source_kind": "planned",
+      "status": "usable"
     }
-  ],
-  "repair_exhausted": true
+  ]
 }

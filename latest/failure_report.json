@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-25T17:49:15+00:00",
+  "generated_at": "2026-11-25T18:08:22+00:00",
   "status": "failed",
   "failed_stage": "fact_check",
   "error_type": "RuntimeError",
-  "error_message": "The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C1=insufficient: The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation.; C2=insufficient: The excerpt focuses on beaver phylogenetic lineage and exploitation history, not on dam effects on groundwater or floodplain soils.; C3=insufficient: The excerpt describes fossil beaver sites and paleo‑ecology, without any data on modern pond depth, thermal refuges, or fish survival.; C4=insufficient: The excerpt is about mitochondrial genomes and specimen collection, not about sediment trapping, water clarity, or nutrient delivery.; C5=insufficient: Both sources discuss biodiversity in broad human‑health or forest‑management contexts; they do not provide evidence that beaver activity raises biodiversity of amphibians, waterfowl, or mammals.; C6=insufficient: The excerpt again deals with beaver mitochondrial genetics, not with carbon storage in pond sediments.; C7=insufficient: The excerpt mentions rodent diversification and does not address water chemistry or nitrogen changes caused by beaver dams.; C8=insufficient: Both sources provide taxonomic information on beaver species; they contain no statements about beavers reshaping rivers or ecosystem services.",
+  "error_message": "The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Trusted source pages were fetched, but the independent fact-audit route did not return a valid verdict.",
   "context": {
     "topic": "How beavers reshape entire river ecosystems",
     "vision_required": "True"
   },
-  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3747, in _run_pipeline\n    fact_report = verify_documentary_facts(\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py\", line 1505, in verify_documentary_facts\n    raise FactCheckError(str(exc), report=report) from None\nfact_check.FactCheckError: Narration did not pass evidence validation. C1=insufficient: The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation.; C2=insufficient: The excerpt focuses on beaver phylogenetic lineage and exploitation history, not on dam effects on groundwater or floodplain soils.; C3=insufficient: The excerpt describes fossil beaver sites and paleo‑ecology, without any data on modern pond depth, thermal refuges, or fish survival.; C4=insufficient: The excerpt is about mitochondrial genomes and specimen collection, not about sediment trapping, water clarity, or nutrient delivery.; C5=insufficient: Both sources discuss biodiversity in broad human‑health or forest‑management contexts; they do not provide evidence that beaver activity raises biodiversity of amphibians, waterfowl, or mammals.; C6=insufficient: The excerpt again deals with beaver mitochondrial genetics, not with carbon storage in pond sediments.; C7=insufficient: The excerpt mentions rodent diversification and does not address water chemistry or nitrogen changes caused by beaver dams.; C8=insufficient: Both sources provide taxonomic information on beaver species; they contain no statements about beavers reshaping rivers or ecosystem services.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3990, in main\n    _run_pipeline()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3776, in _run_pipeline\n    raise RuntimeError(\nRuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C1=insufficient: The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation.; C2=insufficient: The excerpt focuses on beaver phylogenetic lineage and exploitation history, not on dam effects on groundwater or floodplain soils.; C3=insufficient: The excerpt describes fossil beaver sites and paleo‑ecology, without any data on modern pond depth, thermal refuges, or fish survival.; C4=insufficient: The excerpt is about mitochondrial genomes and specimen collection, not about sediment trapping, water clarity, or nutrient delivery.; C5=insufficient: Both sources discuss biodiversity in broad human‑health or forest‑management contexts; they do not provide evidence that beaver activity raises biodiversity of amphibians, waterfowl, or mammals.; C6=insufficient: The excerpt again deals with beaver mitochondrial genetics, not with carbon storage in pond sediments.; C7=insufficient: The excerpt mentions rodent diversification and does not address water chemistry or nitrogen changes caused by beaver dams.; C8=insufficient: Both sources provide taxonomic information on beaver species; they contain no statements about beavers reshaping rivers or ecosystem services.\n",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py\", line 1305, in _verify_documentary_pass\n    verdict, provider, model = _call_fact_json(\n                               ^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py\", line 780, in _call_fact_json\n    return generate_fact_json(prompt, validator=validator, stage=stage)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py\", line 1252, in generate_fact_json\n    return _route(\"fact\", prompt, validator=validator, stage=stage)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py\", line 1227, in _route\n    raise ProviderRoutingError(\nai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 400; openrouter/baidu/ernie-5.5-flash-preview:free: HTTP 400; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: HTTP 413\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3827, in _run_pipeline\n    fact_report = verify_documentary_facts(\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py\", line 1497, in verify_documentary_facts\n    report = _verify_documentary_pass(plan, generate_fact_json, fetched)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py\", line 1316, in _verify_documentary_pass\n    raise FactCheckError(\nfact_check.FactCheckError: Trusted source pages were fetched, but the independent fact-audit route did not return a valid verdict.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4070, in main\n    _run_pipeline()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3856, in _run_pipeline\n    raise RuntimeError(\nRuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Trusted source pages were fetched, but the independent fact-audit route did not return a valid verdict.\n",
   "environment": {
     "python": "3.11.18",
     "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
@@ -37,21 +37,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 128.92,
+    "total_elapsed_seconds": 178.973,
     "stage_count": 5,
     "failed_stage": "fact_check",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-25T17:47:07+00:00",
+        "started_at": "2026-11-25T18:05:23+00:00",
         "details": {},
         "duration_seconds": 0.001
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-25T17:47:07+00:00",
+        "started_at": "2026-11-25T18:05:23+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -61,32 +61,33 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-25T17:47:07+00:00",
+        "started_at": "2026-11-25T18:05:23+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
-          "urls": "12"
+          "urls": "12",
+          "excerpts": "5"
         },
-        "duration_seconds": 0.987
+        "duration_seconds": 7.344
       },
       {
         "stage": "script_generation",
         "status": "completed",
-        "started_at": "2026-11-25T17:47:08+00:00",
+        "started_at": "2026-11-25T18:05:30+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
-          "words": "168"
+          "words": "159"
         },
-        "duration_seconds": 13.778
+        "duration_seconds": 11.707
       },
       {
         "stage": "fact_check",
         "status": "failed",
-        "started_at": "2026-11-25T17:47:21+00:00",
+        "started_at": "2026-11-25T18:05:42+00:00",
         "details": {
           "claims": "8"
         },
-        "duration_seconds": 114.069,
-        "error": "RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C1=insufficient: The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation.; C2=insufficient: The excerpt focuses on beaver phylogenetic lineage and exploitation history, not on dam effects on groundwater or floodplain soils.; C3=insufficient: The excerpt describes fossil beaver sites and paleo‑ecology, without any data on modern pond depth, thermal refuges, or fish survival.; C4=insufficient: The excerpt is about mitochondrial genomes and specimen collection, not about sediment trapping, water clarity, or nutrient delivery.; C5=insufficient: Both sources discuss biodiversity in broad human‑health or forest‑management contexts; they do not provide evidence that beaver activity raises biodiversity of amphibians, waterfowl, or mammals.; C6=insufficient: The excerpt again deals with beaver mitochondrial genetics, not with carbon storage in pond sediments.; C7=insufficient: The excerpt mentions rodent diversification and does not address water chemistry or nitrogen changes caused by beaver dams.; C8=insufficient: Both sources provide taxonomic information on beaver species; they contain no statements about beavers reshaping rivers or ecosystem services."
+        "duration_seconds": 159.838,
+        "error": "RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Trusted source pages were fetched, but the independent fact-audit route did not return a valid verdict."
       }
     ]
   }
