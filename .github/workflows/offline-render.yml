@@ -1,0 +1,114 @@
+name: Offline Render Check (no API keys)
+
+# This workflow proves the encoder, muxer, caption burn-in and audio pipeline
+# work without any provider secret: it renders a real 1080x1920 MP4 through the
+# production code path (narration assembly, subtitle alignment, scene timing,
+# render(), validate_final_video()) using free Edge TTS and locally generated
+# placeholder clips.
+#
+# It never touches main or project1: it only runs on fix/* branches and on
+# manual dispatch, and it only uploads artifacts.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "fix/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: offline-render-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "2"
+      X264_PRESET: medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install FFmpeg and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+
+      - name: Install Python dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --no-input -r requirements.txt
+          python -m pip check
+          ffmpeg -hide_banner -version | head -n 1
+          ffprobe -hide_banner -version | head -n 1
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -q
+
+      - name: Render a real MP4 without any API key
+        env:
+          TTS_VOICE: en-US-GuyNeural
+          TTS_RATE: "-4%"
+          TTS_PITCH: "-3Hz"
+        run: |
+          set -o pipefail
+          mkdir -p output
+          python scripts/offline_render_check.py --preset medium 2>&1 | tee output/offline_render.log
+
+      - name: Verify the produced file
+        run: |
+          set -euo pipefail
+          test -s documentary.mp4
+          ffprobe -v error \
+            -show_entries format=duration,size \
+            -show_entries stream=codec_name,width,height,sample_rate,channels \
+            -of json documentary.mp4
+          python - <<'PY'
+          import json
+
+          data = json.load(open("output/offline_render_evidence.json"))
+          video = data["final_video"]
+          assert video["video"]["codec"] == "h264", video["video"]
+          assert video["video"]["width"] == data["profile"]["width"], video["video"]
+          assert video["video"]["height"] == data["profile"]["height"], video["video"]
+          assert video["audio"]["codec"] == "aac", video["audio"]
+          assert video["duration_seconds"] > 60, video["duration_seconds"]
+          assert abs(video["duration_delta_seconds"]) < 0.5, video["duration_delta_seconds"]
+          assert data["paid_api_calls"] == 0, data["paid_api_calls"]
+          print(
+              "OK:",
+              video["video"]["codec"],
+              f"{video['video']['width']}x{video['video']['height']}",
+              f"{video['duration_seconds']}s",
+              "audio", video["audio"]["codec"],
+              "delta", video["duration_delta_seconds"],
+              "tts", data["tts_backend"],
+          )
+          PY
+
+      - name: Upload the rendered video and evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: offline-render-${{ github.run_number }}
+          path: |
+            documentary.mp4
+            output/offline_render_evidence.json
+            output/captions.ass
+            output/offline_render.log
+          if-no-files-found: warn
+          retention-days: 7
