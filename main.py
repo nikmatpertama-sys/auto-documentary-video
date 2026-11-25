@@ -29,6 +29,8 @@ from narration_timing import duration_correction
 from source_policy import source_failure_reason
 from fact_check import (
     FactCheckError,
+    fetch_source_page,
+    select_relevant_excerpt,
     validate_planner_source_urls,
     verify_documentary_facts,
     wikipedia_search_titles,
@@ -213,9 +215,72 @@ def align_visual_query_to_focus(visual_query, visual_focus):
 # AI DOCUMENTARY PLANNER
 # ============================================================
 
-def documentary_prompt(topic, source_pool=None):
+def evidence_block(evidence, max_excerpt_chars=0):
+    """Render fetched source excerpts for a planner prompt.
+
+    A URL alone tells the planner nothing about what the page says, so models
+    wrote confident narration and then attached the closest-looking link. The
+    fact auditor correctly rejected that. Showing the actual fetched passage
+    keeps the script inside its evidence.
+    """
+    lines = []
+    for item in (evidence or []):
+        excerpt = re.sub(r"\s+", " ", str(item.get("excerpt", ""))).strip()
+        if max_excerpt_chars:
+            excerpt = excerpt[:max_excerpt_chars]
+        if not excerpt:
+            continue
+        title = re.sub(r"\s+", " ", str(item.get("title", ""))).strip()[:120]
+        label = f" ({title})" if title else ""
+        lines.append(f'- {item["url"]}{label}: "{excerpt}"')
+    return "\n".join(lines)
+
+
+def build_evidence_brief(topic, source_pool, limit=6, candidates=8, excerpt_chars=420):
+    """Fetch candidate sources and keep the passages that fit this topic.
+
+    A citation list taken from a Wikipedia article is not automatically about
+    the documentary subject: it also contains genetics and taxonomy papers.
+    Selecting the passage for the topic first, then ranking by how much of the
+    topic that passage actually covers, keeps the brief on subject.
+    """
+    topic_words = set(normalize_words(topic))
+    scored = []
+    for url in list(source_pool or [])[:candidates]:
+        try:
+            page = fetch_source_page(url)
+            excerpt = select_relevant_excerpt(
+                page["text"], topic, max_chars=excerpt_chars
+            )
+        except Exception as exc:
+            print(
+                f"Evidence brief: skipped {url} "
+                f"({type(exc).__name__}: {str(exc)[:120]})"
+            )
+            continue
+        overlap = len(topic_words & set(normalize_words(excerpt)))
+        scored.append((overlap, {
+            "url": page.get("url") or url,
+            "title": page.get("title") or "",
+            "excerpt": excerpt,
+        }))
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return [item for _overlap, item in scored[:limit]]
+
+
+def documentary_prompt(topic, source_pool=None, evidence=None):
     pool_block = ""
-    if source_pool:
+    if evidence:
+        listing = evidence_block(evidence)
+        pool_block = f"""
+VERIFIED SOURCE PAGES WITH THE FETCHED PASSAGE THAT WILL BE AUDITED:
+{listing}
+Every fact_claims[].source_urls entry MUST be copied exactly from this list,
+and each sentence must be fully supported by that page's passage above. Never
+state anything absent from those passages. The narration must STILL total
+160-185 spoken words (about 20-23 per scene); count the words before answering.
+"""
+    elif source_pool:
         listing = "\n".join(f"- {url}" for url in source_pool)
         pool_block = f"""
 VERIFIED SOURCE PAGES (each confirmed to exist on a trusted institution site):
@@ -371,10 +436,16 @@ def discover_source_pool(topic):
     return pool
 
 
-def outline_prompt(topic, source_pool=None):
+def outline_prompt(topic, source_pool=None, evidence=None):
     """Narration-and-visuals-only request used by the staged plan recovery."""
     pool_block = ""
-    if source_pool:
+    if evidence:
+        pool_block = (
+            "\nVERIFIED SOURCE PAGES WITH THEIR FETCHED PASSAGES (the narration "
+            "may only state what these passages say):\n"
+            f"{evidence_block(evidence)}\n"
+        )
+    elif source_pool:
         listing = "\n".join(f"- {url}" for url in source_pool)
         pool_block = (
             "\nVERIFIED SOURCE PAGES (the narration may only state what these "
@@ -404,9 +475,11 @@ Return ONLY valid JSON:
 """
 
 
-def claim_prompt(narrations, source_pool, start_index):
+def claim_prompt(narrations, source_pool, start_index, evidence=None):
     """Citation-only request for a group of already written scenes."""
-    listing = "\n".join(f"- {url}" for url in (source_pool or []))
+    listing = evidence_block(evidence) if evidence else "\n".join(
+        f"- {url}" for url in (source_pool or [])
+    )
     scene_block = "\n".join(
         f'SCENE {start_index + offset + 1}: "{narration}"'
         for offset, narration in enumerate(narrations)
@@ -435,7 +508,7 @@ Return ONLY valid JSON:
 """
 
 
-def staged_plan(topic, source_pool, validate_plan):
+def staged_plan(topic, source_pool, validate_plan, evidence=None):
     """Build the plan from two smaller requests when the single shot fails.
 
     Narration, visuals and citations competing for one completion budget is what
@@ -490,7 +563,7 @@ def staged_plan(topic, source_pool, validate_plan):
         return candidate
 
     outline, provider, model = generate_json(
-        outline_prompt(topic, source_pool),
+        outline_prompt(topic, source_pool, evidence),
         validator=validate_outline,
         stage="script_outline",
     )
@@ -499,7 +572,7 @@ def staged_plan(topic, source_pool, validate_plan):
     claims = []
     for start_index in (0, 4):
         chunk = narrations[start_index:start_index + 4]
-        prompt = claim_prompt(chunk, source_pool, start_index)
+        prompt = claim_prompt(chunk, source_pool, start_index, evidence)
 
         def validate_claims(candidate, start_index=start_index, chunk=chunk):
             if not isinstance(candidate, dict):
@@ -548,9 +621,9 @@ def staged_plan(topic, source_pool, validate_plan):
     return validate_plan(candidate), provider, model
 
 
-def gemini_plan(topic, source_pool=None):
+def gemini_plan(topic, source_pool=None, evidence=None):
     """Generate and validate a complete 8-scene plan through the AI router."""
-    prompt = documentary_prompt(topic, source_pool)
+    prompt = documentary_prompt(topic, source_pool, evidence)
 
     def validate_plan(candidate):
         if not isinstance(candidate, dict):
@@ -690,7 +763,9 @@ def gemini_plan(topic, source_pool=None):
             f"First failure: {type(exc).__name__}: {str(exc)[:300]}"
         )
         try:
-            plan, provider, model = staged_plan(topic, source_pool, validate_plan)
+            plan, provider, model = staged_plan(
+                topic, source_pool, validate_plan, evidence
+            )
         except Exception as staged_exc:
             raise RuntimeError(
                 "A source-backed documentary plan could not be generated. "
@@ -3731,9 +3806,14 @@ def _run_pipeline():
             "Source pool discovery skipped: "
             f"{type(exc).__name__}: {str(exc)[:200]}"
         )
-    diagnostics.STAGES.complete(urls=len(source_pool))
+    # The planner can only stay inside its evidence if it can read it. Fetching
+    # the candidate pages here keeps the script, its claims and the later audit
+    # on the same passages.
+    evidence = build_evidence_brief(TOPIC, source_pool) if source_pool else []
+    print(f"Evidence brief: {len(evidence)} source passages fetched for planning.")
+    diagnostics.STAGES.complete(urls=len(source_pool), excerpts=len(evidence))
     diagnostics.STAGES.begin("script_generation", topic=TOPIC)
-    plan = gemini_plan(TOPIC, source_pool)
+    plan = gemini_plan(TOPIC, source_pool, evidence)
     if not str(plan.get("script", "")).strip() or len(plan["script"].split()) < 100:
         raise RuntimeError("Script quality gate failed: narration is empty or too short for production.")
     # The opening card is proven to fit before any narration, vision or encode

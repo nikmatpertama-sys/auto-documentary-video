@@ -354,5 +354,60 @@ class StagedPlanRecoveryTests(unittest.TestCase):
         self.assertTrue(focus_words.issubset(set(main.normalize_words(repaired))))
 
 
+class EvidenceBriefTests(unittest.TestCase):
+    """The planner must read the source passages the audit will judge."""
+
+    TOPIC = "How beaver dams create wetlands"
+
+    def test_brief_keeps_topic_related_passages_and_drops_unusable_pages(self):
+        pages = {
+            "https://www.usgs.gov/beaver-dams": {
+                "text": "Beaver dams create wetlands.",
+                "title": "Beaver dams",
+                "url": "https://www.usgs.gov/beaver-dams",
+            },
+            "https://www.noaa.gov/wetlands": {
+                "text": "Wetlands store water.",
+                "title": "Wetlands",
+                "url": "https://www.noaa.gov/wetlands",
+            },
+            "https://www.nasa.gov/phylogeny": {
+                "text": "Rodent phylogeny.",
+                "title": "Phylogeny",
+                "url": "https://www.nasa.gov/phylogeny",
+            },
+        }
+
+        def fake_fetch(url):
+            return pages[url]
+
+        def fake_excerpt(page_text, claim, max_chars=420, required_numbers=()):
+            if "Rodent" in page_text:
+                raise main.FactCheckError("no lexical anchor for this claim")
+            return page_text
+
+        with patch.object(main, "fetch_source_page", side_effect=fake_fetch), patch.object(
+            main, "select_relevant_excerpt", side_effect=fake_excerpt
+        ):
+            brief = main.build_evidence_brief(self.TOPIC, list(pages))
+
+        urls = [item["url"] for item in brief]
+        self.assertIn("https://www.usgs.gov/beaver-dams", urls)
+        self.assertNotIn("https://www.nasa.gov/phylogeny", urls)
+        self.assertEqual(brief[0]["url"], "https://www.usgs.gov/beaver-dams")
+
+    def test_prompt_shows_the_fetched_passage_not_only_the_url(self):
+        evidence = [{
+            "url": "https://www.usgs.gov/beaver-dams",
+            "title": "Beaver dams",
+            "excerpt": "Dams slow water and create ponds.",
+        }]
+        prompt = main.documentary_prompt(self.TOPIC, [evidence[0]["url"]], evidence)
+
+        self.assertIn("Dams slow water and create ponds.", prompt)
+        self.assertIn("https://www.usgs.gov/beaver-dams", prompt)
+        self.assertIn("FETCHED PASSAGE", prompt)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
