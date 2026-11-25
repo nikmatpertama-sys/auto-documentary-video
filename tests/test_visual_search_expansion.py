@@ -102,7 +102,8 @@ class VisualSearchExpansionTests(unittest.TestCase):
 
     def test_candidate_limit_is_clamped_and_handles_invalid_values(self):
         self.assertEqual(effective_candidate_limit("11"), 11)
-        self.assertEqual(effective_candidate_limit("99"), 12)
+        self.assertEqual(effective_candidate_limit("14"), 14)
+        self.assertEqual(effective_candidate_limit("99"), 20)
         self.assertEqual(effective_candidate_limit("invalid"), 8)
 
 

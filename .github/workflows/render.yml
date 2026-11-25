@@ -187,7 +187,7 @@ jobs:
           OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free
           FOOTAGE_VISION_REQUIRED: "true"
           FOOTAGE_VISION_MIN_CONFIDENCE: "0.72"
-          FOOTAGE_VISION_CANDIDATE_LIMIT: "8"
+          FOOTAGE_VISION_CANDIDATE_LIMIT: "14"
           TTS_VOICE: en-US-GuyNeural
           TTS_RATE: "-4%"
           TTS_PITCH: "-3Hz"

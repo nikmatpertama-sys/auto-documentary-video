@@ -258,4 +258,7 @@ def effective_candidate_limit(requested: object) -> int:
         value = int(requested)
     except (TypeError, ValueError):
         value = 8
-    return max(8, min(12, value))
+    # A scarce subject (a named animal, a specific structure) often has no
+    # acceptable clip in the first eight ranked candidates. The verifier still
+    # checks every downloaded pixel, so a wider sweep costs time, not accuracy.
+    return max(8, min(20, value))
