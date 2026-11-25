@@ -8,31 +8,28 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 1/7 Writing and validating the documentary script...
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
-Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
-Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-3.5-flash.
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver dam, North American beaver, Beaver
-Source pool: 67 trusted page(s) cited by Beaver dam, North American beaver, Beaver.
-Evidence brief: skipped https://mushare.marian.edu/fp_db/4 (FactCheckError: Could not fetch evidence source https://mushare.marian.edu/fp_db/4: HTTPError (HTTP 404))
-Evidence brief: skipped https://www.exeter.ac.uk/creww/research/beavertrial/ (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/15238298 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/26436285 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://lowtechpbr.restoration.usu.edu/resources/Topics/02_Science/fish.html (FactCheckError: Could not fetch evidence source https://lowtechpbr.restoration.usu.edu/resources/Topics/02_Science/fish.html: HTTPError )
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/31148552 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://edits.nationalmap.gov/apps/gaz-domestic/public/search/names/260383 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://www.iucnredlist.org/species/4003/22187946 (FactCheckError: Could not fetch evidence source https://www.iucnredlist.org/species/4003/22187946: HTTPError (HTTP 403))
+Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, Stream restoration
+Source pool: 51 trusted page(s) cited by Beaver, Keystone species, Stream restoration.
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/22697210 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/28256552 (FactCheckError: Evidence page contains too little readable text for verification.)
+Fact-check source temporarily unavailable (SSLError); retrying once in 3s.
+Evidence brief: skipped https://journals.iupui.edu/index.php/ias/article/download/7219/7239 (FactCheckError: Could not fetch evidence source https://journals.iupui.edu/index.php/ias/article/download/7219/7239: SSLError)
+Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/32753594 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: 2 source passages fetched for planning.
-[stage] source_pool: completed in 66.8s
+[stage] source_pool: completed in 8.2s
 [stage] script_generation: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-Gemini model gemini-3.5-flash answered HTTP 503; trying gemini-3.8-flash.
-Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
-AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
+AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Fact claim 1 does not restate the fetched passage it cites (29% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.
 AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
 AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
 AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-Plan repair: scene 3 visual_query rewritten to name its visual_focus ('riparian plant growth').
-AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 118 words; expected 150-195 for a 70-90 second narration. Rewrite each scene to 20-23 words: add 52 words overall across the scenes.
+AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Fact claim 8 does not restate the fetched passage it cites (47% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.
 AI router: trying openrouter / openrouter/free for text/script_generation...
 AI router: openrouter:openrouter/free returned no content before its budget ran out; retrying with a 1.60x completion budget.
 AI router: openrouter:openrouter/free exhausted its output budget; retrying with a 0.96x completion budget.
@@ -41,76 +38,110 @@ AI router: trying openrouter / baidu/ernie-5.5-flash-preview:free for text/scrip
 AI router: openrouter:baidu/ernie-5.5-flash-preview:free returned no content before its budget ran out; retrying with a 1.60x completion budget.
 AI router: openrouter:baidu/ernie-5.5-flash-preview:free exhausted its output budget; retrying with a 0.96x completion budget.
 AI router: openrouter:baidu/ernie-5.5-flash-preview:free still truncates its output after shrinking the budget; retrying later in this run.
-AI router: retry pass 2/4 for text/script_generation in 60.0s with 3 route(s).
+AI router: retry pass 2/4 for text/script_generation in 60.0s with 4 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
+Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
+AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. network timeout/connection error
 AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
 AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
 AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned a valid text response.
-Documentary plan generated by groq/openai/gpt-oss-120b: 168 words, 8 scenes.
-Opening validated before TTS: title=8 word(s), hook=12 word(s) (hook shortened to 12 words).
-[stage] script_generation: completed in 416.0s
-2/7 Fetching trusted source pages and auditing every factual assertion...
-[stage] fact_check: start
-AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_audit...
+AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.36x completion budget.
+AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
+AI router: trying openrouter / openrouter/free for text/script_generation...
+AI router: openrouter:openrouter/free returned no content before its budget ran out; retrying with a 1.54x completion budget.
+AI router: openrouter:openrouter/free exhausted its output budget; retrying with a 0.92x completion budget.
+AI router: openrouter:openrouter/free still truncates its output after shrinking the budget; retrying later in this run.
+AI router: trying openrouter / baidu/ernie-5.5-flash-preview:free for text/script_generation...
+AI router: openrouter:baidu/ernie-5.5-flash-preview:free returned no content before its budget ran out; retrying with a 1.54x completion budget.
+AI router: openrouter:baidu/ernie-5.5-flash-preview:free exhausted its output budget; retrying with a 0.92x completion budget.
+AI router: openrouter:baidu/ernie-5.5-flash-preview:free still truncates its output after shrinking the budget; retrying later in this run.
+AI router: retry pass 3/4 for text/script_generation in 60.0s with 4 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
 Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
 Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-3.5-flash.
-Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-2.5-flash.
+AI router: gemini:gemini-3.5-flash-lite exhausted its output budget; retrying with a 0.36x completion budget.
+AI router: gemini:gemini-3.5-flash-lite still truncates its output after shrinking the budget; retrying later in this run.
+AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
+AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
+AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
+AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
+AI router: trying openrouter / openrouter/free for text/script_generation...
+AI router: openrouter:openrouter/free returned no content before its budget ran out; retrying with a 1.50x completion budget.
+AI router: openrouter:openrouter/free exhausted its output budget; retrying with a 0.90x completion budget.
+AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
+AI router: retry pass 4/4 for text/script_generation in 20.0s with 2 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
+AI router: gemini:gemini-3.5-flash-lite exhausted its output budget; retrying with a 0.30x completion budget.
+Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 429; trying gemini-2.5-flash.
 AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
-AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_audit...
-AI router: groq rate limited (HTTP 429); provider paused for 15s and the next route is used now.
-AI router: trying openrouter / openrouter/free for fact/fact_check_audit...
-AI router: openrouter:openrouter/free returned no content before its budget ran out; retrying with a 1.60x completion budget.
-AI router: openrouter/openrouter/free returned a valid fact response.
-AI router: trying gemini / gemini-3.5-flash-lite for text/fact_check_repair...
+AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
+AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
+AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
+AI router: the single-shot plan was rejected by every provider; retrying as two smaller, independently validated requests. First failure: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Fact claim 1 does not restate the fetched passage it cites (29% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.)
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
+AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. network timeout/connection error
+AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
+AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
+AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
+AI router: trying openrouter / openrouter/free for text/script_outline...
+AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
+AI router: retry pass 2/4 for text/script_outline in 59.6s with 2 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: gemini:gemini-3.5-flash-lite exhausted its output budget; retrying with a 0.30x completion budget.
 Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
 Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
 AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
-AI router: trying groq / openai/gpt-oss-120b for text/fact_check_repair...
+AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
 AI router: groq/openai/gpt-oss-120b returned a valid text response.
-Fact-check repair for C3 proposed by groq/openai/gpt-oss-120b: Beaver dams raise water levels, creating wetland patches and increasing habitat diversity along the stream corridor.
-Fact-check claim repair: C3 rewritten for scene 3.
-AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_audit...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned a valid fact response.
-AI router: trying groq / openai/gpt-oss-120b for text/fact_check_repair...
-AI router: groq rate limited (HTTP 429); provider paused for 15s and the next route is used now.
-AI router: trying openrouter / openrouter/free for text/fact_check_repair...
-AI router: openrouter/openrouter/free returned a valid text response.
-Fact-check repair for C4 proposed by openrouter/openrouter/free: After dam abandonment, beaver activity continues to influence channel and floodplain evolution and riparian plant recruitment.
-Fact-check claim repair: C4 rewritten for scene 4.
-AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_audit...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Fact-check C3 cited a URL not fetched for that exact claim.
-AI router: trying openrouter / openrouter/free for fact/fact_check_audit...
-AI router: openrouter/openrouter/free returned a valid fact response.
-Fact-check blocked sentence: Beaver activity thus links geomorphology and riparian ecology, generating a mosaic of successional stages across the watershed for diverse species communities.
-Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/ | Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl
-Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/ | Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock
-Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/ | Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl
-Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/ | Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock
-Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/ | Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl
-Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/ | Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock
-Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/ | Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl
-Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/ | Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock
-[stage] fact_check: FAILED after 295.2s
+AI router: trying gemini / gemini-3.5-flash-lite for text/claim_sourcing...
+AI router: gemini:gemini-3.5-flash-lite exhausted its output budget; retrying with a 0.30x completion budget.
+Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+[stage] script_generation: FAILED after 1971.5s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3893, in _run_pipeline
-    fact_report = verify_documentary_facts(
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1529, in verify_documentary_facts
-    raise FactCheckError(str(exc), report=report) from None
-fact_check.FactCheckError: Narration did not pass evidence validation. C5=insufficient: The excerpt supports a shifting mosaic and links between channel/floodplain evolution and riparian plant recruitment, but it does not directly establish a watershed-wide mosaic of successional stages for diverse species communities.; C6=insufficient: The excerpt mentions elevated water levels, wetlands, hydrology, and sediment storage, but it does not directly evidence enhanced water storage, moderated flood peaks, drought refuges, or year-round aquatic organism refuges.; C7=insufficient: The excerpt does not directly state that beaver-modified streams support higher biodiversity than unaltered reaches or that this illustrates self-organized restoration across multiple taxa levels.; C8=insufficient: The excerpt supports that beavers are ecosystem engineers, but it does not directly evidence reverberation through water quality, habitat complexity, or regional ecological resilience for the future.
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 820, in gemini_plan
+    plan, provider, model = generate_json(
+                            ^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1244, in generate_json
+    return _route("text", prompt, validator=validator, stage=stage)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1228, in _route
+    raise ProviderRoutingError(
+ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Fact claim 1 does not restate the fetched passage it cites (29% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); groq/openai/gpt-oss-120b: invalid response (Fact claim 8 does not restate the fetched passage it cites (47% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); gemini/gemini-3.5-flash-lite: ReadTimeout; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 833, in gemini_plan
+    plan, provider, model = staged_plan(
+                            ^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 661, in staged_plan
+    return validate_plan(candidate), provider, model
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 807, in validate_plan
+    raise ValueError(
+ValueError: Fact claim 1 does not restate the fetched passage it cites (33% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4156, in <module>
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4162, in <module>
     main()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4136, in main
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4142, in main
     _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3922, in _run_pipeline
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3888, in _run_pipeline
+    plan = gemini_plan(TOPIC, source_pool, evidence)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 837, in gemini_plan
     raise RuntimeError(
-RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C5=insufficient: The excerpt supports a shifting mosaic and links between channel/floodplain evolution and riparian plant recruitment, but it does not directly establish a watershed-wide mosaic of successional stages for diverse species communities.; C6=insufficient: The excerpt mentions elevated water levels, wetlands, hydrology, and sediment storage, but it does not directly evidence enhanced water storage, moderated flood peaks, drought refuges, or year-round aquatic organism refuges.; C7=insufficient: The excerpt does not directly state that beaver-modified streams support higher biodiversity than unaltered reaches or that this illustrates self-organized restoration across multiple taxa levels.; C8=insufficient: The excerpt supports that beavers are ecosystem engineers, but it does not directly evidence reverberation through water quality, habitat complexity, or regional ecological resilience for the future.
+RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Fact claim 1 does not restate the fetched passage it cites (29% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); groq/openai/gpt-oss-120b: invalid response (Fact claim 8 does not restate the fetched passage it cites (47% of its key terms appear there). Rewrite that sentence using the passage's own wording and  | staged fallback: ValueError: Fact claim 1 does not restate the fetched passage it cites (33% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.

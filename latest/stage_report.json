@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-25T19:09:01+00:00",
+  "generated_at": "2026-11-25T19:47:47+00:00",
   "environment": {
     "python": "3.11.18",
     "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
@@ -28,21 +28,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 778.208,
-    "stage_count": 5,
-    "failed_stage": "fact_check",
+    "total_elapsed_seconds": 1979.906,
+    "stage_count": 4,
+    "failed_stage": "script_generation",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-25T18:56:03+00:00",
+        "started_at": "2026-11-25T19:14:48+00:00",
         "details": {},
         "duration_seconds": 0.002
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-25T18:56:03+00:00",
+        "started_at": "2026-11-25T19:14:48+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -52,33 +52,23 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-25T18:56:03+00:00",
+        "started_at": "2026-11-25T19:14:48+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "urls": "12",
           "excerpts": "2"
         },
-        "duration_seconds": 66.843
+        "duration_seconds": 8.204
       },
       {
         "stage": "script_generation",
-        "status": "completed",
-        "started_at": "2026-11-25T18:57:10+00:00",
-        "details": {
-          "topic": "How beavers reshape entire river ecosystems",
-          "words": "168"
-        },
-        "duration_seconds": 415.982
-      },
-      {
-        "stage": "fact_check",
         "status": "failed",
-        "started_at": "2026-11-25T19:04:06+00:00",
+        "started_at": "2026-11-25T19:14:56+00:00",
         "details": {
-          "claims": "8"
+          "topic": "How beavers reshape entire river ecosystems"
         },
-        "duration_seconds": 295.199,
-        "error": "RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C5=insufficient: The excerpt supports a shifting mosaic and links between channel/floodplain evolution and riparian plant recruitment, but it does not directly establish a watershed-wide mosaic of successional stages for diverse species communities.; C6=insufficient: The excerpt mentions elevated water levels, wetlands, hydrology, and sediment storage, but it does not directly evidence enhanced water storage, moderated flood peaks, drought refuges, or year-round aquatic organism refuges.; C7=insufficient: The excerpt does not directly state that beaver-modified streams support higher biodiversity than unaltered reaches or that this illustrates self-organized restoration across multiple taxa levels.; C8=insufficient: The excerpt supports that beavers are ecosystem engineers, but it does not directly evidence reverberation through water quality, habitat complexity, or regional ecological resilience for the future."
+        "duration_seconds": 1971.514,
+        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Fact claim 1 does not restate the fetched passage it cites (29% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); groq/openai/gpt-oss-120b: invalid response (Fact claim 8 does not restate the fetched passage it cites (47% of its key terms appear there). Rewrite that sentence using the passage's own wording and  | staged fallback: ValueError: Fact claim 1 does not restate the fetched passage it cites (33% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it."
       }
     ]
   }
