@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-11-25T19:47:47+00:00",
+  "generated_at": "2026-11-25T20:05:30+00:00",
   "status": "failed",
   "failed_stage": "script_generation",
   "error_type": "RuntimeError",
-  "error_message": "A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Fact claim 1 does not restate the fetched passage it cites (29% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); groq/openai/gpt-oss-120b: invalid response (Fact claim 8 does not restate the fetched passage it cites (47% of its key terms appear there). Rewrite that sentence using the passage's own wording and  | staged fallback: ValueError: Fact claim 1 does not restate the fetched passage it cites (33% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.",
+  "error_message": "A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: invalid response (Scene narration totals 112 words; expected 150-195 for a 70-90 second narration. Rewrite each scene to 20-23 words: add 58 words overall across the scenes.); openrouter/openrouter/free: HTTP 429; groq/openai/gpt-oss-120b: invalid response (Scene 7 has too many separate ideas; use  | staged fallback: ValueError: The plan must provide a source-backed claim for every scene narration sentence.",
   "context": {
     "topic": "How beavers reshape entire river ecosystems",
     "vision_required": "True"
   },
-  "traceback": "ponse (Fact claim 8 does not restate the fetched passage it cites (47% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); gemini/gemini-3.5-flash-lite: ReadTimeout; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 833, in gemini_plan\n    plan, provider, model = staged_plan(\n                            ^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 661, in staged_plan\n    return validate_plan(candidate), provider, model\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 807, in validate_plan\n    raise ValueError(\nValueError: Fact claim 1 does not restate the fetched passage it cites (33% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4142, in main\n    _run_pipeline()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3888, in _run_pipeline\n    plan = gemini_plan(TOPIC, source_pool, evidence)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 837, in gemini_plan\n    raise RuntimeError(\nRuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Fact claim 1 does not restate the fetched passage it cites (29% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); groq/openai/gpt-oss-120b: invalid response (Fact claim 8 does not restate the fetched passage it cites (47% of its key terms appear there). Rewrite that sentence using the passage's own wording and  | staged fallback: ValueError: Fact claim 1 does not restate the fetched passage it cites (33% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.\n",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 831, in gemini_plan\n    plan, provider, model = generate_json(\n                            ^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py\", line 1244, in generate_json\n    return _route(\"text\", prompt, validator=validator, stage=stage)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py\", line 1228, in _route\n    raise ProviderRoutingError(\nai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: invalid response (Scene narration totals 112 words; expected 150-195 for a 70-90 second narration. Rewrite each scene to 20-23 words: add 58 words overall across the scenes.); openrouter/openrouter/free: HTTP 429; groq/openai/gpt-oss-120b: invalid response (Scene 7 has too many separate ideas; use at most two sentences.); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 844, in gemini_plan\n    plan, provider, model = staged_plan(\n                            ^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 672, in staged_plan\n    return validate_plan(candidate), provider, model\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 784, in validate_plan\n    raise ValueError(\"The plan must provide a source-backed claim for every scene narration sentence.\")\nValueError: The plan must provide a source-backed claim for every scene narration sentence.\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4153, in main\n    _run_pipeline()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 3899, in _run_pipeline\n    plan = gemini_plan(TOPIC, source_pool, evidence)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 848, in gemini_plan\n    raise RuntimeError(\nRuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: invalid response (Scene narration totals 112 words; expected 150-195 for a 70-90 second narration. Rewrite each scene to 20-23 words: add 58 words overall across the scenes.); openrouter/openrouter/free: HTTP 429; groq/openai/gpt-oss-120b: invalid response (Scene 7 has too many separate ideas; use  | staged fallback: ValueError: The plan must provide a source-backed claim for every scene narration sentence.\n",
   "environment": {
     "python": "3.11.18",
-    "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
+    "platform": "Linux-7.0.0-1016-aws-x86_64-with-glibc2.43",
     "machine": "x86_64",
     "cpu_count": 4,
     "cwd": "/home/runner/work/auto-documentary-video/auto-documentary-video",
@@ -37,21 +37,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 1979.832,
+    "total_elapsed_seconds": 655.066,
     "stage_count": 4,
     "failed_stage": "script_generation",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-25T19:14:48+00:00",
+        "started_at": "2026-11-25T19:54:35+00:00",
         "details": {},
-        "duration_seconds": 0.002
+        "duration_seconds": 0.001
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-25T19:14:48+00:00",
+        "started_at": "2026-11-25T19:54:35+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -61,23 +61,23 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-25T19:14:48+00:00",
+        "started_at": "2026-11-25T19:54:35+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
-          "urls": "12",
-          "excerpts": "2"
+          "urls": "24",
+          "excerpts": "3"
         },
-        "duration_seconds": 8.204
+        "duration_seconds": 48.886
       },
       {
         "stage": "script_generation",
         "status": "failed",
-        "started_at": "2026-11-25T19:14:56+00:00",
+        "started_at": "2026-11-25T19:55:24+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems"
         },
-        "duration_seconds": 1971.514,
-        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Fact claim 1 does not restate the fetched passage it cites (29% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); groq/openai/gpt-oss-120b: invalid response (Fact claim 8 does not restate the fetched passage it cites (47% of its key terms appear there). Rewrite that sentence using the passage's own wording and  | staged fallback: ValueError: Fact claim 1 does not restate the fetched passage it cites (33% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it."
+        "duration_seconds": 606.096,
+        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: invalid response (Scene narration totals 112 words; expected 150-195 for a 70-90 second narration. Rewrite each scene to 20-23 words: add 58 words overall across the scenes.); openrouter/openrouter/free: HTTP 429; groq/openai/gpt-oss-120b: invalid response (Scene 7 has too many separate ideas; use  | staged fallback: ValueError: The plan must provide a source-backed claim for every scene narration sentence."
       }
     ]
   }
