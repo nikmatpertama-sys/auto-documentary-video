@@ -13,7 +13,7 @@ import json
 import re
 import time
 from html.parser import HTMLParser
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote, urljoin, urlparse
 
 import requests
 
@@ -251,6 +251,16 @@ def is_trusted_source_url(url: str) -> bool:
         if parsed.port not in (None, 443):
             return False
         if host in TRUSTED_EXACT_HOSTS:
+            return True
+        if (
+            host.endswith("wikipedia.org")
+            and parsed.path.startswith("/wiki/")
+            and not parsed.query
+        ):
+            # An encyclopedia article is a real, fetchable, citable source with
+            # enough readable prose to support a sentence. The audit still has
+            # to find the supporting passage in the fetched text; only the host
+            # policy changes here.
             return True
         return any(host.endswith(suffix) for suffix in TRUSTED_SUFFIXES)
     except (TypeError, ValueError):
@@ -1040,6 +1050,13 @@ def wikipedia_source_pool(titles: list[str], limit: int = 24) -> list[str]:
     """
     urls: list[str] = []
     usable_titles = [str(title).strip() for title in titles if str(title).strip()][:3]
+    # The article itself is the most readable evidence about the topic; the
+    # institution pages it cites are added after it as independent support.
+    for title in usable_titles:
+        urls.append(
+            "https://en.wikipedia.org/wiki/"
+            + quote(title.replace(" ", "_"), safe="/()_-,")
+        )
     for title in usable_titles:
         try:
             page = _wikipedia_get(

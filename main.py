@@ -375,7 +375,8 @@ NARRATION AND EVIDENCE
 - Hosts must pass the allowlist: HTTPS on .gov, .edu, .int, .ac.uk or .fed.us, or
   nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org,
   britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int,
-  un.org, worldbank.org. The example URL above is illustrative only.
+  un.org, worldbank.org, or an English wikipedia.org article. The example URL
+  above is illustrative only.
 - Never use HTTP, search-result pages, shorteners, redirectors, social posts or
   invented domains; a URL that fails host validation is rejected and regenerated.
 - Never invent a source, title, author, DOI, URL, statistic, date, percentage,
@@ -555,7 +556,7 @@ Return ONLY valid JSON:
 - Hosts must be HTTPS on .gov, .edu, .int, .ac.uk or .fed.us, or one of
   nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org,
   britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int,
-  un.org, worldbank.org.
+  un.org, worldbank.org, or an English wikipedia.org article.
 - Never invent a source, title, author, DOI, URL, statistic or date.
 """
 
