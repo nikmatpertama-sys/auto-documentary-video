@@ -426,17 +426,28 @@ class AIRouterTests(unittest.TestCase):
             "OPENROUTER_MODEL": "openrouter/free",
         }, clear=True), patch(
             "ai_router.requests.post",
-            side_effect=[empty_reasoning_only, empty_reasoning_only, valid],
+            side_effect=[
+                empty_reasoning_only,
+                empty_reasoning_only,
+                empty_reasoning_only,
+                valid,
+            ],
         ) as post:
             value, provider, model = ai_router.generate_json("Return one complete JSON object")
 
         self.assertEqual(value, {"ready": True})
         self.assertEqual(provider, "openrouter")
         self.assertEqual(model, "baidu/ernie-5.5-flash-preview:free")
-        self.assertEqual(post.call_count, 3)
+        self.assertEqual(post.call_count, 4)
+        # An empty answer is a budget that was too small, not too large: the
+        # same route is retried once with more room before the fallback runs.
+        self.assertGreater(
+            post.call_args_list[1].kwargs["json"]["max_tokens"],
+            post.call_args_list[0].kwargs["json"]["max_tokens"],
+        )
         fallback_payload = post.call_args_list[-1].kwargs["json"]
         self.assertEqual(fallback_payload["model"], "baidu/ernie-5.5-flash-preview:free")
-        self.assertEqual(fallback_payload["reasoning"], {"effort": "low"})
+        self.assertEqual(fallback_payload["reasoning"], {"enabled": False})
         self.assertEqual(fallback_payload["response_format"], {"type": "json_object"})
 
     def test_transient_retry_preserves_first_failure_diagnostic(self):

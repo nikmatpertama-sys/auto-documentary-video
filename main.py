@@ -190,6 +190,25 @@ def normalize_words(text):
     )
 
 
+def align_visual_query_to_focus(visual_query, visual_focus):
+    """Rebuild a footage query so it names the scene's visible subject.
+
+    The planner is asked for a query that contains at least half of its
+    visual_focus words verbatim. Free-tier models often answer a near miss
+    (the right subject under a synonym), and rejecting the whole plan for that
+    threw away eight valid scenes. The query is rebuilt instead: focus words
+    first, then whatever else the model wrote, capped at a searchable length.
+    """
+    focus_words = normalize_words(visual_focus)
+    query_words = normalize_words(visual_query)
+    if not focus_words or not query_words:
+        return ""
+    rebuilt = list(
+        dict.fromkeys(focus_words + [word for word in query_words if word not in focus_words])
+    )
+    return " ".join(rebuilt[:8])
+
+
 # ============================================================
 # AI DOCUMENTARY PLANNER
 # ============================================================
@@ -212,13 +231,13 @@ vertical 9:16 video.
 TOPIC: {topic}
 {pool_block}
 Length: 160-185 spoken words, about 70-90 seconds with natural pauses.
-Exactly 8 sequential scenes.
+Exactly 8 sequential scenes, each with 20-23 spoken words. Count the words of
+every scene before answering; a scene outside 20-23 words is rejected.
 
 Return ONLY valid JSON:
 {{
   "title":"...",
   "hook":"...",
-  "script":"...",
   "scenes":[
     {{"narration":"one or two complete spoken sentences",
       "visual_focus":"one concrete visible subject, 2-6 words",
@@ -239,6 +258,8 @@ Return ONLY valid JSON:
 
 NARRATION AND EVIDENCE
 - Combined scene narration is the full script, in order, totalling 160-185 words.
+- Every scene narration is 20-23 spoken words in one or two sentences; rewrite
+  that scene until it fits, without adding unsupported facts.
 - List every narration sentence in fact_claims as its exact complete sentence with
   source URLs; no sentence may go uncited.
 - Give each claim TWO direct source pages from recognised institutions when
@@ -350,6 +371,183 @@ def discover_source_pool(topic):
     return pool
 
 
+def outline_prompt(topic, source_pool=None):
+    """Narration-and-visuals-only request used by the staged plan recovery."""
+    pool_block = ""
+    if source_pool:
+        listing = "\n".join(f"- {url}" for url in source_pool)
+        pool_block = (
+            "\nVERIFIED SOURCE PAGES (the narration may only state what these "
+            "pages support):\n"
+            f"{listing}\n"
+        )
+    return f"""Write the spoken narration and the footage plan for an original,
+vertical 9:16 mini-documentary.
+
+TOPIC: {topic}
+{pool_block}
+Return ONLY valid JSON:
+{{"title":"...","hook":"...","scenes":[{{"narration":"one or two complete spoken sentences","visual_focus":"one concrete visible subject, 2-6 words","visual_query":"searchable real-world footage phrase, 3-6 words","visual_queries":["independent alternate shot","second independent alternate shot"]}}]}}
+
+- Exactly 8 scenes in story order, one main factual idea per scene.
+- Every scene narration is 20-23 spoken words; count each scene and rewrite it
+  until it fits. The combined narration must total 160-185 words.
+- Scene 1 opens with a curiosity hook of at most 12 words and real moving
+  footage, never a diagram.
+- visual_focus is 2-6 concrete words and at least half of them must appear
+  verbatim in visual_query.
+- visual_query and visual_queries must be filmable: never map, chart, graph,
+  diagram, table, infographic, illustration, animation or visualization.
+- Never invent a statistic, date, measurement, quotation, causal claim or
+  source; write only what the verified pages above support.
+- Write for a calm documentary narrator with varied sentence lengths.
+"""
+
+
+def claim_prompt(narrations, source_pool, start_index):
+    """Citation-only request for a group of already written scenes."""
+    listing = "\n".join(f"- {url}" for url in (source_pool or []))
+    scene_block = "\n".join(
+        f'SCENE {start_index + offset + 1}: "{narration}"'
+        for offset, narration in enumerate(narrations)
+    )
+    first_scene = start_index + 1
+    last_scene = start_index + len(narrations)
+    return f"""Cite the factual sentences of an existing documentary narration.
+
+VERIFIED SOURCE PAGES (copy URLs exactly from this list; never invent one):
+{listing}
+
+{scene_block}
+
+Return ONLY valid JSON:
+{{"fact_claims":[{{"scene":{first_scene},"sentence":"an exact complete sentence copied from that scene","source_urls":["https://www.example.gov/page"]}}]}}
+
+- Cite every narration sentence in scenes {first_scene}-{last_scene}, each exactly
+  once, copying it character for character.
+- Cite only pages that directly support the exact claim, preferring two
+  independent organisations.
+- Hosts must be HTTPS on .gov, .edu, .int, .ac.uk or .fed.us, or one of
+  nasa.gov, noaa.gov, usgs.gov, nature.com, science.org, pnas.org,
+  britannica.com, nationalgeographic.com, si.edu, fao.org, ipcc.ch, who.int,
+  un.org, worldbank.org.
+- Never invent a source, title, author, DOI, URL, statistic or date.
+"""
+
+
+def staged_plan(topic, source_pool, validate_plan):
+    """Build the plan from two smaller requests when the single shot fails.
+
+    Narration, visuals and citations competing for one completion budget is what
+    free-tier models truncate or shorten. Writing the narration first and then
+    citing it in two halves keeps every reply small enough to finish, while the
+    same strict plan validator still judges the assembled result.
+    """
+
+    def validate_outline(candidate):
+        if not isinstance(candidate, dict):
+            raise ValueError("Outline response is not a JSON object.")
+        candidate = normalize_scene_count(candidate, target_count=8)
+        scenes = candidate.get("scenes")
+        if not isinstance(scenes, list) or len(scenes) != 8:
+            raise ValueError("Expected exactly 8 scenes in the outline.")
+        for index, scene in enumerate(scenes, 1):
+            if not isinstance(scene, dict):
+                raise ValueError(f"Scene {index} is not a JSON object.")
+            narration = re.sub(r"\s+", " ", str(scene.get("narration", ""))).strip()
+            if not narration:
+                raise ValueError(f"Scene {index} has empty narration.")
+            words = len(narration.split())
+            if not 18 <= words <= 25:
+                change = "add" if words < 18 else "remove"
+                raise ValueError(
+                    f"Scene {index} narration is {words} words; {change} words to "
+                    "reach 20-23 words for this scene."
+                )
+            scene["narration"] = narration
+            visual_query = re.sub(r"\s+", " ", str(scene.get("visual_query", ""))).strip()
+            visual_focus = re.sub(r"\s+", " ", str(scene.get("visual_focus", ""))).strip()
+            if not visual_query or not visual_focus:
+                raise ValueError(f"Scene {index} needs both visual_focus and visual_query.")
+            if len(normalize_words(visual_focus)) < 2:
+                raise ValueError(f"Scene {index} needs a concrete 2-6 word visual_focus.")
+            alternatives = scene.get("visual_queries")
+            if not isinstance(alternatives, list) or len(
+                [item for item in alternatives if str(item).strip()]
+            ) < 2:
+                raise ValueError(f"Scene {index} needs two independent visual_queries.")
+            scene["visual_query"] = visual_query
+            scene["visual_focus"] = visual_focus
+            scene["visual_queries"] = [
+                re.sub(r"\s+", " ", str(item)).strip() for item in alternatives[:2]
+            ]
+        total_words = sum(len(scene["narration"].split()) for scene in scenes)
+        if not 150 <= total_words <= 195:
+            raise ValueError(
+                f"Scene narration totals {total_words} words; expected 150-195. "
+                "Rewrite the scenes to 20-23 words each."
+            )
+        return candidate
+
+    outline, provider, model = generate_json(
+        outline_prompt(topic, source_pool),
+        validator=validate_outline,
+        stage="script_outline",
+    )
+
+    narrations = [scene["narration"] for scene in outline["scenes"]]
+    claims = []
+    for start_index in (0, 4):
+        chunk = narrations[start_index:start_index + 4]
+        prompt = claim_prompt(chunk, source_pool, start_index)
+
+        def validate_claims(candidate, start_index=start_index, chunk=chunk):
+            if not isinstance(candidate, dict):
+                raise ValueError("Claims response is not a JSON object.")
+            items = candidate.get("fact_claims")
+            if not isinstance(items, list) or not items:
+                raise ValueError("The claims response needs a non-empty fact_claims list.")
+            first_scene = start_index + 1
+            last_scene = start_index + len(chunk)
+            for position, item in enumerate(items, 1):
+                if not isinstance(item, dict):
+                    raise ValueError(f"Fact claim {position} is not a JSON object.")
+                scene_number = int(item.get("scene", 0))
+                if not first_scene <= scene_number <= last_scene:
+                    raise ValueError(
+                        f"Fact claim {position} cites scene {scene_number}, which is "
+                        f"outside scenes {first_scene}-{last_scene}."
+                    )
+                sentence = re.sub(r"\s+", " ", str(item.get("sentence", ""))).strip()
+                if not normalize_words(sentence):
+                    raise ValueError(f"Fact claim {position} has an empty sentence.")
+                narration_words = " ".join(
+                    normalize_words(chunk[scene_number - first_scene])
+                )
+                if " ".join(normalize_words(sentence)) not in narration_words:
+                    raise ValueError(
+                        f"Fact claim {position} is not copied from its scene narration."
+                    )
+                item["sentence"] = sentence
+                item["source_urls"] = validate_planner_source_urls(
+                    position, item.get("source_urls")
+                )
+            return candidate
+
+        part, _provider, _model = generate_json(
+            prompt, validator=validate_claims, stage="claim_sourcing"
+        )
+        claims.extend(part["fact_claims"])
+
+    candidate = {
+        "title": str(outline.get("title") or topic).strip(),
+        "hook": str(outline.get("hook") or "").strip(),
+        "scenes": outline["scenes"],
+        "fact_claims": claims,
+    }
+    return validate_plan(candidate), provider, model
+
+
 def gemini_plan(topic, source_pool=None):
     """Generate and validate a complete 8-scene plan through the AI router."""
     prompt = documentary_prompt(topic, source_pool)
@@ -394,7 +592,22 @@ def gemini_plan(topic, source_pool=None):
                 raise ValueError(f"Scene {scene_index} needs a concrete 2-6 word visual_focus.")
             focus_overlap = len(focus_tokens & query_tokens_for_focus) / max(1, len(focus_tokens))
             if focus_overlap < 0.5:
-                raise ValueError(f"Scene {scene_index} visual_focus is not represented by its primary visual_query.")
+                # A near miss here is a search-phrase problem, not a factual
+                # one: free-tier planners often name the right subject with a
+                # synonym in the query. Rebuild the query around the focus
+                # instead of discarding eight scenes the provider already
+                # wrote (and already paid for).
+                aligned_query = align_visual_query_to_focus(visual_query, visual_focus)
+                if not aligned_query:
+                    raise ValueError(
+                        f"Scene {scene_index} visual_focus is not represented by its primary visual_query."
+                    )
+                print(
+                    f"Plan repair: scene {scene_index} visual_query rewritten to "
+                    f"name its visual_focus ({visual_focus!r})."
+                )
+                visual_query = aligned_query
+                query_tokens_for_focus = set(normalize_words(visual_query))
             if len(split_sentences(narration)) > 2:
                 raise ValueError(f"Scene {scene_index} has too many separate ideas; use at most two sentences.")
             alternatives = scene.get("visual_queries")
@@ -430,8 +643,12 @@ def gemini_plan(topic, source_pool=None):
         candidate["script"] = " ".join(narrations).strip()
         word_count = len(candidate["script"].split())
         if not 150 <= word_count <= 195:
+            gap = 170 - word_count
+            direction = "add" if gap > 0 else "remove"
             raise ValueError(
-                f"Scene narration totals {word_count} words; expected 150-195 for a 70-90 second narration."
+                f"Scene narration totals {word_count} words; expected 150-195 for a "
+                f"70-90 second narration. Rewrite each scene to 20-23 words: "
+                f"{direction} {abs(gap)} words overall across the scenes."
             )
         fact_claims = candidate.get("fact_claims")
         if not isinstance(fact_claims, list) or len(fact_claims) < len(scenes):
@@ -464,11 +681,23 @@ def gemini_plan(topic, source_pool=None):
             prompt, validator=validate_plan, stage="script_generation"
         )
     except Exception as exc:
-        raise RuntimeError(
-            "A source-backed documentary plan could not be generated. "
-            "The generator will not substitute a generic, unaudited local script. "
-            f"Details: {type(exc).__name__}: {str(exc)[:900]}"
-        ) from exc
+        # One request has to produce narration, visuals and citations at once,
+        # and free-tier models answer that with a truncated or too-short plan.
+        # Split it: the narration is written first, then cited in two halves.
+        print(
+            "AI router: the single-shot plan was rejected by every provider; "
+            "retrying as two smaller, independently validated requests. "
+            f"First failure: {type(exc).__name__}: {str(exc)[:300]}"
+        )
+        try:
+            plan, provider, model = staged_plan(topic, source_pool, validate_plan)
+        except Exception as staged_exc:
+            raise RuntimeError(
+                "A source-backed documentary plan could not be generated. "
+                "The generator will not substitute a generic, unaudited local script. "
+                f"Details: {type(exc).__name__}: {str(exc)[:500]} | "
+                f"staged fallback: {type(staged_exc).__name__}: {str(staged_exc)[:500]}"
+            ) from staged_exc
     plan["ai_provider"] = {"provider": provider, "model": model}
 
     Path("plan.json").write_text(

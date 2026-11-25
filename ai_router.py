@@ -150,6 +150,27 @@ def _shrink_completion_budget(task: str, route: Route) -> float:
     return scale
 
 
+def _grow_completion_budget(task: str, route: Route) -> float:
+    """Give a reasoning model room to finish instead of thinking the budget away.
+
+    An empty assistant message with ``finish_reason=length`` means the model was
+    cut off mid-thought: shrinking the budget cannot fix it. Only a larger one
+    can, so an empty reply grows the budget once before the route is set aside.
+    """
+    scale = min(2.5, max(1.5, _completion_scale(task, route) * 1.6))
+    _COMPLETION_SCALE[(task, route.route_id)] = scale
+    return scale
+
+
+def _is_reasoning_model(model: str) -> bool:
+    """Whether a chat model spends hidden reasoning tokens from the budget."""
+    slug = str(model or "").lower()
+    return any(
+        marker in slug
+        for marker in ("gpt-oss", "qwen3", "reasoning", "thinking", "deepseek-r", "o1", "o3", "o4")
+    )
+
+
 def _env(name: str, default: str = "") -> str:
     return os.getenv(name, default).strip()
 
@@ -587,7 +608,10 @@ def _openai_request(
         # for low reasoning effort and no server-side JSON validation.
         if route.provider in ("deepseek", "openrouter"):
             payload["response_format"] = {"type": "json_object"}
-        if route.provider == "groq":
+        # Only a reasoning model accepts reasoning_effort; Groq answers HTTP 400
+        # when the parameter is sent to a plain instruct model, so the free-tier
+        # text model can be a non-reasoning one without breaking the request.
+        if route.provider == "groq" and _is_reasoning_model(route.model):
             payload["reasoning_effort"] = "low"
 
         if route.provider == "deepseek":
@@ -595,10 +619,10 @@ def _openai_request(
 
         if route.provider == "openrouter":
             # The free router can select a reasoning model that spends the whole
-            # completion budget thinking and returns empty content with
-            # finish_reason=length. Low effort reserves that budget for the
-            # required structured JSON.
-            payload["reasoning"] = {"effort": "low"}
+            # completion budget thinking and then returns empty content with
+            # finish_reason=length, which no smaller budget can repair. Turning
+            # reasoning off reserves the budget for the required JSON.
+            payload["reasoning"] = {"enabled": False}
 
         if route.provider == "groq":
             # The free plan counts prompt plus completion budget against a
@@ -921,6 +945,7 @@ def _route(
             request_prompt = prompt
             repair_used = False
             shrink_attempts = 0
+            grow_attempts = 0
 
             while True:
                 try:
@@ -980,12 +1005,29 @@ def _route(
                     return value, route.provider, route.model
 
                 except TruncatedOutputError as exc:
-                    # The model spent its whole completion budget before
-                    # finishing. Shrink the budget and retry the same route
-                    # instead of losing it for the rest of the run.
                     errors.append(
                         f"{route.provider}/{route.model}: truncated output ({exc})"
                     )
+                    # An empty reply means the model thought the entire budget
+                    # away, so shrinking would only make it worse: give it more
+                    # room once. A half-written JSON reply is the opposite case
+                    # and still shrinks.
+                    if (
+                        grow_attempts < 1
+                        and route.provider != "groq"
+                        and "empty assistant content" in str(exc)
+                    ):
+                        grow_attempts += 1
+                        scale = _grow_completion_budget(task, route)
+                        _COOLDOWN_UNTIL.pop(
+                            _health_key(task, stage, route.route_id), None
+                        )
+                        print(
+                            f"AI router: {route.route_id} returned no content "
+                            f"before its budget ran out; retrying with a "
+                            f"{scale:.2f}x completion budget."
+                        )
+                        continue
                     if shrink_attempts < 1:
                         shrink_attempts += 1
                         scale = _shrink_completion_budget(task, route)

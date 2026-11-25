@@ -92,7 +92,7 @@ class ProviderStabilityTests(unittest.TestCase):
             prompt_tokens + payload["max_completion_tokens"], 8000
         )
 
-    def test_truncated_output_retries_the_same_route_with_a_smaller_budget(self):
+    def test_empty_output_retries_the_same_route_with_a_larger_budget(self):
         with patch.dict(os.environ, {
             "AI_TEXT_PROVIDER_ORDER": "openrouter",
             "OPENROUTER_API_KEY": "test-openrouter",
@@ -107,12 +107,41 @@ class ProviderStabilityTests(unittest.TestCase):
         self.assertEqual(value, {"ready": True})
         self.assertEqual((provider, model), ("openrouter", "openrouter/free"))
         self.assertEqual(post.call_count, 2)
-        self.assertLess(
+        # The whole answer was consumed by hidden reasoning, so a smaller budget
+        # could never contain the JSON: the retry must reserve more room.
+        self.assertGreater(
             post.call_args_list[1].kwargs["json"]["max_tokens"],
             post.call_args_list[0].kwargs["json"]["max_tokens"],
         )
+        self.assertEqual(
+            post.call_args_list[0].kwargs["json"]["reasoning"], {"enabled": False}
+        )
         self.assertNotIn(
             ("text", "openrouter:openrouter/free"), ai_router._DISABLED_ROUTES
+        )
+
+    def test_incomplete_json_retries_the_same_route_with_a_smaller_budget(self):
+        def _partial_json():
+            return FakeResponse(200, {
+                "choices": [{"message": {"content": '{"ready": tru'}}]
+            })
+
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "openrouter",
+            "OPENROUTER_API_KEY": "test-openrouter",
+            "OPENROUTER_MODEL": "openrouter/free",
+        }, clear=True), patch(
+            "ai_router.requests.post",
+            side_effect=[_partial_json(), _ok({"ready": True})],
+        ) as post:
+            value, provider, model = ai_router.generate_json("Return JSON")
+
+        self.assertEqual(value, {"ready": True})
+        self.assertEqual((provider, model), ("openrouter", "openrouter/free"))
+        self.assertEqual(post.call_count, 2)
+        self.assertLess(
+            post.call_args_list[1].kwargs["json"]["max_tokens"],
+            post.call_args_list[0].kwargs["json"]["max_tokens"],
         )
 
     def test_repeated_503_gets_exponential_backoff_between_passes(self):
@@ -252,6 +281,76 @@ class DocumentaryPromptBudgetTests(unittest.TestCase):
             self.assertIn(required, prompt)
         for url in self.POOL:
             self.assertIn(url, prompt)
+
+
+class StagedPlanRecoveryTests(unittest.TestCase):
+    """The two-request fallback that replaced a dead single-shot plan call."""
+
+    POOL = ["https://www.noaa.gov/rain", "https://www.usgs.gov/water"]
+
+    @staticmethod
+    def _narration(index):
+        return " ".join(f"scene{index}word{position}" for position in range(21))
+
+    def _outline(self):
+        scenes = []
+        for index in range(1, 9):
+            narration = self._narration(index)
+            scenes.append({
+                "narration": narration,
+                "visual_focus": "rain forest canopy",
+                "visual_query": "rain forest canopy",
+                "visual_queries": ["rain on leaves", "forest mist"],
+            })
+        return {"title": "Rain", "hook": "A hook", "scenes": scenes}
+
+    def _claims(self, start_index):
+        return {"fact_claims": [
+            {
+                "scene": start_index + offset + 1,
+                "sentence": self._narration(start_index + offset + 1),
+                "source_urls": self.POOL,
+            }
+            for offset in range(4)
+        ]}
+
+    def test_staged_plan_assembles_the_outline_and_both_claim_halves(self):
+        outline = self._outline()
+        captured = {}
+
+        def validate_plan(candidate):
+            captured["candidate"] = candidate
+            return candidate
+
+        with patch.object(
+            main,
+            "generate_json",
+            side_effect=[
+                (outline, "gemini", "gemini-3.5-flash-lite"),
+                (self._claims(0), "gemini", "gemini-3.5-flash-lite"),
+                (self._claims(4), "gemini", "gemini-3.5-flash-lite"),
+            ],
+        ) as generate:
+            plan, provider, model = main.staged_plan("Rain", self.POOL, validate_plan)
+
+        self.assertEqual(generate.call_count, 3)
+        self.assertEqual((provider, model), ("gemini", "gemini-3.5-flash-lite"))
+        self.assertEqual(len(plan["scenes"]), 8)
+        self.assertEqual(len(captured["candidate"]["fact_claims"]), 8)
+        self.assertEqual(plan["title"], "Rain")
+        # Narration and citation are separate requests so that neither has to
+        # fit both a script and its sources into one completion budget.
+        stages = [call.kwargs["stage"] for call in generate.call_args_list]
+        self.assertEqual(stages, ["script_outline", "claim_sourcing", "claim_sourcing"])
+
+    def test_visual_query_is_repaired_instead_of_rejecting_the_plan(self):
+        repaired = main.align_visual_query_to_focus(
+            "woodland downpour footage", "rain forest canopy"
+        )
+
+        self.assertEqual(repaired.split()[:3], ["rain", "forest", "canopy"])
+        focus_words = set(main.normalize_words("rain forest canopy"))
+        self.assertTrue(focus_words.issubset(set(main.normalize_words(repaired))))
 
 
 if __name__ == "__main__":
