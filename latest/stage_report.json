@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-25T07:07:52+00:00",
+  "generated_at": "2026-11-25T07:28:41+00:00",
   "environment": {
     "python": "3.11.18",
     "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
@@ -28,23 +28,23 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 49.083,
-    "stage_count": 5,
-    "failed_stage": "fact_check",
+    "total_elapsed_seconds": 775.608,
+    "stage_count": 4,
+    "failed_stage": "script_generation",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-25T07:07:03+00:00",
+        "started_at": "2026-11-25T07:15:46+00:00",
         "details": {},
         "duration_seconds": 0.001
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-25T07:07:03+00:00",
+        "started_at": "2026-11-25T07:15:46+00:00",
         "details": {
-          "topic": "How beavers reshape entire river ecosystems",
+          "topic": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain — Explore how billions of trees release moisture into the atmosphere, create flying rivers, regulate global climate, and sustain an extraordinary ecosystem. Reveal the hidden connections between trees, wildlife, rainfall, and the survival of our planet.",
           "provider_keys": "4"
         },
         "duration_seconds": 0.0
@@ -52,32 +52,22 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-25T07:07:03+00:00",
+        "started_at": "2026-11-25T07:15:46+00:00",
         "details": {
-          "topic": "How beavers reshape entire river ecosystems",
+          "topic": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain — Explore how billions of trees release moisture into the atmosphere, create flying rivers, regulate global climate, and sustain an extraordinary ecosystem. Reveal the hidden connections between trees, wildlife, rainfall, and the survival of our planet.",
           "urls": "12"
         },
-        "duration_seconds": 0.698
+        "duration_seconds": 1.182
       },
       {
         "stage": "script_generation",
-        "status": "completed",
-        "started_at": "2026-11-25T07:07:04+00:00",
-        "details": {
-          "topic": "How beavers reshape entire river ecosystems",
-          "words": "170"
-        },
-        "duration_seconds": 17.382
-      },
-      {
-        "stage": "fact_check",
         "status": "failed",
-        "started_at": "2026-11-25T07:07:21+00:00",
+        "started_at": "2026-11-25T07:15:47+00:00",
         "details": {
-          "claims": "8"
+          "topic": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain — Explore how billions of trees release moisture into the atmosphere, create flying rivers, regulate global climate, and sustain an extraordinary ecosystem. Reveal the hidden connections between trees, wildlife, rainfall, and the survival of our planet."
         },
-        "duration_seconds": 30.841,
-        "error": "RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: No supplied or recovered trusted source yielded a relevant evidence passage for C2. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264: Fetched page is about a different subject: it shares 1 of the claim's 16 content terms (needs 2).; https://pubmed.ncbi.nlm.nih.gov/28256552: Evidence page contains too little readable text for verification.; https://www.fws.gov/story/beavers-nature-s-ecosaturators: Could not fetch evidence source https://www.fws.gov/story/beavers-nature-s-ecosaturators: HTTPError (HTTP 404); https://www.usgs.gov/news/national-park-service-release-beavers-help-restore-water-security-climate-change: Could not fetch evidence source https://www.usgs.gov/news/national-park-service-release-beavers-help-restore-water-security-climate-change: HTTPError (HTTP 404); https://www.sec.gov/Archives/edgar/data/1385157/000110465926124497/tel-20260925x10k.htm: Could not fetch evidence source https://www.sec.gov/Archives/edgar/data/1385157/000110465926124497/tel-20260925x10k.htm: HTTPError (HTTP 403); https://www.sec.gov/Archives/edgar/data/1385157/000110465925109150/tel-20250926x10k.htm: Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again.; https://www.sec.gov/Archives/edgar/data/1385157/000104746911009687/a2206230z10-k.htm: Source host was already blocked in this run (institution returned HTTP 401/403 for t"
+        "duration_seconds": 774.259,
+        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 94 words; expected 150-195 for a 70-90 second narration.); groq/openai/gpt-oss-120b: invalid response (Scene 4 visual_focus is not represented by its primary visual_query.); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated outp"
       }
     ]
   }
