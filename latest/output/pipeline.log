@@ -9,17 +9,17 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, Ecological engineering
-Source pool: 45 trusted page(s) cited by Beaver, Keystone species, Ecological engineering.
+Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, River ecosystem
+Source pool: 68 trusted page(s) cited by Beaver, Keystone species, River ecosystem.
 Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/22697210 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/28256552 (FactCheckError: Evidence page contains too little readable text for verification.)
 Fact-check source temporarily unavailable (SSLError); retrying once in 3s.
 Evidence brief: skipped https://journals.iupui.edu/index.php/ias/article/download/7219/7239 (FactCheckError: Could not fetch evidence source https://journals.iupui.edu/index.php/ias/article/download/7219/7239: SSLError)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313
+Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/32753594 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560
+Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/21307956 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/18777567 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/25678658 (FactCheckError: Evidence page contains too little readable text for verification.)
@@ -31,46 +31,116 @@ Evidence brief: skipped https://www.iucnredlist.org/species/4007/197499749 (Fact
 Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6175133
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/30333676 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: 2 source passages fetched for planning.
-[stage] source_pool: completed in 12.7s
+[stage] source_pool: completed in 8.8s
 [stage] script_generation: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
+Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
+AI router: gemini:gemini-3.5-flash-lite exhausted its output budget; retrying with a 0.60x completion budget.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-3.5-flash.
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 118 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 52 words overall across the scenes.
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. AI response did not contain a JSON object
 AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
 AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
 AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-Plan repair: scene 5 visual_query rewritten to name its visual_focus ('beaver family portrait').
-Plan repair: scene 7 visual_query rewritten to name its visual_focus ('beaver taxonomy page').
-Plan repair: scene 8 visual_query rewritten to name its visual_focus ('beaver taxonomy screen').
+Plan repair: scene 6 visual_query rewritten to name its visual_focus ('Two beaver species').
+AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Fact claim 5 does not restate the fetched passage it cites (23% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.
+AI router: trying openrouter / openrouter/free for text/script_generation...
+AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
+AI router: retry pass 2/4 for text/script_generation in 59.0s with 2 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
+Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 429; trying gemini-2.5-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
+AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
+AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
+AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.36x completion budget.
+AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
+AI router: retry pass 3/4 for text/script_generation in 60.0s with 1 route(s).
+AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
+AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
+AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
+AI router: groq rate limited (HTTP 429); provider paused for 900s and the next route is used now.
+AI router: retry pass 4/4 for text/script_generation in 900.0s with 1 route(s).
+AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
+AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
+AI router: groq rate limited (HTTP 429); provider paused for 852s and the next route is used now.
+AI router: the single-shot plan was rejected by every provider; retrying as two smaller, independently validated requests. First failure: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: invalid response (AI response did not contain a JSON object); groq/openai/gpt-oss-120b: invalid response (Fact claim 5 does not restate
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
+Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
+AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
+AI router: groq rate limited (HTTP 429); provider paused for 900s and the next route is used now.
+AI router: trying openrouter / openrouter/free for text/script_outline...
+AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
+AI router: retry pass 2/4 for text/script_outline in 899.8s with 1 route(s).
+AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
 AI router: groq/openai/gpt-oss-120b returned a valid text response.
-Documentary plan generated by groq/openai/gpt-oss-120b: 167 words, 8 scenes.
-Opening validated before TTS: title=3 word(s), hook=7 word(s).
-[stage] script_generation: completed in 77.9s
-2/7 Fetching trusted source pages and auditing every factual assertion...
-[stage] fact_check: start
-[stage] fact_check: FAILED after 0.0s
+AI router: trying gemini / gemini-3.5-flash-lite for text/claim_sourcing...
+Gemini model gemini-3.5-flash answered HTTP 503; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq rate limited (HTTP 429); provider paused for 329s and the next route is used now.
+AI router: trying openrouter / openrouter/free for text/claim_sourcing...
+AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
+AI router: retry pass 2/4 for text/claim_sourcing in 328.8s with 1 route(s).
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq rate limited (HTTP 429); provider paused for 323s and the next route is used now.
+AI router: retry pass 2/4 for text/claim_sourcing in 323.0s with 1 route(s).
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq rate limited (HTTP 429); provider paused for 331s and the next route is used now.
+AI router: retry pass 2/4 for text/claim_sourcing in 331.0s with 1 route(s).
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq rate limited (HTTP 429); provider paused for 480s and the next route is used now.
+AI router: retry pass 2/4 for text/claim_sourcing in 480.0s with 1 route(s).
+AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+[stage] script_generation: FAILED after 3862.5s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3914, in _run_pipeline
-    fact_report = verify_documentary_facts(
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1521, in verify_documentary_facts
-    report = _verify_documentary_pass(plan, generate_fact_json, fetched)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1079, in _verify_documentary_pass
-    claims = validate_fact_claims(plan)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 609, in validate_fact_claims
-    raise FactCheckError(
-fact_check.FactCheckError: Fact claim 3 is not an exact complete sentence in scene 3 narration.
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 869, in gemini_plan
+    plan, provider, model = generate_json(
+                            ^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1244, in generate_json
+    return _route("text", prompt, validator=validator, stage=stage)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1228, in _route
+    raise ProviderRoutingError(
+ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: invalid response (AI response did not contain a JSON object); groq/openai/gpt-oss-120b: invalid response (Fact claim 5 does not restate the fetched passage it cites (23% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 429
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 882, in gemini_plan
+    plan, provider, model = staged_plan(
+                            ^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 675, in staged_plan
+    return validate_plan(candidate), provider, model
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 789, in validate_plan
+    raise ValueError("The plan must provide a source-backed claim for every scene narration sentence.")
+ValueError: The plan must provide a source-backed claim for every scene narration sentence.
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4177, in <module>
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4211, in <module>
     main()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4157, in main
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4191, in main
     _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3943, in _run_pipeline
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3937, in _run_pipeline
+    plan = gemini_plan(TOPIC, source_pool, evidence)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 886, in gemini_plan
     raise RuntimeError(
-RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Fact claim 3 is not an exact complete sentence in scene 3 narration.
+RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: invalid response (AI response did not contain a JSON object); groq/openai/gpt-oss-120b: invalid response (Fact claim 5 does not restate the fetched passage it cites (23% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); openrouter/openrouter/ | staged fallback: ValueError: The plan must provide a source-backed claim for every scene narration sentence.

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-25T20:16:01+00:00",
+  "generated_at": "2026-11-25T21:27:33+00:00",
   "environment": {
     "python": "3.11.18",
     "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
@@ -28,21 +28,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 90.839,
-    "stage_count": 5,
-    "failed_stage": "fact_check",
+    "total_elapsed_seconds": 3871.391,
+    "stage_count": 4,
+    "failed_stage": "script_generation",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-25T20:14:31+00:00",
+        "started_at": "2026-11-25T20:23:01+00:00",
         "details": {},
         "duration_seconds": 0.001
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-25T20:14:31+00:00",
+        "started_at": "2026-11-25T20:23:01+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -52,33 +52,23 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-25T20:14:31+00:00",
+        "started_at": "2026-11-25T20:23:01+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "urls": "24",
           "excerpts": "2"
         },
-        "duration_seconds": 12.725
+        "duration_seconds": 8.795
       },
       {
         "stage": "script_generation",
-        "status": "completed",
-        "started_at": "2026-11-25T20:14:43+00:00",
-        "details": {
-          "topic": "How beavers reshape entire river ecosystems",
-          "words": "167"
-        },
-        "duration_seconds": 77.947
-      },
-      {
-        "stage": "fact_check",
         "status": "failed",
-        "started_at": "2026-11-25T20:16:01+00:00",
+        "started_at": "2026-11-25T20:23:10+00:00",
         "details": {
-          "claims": "8"
+          "topic": "How beavers reshape entire river ecosystems"
         },
-        "duration_seconds": 0.0,
-        "error": "RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Fact claim 3 is not an exact complete sentence in scene 3 narration."
+        "duration_seconds": 3862.466,
+        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: truncated output (AI response contained incomplete JSON); gemini/gemini-3.5-flash-lite: invalid response (AI response did not contain a JSON object); groq/openai/gpt-oss-120b: invalid response (Fact claim 5 does not restate the fetched passage it cites (23% of its key terms appear there). Rewrite that sentence using the passage's own wording and claims only, or cite the passage that supports it.); openrouter/openrouter/ | staged fallback: ValueError: The plan must provide a source-backed claim for every scene narration sentence."
       }
     ]
   }
