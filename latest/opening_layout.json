@@ -1,17 +1,16 @@
 {
   "path": "output/opening_overlay.png",
   "title_lines": [
-    "THE AMAZON RAINFOREST: THE MYSTERIOUS FOREST",
-    "THAT CREATES ITS OWN RAIN"
+    "HOW BEAVERS RESHAPE RIVER ECOSYSTEMS"
   ],
   "hook_lines": [
-    "Deep within the Amazon,",
-    "towering trees summon",
-    "their own rain, turning",
-    "the"
+    "Beavers turn ordinary",
+    "rivers into thriving",
+    "wetlands with just one",
+    "dam, reshaping"
   ],
-  "title_text": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain",
-  "hook_text": "Deep within the Amazon, towering trees summon their own rain, turning the",
+  "title_text": "How Beavers Reshape River Ecosystems",
+  "hook_text": "Beavers turn ordinary rivers into thriving wetlands with just one dam, reshaping",
   "title_font_size": 27,
   "hook_font_size": 62,
   "max_text_width": 880,
@@ -19,6 +18,6 @@
     48,
     150,
     1032,
-    564
+    538
   ]
 }

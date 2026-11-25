@@ -1,140 +1,140 @@
 {
-  "title": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain",
-  "hook": "Deep within the Amazon, towering trees summon their own rain, turning the",
-  "script": "Deep within the Amazon, towering trees summon their own rain, turning the forest into a living cloud factory where humidity never ceases. Billions of leaves continuously transpire water, releasing moisture that climbs thousands of meters before cooling and forming clouds that fuel the region’s perpetual monsoon. These vapor streams merge into colossal “flying rivers” that drift eastward, transporting moisture across the continent and sustaining distant savannas. When the airborne water condenses, it falls as rain that feeds the Amazon River, the planet’s largest discharge, supporting millions of people downstream. The river’s immense flow nourishes flooded forests, swamps, and even the dark waters of the Rio Negro, replenishing vital fish stocks. This forest‑driven rainfall stabilizes regional temperatures, creating a cooling effect that influences global climate patterns and moderates atmospheric carbon. From apex predators like jaguars to microscopic insects, every species relies on the steady water cycle for their breeding and feeding. Safeguarding this self‑sustaining engine is essential for preserving worldwide weather stability and countless human lives, for agriculture, health, and economies worldwide.",
+  "title": "How Beavers Reshape River Ecosystems",
+  "hook": "Beavers turn ordinary rivers into thriving wetlands with just one dam, reshaping",
+  "script": "Beavers turn ordinary rivers into thriving wetlands with just one dam, reshaping water flow and habitat for countless species today. Their sturdy dams slow the current, creating deep ponds that trap sediment, raise groundwater tables, and expand floodplain connectivity across the valley. These new ponds become nurseries for fish, amphibians, and insects, dramatically increasing local biodiversity and offering safe breeding grounds for future generations. Beaver activity also enriches riparian zones, as silt‑laden water deposits nutrients that stimulate rapid growth of trees and shrubs along the riverbank. The expanded wetlands act as natural filters, where plants and microbes absorb excess nitrogen and phosphorus, improving downstream water quality for nearby communities. During drought periods, stored pond water releases slowly, maintaining stream flow and protecting downstream habitats from desiccation for fish and plants. Beaver‑engineered streams also moderate temperature, creating cooler refuges that support cold‑water fish such as trout during summer heat for survival. Thus, a single beaver family can reshape an entire river ecosystem, delivering lasting ecological benefits that persist for generations throughout.",
   "scenes": [
     {
-      "narration": "Deep within the Amazon, towering trees summon their own rain, turning the forest into a living cloud factory where humidity never ceases.",
-      "visual_focus": "towering Amazon trees",
-      "visual_query": "towering Amazon trees canopy",
+      "narration": "Beavers turn ordinary rivers into thriving wetlands with just one dam, reshaping water flow and habitat for countless species today.",
+      "visual_focus": "beaver dam",
+      "visual_query": "beaver dam construction",
       "visual_queries": [
-        "Amazon rainforest canopy aerial",
-        "tall trees rainforest sunrise"
+        "beaver dam building",
+        "beaver dam in river"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "towering Amazon trees canopy",
-      "source_label": "Encyclopedia Britannica",
-      "source_url": "https://www.britannica.com/place/Amazon-Rainforest",
+      "reference_query": "beaver dam construction",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "Billions of leaves continuously transpire water, releasing moisture that climbs thousands of meters before cooling and forming clouds that fuel the region’s perpetual monsoon.",
-      "visual_focus": "leaf transpiration process",
-      "visual_query": "leaf transpiration closeup rainforest",
+      "narration": "Their sturdy dams slow the current, creating deep ponds that trap sediment, raise groundwater tables, and expand floodplain connectivity across the valley.",
+      "visual_focus": "deep pond",
+      "visual_query": "deep pond behind beaver dam",
       "visual_queries": [
-        "rainforest leaf water vapor",
-        "tree leaf condensation footage"
+        "pond formed by beaver dam",
+        "slow water pond beaver"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "leaf transpiration closeup rainforest",
-      "source_label": "NCBI",
-      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247",
+      "reference_query": "deep pond behind beaver dam",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "These vapor streams merge into colossal “flying rivers” that drift eastward, transporting moisture across the continent and sustaining distant savannas.",
-      "visual_focus": "flying rivers concept",
-      "visual_query": "flying rivers Amazon aerial",
+      "narration": "These new ponds become nurseries for fish, amphibians, and insects, dramatically increasing local biodiversity and offering safe breeding grounds for future generations.",
+      "visual_focus": "pond wildlife",
+      "visual_query": "fish amphibians insects pond",
       "visual_queries": [
-        "Amazon moisture transport view",
-        "aerial view river vapor flow"
+        "pond wildlife beaver",
+        "nursery pond beaver dam"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "flying rivers Amazon aerial",
-      "source_label": "Encyclopedia Britannica",
-      "source_url": "https://www.britannica.com/place/Amazon-River",
+      "reference_query": "fish amphibians insects pond",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2
     },
     {
-      "narration": "When the airborne water condenses, it falls as rain that feeds the Amazon River, the planet’s largest discharge, supporting millions of people downstream.",
-      "visual_focus": "Amazon River discharge",
-      "visual_query": "Amazon River massive flow",
+      "narration": "Beaver activity also enriches riparian zones, as silt‑laden water deposits nutrients that stimulate rapid growth of trees and shrubs along the riverbank.",
+      "visual_focus": "riparian trees",
+      "visual_query": "riparian trees near beaver dam",
       "visual_queries": [
-        "Amazon River floodplain aerial",
-        "river water volume Amazon"
+        "riverbank vegetation beaver",
+        "shrubs growing by beaver pond"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "Amazon River massive flow",
-      "source_label": "Encyclopedia Britannica",
-      "source_url": "https://www.britannica.com/place/Amazon-River",
+      "reference_query": "riparian trees near beaver dam",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "The river’s immense flow nourishes flooded forests, swamps, and even the dark waters of the Rio Negro, replenishing vital fish stocks.",
-      "visual_focus": "Rio Negro waters",
-      "visual_query": "Rio Negro dark water",
+      "narration": "The expanded wetlands act as natural filters, where plants and microbes absorb excess nitrogen and phosphorus, improving downstream water quality for nearby communities.",
+      "visual_focus": "wetland filter",
+      "visual_query": "wetland plants filtering water",
       "visual_queries": [
-        "Rio Negro river view",
-        "dark water Amazon tributary"
+        "wetland filtration beaver",
+        "plants cleaning water pond"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "Rio Negro dark water",
-      "source_label": "Encyclopedia Britannica",
-      "source_url": "https://www.britannica.com/place/Amazon-Rainforest",
+      "reference_query": "wetland plants filtering water",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "This forest‑driven rainfall stabilizes regional temperatures, creating a cooling effect that influences global climate patterns and moderates atmospheric carbon.",
-      "visual_focus": "rainforest cooling effect",
-      "visual_query": "rainforest cooling aerial",
+      "narration": "During drought periods, stored pond water releases slowly, maintaining stream flow and protecting downstream habitats from desiccation for fish and plants.",
+      "visual_focus": "slow water release",
+      "visual_query": "beaver pond water release during drought",
       "visual_queries": [
-        "Amazon canopy temperature",
-        "forest cooling effect footage"
+        "pond outflow beaver drought",
+        "stream flow from beaver pond"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "rainforest cooling aerial",
-      "source_label": "NCBI",
-      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7192477",
+      "reference_query": "beaver pond water release during drought",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5
     },
     {
-      "narration": "From apex predators like jaguars to microscopic insects, every species relies on the steady water cycle for their breeding and feeding.",
-      "visual_focus": "jaguar in rainforest",
-      "visual_query": "jaguar moving rainforest",
+      "narration": "Beaver‑engineered streams also moderate temperature, creating cooler refuges that support cold‑water fish such as trout during summer heat for survival.",
+      "visual_focus": "cool water refuge",
+      "visual_query": "cool water refuge beaver stream",
       "visual_queries": [
-        "jaguar tracking forest",
-        "jaguar prowling Amazon"
+        "cold water habitat beaver",
+        "trout refuge beaver pond"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "jaguar moving rainforest",
-      "source_label": "NCBI",
-      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11774006",
+      "reference_query": "cool water refuge beaver stream",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6
     },
     {
-      "narration": "Safeguarding this self‑sustaining engine is essential for preserving worldwide weather stability and countless human lives, for agriculture, health, and economies worldwide.",
-      "visual_focus": "global climate impact",
-      "visual_query": "global climate impact forest",
+      "narration": "Thus, a single beaver family can reshape an entire river ecosystem, delivering lasting ecological benefits that persist for generations throughout.",
+      "visual_focus": "beaver family",
+      "visual_query": "beaver family near dam",
       "visual_queries": [
-        "world weather map forest influence",
-        "global climate change forest footage"
+        "beaver colony dam",
+        "family of beavers riverbank"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "global climate impact forest",
-      "source_label": "PubMed",
-      "source_url": "https://pubmed.ncbi.nlm.nih.gov/37990807",
+      "reference_query": "beaver family near dam",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7
@@ -143,66 +143,66 @@
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "Deep within the Amazon, towering trees summon their own rain, turning the forest into a living cloud factory where humidity never ceases.",
+      "sentence": "Beavers turn ordinary rivers into thriving wetlands with just one dam, reshaping water flow and habitat for countless species today.",
       "source_urls": [
-        "https://www.britannica.com/place/Amazon-Rainforest",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247"
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383",
+        "https://pubmed.ncbi.nlm.nih.gov/22697210"
       ]
     },
     {
       "scene": 2,
-      "sentence": "Billions of leaves continuously transpire water, releasing moisture that climbs thousands of meters before cooling and forming clouds that fuel the region’s perpetual monsoon.",
+      "sentence": "Their sturdy dams slow the current, creating deep ponds that trap sediment, raise groundwater tables, and expand floodplain connectivity across the valley.",
       "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6878948"
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264",
+        "https://pubmed.ncbi.nlm.nih.gov/28256552"
       ]
     },
     {
       "scene": 3,
-      "sentence": "These vapor streams merge into colossal “flying rivers” that drift eastward, transporting moisture across the continent and sustaining distant savannas.",
+      "sentence": "These new ponds become nurseries for fish, amphibians, and insects, dramatically increasing local biodiversity and offering safe breeding grounds for future generations.",
       "source_urls": [
-        "https://www.britannica.com/place/Amazon-River",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6756188"
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313",
+        "https://pubmed.ncbi.nlm.nih.gov/32753594"
       ]
     },
     {
       "scene": 4,
-      "sentence": "When the airborne water condenses, it falls as rain that feeds the Amazon River, the planet’s largest discharge, supporting millions of people downstream.",
+      "sentence": "Beaver activity also enriches riparian zones, as silt‑laden water deposits nutrients that stimulate rapid growth of trees and shrubs along the riverbank.",
       "source_urls": [
-        "https://www.britannica.com/place/Amazon-River",
-        "https://pubmed.ncbi.nlm.nih.gov/30415837"
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560",
+        "https://pubmed.ncbi.nlm.nih.gov/21307956"
       ]
     },
     {
       "scene": 5,
-      "sentence": "The river’s immense flow nourishes flooded forests, swamps, and even the dark waters of the Rio Negro, replenishing vital fish stocks.",
+      "sentence": "The expanded wetlands act as natural filters, where plants and microbes absorb excess nitrogen and phosphorus, improving downstream water quality for nearby communities.",
       "source_urls": [
-        "https://www.britannica.com/place/Amazon-Rainforest",
-        "https://pubmed.ncbi.nlm.nih.gov/31350885"
+        "https://pubmed.ncbi.nlm.nih.gov/18777567",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383"
       ]
     },
     {
       "scene": 6,
-      "sentence": "This forest‑driven rainfall stabilizes regional temperatures, creating a cooling effect that influences global climate patterns and moderates atmospheric carbon.",
+      "sentence": "During drought periods, stored pond water releases slowly, maintaining stream flow and protecting downstream habitats from desiccation for fish and plants.",
       "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7192477",
-        "https://www.britannica.com/place/Amazon-Rainforest"
+        "https://pubmed.ncbi.nlm.nih.gov/22697210",
+        "https://pubmed.ncbi.nlm.nih.gov/28256552"
       ]
     },
     {
       "scene": 7,
-      "sentence": "From apex predators like jaguars to microscopic insects, every species relies on the steady water cycle for their breeding and feeding.",
+      "sentence": "Beaver‑engineered streams also moderate temperature, creating cooler refuges that support cold‑water fish such as trout during summer heat for survival.",
       "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11774006",
-        "https://www.britannica.com/place/Amazon-Rainforest"
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264",
+        "https://pubmed.ncbi.nlm.nih.gov/32753594"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Safeguarding this self‑sustaining engine is essential for preserving worldwide weather stability and countless human lives, for agriculture, health, and economies worldwide.",
+      "sentence": "Thus, a single beaver family can reshape an entire river ecosystem, delivering lasting ecological benefits that persist for generations throughout.",
       "source_urls": [
-        "https://pubmed.ncbi.nlm.nih.gov/37990807",
-        "https://www.britannica.com/place/Amazon-Rainforest"
+        "https://journals.iupui.edu/index.php/ias/article/download/7219/7239",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313"
       ]
     }
   ],
@@ -218,17 +218,16 @@
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "THE AMAZON RAINFOREST: THE MYSTERIOUS FOREST",
-        "THAT CREATES ITS OWN RAIN"
+        "HOW BEAVERS RESHAPE RIVER ECOSYSTEMS"
       ],
       "hook_lines": [
-        "Deep within the Amazon,",
-        "towering trees summon",
-        "their own rain, turning",
-        "the"
+        "Beavers turn ordinary",
+        "rivers into thriving",
+        "wetlands with just one",
+        "dam, reshaping"
       ],
-      "title_text": "The Amazon Rainforest: The Mysterious Forest That Creates Its Own Rain",
-      "hook_text": "Deep within the Amazon, towering trees summon their own rain, turning the",
+      "title_text": "How Beavers Reshape River Ecosystems",
+      "hook_text": "Beavers turn ordinary rivers into thriving wetlands with just one dam, reshaping",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,
@@ -236,7 +235,7 @@
         48,
         150,
         1032,
-        564
+        538
       ]
     }
   }
