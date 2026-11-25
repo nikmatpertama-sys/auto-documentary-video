@@ -470,7 +470,7 @@ class AIRouterTests(unittest.TestCase):
         )
         fallback_payload = post.call_args_list[-1].kwargs["json"]
         self.assertEqual(fallback_payload["model"], "baidu/ernie-5.5-flash-preview:free")
-        self.assertEqual(fallback_payload["reasoning"], {"enabled": False})
+        self.assertEqual(fallback_payload["reasoning"], {"effort": "low"})
         self.assertEqual(fallback_payload["response_format"], {"type": "json_object"})
 
     def test_transient_retry_preserves_first_failure_diagnostic(self):

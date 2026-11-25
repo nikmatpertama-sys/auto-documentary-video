@@ -114,7 +114,7 @@ class ProviderStabilityTests(unittest.TestCase):
             post.call_args_list[0].kwargs["json"]["max_tokens"],
         )
         self.assertEqual(
-            post.call_args_list[0].kwargs["json"]["reasoning"], {"enabled": False}
+            post.call_args_list[0].kwargs["json"]["reasoning"], {"effort": "low"}
         )
         self.assertNotIn(
             ("text", "openrouter:openrouter/free"), ai_router._DISABLED_ROUTES

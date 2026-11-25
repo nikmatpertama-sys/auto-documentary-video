@@ -619,10 +619,11 @@ def _openai_request(
 
         if route.provider == "openrouter":
             # The free router can select a reasoning model that spends the whole
-            # completion budget thinking and then returns empty content with
-            # finish_reason=length, which no smaller budget can repair. Turning
-            # reasoning off reserves the budget for the required JSON.
-            payload["reasoning"] = {"enabled": False}
+            # completion budget thinking and returns empty content with
+            # finish_reason=length. Some endpoints make reasoning mandatory and
+            # answer HTTP 400 when it is disabled, so it is only turned down and
+            # the empty reply is retried with a larger budget instead.
+            payload["reasoning"] = {"effort": "low"}
 
         if route.provider == "groq":
             # The free plan counts prompt plus completion budget against a

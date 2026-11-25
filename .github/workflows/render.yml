@@ -164,7 +164,9 @@ jobs:
           # 3.5 Flash-Lite has a much larger free daily request allowance.
           GEMINI_MODEL: gemini-3.5-flash-lite
           GEMINI_VISION_MODEL: gemini-3.5-flash-lite
-          GEMINI_MODEL_FALLBACKS: gemini-3.8-flash,gemini-2.5-flash,gemini-2.0-flash
+          # gemini-2.0-flash is retired for this key (HTTP 404). The primary
+          # lite model keeps the largest free daily allowance.
+          GEMINI_MODEL_FALLBACKS: gemini-3.8-flash,gemini-3.5-flash,gemini-2.5-flash
           # Groq's per-minute token window needs a full minute to recover.
           AI_RATE_LIMIT_COOLDOWN_SECONDS: "60"
           # Free-tier token ceiling for one request, and the window that must

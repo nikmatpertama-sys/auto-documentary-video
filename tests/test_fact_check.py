@@ -2,6 +2,7 @@ import unittest
 
 from fact_check import (
     FactCheckError,
+    build_fact_check_prompt,
     extract_page_text,
     is_trusted_source_url,
     select_relevant_excerpt,
@@ -463,6 +464,35 @@ class FactCheckTests(unittest.TestCase):
         self.assertEqual(context.exception.report["status"], "blocked")
         self.assertEqual(context.exception.report["blocked_at_claim"], "C1")
 
+
+
+class FactAuditPromptBudgetTests(unittest.TestCase):
+    def test_audit_prompt_fits_a_free_tier_token_ceiling(self):
+        long_excerpt = "Beaver dams slow water and create ponds. " * 120
+        claims = [
+            {
+                "id": f"C{index}",
+                "scene": index,
+                "sentence": "Beaver dams slow water and create ponds.",
+                "sources": [
+                    {
+                        "url": f"https://www.example{source}.gov/page",
+                        "title": "Beaver dams",
+                        "host": "example.gov",
+                        "excerpt": long_excerpt,
+                    }
+                    for source in (1, 2)
+                ],
+            }
+            for index in range(1, 9)
+        ]
+
+        prompt = build_fact_check_prompt("Beaver dams slow water and create ponds.", claims)
+
+        # Groq's free plan rejects anything above 8,000 tokens per minute, and
+        # the previous ~8,400-token audit prompt was rejected by every provider.
+        self.assertLess(len(prompt) // 4, 6000)
+        self.assertNotIn(long_excerpt, prompt)
 
 
 if __name__ == "__main__":
