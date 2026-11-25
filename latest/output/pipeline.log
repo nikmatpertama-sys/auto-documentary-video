@@ -9,82 +9,84 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Source pool articles suggested by gemini/gemini-3.5-flash-lite: Amazon rainforest, Flying river, Deforestation of the Amazon rainforest
-Source pool: 68 trusted page(s) cited by Amazon rainforest, Flying river, Deforestation of the Amazon rainforest.
-[stage] source_pool: completed in 1.2s
+Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, Stream restoration
+Source pool: 51 trusted page(s) cited by Beaver, Keystone species, Stream restoration.
+[stage] source_pool: completed in 0.8s
 [stage] script_generation: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 94 words; expected 150-195 for a 70-90 second narration.
-AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 4 visual_focus is not represented by its primary visual_query.
-AI router: trying openrouter / openrouter/free for text/script_generation...
-AI router: openrouter:openrouter/free exhausted its output budget; retrying with a 0.60x completion budget.
-AI router: openrouter:openrouter/free still truncates its output after shrinking the budget; retrying later in this run.
-AI router: trying openrouter / baidu/ernie-5.5-flash-preview:free for text/script_generation...
-AI router: openrouter:baidu/ernie-5.5-flash-preview:free exhausted its output budget; retrying with a 0.60x completion budget.
-AI router: openrouter:baidu/ernie-5.5-flash-preview:free still truncates its output after shrinking the budget; retrying later in this run.
-AI router: retry pass 2/4 for text/script_generation in 60.0s with 4 route(s).
+AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+AI router: trying groq / llama-3.3-70b-versatile for text/script_generation...
+AI router: route groq:llama-3.3-70b-versatile rejected configuration/request (HTTP 404); trying another route. The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.
+AI router: trying openrouter / meta-llama/llama-3.3-70b-instruct:free for text/script_generation...
+AI router: route openrouter:meta-llama/llama-3.3-70b-instruct:free rejected configuration/request (HTTP 404); trying another route. This model is unavailable for free. The paid version is available now - use this slug instead: meta-llama/llama-3.3-70b-instruct
+AI router: trying openrouter / qwen/qwen-2.5-72b-instruct:free for text/script_generation...
+AI router: route openrouter:qwen/qwen-2.5-72b-instruct:free rejected configuration/request (HTTP 404); trying another route. This model is unavailable for free. The paid version is available now - use this slug instead: qwen/qwen-2.5-72b-instruct
+AI router: retry pass 2/4 for text/script_generation in 5.0s with 1 route(s).
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
 AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.36x completion budget.
-AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
-AI router: trying openrouter / openrouter/free for text/script_generation...
-AI router: openrouter:openrouter/free exhausted its output budget; retrying with a 0.36x completion budget.
-AI router: openrouter:openrouter/free still truncates its output after shrinking the budget; retrying later in this run.
-AI router: trying openrouter / baidu/ernie-5.5-flash-preview:free for text/script_generation...
-AI router: openrouter:baidu/ernie-5.5-flash-preview:free exhausted its output budget; retrying with a 0.36x completion budget.
-AI router: openrouter:baidu/ernie-5.5-flash-preview:free still truncates its output after shrinking the budget; retrying later in this run.
-AI router: retry pass 3/4 for text/script_generation in 60.0s with 4 route(s).
+AI router: retry pass 3/4 for text/script_generation in 10.0s with 1 route(s).
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
 AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
-AI router: trying openrouter / openrouter/free for text/script_generation...
-AI router: openrouter:openrouter/free exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: openrouter:openrouter/free still truncates its output after shrinking the budget; retrying later in this run.
-AI router: trying openrouter / baidu/ernie-5.5-flash-preview:free for text/script_generation...
-AI router: openrouter rate limited (HTTP 429); provider paused for 60s and the next route is used now.
-AI router: retry pass 4/4 for text/script_generation in 60.0s with 4 route(s).
+AI router: retry pass 4/4 for text/script_generation in 20.0s with 1 route(s).
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 144 words; expected 150-195 for a 70-90 second narration.
-AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
-AI router: trying openrouter / openrouter/free for text/script_generation...
-AI router: openrouter:openrouter/free exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: openrouter:openrouter/free still truncates its output after shrinking the budget; retrying later in this run.
-AI router: trying openrouter / baidu/ernie-5.5-flash-preview:free for text/script_generation...
-AI router: openrouter:baidu/ernie-5.5-flash-preview:free exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: openrouter:baidu/ernie-5.5-flash-preview:free still truncates its output after shrinking the budget; retrying later in this run.
-[stage] script_generation: FAILED after 774.3s
+AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+AI router: the single-shot plan was rejected by every provider; retrying as two smaller, independently validated requests. First failure: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+AI router: trying groq / llama-3.3-70b-versatile for text/script_outline...
+AI router: route groq:llama-3.3-70b-versatile rejected configuration/request (HTTP 404); trying another route. The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.
+AI router: trying openrouter / meta-llama/llama-3.3-70b-instruct:free for text/script_outline...
+AI router: route openrouter:meta-llama/llama-3.3-70b-instruct:free rejected configuration/request (HTTP 404); trying another route. This model is unavailable for free. The paid version is available now - use this slug instead: meta-llama/llama-3.3-70b-instruct
+AI router: trying openrouter / qwen/qwen-2.5-72b-instruct:free for text/script_outline...
+AI router: route openrouter:qwen/qwen-2.5-72b-instruct:free rejected configuration/request (HTTP 404); trying another route. This model is unavailable for free. The paid version is available now - use this slug instead: qwen/qwen-2.5-72b-instruct
+AI router: retry pass 2/4 for text/script_outline in 5.0s with 1 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+AI router: retry pass 3/4 for text/script_outline in 10.0s with 1 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+AI router: retry pass 4/4 for text/script_outline in 20.0s with 1 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+[stage] script_generation: FAILED after 101.5s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 463, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 680, in gemini_plan
     plan, provider, model = generate_json(
                             ^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1197, in generate_json
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1239, in generate_json
     return _route("text", prompt, validator=validator, stage=stage)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1181, in _route
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1223, in _route
     raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 94 words; expected 150-195 for a 70-90 second narration.); groq/openai/gpt-oss-120b: invalid response (Scene 4 visual_focus is not represented by its primary visual_query.); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); gemini/gemini-3.5-flash-lite: HTTP 503; groq/openai/gpt-oss-120b: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,role)); groq/openai/gpt-oss-120b: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 144 words; expected 150-195 for a 70-90 second narration.); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role))
+ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 693, in gemini_plan
+    plan, provider, model = staged_plan(topic, source_pool, validate_plan)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 492, in staged_plan
+    outline, provider, model = generate_json(
+                               ^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1239, in generate_json
+    return _route("text", prompt, validator=validator, stage=stage)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1223, in _route
+    raise ProviderRoutingError(
+ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3781, in <module>
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4010, in <module>
     main()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3761, in main
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3990, in main
     _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3507, in _run_pipeline
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3736, in _run_pipeline
     plan = gemini_plan(TOPIC, source_pool)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 467, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 695, in gemini_plan
     raise RuntimeError(
-RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 94 words; expected 150-195 for a 70-90 second narration.); groq/openai/gpt-oss-120b: invalid response (Scene 4 visual_focus is not represented by its primary visual_query.); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/openrouter/free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated output (provider returned empty assistant content (finish_reason=length, message_keys=content,reasoning,reasoning_details,refusal,role)); openrouter/baidu/ernie-5.5-flash-preview:free: truncated outp
+RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503 | staged fallback: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503
