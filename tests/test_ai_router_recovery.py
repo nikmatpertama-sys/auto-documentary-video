@@ -376,6 +376,11 @@ class EvidenceBriefTests(unittest.TestCase):
                 "title": "Phylogeny",
                 "url": "https://www.nasa.gov/phylogeny",
             },
+            "https://www.nasa.gov/beaver-mitochondrial-genomes": {
+                "text": "Beaver dams create wetlands.",
+                "title": "Beaver mitochondrial genomes",
+                "url": "https://www.nasa.gov/beaver-mitochondrial-genomes",
+            },
         }
 
         def fake_fetch(url):
@@ -394,6 +399,9 @@ class EvidenceBriefTests(unittest.TestCase):
         urls = [item["url"] for item in brief]
         self.assertIn("https://www.usgs.gov/beaver-dams", urls)
         self.assertNotIn("https://www.nasa.gov/phylogeny", urls)
+        # A genetics paper on the same animal is still not evidence about dams.
+        self.assertNotIn("https://www.nasa.gov/beaver-mitochondrial-genomes", urls)
+        self.assertEqual(brief[0]["evidence_id"], "S1")
         self.assertEqual(brief[0]["url"], "https://www.usgs.gov/beaver-dams")
 
     def test_prompt_shows_the_fetched_passage_not_only_the_url(self):

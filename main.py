@@ -236,15 +236,35 @@ def evidence_block(evidence, max_excerpt_chars=0):
     return "\n".join(lines)
 
 
-def build_evidence_brief(topic, source_pool, limit=6, candidates=8, excerpt_chars=420):
+# Pages cited by a broad encyclopedia article also include genetics, taxonomy
+# and palaeontology papers. Planning from those produced scripts whose claims the
+# fact auditor could not support ("the excerpt contains isotopic data"), so a
+# page titled or slugged like a lab paper never reaches the brief.
+OFF_TOPIC_SOURCE_MARKERS = (
+    "phylogen",
+    "mitochondr",
+    "genom",
+    "taxonom",
+    "specimen",
+    "isotop",
+    "paleo",
+    "palaeo",
+    "fossil",
+    "cladistic",
+    "systematic review of",
+)
+
+
+def build_evidence_brief(topic, source_pool, limit=6, candidates=10, excerpt_chars=420):
     """Fetch candidate sources and keep the passages that fit this topic.
 
     A citation list taken from a Wikipedia article is not automatically about
     the documentary subject: it also contains genetics and taxonomy papers.
     Selecting the passage for the topic first, then ranking by how much of the
-    topic that passage actually covers, keeps the brief on subject.
+    topic the page title, URL and passage actually cover, keeps the brief on
+    subject.
     """
-    topic_words = set(normalize_words(topic))
+    topic_words = {word for word in normalize_words(topic) if len(word) > 3}
     scored = []
     for url in list(source_pool or [])[:candidates]:
         try:
@@ -258,14 +278,24 @@ def build_evidence_brief(topic, source_pool, limit=6, candidates=8, excerpt_char
                 f"({type(exc).__name__}: {str(exc)[:120]})"
             )
             continue
-        overlap = len(topic_words & set(normalize_words(excerpt)))
-        scored.append((overlap, {
+        title = page.get("title") or ""
+        label = f"{title} {url}".lower()
+        if any(marker in label for marker in OFF_TOPIC_SOURCE_MARKERS):
+            print(f"Evidence brief: skipped off-topic paper {url}")
+            continue
+        excerpt_words = {word for word in normalize_words(excerpt) if len(word) > 3}
+        title_words = {word for word in normalize_words(label) if len(word) > 3}
+        score = 2 * len(topic_words & title_words) + len(topic_words & excerpt_words)
+        scored.append((score, {
             "url": page.get("url") or url,
-            "title": page.get("title") or "",
+            "title": title,
             "excerpt": excerpt,
         }))
     scored.sort(key=lambda item: item[0], reverse=True)
-    return [item for _overlap, item in scored[:limit]]
+    brief = [item for score, item in scored[:limit] if score > 0]
+    for index, item in enumerate(brief, 1):
+        item["evidence_id"] = f"S{index}"
+    return brief
 
 
 def documentary_prompt(topic, source_pool=None, evidence=None):
@@ -277,7 +307,8 @@ VERIFIED SOURCE PAGES WITH THE FETCHED PASSAGE THAT WILL BE AUDITED:
 {listing}
 Every fact_claims[].source_urls entry MUST be copied exactly from this list,
 and each sentence must be fully supported by that page's passage above. Never
-state anything absent from those passages. The narration must STILL total
+state anything absent from those passages: use their words and facts, not your
+own general knowledge. The narration must STILL total
 160-185 spoken words (about 20-23 per scene); count the words before answering.
 """
     elif source_pool:
@@ -624,6 +655,11 @@ def staged_plan(topic, source_pool, validate_plan, evidence=None):
 def gemini_plan(topic, source_pool=None, evidence=None):
     """Generate and validate a complete 8-scene plan through the AI router."""
     prompt = documentary_prompt(topic, source_pool, evidence)
+    evidence_by_url = {
+        str(item.get("url")): str(item.get("excerpt") or "")
+        for item in (evidence or [])
+        if item.get("url") and item.get("excerpt")
+    }
 
     def validate_plan(candidate):
         if not isinstance(candidate, dict):
@@ -743,6 +779,27 @@ def gemini_plan(topic, source_pool=None, evidence=None):
             claim["source_urls"] = validate_planner_source_urls(
                 claim_index, claim.get("source_urls")
             )
+            # A sentence that shares almost no vocabulary with the passage it
+            # cites never survives the independent audit, so reject it here
+            # where the same provider gets one bounded repair instead of
+            # failing the whole run two stages later.
+            if evidence_by_url:
+                excerpt = evidence_by_url.get(claim["source_urls"][0])
+                if excerpt:
+                    sentence_terms = {
+                        word for word in normalize_words(quoted_sentence) if len(word) > 3
+                    }
+                    excerpt_terms = {
+                        word for word in normalize_words(excerpt) if len(word) > 3
+                    }
+                    shared_terms = sentence_terms & excerpt_terms
+                    if len(shared_terms) < 3:
+                        raise ValueError(
+                            f"Fact claim {claim_index} does not restate the fetched passage "
+                            f"it cites (only {len(shared_terms)} shared key terms). Rewrite "
+                            "that sentence so it states what the cited passage says, or "
+                            "cite the passage that supports it."
+                        )
         try:
             assign_scene_sentence_ranges(candidate)
         except Exception as exc:
