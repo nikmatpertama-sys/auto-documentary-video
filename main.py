@@ -307,8 +307,9 @@ VERIFIED SOURCE PAGES WITH THE FETCHED PASSAGE THAT WILL BE AUDITED:
 {listing}
 Every fact_claims[].source_urls entry MUST be copied exactly from this list,
 and each sentence must be fully supported by that page's passage above. Never
-state anything absent from those passages: use their words and facts, not your
-own general knowledge. The narration must STILL total
+state anything absent from those passages: reuse their vocabulary and facts,
+not your own general knowledge. Do not merge two passages into one sentence and
+do not add consequences, comparisons or effects a passage does not state. The narration must STILL total
 160-185 spoken words (about 20-23 per scene); count the words before answering.
 """
     elif source_pool:
@@ -354,8 +355,9 @@ Return ONLY valid JSON:
 
 NARRATION AND EVIDENCE
 - Combined scene narration is the full script, in order, totalling 160-185 words.
-- Every scene narration is 20-23 spoken words in one or two sentences; rewrite
-  that scene until it fits, without adding unsupported facts.
+- Every scene narration is one sentence of 20-23 spoken words; rewrite that
+  scene until it fits, without adding unsupported facts. One sentence maps to
+  one cited passage, so every claim can be checked against its own excerpt.
 - List every narration sentence in fact_claims as its exact complete sentence with
   source URLs; no sentence may go uncited.
 - Give each claim TWO direct source pages from recognised institutions when
@@ -496,8 +498,11 @@ Return ONLY valid JSON:
 {{"title":"...","hook":"...","scenes":[{{"narration":"one or two complete spoken sentences","visual_focus":"one concrete visible subject, 2-6 words","visual_query":"searchable real-world footage phrase, 3-6 words","visual_queries":["independent alternate shot","second independent alternate shot"]}}]}}
 
 - Exactly 8 scenes in story order, one main factual idea per scene.
-- Every scene narration is 20-23 spoken words; count each scene and rewrite it
-  until it fits. The combined narration must total 160-185 words.
+- Every scene narration is one sentence of 20-23 spoken words; count each
+  scene and rewrite it until it fits. The combined narration must total
+  160-185 words.
+- Reuse the vocabulary of the fetched passages and state only what they state:
+  no added consequences, comparisons or effects.
 - Scene 1 opens with a curiosity hook of at most 12 words and real moving
   footage, never a diagram.
 - visual_focus is 2-6 concrete words and at least half of them must appear
@@ -797,12 +802,13 @@ def gemini_plan(topic, source_pool=None, evidence=None):
                         word for word in normalize_words(excerpt) if len(word) > 3
                     }
                     shared_terms = sentence_terms & excerpt_terms
-                    if len(shared_terms) < 3:
+                    coverage = len(shared_terms) / max(1, len(sentence_terms))
+                    if len(shared_terms) < 3 or coverage < 0.5:
                         raise ValueError(
                             f"Fact claim {claim_index} does not restate the fetched passage "
-                            f"it cites (only {len(shared_terms)} shared key terms). Rewrite "
-                            "that sentence so it states what the cited passage says, or "
-                            "cite the passage that supports it."
+                            f"it cites ({coverage:.0%} of its key terms appear there). "
+                            "Rewrite that sentence using the passage's own wording and "
+                            "claims only, or cite the passage that supports it."
                         )
         try:
             assign_scene_sentence_ranges(candidate)
