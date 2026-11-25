@@ -365,8 +365,9 @@ NARRATION AND EVIDENCE
 - Every scene narration is one sentence of 19-23 spoken words; rewrite that
   scene until it fits, without adding unsupported facts. One sentence maps to
   one cited passage, so every claim can be checked against its own excerpt.
-- List every narration sentence in fact_claims as its exact complete sentence with
-  source URLs; no sentence may go uncited.
+- List every narration sentence in fact_claims as its exact complete sentence
+  with final punctuation and source URLs; one claim per sentence, no duplicates,
+  and no sentence may go uncited.
 - Give each claim TWO direct source pages from recognised institutions when
   possible, preferring independent organisations, so the verifier can try an
   alternate. Never invent URLs; give one only if a second known page truly does
@@ -786,6 +787,7 @@ def gemini_plan(topic, source_pool=None, evidence=None):
         fact_claims = candidate.get("fact_claims")
         if not isinstance(fact_claims, list) or len(fact_claims) < len(scenes):
             raise ValueError("The plan must provide a source-backed claim for every scene narration sentence.")
+        claimed_identities = set()
         for claim_index, claim in enumerate(fact_claims, 1):
             if not isinstance(claim, dict):
                 raise ValueError(f"Fact claim {claim_index} must be a JSON object.")
@@ -795,8 +797,29 @@ def gemini_plan(topic, source_pool=None, evidence=None):
             quoted_sentence = re.sub(r"\s+", " ", str(claim.get("sentence", ""))).strip()
             if not quoted_sentence or normalize_words(quoted_sentence) == []:
                 raise ValueError(f"Fact claim {claim_index} has an empty sentence.")
-            if " ".join(normalize_words(quoted_sentence)) not in " ".join(normalize_words(scenes[scene_number - 1]["narration"])):
-                raise ValueError(f"Fact claim {claim_index} is not copied from its scene narration.")
+            # The fact ledger only accepts a whole narration sentence, never a
+            # clause of one: fact checking compares these strings exactly.
+            if not quoted_sentence.endswith((".", "!", "?")):
+                raise ValueError(
+                    f"Fact claim {claim_index} must quote one complete narration "
+                    "sentence including its final punctuation."
+                )
+            scene_sentences = {
+                " ".join(normalize_words(part))
+                for part in split_sentences(str(scenes[scene_number - 1]["narration"]))
+                if normalize_words(part)
+            }
+            sentence_identity = " ".join(normalize_words(quoted_sentence))
+            if sentence_identity not in scene_sentences:
+                raise ValueError(
+                    f"Fact claim {claim_index} is not an exact complete sentence of "
+                    f"scene {scene_number} narration."
+                )
+            if (scene_number, sentence_identity) in claimed_identities:
+                raise ValueError(
+                    f"Fact claim {claim_index} duplicates an earlier claim in scene {scene_number}."
+                )
+            claimed_identities.add((scene_number, sentence_identity))
             # Validate source host and HTTPS policy inside the planner callback.
             # This lets ai_router issue its one bounded same-provider repair instead
             # of waiting until the later fact-check stage to fail the entire run.
@@ -825,6 +848,17 @@ def gemini_plan(topic, source_pool=None, evidence=None):
                             "Rewrite that sentence using the passage's own wording and "
                             "claims only, or cite the passage that supports it."
                         )
+        # Every narration sentence needs its own claim, exactly as the fact
+        # ledger requires; catching it here triggers a repair instead of a
+        # blocked run after the voice-over work.
+        for scene_number, scene in enumerate(scenes, 1):
+            for part in split_sentences(str(scene.get("narration", ""))):
+                identity = " ".join(normalize_words(part))
+                if identity and (scene_number, identity) not in claimed_identities:
+                    raise ValueError(
+                        f"Scene {scene_number} has an uncited narration sentence: "
+                        f"{part.strip()}"
+                    )
         try:
             assign_scene_sentence_ranges(candidate)
         except Exception as exc:
