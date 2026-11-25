@@ -1,17 +1,17 @@
 {
   "path": "output/opening_overlay.png",
   "title_lines": [
-    "BEAVER ENGINEERS: HOW CASTOR RESHAPES RIVER",
-    "WORLDS"
+    "BEAVER ENGINEERS: HOW THEIR DAMS RESHAPE RIVER",
+    "ECOSYSTEMS"
   ],
   "hook_lines": [
-    "Beavers, the world’s",
-    "most industrious",
-    "rodents, reshape rivers",
-    "by building dams that"
+    "Beavers silently reshape",
+    "river corridors, their",
+    "modest dams echoing",
+    "through entire riparian"
   ],
-  "title_text": "Beaver Engineers: How Castor reshapes River Worlds",
-  "hook_text": "Beavers, the world’s most industrious rodents, reshape rivers by building dams that",
+  "title_text": "Beaver Engineers: How Their Dams Reshape River Ecosystems",
+  "hook_text": "Beavers silently reshape river corridors, their modest dams echoing through entire riparian",
   "title_font_size": 27,
   "hook_font_size": 62,
   "max_text_width": 880,

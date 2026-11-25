@@ -1,222 +1,340 @@
 {
-  "status": "passed",
+  "status": "blocked",
   "method": "trusted-source fetch + independent evidence-grounded AI audit",
   "fact_checker": {
-    "provider": "gemini",
-    "model": "gemini-3.5-flash-lite"
+    "provider": "openrouter",
+    "model": "openrouter/free"
   },
   "claim_count": 8,
-  "supported_claim_count": 8,
-  "failed_claims": [],
+  "supported_claim_count": 4,
+  "failed_claims": [
+    {
+      "claim_id": "C5",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
+      ],
+      "reason": "The excerpt supports a shifting mosaic and links between channel/floodplain evolution and riparian plant recruitment, but it does not directly establish a watershed-wide mosaic of successional stages for diverse species communities."
+    },
+    {
+      "claim_id": "C6",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
+      ],
+      "reason": "The excerpt mentions elevated water levels, wetlands, hydrology, and sediment storage, but it does not directly evidence enhanced water storage, moderated flood peaks, drought refuges, or year-round aquatic organism refuges."
+    },
+    {
+      "claim_id": "C7",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
+      ],
+      "reason": "The excerpt does not directly state that beaver-modified streams support higher biodiversity than unaltered reaches or that this illustrates self-organized restoration across multiple taxa levels."
+    },
+    {
+      "claim_id": "C8",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
+      ],
+      "reason": "The excerpt supports that beavers are ecosystem engineers, but it does not directly evidence reverberation through water quality, habitat complexity, or regional ecological resilience for the future."
+    }
+  ],
   "uncited_factual_sentences": [],
-  "coverage_note": "All sentences in the script are fully covered by the provided claims and supported by the corresponding trusted excerpts.",
+  "coverage_note": "All script sentences are represented by supplied exact claims, but the audit fails because C5 through C8 are insufficient based only on the fetched excerpts.",
   "claims": [
     {
       "id": "C1",
       "scene": 1,
-      "sentence": "Beavers, the world’s most industrious rodents, reshape rivers by building dams that flood valleys, create wetlands, and nurture diverse species.",
+      "sentence": "The entire network of a beaver‑occupied stream appears influenced by their presence, as dam sites cycle through maintenance, abandonment, and failure.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
       ],
-      "reason": "The source explicitly states that modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building."
+      "reason": "The excerpt directly states that the entire network of a beaver-occupied stream appears influenced by beaver presence as dam sites cycle through maintenance, abandonment, and failure."
     },
     {
       "id": "C2",
       "scene": 2,
-      "sentence": "Through relentless tree harvesting, beavers obtain building material and food, dramatically altering forest structure along riverbanks and influencing water flow patterns downstream.",
+      "sentence": "Riparian ecosystems face increasing stress from climate change, water demand, and loss of flood‑induced disturbance, yet beaver activity adds dynamic change.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
       ],
-      "reason": "The source states that modern beavers dramatically alter the landscape through tree harvesting and dam building."
+      "reason": "The excerpt states riparian ecosystems are under increasing stress from changing climate, increasing water demands, and loss of flood-induced disturbance, and that beaver activity generates frequent disturbance."
     },
     {
       "id": "C3",
       "scene": 3,
-      "sentence": "The Eurasian beaver (Castor fiber) and North American beaver (Castor canadensis) belong to the family Castoridae, genus Castor, as recognized by scientific classification.",
+      "sentence": "Beaver dams raise water levels, creating wetland patches and increasing habitat diversity along the stream corridor.",
       "source_urls": [
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6544642"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC6544642/"
       ],
-      "reason": "The ITIS database reports show Family Castoridae, Genus Castor, Species Castor fiber (Eurasian Beaver), and Species Castor canadensis (North American Beaver)."
+      "reason": "The excerpt says beaver dams elevate water levels and enhance wetlands, and that beaver occupancy variability creates riparian patchiness and habitat heterogeneity along the stream corridor."
     },
     {
       "id": "C4",
       "scene": 4,
-      "sentence": "Their dams slow water, raising local water tables and fostering riparian vegetation that stabilizes banks while reducing erosion during floods.",
+      "sentence": "After dam abandonment, beaver activity continues to influence channel and floodplain evolution and riparian plant recruitment.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6544642"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC6544642/"
       ],
-      "reason": "The source notes that beaver behaviors have a profound effect on regional hydrology."
+      "reason": "The excerpt states beaver activity affects channel processes and riparian plant recruitment after dam abandonment, with each phase influencing channel and floodplain evolution."
     },
     {
       "id": "C5",
       "scene": 5,
-      "sentence": "Created wetlands become nurseries for fish, amphibians, and waterfowl, increasing regional biodiversity dramatically supporting insects, mammals, and plant communities alike.",
+      "sentence": "Beaver activity thus links geomorphology and riparian ecology, generating a mosaic of successional stages across the watershed for diverse species communities.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/"
       ],
-      "status": "supported",
+      "status": "insufficient",
       "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
       ],
-      "reason": "The source supports that beaver behaviors have a profound effect on local biodiversity and mentions faunal biodiversity."
+      "reason": "The excerpt supports a shifting mosaic and links between channel/floodplain evolution and riparian plant recruitment, but it does not directly establish a watershed-wide mosaic of successional stages for diverse species communities."
     },
     {
       "id": "C6",
       "scene": 6,
-      "sentence": "Flooded soils accumulate organic matter, sequestering carbon and contributing to climate regulation over decades making beaver habitats valuable carbon sinks worldwide.",
+      "sentence": "These engineered wetlands enhance water storage, moderating flood peaks and providing drought refuges for aquatic organisms throughout the year in streams.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/"
       ],
-      "status": "supported",
+      "status": "insufficient",
       "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
       ],
-      "reason": "The source details the measurement of stable carbon and nitrogen isotopes in coeval subfossil plants and beaver material from a bog and marsh/pond context."
+      "reason": "The excerpt mentions elevated water levels, wetlands, hydrology, and sediment storage, but it does not directly evidence enhanced water storage, moderated flood peaks, drought refuges, or year-round aquatic organism refuges."
     },
     {
       "id": "C7",
       "scene": 7,
-      "sentence": "These engineered wetlands improve water quality by filtering sediments and nutrients, offering natural flood mitigation for nearby communities and enhancing recreational opportunities.",
+      "sentence": "Scientists observe that beaver‑modified streams support higher biodiversity than unaltered reaches, illustrating nature’s capacity for self‑organized restoration across multiple taxa levels.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/"
       ],
-      "status": "supported",
+      "status": "insufficient",
       "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
       ],
-      "reason": "The source mentions water-logged soils and dissolved nitrates associated with beaver wetland environments."
+      "reason": "The excerpt does not directly state that beaver-modified streams support higher biodiversity than unaltered reaches or that this illustrates self-organized restoration across multiple taxa levels."
     },
     {
       "id": "C8",
       "scene": 8,
-      "sentence": "Thus, beavers act as keystone engineers, reshaping rivers and sustaining ecosystems that countless species, including humans, rely upon for generations to come.",
+      "sentence": "Ultimately, beavers act as ecosystem engineers, their modest constructions reverberating through water quality, habitat complexity, and regional ecological resilience for future.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/"
       ],
-      "status": "supported",
+      "status": "insufficient",
       "verified_evidence_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/"
       ],
-      "reason": "The source explicitly classifies beavers as ecosystem engineers that dramatically alter the landscape."
+      "reason": "The excerpt supports that beavers are ecosystem engineers, but it does not directly evidence reverberation through water quality, habitat complexity, or regional ecological resilience for the future."
     }
   ],
   "sources": [
     {
       "claim_id": "C1",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern beavers ( Castor ) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Castoridae is a diverse family of herbivorous Holarctic rodents, originating during the late Eocene 7 – 9 . The only definitive evidence of woodcutting in extinct beavers is from the Pliocene-aged High Arctic Beaver Pond foss",
+      "page_title": "Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl",
+      "excerpt": "The entire network of a beaver occupied stream appears to be influenced by their presence, as dam sites cycle through being maintained, abandoned and ultimately failing. Beaver activity thus generates a cycle of frequent disturbance, from dam building and riparian plant browsing through dam failure and abandonment, with each phase influencing channel and floodplain evolution and riparian plant recruitment. In North American and Eurasia, the full cycle of beaver activity – including dam building, breaching and herbivory – enhances fluvial and floodplain dynamics, and promotes the reproduction and regeneration of riparian plants, not only at active dam sites, but throughout intervening stream reaches as well. Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active d",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock",
+      "excerpt": "PMC Copyright notice PMCID: PMC1247398 PMID: 15238298 Like the Earth’s water, nitrogen compounds cycle through the air, aquatic systems, and soil. In doing so, we are altering the global nitrogen cycle, causing possible grave impacts on biodiversity, global warming, water quality, human health, and even the rate of population growth in developing nations. Although carbon dioxide may get more press, “the nitrogen cycle has been altered more than any other basic element cycle,” says John Aber, vice president for research and public service at the University of New Hampshire. And now, he says, humans are adding more reactive nitrogen to the global nitrogen cycle than all other sources combined. Lightning accounts for some naturally occurring reactive nitrogen—worldwide each year, lightning fixes an estimated 3–10 teragrams (Tg), the usual measurement unit for discussing the global nitrogen ",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C2",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern beavers ( Castor ) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. In particular, how Castor ’s distinctive complex of behavioural traits (tree harvesting, underwater food caching, and construction behaviour) may have evolved. If material is not included in the article’s Creative Commons lic",
+      "page_title": "Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl",
+      "excerpt": "Subject terms: Riparian ecology, Freshwater ecology, Geomorphology Introduction Riparian ecosystems are coming under increasing stress from changing climate, increasing demands on water, and loss of flood-induced disturbance 1 . Beaver activity thus generates a cycle of frequent disturbance, from dam building and riparian plant browsing through dam failure and abandonment, with each phase influencing channel and floodplain evolution and riparian plant recruitment. Riparian communities along streams that lack beaver or large wood are dependent on flood disturbance and channel migration to provide colonization sites on bare sediment 37 , 38 , thus shrub and tree distribution is closely tied to flood occurrence. The loss of beaver from stream systems across northern latitudes has meant that much of the research on functioning riparian systems, riparian plant establishment, and the interplay",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock",
+      "excerpt": "But unlike water, these compounds are being injected into the environment in ever increasing quantities. Not just among the seven or eight most industrialized nations, but even among nations that are not industrial giants, the agricultural side has really pursued nitrogen fertilization.” Galloway adds that nitrogen pollution is distributed globally not just by wind and water but also by ship and truck: “International commerce is a major way of shipping reactive nitrogen around the world,” he says. “Our long-term studies at Hubbard Brook Experimental Forest—the longest continuous measurement of precipitation and stream-water chemistry in the world—clearly indicate that there is a major change under way,” he says. “From the 1850s on, we’ve known that the addition of nutrients to terrestrial ecosystems causes changes in which species are there and causes a loss of diversity in those systems",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C3",
-      "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-      "resolved_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-      "host": "www.itis.gov",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6544642",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC6544642/",
+      "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "ITIS - Report: Castor fiber",
-      "excerpt": "Wood, 1955 Family Castoridae Hemprich, 1820 – Beavers Genus Castor Linnaeus, 1758 – beavers Species Castor fiber Linnaeus, 1758 – Eurasian Beaver References Expert(s): Expert: Don E. Upmeyer Reference for: Castor fiber , Eurasian Beaver [English] Geographic Information Geographic Division: Europe & Northern Asia (excluding China) Jurisdiction/Origin: Comments Comment: Comments: Reviewed by Heidecke (1986), who recognized eight subspecies, and V�ron (1992b), who recognized six; Monotremata to Rodentia Page(s): 631 Publisher: Lynx Edicions Publication Place: Barcelona ISBN/ISSN: 978-84-16728-343 Notes: Reference for: Castor fiber , Eurasian Beaver [English] Author(s)/Editor(s): Busher, P. 6: Lagomorphs and Rodents I Page(s): 150-168 Publisher: Lynx Edicions Publication Place: Barcelona, Spain ISBN/ISSN: 978-84-941892-34 Notes: Reference for: Castor fiber , Eurasian Beaver [English] Author(",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C3",
-      "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
-      "resolved_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
-      "host": "www.itis.gov",
-      "http_status": 200,
-      "page_title": "ITIS - Report: Castor canadensis",
-      "excerpt": "Wood, 1955 Family Castoridae Hemprich, 1820 – Beavers Genus Castor Linnaeus, 1758 – beavers Species Castor canadensis Kuhl, 1820 – castor, American Beaver, Castor Americano, North American Beaver References Expert(s): Expert: Alfred L. Monotremata to Rodentia Page(s): 631 Publisher: Lynx Edicions Publication Place: Barcelona ISBN/ISSN: 978-84-16728-343 Notes: Reference for: Castor canadensis , North American Beaver [English] Author(s)/Editor(s): Busher, P. 6: Lagomorphs and Rodents I Page(s): 150-168 Publisher: Lynx Edicions Publication Place: Barcelona, Spain ISBN/ISSN: 978-84-941892-34 Notes: Reference for: Castor canadensis , North American Beaver [English] Author(s)/Editor(s): Wilson, Don E., and DeeAnn M. Upmeyer Reference for: Castor canadensis , American Beaver [English] Geographic Information Geographic Division: North America Middle America Jurisdiction/Origin: Continental US, N",
+      "page_title": "Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl",
+      "excerpt": "Additionally, lateral accretion of material in migrating bends provides increasing shelter from scour for saplings 42 , 43 Overall, despite beaver impacts being partially dependent on catchment characteristics, the variability in beaver occupancy in both space and time creates riparian patchiness and habitat heterogeneity along the stream corridor 17 , 34 , 44 with beaver enhancing multiple pathways for willow reproduction (Fig. Breached dams can initiate meanders, increasing channel and riparian habitat diversity. Dams along our study streams elevate water levels within the channel and enhance wetlands across the floodplain. In the case of beaver dams, however, the remnants of a “blow out” continue to promote habitat diversity beyond the effects of the initial structure. Our work shows, however, that beaver can facilitate multiple pathways for plant colonization (Figs 2 , 6 ) and add to",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C4",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6544642",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC6544642/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "These behaviours have a profound effect on regional hydrology, nutrient flow across the landscape, and local biodiversity, thus making them exemplary “ecosystem engineers” 2 – 4 . This finding, alongside a lack of definitive evidence of lodges or dams at the Beaver Pond site highlights the question: Does the cut wood at the Beaver Pond site represent a means of gathering food? It is hypothesized that northwest passages did not exist during the Pliocene, as they had yet to be incised by fluvial and glacial erosion 22 , 26 . The remains of a complex faunal community were discovered at the Beaver Pond site, including beaver ( Dipoides sp., see below), three-toed horse, bear, badger, “deerlet”, water fowl, fish and a rabbit relative 10 , 22 . Our study aims to describe the relative contributions of woody vegetation and aquatic plants to the diet of Dipoides sp. Casey and Post 45 provide a th",
+      "page_title": "Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl",
+      "excerpt": "Beaver activity thus generates a cycle of frequent disturbance, from dam building and riparian plant browsing through dam failure and abandonment, with each phase influencing channel and floodplain evolution and riparian plant recruitment. Here we explore the effects of beaver activity on channel processes and riparian plant recruitment beyond those dams and after dam abandonment in southwestern Montana, USA. Here we explore the effects of beaver activity on channel processes and riparian plant recruitment beyond ... Here we explore the effects of beaver activity on channel processes and riparian plant recruitment beyond ... In addition, we saw that beaver dam remnants often persisted for some years after breaching and abandonment, with the potential to influence channel morphology and evolution. The effect of beaver cuttings on channel processes, floodplain evolution and carbon burial C",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C5",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "These behaviours have a profound effect on regional hydrology, nutrient flow across the landscape, and local biodiversity, thus making them exemplary “ecosystem engineers” 2 – 4 . The Beaver Pond site supported higher faunal biodiversity than any modern near-tree line communities. The identified plant species in this study concur with previous interpretations that this was an open-forest landscape interspersed with shallow wetlands. Decomposition processes also increase plant δ 15 N over time 47 and remineralized organic debris decomposing in wetlands may be particularly 15 N-enriched. Increasing foliar N concentration due to atmospheric N deposition also drives up plant δ 15 N 78 , 79 . Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants M",
+      "page_title": "Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl",
+      "excerpt": "For riparian vegetation, the shifting mosaic of beaver activity can generate variability in ages and species distributions 2 , 6 , 36 that also results in spatial variations in overbank flow on floodplains. Beaver activity thus generates a cycle of frequent disturbance, from dam building and riparian plant browsing through dam failure and abandonment, with each phase influencing channel and floodplain evolution and riparian plant recruitment. Riparian communities along streams that lack beaver or large wood are dependent on flood disturbance and channel migration to provide colonization sites on bare sediment 37 , 38 , thus shrub and tree distribution is closely tied to flood occurrence. Here we explore the effects of beaver activity on channel processes and riparian plant recruitment beyond ... Here we explore the effects of beaver activity on channel processes and riparian plant recrui",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock",
+      "excerpt": "The past 15 years have seen a huge explosion in the amount of reactive nitrogen that humans have produced and injected into the environment, according to a report on relationships between the global nitrogen cycle and human health in volume 1, issue 5 (2003) of Frontiers in Ecology and the Environment by Alan Townsend, an assistant professor of ecology and evolutionary biology at the University of Colorado, and colleagues. As modern farming methods have been increasingly adopted, so has the rate at which nitrogen is being fixed, with much of the increase coming in developing countries, according to Townsend and colleagues in Frontiers in Ecology and Environment . These sources contribute about 10 and 20 Tg, respectively, according to an article in the Spring 1997 Issues in Ecology by a team led by Peter Vitousek, a professor of population and resource studies at Stanford University. Very",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C6",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Carbon-isotope ratios and carbon, nitrogen and sulfur abundances in flora and soil organic matter from a temperate-zone bog and marsh. We measured stable carbon and nitrogen isotopes ( δ 13 C and δ 15 N) of coeval subfossil plants and beaver collagen ( Dipoides sp.) from the Early Pliocene, High Arctic Beaver Pond fossil locality (Ellesmere Island), in order to reconstruct Dipoides sp. using stable carbon and nitrogen isotope analysis of contemporary sub-fossil skeletal and plant macrofossil material from the Beaver Pond site. Fortunately, much of this concern is alleviated at the Beaver Pond site, given the excellent organic preservation of coeval plant and animal tissues. Open in a new tab Stable carbon and nitrogen isotope results for the Beaver Pond site plant macrofossils. Open in a new tab Beaver Pond plant macrofossil carbon and nitrogen content represented by C/N (wt%). For these",
+      "page_title": "Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl",
+      "excerpt": "Dams along our study streams elevate water levels within the channel and enhance wetlands across the floodplain. On both Odell Creek and EFBD Creek, long-term monitoring shows that beaver reoccupy sites at >5 year intervals, with locations of beaver occupancy shifting throughout the available habitat along the streams. Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment Given the direct effects of their dams on hydrology, sediment storage, and vegetation, beaver are widely acknowledged as ecosystem engineers. Subject terms: Riparian ecology, Freshwater ecology, Geomorphology Introduction Riparian ecosystems are coming under increasing stress from changing climate, increasing demands on w",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock",
+      "excerpt": "PMC Copyright notice PMCID: PMC1247398 PMID: 15238298 Like the Earth’s water, nitrogen compounds cycle through the air, aquatic systems, and soil. According to a literature review published in the April 2003 issue of BioScience by Galloway and colleagues, experts believe natural, nonagricultural organisms fix 100–300 Tg of nitrogen per year on the land surfaces of the Earth, although most estimates tend toward the lower end. If too much oxygen is removed, the water body develops a “dead zone”—an area that can no longer support finfish, shellfish, or most other aquatic life. “Regardless of what we add [nitrate, ammonia, or urea from livestock], it will stimulate algae growth in these black-water streams,” he says. Reactive nitrogen can also infiltrate drinking water, as nitrates from nitrogen fertilizers and runoff from livestock find their way into streams, rivers, lakes, and groundwater",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C7",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Given the proximity of wetlands, the root systems of larch trees may have had access to 15 N-enriched dissolved nitrates in the surrounding water-logged soils. The Beaver: Natural History of a Wetlands Engineer. The 15N natural abundance (δ15N) of ecosystem samples reflects measures of water availability. The Beaver Pond site supported higher faunal biodiversity than any modern near-tree line communities. The remains of a complex faunal community were discovered at the Beaver Pond site, including beaver ( Dipoides sp., see below), three-toed horse, bear, badger, “deerlet”, water fowl, fish and a rabbit relative 10 , 22 . Project sample ID δ 13 C ‰ (VPDB) δ 15 N ‰ (AIR) C (wt%) N (wt%) C/N (wt%) Atomic C:N Taxon Common name Description and sample treatment 1 − 36.6 + 4.8 36.8 0.5 77.4 90.25 Scorpidium scorpioides Hooked scorpion moss Bulk plant, dry pick cleaning, no ultrasonic water bath",
+      "page_title": "Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl",
+      "excerpt": "Dam breaching is a critical part of the beaver cycle in streams and acts as an additional disturbance in the riparian corridor, an outcome desired in many restoration projects 29 . Along unconfined meadow reaches of mountain streams where large wood is rare, beaver activity may be the predominant mechanism for carbon storage. Modeling the capacity of riverscapes to support beaver dams. Nonetheless, there has been limited investigation of the effects of beaver activity on stream reaches and riparian vegetation beyond their iconic dams and ponds, or on the continuing impacts of breached and abandoned dams. In prior research along beaver-occupied streams in southwestern Montana and the Rocky Mountain region, we observed that willow cuttings produced by beaver herbivory and dam building are commonly transported downstream and accumulate along channel margins. Thus, we asked whether beaver-ge",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock",
+      "excerpt": "“If it is being denitrified, on the other hand, that’s more of a steady-state process, and it can probably continue to do that.” Townsend says some scientists had hoped that excess reactive nitrogen levels might actually reduce greenhouse gases by stimulating plant growth, which locks up carbon dioxide. In doing so, we are altering the global nitrogen cycle, causing possible grave impacts on biodiversity, global warming, water quality, human health, and even the rate of population growth in developing nations. Farmers eventually learned to increase the levels of reactive nitrogen in their soil using plants that have nitrogen-fixing bacterial symbionts, but their resources were limited: at the beginning of the twentieth century they could rotate with nitrogen-fixing crops such as legumes, or add naturally occurring fertilizers such as manure, guano, and nitrate mineral deposits mined in C",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C8",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern beavers ( Castor ) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. These behaviours have a profound effect on regional hydrology, nutrient flow across the landscape, and local biodiversity, thus making them exemplary “ecosystem engineers” 2 – 4 . The only definitive evidence of woodcutting i",
+      "page_title": "Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl",
+      "excerpt": "In addition, given the strong influence of beaver on fluvial and riparian function, and their decline across much of their native Northern Hemisphere habitat 2 , these ecosystem engineers have become an important area of focus in riparian science. Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment Given the direct effects of their dams on hydrology, sediment storage, and vegetation, beaver are widely acknowledged as ecosystem engineers. Given the direct effects of their dams on hydrology, sediment storage, and vegetation, beaver are widely acknowledged as ecosystem engineers. PMC Copyright notice PMCID: PMC6544642 PMID: 31148552 Abstract Given the direct effects of their dams on hydrolo",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock",
+      "excerpt": "In doing so, we are altering the global nitrogen cycle, causing possible grave impacts on biodiversity, global warming, water quality, human health, and even the rate of population growth in developing nations. And you end up with a very unbalanced system.” If it’s true that saturated soil immediately passes additional nitrogen, rather than denitrifying it, that could be bad news for the near future, says Howarth, with all that excess nitrogen flowing straight to ground-water, rivers, streams, and seas. PMC Copyright notice PMCID: PMC1247398 PMID: 15238298 Like the Earth’s water, nitrogen compounds cycle through the air, aquatic systems, and soil. But unlike water, these compounds are being injected into the environment in ever increasing quantities. And plants get reactive nitrogen from the soil or water. Very few parts of the Earth now lack their own regional sources of reactive nitrog",
       "source_kind": "planned",
       "status": "usable"
     }
-  ]
+  ],
+  "blocked_at_claim": "C5",
+  "blocked_claim_sentence": "Beaver activity thus links geomorphology and riparian ecology, generating a mosaic of successional stages across the watershed for diverse species communities.",
+  "failure_reason": "C5=insufficient: The excerpt supports a shifting mosaic and links between channel/floodplain evolution and riparian plant recruitment, but it does not directly establish a watershed-wide mosaic of successional stages for diverse species communities.",
+  "claim_repairs": [
+    {
+      "claim_id": "C3",
+      "scene": 3,
+      "original_sentence": "Each beaver dam creates a pond that slows water, traps sediment, and expands wetland habitat throughout the stream corridor for species.",
+      "replacement_sentence": "Beaver dams raise water levels, creating wetland patches and increasing habitat diversity along the stream corridor.",
+      "replacement_source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6544642"
+      ],
+      "status": "rewritten"
+    },
+    {
+      "claim_id": "C4",
+      "scene": 4,
+      "original_sentence": "When dams are abandoned, water breaches, releasing stored nutrients and reshaping channel morphology downstream, influencing plant recruitment patterns along the river.",
+      "replacement_sentence": "After dam abandonment, beaver activity continues to influence channel and floodplain evolution and riparian plant recruitment.",
+      "replacement_source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6544642"
+      ],
+      "status": "rewritten"
+    }
+  ],
+  "repair_exhausted": true
 }

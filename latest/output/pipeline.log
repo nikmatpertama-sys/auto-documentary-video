@@ -8,104 +8,109 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 1/7 Writing and validating the documentary script...
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
-AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, Stream restoration
-Source pool: 51 trusted page(s) cited by Beaver, Keystone species, Stream restoration.
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/22697210 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/28256552 (FactCheckError: Evidence page contains too little readable text for verification.)
-Fact-check source temporarily unavailable (SSLError); retrying once in 3s.
-Evidence brief: skipped https://journals.iupui.edu/index.php/ias/article/download/7219/7239 (FactCheckError: Could not fetch evidence source https://journals.iupui.edu/index.php/ias/article/download/7219/7239: SSLError)
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/32753594 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560
-Evidence brief: 3 source passages fetched for planning.
-[stage] source_pool: completed in 8.3s
-[stage] script_generation: start
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
 Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
 Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-3.5-flash.
-AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. AI response did not contain a JSON object
+AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
+Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver dam, North American beaver, Beaver
+Source pool: 67 trusted page(s) cited by Beaver dam, North American beaver, Beaver.
+Evidence brief: skipped https://mushare.marian.edu/fp_db/4 (FactCheckError: Could not fetch evidence source https://mushare.marian.edu/fp_db/4: HTTPError (HTTP 404))
+Evidence brief: skipped https://www.exeter.ac.uk/creww/research/beavertrial/ (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/15238298 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/26436285 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://lowtechpbr.restoration.usu.edu/resources/Topics/02_Science/fish.html (FactCheckError: Could not fetch evidence source https://lowtechpbr.restoration.usu.edu/resources/Topics/02_Science/fish.html: HTTPError )
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/31148552 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://edits.nationalmap.gov/apps/gaz-domestic/public/search/names/260383 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://www.iucnredlist.org/species/4003/22187946 (FactCheckError: Could not fetch evidence source https://www.iucnredlist.org/species/4003/22187946: HTTPError (HTTP 403))
+Evidence brief: 2 source passages fetched for planning.
+[stage] source_pool: completed in 66.8s
+[stage] script_generation: start
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
+Gemini model gemini-3.5-flash answered HTTP 503; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
+AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
+AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
+AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
+Plan repair: scene 3 visual_query rewritten to name its visual_focus ('riparian plant growth').
+AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 118 words; expected 150-195 for a 70-90 second narration. Rewrite each scene to 20-23 words: add 52 words overall across the scenes.
+AI router: trying openrouter / openrouter/free for text/script_generation...
+AI router: openrouter:openrouter/free returned no content before its budget ran out; retrying with a 1.60x completion budget.
+AI router: openrouter:openrouter/free exhausted its output budget; retrying with a 0.96x completion budget.
+AI router: openrouter:openrouter/free still truncates its output after shrinking the budget; retrying later in this run.
+AI router: trying openrouter / baidu/ernie-5.5-flash-preview:free for text/script_generation...
+AI router: openrouter:baidu/ernie-5.5-flash-preview:free returned no content before its budget ran out; retrying with a 1.60x completion budget.
+AI router: openrouter:baidu/ernie-5.5-flash-preview:free exhausted its output budget; retrying with a 0.96x completion budget.
+AI router: openrouter:baidu/ernie-5.5-flash-preview:free still truncates its output after shrinking the budget; retrying later in this run.
+AI router: retry pass 2/4 for text/script_generation in 60.0s with 3 route(s).
 AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
 AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
 AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
 AI router: groq/openai/gpt-oss-120b returned a valid text response.
-Documentary plan generated by groq/openai/gpt-oss-120b: 170 words, 8 scenes.
-Opening validated before TTS: title=7 word(s), hook=12 word(s) (hook shortened to 12 words).
-[stage] script_generation: completed in 172.4s
+Documentary plan generated by groq/openai/gpt-oss-120b: 168 words, 8 scenes.
+Opening validated before TTS: title=8 word(s), hook=12 word(s) (hook shortened to 12 words).
+[stage] script_generation: completed in 416.0s
 2/7 Fetching trusted source pages and auditing every factual assertion...
 [stage] fact_check: start
 AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_audit...
-AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
-[stage] fact_check: completed in 3.2s
-3/7 Generating the complete voice-over (no subtitle/visual work yet)...
-[stage] voiceover: start
-VO duration is within target: 87.68s.
-VO quality gate passed: 87.68s, 48000 Hz, mean -23.0 dB, peak -4.5 dB.
-[stage] voiceover: completed in 12.5s
-4/7 Locking the final VO timeline as the master production reference...
-[stage] timeline_lock: start
-[stage] timeline_lock: completed in 0.0s
-5/7 Building phrase subtitles from the validated VO timing...
-[stage] subtitles: start
-Subtitles created from final VO: 170 words; 170 measured by Edge TTS, 0 estimated; 37 natural phrase groups.
-[stage] subtitles: completed in 0.0s
-6/7 Searching for footage and trusted published visuals against the VO scene map...
-[stage] footage: start
-Footage source: Pexels disabled because PEXELS_API_KEY is not configured.
-Visual verification enabled with automatic failover: Gemini (gemini-3.5-flash-lite) -> Groq (qwen/qwen3.8-27b) -> OpenRouter (nvidia/nemotron-3.5-super-vl:free) -> OpenRouter (inclusionai/ling-3.2-flash:free). Minimum confidence=0.72.
-Scene 1: applying metadata anchors independently to each of 4 search variants.
-  Pixabay: 25 candidate(s)
-  Pixabay: 25 candidate(s)
-  Pixabay: 25 candidate(s)
-  Pixabay: 25 candidate(s)
-  Wikimedia Commons: 7 candidate(s)
-Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
-Scene 1: SigLIP thumbnail reranking applied to 22 candidate(s).
-Scene 1: 47 metadata-qualified candidate(s) across 4 search variants; checking up to 8 candidates.
-  Candidate rank 1: Pixabay ID=1077 score=0.51 match=2/3 query='beaver dam construction footage' metadata=water power, dam, hydroelectric, electricity, reservoir, energy, water, power plant, construction, nature, supply, lake, structure, engineering, 142261884 https
-  Candidate rank 2: Pixabay ID=158405 score=0.41 match=2/4 query='beaver dam building river' metadata=river, waterfall, flow, cascade, waves, forest, mountain, park, spring, summer, season, climate, peaceful, beautiful wallpaper, environment, dam, trees, sky, na
-  Candidate rank 3: Pixabay ID=280056 score=0.41 match=2/4 query='beaver dam building river' metadata=beaver, nature, rodent, animal, mammal, muskrat, wool, water, nutria, tail, river, stream, forest, canada, rat, wet, pond https://pixabay.com/videos/id-280056/
-  Candidate rank 4: Pixabay ID=200580 score=0.41 match=2/4 query='beaver dam building river' metadata=lake, dam, trees, river, water, forest, nature, landscape https://pixabay.com/videos/id-200580/
-  Candidate rank 5: Pixabay ID=29237 score=0.51 match=2/3 query='beaver dam construction footage' metadata=erlauf, lower austria, austria, drone, nature, landscape, meadow, agriculture, dam, water power, hydroelectric power station, technology, energy, construction, 
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
 Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
 Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-3.5-flash.
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.99).
-Scene 1: visual check 1/8 via gemini (gemini-3.5-flash-lite) — REJECT (0.99): The footage shows a human-made hydroelectric dam and reservoir facility, not a beaver dam or beavers constructing a dam.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (1.00).
-Scene 1: visual check 2/8 via gemini (gemini-3.5-flash-lite) — REJECT (1.00): The frames show a manicured river/canal lined with artificial fences and walking paths, with no beavers or beaver dams present.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.90).
-Scene 1: visual check 3/8 via gemini (gemini-3.5-flash-lite) — REJECT (0.90): The video shows a beaver swimming and splashing in open water, but there is no visible beaver dam or dam construction process.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 1: visual check 4/8 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames present a wide aerial shot of a large lake or reservoir surrounded by hills, with no beaver or beaver dam visible.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. network timeout/connection error
-AI router: trying groq / qwen/qwen3.8-27b for vision/visual_verification...
-AI router: groq/qwen/qwen3.8-27b visual verdict=REJECT (0.95).
-Scene 1: visual check 5/8 via groq (qwen/qwen3.8-27b) — REJECT (0.95): The frames show a large man-made concrete hydroelectric dam and reservoir, not a beaver dam. There are no beavers or natural construction materials (sticks/mud) visible.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 1: visual check 6/8 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a large human-made concrete dam and lock structure across a river, rather than beaver dam construction or beavers.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (1.00).
-Scene 1: visual check 7/8 via gemini (gemini-3.5-flash-lite) — REJECT (1.00): The frames depict an aerial view of a paved highway causeway with vehicle traffic over open water, not a beaver or beaver dam construction.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.98).
-Scene 1: visual check 8/8 via gemini (gemini-3.5-flash-lite) — REJECT (0.98): The frames show a nutria (coypu) with a long thin tail sitting on a gravel bank, not a beaver. There is no beaver dam, construction activity, or water overflow visible.
-[stage] footage: FAILED after 415.1s
+Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-2.5-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
+AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_audit...
+AI router: groq rate limited (HTTP 429); provider paused for 15s and the next route is used now.
+AI router: trying openrouter / openrouter/free for fact/fact_check_audit...
+AI router: openrouter:openrouter/free returned no content before its budget ran out; retrying with a 1.60x completion budget.
+AI router: openrouter/openrouter/free returned a valid fact response.
+AI router: trying gemini / gemini-3.5-flash-lite for text/fact_check_repair...
+Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
+AI router: trying groq / openai/gpt-oss-120b for text/fact_check_repair...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+Fact-check repair for C3 proposed by groq/openai/gpt-oss-120b: Beaver dams raise water levels, creating wetland patches and increasing habitat diversity along the stream corridor.
+Fact-check claim repair: C3 rewritten for scene 3.
+AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_audit...
+AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
+AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: groq/openai/gpt-oss-120b returned a valid fact response.
+AI router: trying groq / openai/gpt-oss-120b for text/fact_check_repair...
+AI router: groq rate limited (HTTP 429); provider paused for 15s and the next route is used now.
+AI router: trying openrouter / openrouter/free for text/fact_check_repair...
+AI router: openrouter/openrouter/free returned a valid text response.
+Fact-check repair for C4 proposed by openrouter/openrouter/free: After dam abandonment, beaver activity continues to influence channel and floodplain evolution and riparian plant recruitment.
+Fact-check claim repair: C4 rewritten for scene 4.
+AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_audit...
+AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
+AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Fact-check C3 cited a URL not fetched for that exact claim.
+AI router: trying openrouter / openrouter/free for fact/fact_check_audit...
+AI router: openrouter/openrouter/free returned a valid fact response.
+Fact-check blocked sentence: Beaver activity thus links geomorphology and riparian ecology, generating a mosaic of successional stages across the watershed for diverse species communities.
+Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/ | Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl
+Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/ | Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock
+Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/ | Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl
+Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/ | Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock
+Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/ | Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl
+Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/ | Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock
+Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC6544642/ | Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian plant recruitment - PMC Beaver-generated disturbance extends beyond active dam sites to enhance stream morphodynamics and riparian pl
+Fact-check source diagnostic: usable | https://pmc.ncbi.nlm.nih.gov/articles/PMC1247398/ | Global Nitrogen: Cycling out of Control - PMC Global Nitrogen: Cycling out of Control Lock
+[stage] fact_check: FAILED after 295.2s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4147, in <module>
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3893, in _run_pipeline
+    fact_report = verify_documentary_facts(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1529, in verify_documentary_facts
+    raise FactCheckError(str(exc), report=report) from None
+fact_check.FactCheckError: Narration did not pass evidence validation. C5=insufficient: The excerpt supports a shifting mosaic and links between channel/floodplain evolution and riparian plant recruitment, but it does not directly establish a watershed-wide mosaic of successional stages for diverse species communities.; C6=insufficient: The excerpt mentions elevated water levels, wetlands, hydrology, and sediment storage, but it does not directly evidence enhanced water storage, moderated flood peaks, drought refuges, or year-round aquatic organism refuges.; C7=insufficient: The excerpt does not directly state that beaver-modified streams support higher biodiversity than unaltered reaches or that this illustrates self-organized restoration across multiple taxa levels.; C8=insufficient: The excerpt supports that beavers are ecosystem engineers, but it does not directly evidence reverberation through water quality, habitat complexity, or regional ecological resilience for the future.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4156, in <module>
     main()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4127, in main
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4136, in main
     _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3965, in _run_pipeline
-    fetch_footage(plan)
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 2810, in fetch_footage
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3922, in _run_pipeline
     raise RuntimeError(
-RuntimeError: Scene 1 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 8 attempted candidates could be downloaded and accepted under the visual verification policy.
+RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C5=insufficient: The excerpt supports a shifting mosaic and links between channel/floodplain evolution and riparian plant recruitment, but it does not directly establish a watershed-wide mosaic of successional stages for diverse species communities.; C6=insufficient: The excerpt mentions elevated water levels, wetlands, hydrology, and sediment storage, but it does not directly evidence enhanced water storage, moderated flood peaks, drought refuges, or year-round aquatic organism refuges.; C7=insufficient: The excerpt does not directly state that beaver-modified streams support higher biodiversity than unaltered reaches or that this illustrates self-organized restoration across multiple taxa levels.; C8=insufficient: The excerpt supports that beavers are ecosystem engineers, but it does not directly evidence reverberation through water quality, habitat complexity, or regional ecological resilience for the future.
