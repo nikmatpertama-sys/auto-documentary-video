@@ -255,5 +255,42 @@ class MockedPipelineTests(unittest.TestCase):
         self.assertIn("ffmpeg", failure["error_message"])
 
 
+class PreflightFailureTests(unittest.TestCase):
+    """A startup configuration failure must name the startup stage."""
+
+    def test_missing_vision_provider_key_is_reported_as_preflight(self):
+        previous = os.getcwd()
+        with tempfile.TemporaryDirectory() as tmp:
+            os.chdir(tmp)
+            try:
+                with patch.object(main, "TOPIC", "Forest rain"), \
+                        patch.object(main, "VISION_REQUIRED", True), \
+                        patch.object(
+                            main, "configured_vision_provider_names", return_value=[]
+                        ):
+                    for name in (
+                        "GROQ_API_KEY",
+                        "DEEPSEEK_API_KEY",
+                        "GEMINI_API_KEY",
+                        "OPENROUTER_API_KEY",
+                    ):
+                        os.environ.pop(name, None)
+                    with self.assertRaisesRegex(RuntimeError, "vision provider key"):
+                        main.main()
+                failure = json.loads(
+                    Path("failure_report.json").read_text(encoding="utf-8")
+                )
+                stage_report = json.loads(
+                    Path("stage_report.json").read_text(encoding="utf-8")
+                )
+            finally:
+                os.chdir(previous)
+
+        self.assertEqual(failure["failed_stage"], "preflight")
+        stages = [item["stage"] for item in stage_report["run"]["stages"]]
+        self.assertIn("preflight", stages)
+        self.assertEqual(stages[-1], "preflight")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

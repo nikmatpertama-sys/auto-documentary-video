@@ -28,6 +28,9 @@ fact_check_report.json
 voiceover_manifest.json
 opening_layout.json
 opening_hook_overlay.png
+failure_report.json
+stage_report.json
+assets/fonts/.uuid
 .hf-cache/
 
 # Local recovery backups and bundled toolchain symlinks

@@ -3461,6 +3461,11 @@ def _run_pipeline():
     diagnostics.STAGES.begin("cache_prune")
     prune_api_cache()
     diagnostics.STAGES.complete()
+    # Startup configuration gates get their own stage. Without this, a missing
+    # topic or provider key was reported as a failure of whichever stage had
+    # run last ("cache_prune"), which sends anyone reading failure_report.json
+    # to the wrong place.
+    diagnostics.STAGES.begin("preflight", topic=TOPIC or None)
     if not TOPIC:
         raise RuntimeError("Enter a topic in the GitHub Actions Run workflow form.")
     configured_keys = [
@@ -3473,6 +3478,7 @@ def _run_pipeline():
             "Visual verification is enabled but no vision provider key is configured. "
             "Add Groq, DeepSeek, Gemini, or OpenRouter secret."
         )
+    diagnostics.STAGES.complete(provider_keys=len(configured_keys))
     print(
         "AI text provider secrets available: " + (", ".join(configured_keys) or "none")
     )
