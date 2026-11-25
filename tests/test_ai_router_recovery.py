@@ -270,7 +270,7 @@ class DocumentaryPromptBudgetTests(unittest.TestCase):
         prompt = main.documentary_prompt("Beavers", self.POOL)
         for required in (
             "Exactly 8 scenes",
-            "160-185",
+            "150-180",
             "visual_focus",
             "at least half of them must appear",
             "TWO independent trusted hosts",
@@ -312,7 +312,7 @@ class StagedPlanRecoveryTests(unittest.TestCase):
                 "sentence": self._narration(start_index + offset + 1),
                 "source_urls": self.POOL,
             }
-            for offset in range(4)
+            for offset in range(2)
         ]}
 
     def test_staged_plan_assembles_the_outline_and_both_claim_halves(self):
@@ -329,12 +329,14 @@ class StagedPlanRecoveryTests(unittest.TestCase):
             side_effect=[
                 (outline, "gemini", "gemini-3.5-flash-lite"),
                 (self._claims(0), "gemini", "gemini-3.5-flash-lite"),
+                (self._claims(2), "gemini", "gemini-3.5-flash-lite"),
                 (self._claims(4), "gemini", "gemini-3.5-flash-lite"),
+                (self._claims(6), "gemini", "gemini-3.5-flash-lite"),
             ],
         ) as generate:
             plan, provider, model = main.staged_plan("Rain", self.POOL, validate_plan)
 
-        self.assertEqual(generate.call_count, 3)
+        self.assertEqual(generate.call_count, 5)
         self.assertEqual((provider, model), ("gemini", "gemini-3.5-flash-lite"))
         self.assertEqual(len(plan["scenes"]), 8)
         self.assertEqual(len(captured["candidate"]["fact_claims"]), 8)
@@ -342,7 +344,10 @@ class StagedPlanRecoveryTests(unittest.TestCase):
         # Narration and citation are separate requests so that neither has to
         # fit both a script and its sources into one completion budget.
         stages = [call.kwargs["stage"] for call in generate.call_args_list]
-        self.assertEqual(stages, ["script_outline", "claim_sourcing", "claim_sourcing"])
+        self.assertEqual(
+            stages,
+            ["script_outline"] + ["claim_sourcing"] * 4,
+        )
 
     def test_visual_query_is_repaired_instead_of_rejecting_the_plan(self):
         repaired = main.align_visual_query_to_focus(
