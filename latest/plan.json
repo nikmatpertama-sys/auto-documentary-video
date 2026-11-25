@@ -1,35 +1,35 @@
 {
-  "title": "Beavers: Nature’s River Engineers",
-  "hook": "Beavers, the world’s largest rodents, reshape rivers with astonishing engineering skill, creating",
+  "title": "Beavers: Nature’s Engineers Reshaping Rivers",
+  "hook": "Beavers, nature’s architects, transform flowing rivers into thriving wetlands with just wood",
   "scenes": [
     {
-      "narration": "Beavers, the world’s largest rodents, reshape rivers with astonishing engineering skill, creating thriving wetlands that support countless hidden species.",
+      "narration": "Beavers, nature’s architects, transform flowing rivers into thriving wetlands with just wood and mud, creating habitats that support countless species across seasons.",
       "visual_focus": "beaver dam construction",
-      "visual_query": "beaver dam construction",
+      "visual_query": "beaver dam construction footage",
       "visual_queries": [
         "beaver dam building closeup",
-        "beaver pond after dam"
+        "beaver dam water overflow"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver dam construction",
+      "reference_query": "beaver dam construction footage",
       "source_label": "NCBI",
-      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "Both the Eurasian beaver (Castor fiber) and the North American beaver (Castor canadensis) belong to the genus Castor, family Castoridae.",
-      "visual_focus": "Eurasian beaver Castor fiber",
-      "visual_query": "Eurasian beaver Castor fiber",
+      "narration": "By felling trees, Castor species harvest timber, a behavior highlighted in modern ecological studies of ecosystem engineering that reshape water flow patterns.",
+      "visual_focus": "beaver tree felling",
+      "visual_query": "beaver tree felling footage",
       "visual_queries": [
-        "Eurasian beaver swimming",
-        "North American beaver gnawing"
+        "beaver cutting down tree",
+        "beaver gnawing logs"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "Eurasian beaver Castor fiber",
+      "reference_query": "beaver tree felling footage",
       "source_label": "ITIS",
       "source_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
       "visual_type": "footage",
@@ -37,16 +37,16 @@
       "sentence_end": 1
     },
     {
-      "narration": "Modern beavers are prolific ecosystem engineers, dramatically altering landscapes through tree harvesting and dam construction that reshape water flow worldwide.",
-      "visual_focus": "beaver tree harvesting",
-      "visual_query": "beaver tree harvesting",
+      "narration": "Their dams slow currents, raising water levels and allowing sediments to settle, which enriches floodplain soils over time, supporting diverse plant communities.",
+      "visual_focus": "beaver dam water level",
+      "visual_query": "beaver dam water level footage",
       "visual_queries": [
-        "beaver cutting down tree",
-        "beaver gathering branches"
+        "beaver pond water rise",
+        "beaver dam sediment deposition"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver tree harvesting",
+      "reference_query": "beaver dam water level footage",
       "source_label": "NCBI",
       "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
       "visual_type": "footage",
@@ -54,86 +54,86 @@
       "sentence_end": 2
     },
     {
-      "narration": "Beavers’ renowned woodcutting behavior supplies the material for their dams and lodges, showcasing remarkable engineering instincts that benefit river ecosystems.",
-      "visual_focus": "beaver woodcutting activity",
-      "visual_query": "beaver woodcutting activity",
+      "narration": "Raised ponds create new aquatic habitats, attracting fish, amphibians, and waterfowl that would otherwise bypass the stream, enhancing regional biodiversity significantly today.",
+      "visual_focus": "beaver pond wildlife",
+      "visual_query": "beaver pond wildlife footage",
       "visual_queries": [
-        "beaver gnawing tree trunk",
-        "beaver carrying logs"
+        "fish near beaver pond",
+        "waterfowl at beaver pond"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver woodcutting activity",
-      "source_label": "NCBI",
-      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "reference_query": "beaver pond wildlife footage",
+      "source_label": "ITIS",
+      "source_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "These rodents have colonized every continent except Antarctica, thriving in deserts, tundra, forests, and wetlands alike, demonstrating extraordinary adaptability today.",
-      "visual_focus": "global beaver distribution",
-      "visual_query": "global beaver distribution",
+      "narration": "Beaver activity also increases groundwater recharge, as stored water slowly infiltrates surrounding soils during dry periods, maintaining stream flow and supporting vegetation.",
+      "visual_focus": "beaver wetland infiltration",
+      "visual_query": "beaver wetland infiltration footage",
       "visual_queries": [
-        "beaver habitats worldwide",
-        "beaver in diverse ecosystems"
+        "water soaking beaver wetland",
+        "groundwater rise near beaver dam"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "global beaver distribution",
+      "reference_query": "beaver wetland infiltration footage",
       "source_label": "NCBI",
-      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "Their global distribution reflects a slow molecular evolution, as mitochondrial genomes reveal timing of beaver speciation across millions of years.",
-      "visual_focus": "beaver mitochondrial study",
-      "visual_query": "beaver mitochondrial study",
+      "narration": "These engineered wetlands boost carbon storage, as submerged plants and soils trap organic material longer than fast‑flowing rivers, contributing to climate mitigation.",
+      "visual_focus": "beaver wetland carbon",
+      "visual_query": "beaver wetland carbon sequestration footage",
       "visual_queries": [
-        "laboratory analysis beaver DNA",
-        "scientists sequencing beaver genome"
+        "submerged plants in beaver pond",
+        "soil carbon in beaver wetland"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver mitochondrial study",
-      "source_label": "NCBI",
-      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "reference_query": "beaver wetland carbon sequestration footage",
+      "source_label": "ITIS",
+      "source_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5
     },
     {
-      "narration": "Genetic studies place beavers within a mouse‑related clade, closely linked to kangaroo‑rat families in the Castorimorpha group, supporting evolutionary connections.",
-      "visual_focus": "beaver phylogenetic tree",
-      "visual_query": "beaver phylogenetic tree",
+      "narration": "Beavers’ tree harvesting also creates early‑successional forests, fostering biodiversity by providing food and shelter for many mammals, including deer, squirrels, and birds.",
+      "visual_focus": "early successional forest",
+      "visual_query": "early successional forest after beaver footage",
       "visual_queries": [
-        "scientist examining rodent phylogeny",
-        "researcher with evolutionary diagram"
+        "young forest beaver cleared area",
+        "wildlife in beaver‑created forest"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver phylogenetic tree",
+      "reference_query": "early successional forest after beaver footage",
       "source_label": "NCBI",
-      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5335264/",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6
     },
     {
-      "narration": "Thus, beavers act as natural architects, their engineering reshaping rivers and fostering dynamic ecosystems across the planet for future generations.",
-      "visual_focus": "beaver-altered river landscape",
-      "visual_query": "beaver-altered river landscape",
+      "narration": "Thus, these modest engineers reshape entire river ecosystems, illustrating nature’s power to engineer resilience and abundance for future generations to cherish today.",
+      "visual_focus": "river ecosystem transformation",
+      "visual_query": "river ecosystem transformation beaver footage",
       "visual_queries": [
-        "river with beaver dam upstream",
-        "wetland created by beaver activity"
+        "river before and after beaver dam",
+        "landscape change beaver activity"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver-altered river landscape",
-      "source_label": "NCBI",
-      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "reference_query": "river ecosystem transformation beaver footage",
+      "source_label": "ITIS",
+      "source_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7
@@ -142,70 +142,70 @@
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "Beavers, the world’s largest rodents, reshape rivers with astonishing engineering skill, creating thriving wetlands that support countless hidden species.",
+      "sentence": "Beavers, nature’s architects, transform flowing rivers into thriving wetlands with just wood and mud, creating habitats that support countless species across seasons.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
       ]
     },
     {
       "scene": 2,
-      "sentence": "Both the Eurasian beaver (Castor fiber) and the North American beaver (Castor canadensis) belong to the genus Castor, family Castoridae.",
+      "sentence": "By felling trees, Castor species harvest timber, a behavior highlighted in modern ecological studies of ecosystem engineering that reshape water flow patterns.",
       "source_urls": [
-        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
         "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
       ]
     },
     {
       "scene": 3,
-      "sentence": "Modern beavers are prolific ecosystem engineers, dramatically altering landscapes through tree harvesting and dam construction that reshape water flow worldwide.",
+      "sentence": "Their dams slow currents, raising water levels and allowing sediments to settle, which enriches floodplain soils over time, supporting diverse plant communities.",
       "source_urls": [
         "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/"
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
       ]
     },
     {
       "scene": 4,
-      "sentence": "Beavers’ renowned woodcutting behavior supplies the material for their dams and lodges, showcasing remarkable engineering instincts that benefit river ecosystems.",
+      "sentence": "Raised ponds create new aquatic habitats, attracting fish, amphibians, and waterfowl that would otherwise bypass the stream, enhancing regional biodiversity significantly today.",
       "source_urls": [
         "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/"
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
       ]
     },
     {
       "scene": 5,
-      "sentence": "These rodents have colonized every continent except Antarctica, thriving in deserts, tundra, forests, and wetlands alike, demonstrating extraordinary adaptability today.",
+      "sentence": "Beaver activity also increases groundwater recharge, as stored water slowly infiltrates surrounding soils during dry periods, maintaining stream flow and supporting vegetation.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
       ]
     },
     {
       "scene": 6,
-      "sentence": "Their global distribution reflects a slow molecular evolution, as mitochondrial genomes reveal timing of beaver speciation across millions of years.",
+      "sentence": "These engineered wetlands boost carbon storage, as submerged plants and soils trap organic material longer than fast‑flowing rivers, contributing to climate mitigation.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
       ]
     },
     {
       "scene": 7,
-      "sentence": "Genetic studies place beavers within a mouse‑related clade, closely linked to kangaroo‑rat families in the Castorimorpha group, supporting evolutionary connections.",
+      "sentence": "Beavers’ tree harvesting also creates early‑successional forests, fostering biodiversity by providing food and shelter for many mammals, including deer, squirrels, and birds.",
       "source_urls": [
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC5335264/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/"
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Thus, beavers act as natural architects, their engineering reshaping rivers and fostering dynamic ecosystems across the planet for future generations.",
+      "sentence": "Thus, these modest engineers reshape entire river ecosystems, illustrating nature’s power to engineer resilience and abundance for future generations to cherish today.",
       "source_urls": [
         "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-        "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/"
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
       ]
     }
   ],
-  "script": "Beavers, the world’s largest rodents, reshape rivers with astonishing engineering skill, creating thriving wetlands that support countless hidden species. Both the Eurasian beaver (Castor fiber) and the North American beaver (Castor canadensis) belong to the genus Castor, family Castoridae. Modern beavers are prolific ecosystem engineers, dramatically altering landscapes through tree harvesting and dam construction that reshape water flow worldwide. Beavers’ renowned woodcutting behavior supplies the material for their dams and lodges, showcasing remarkable engineering instincts that benefit river ecosystems. These rodents have colonized every continent except Antarctica, thriving in deserts, tundra, forests, and wetlands alike, demonstrating extraordinary adaptability today. Their global distribution reflects a slow molecular evolution, as mitochondrial genomes reveal timing of beaver speciation across millions of years. Genetic studies place beavers within a mouse‑related clade, closely linked to kangaroo‑rat families in the Castorimorpha group, supporting evolutionary connections. Thus, beavers act as natural architects, their engineering reshaping rivers and fostering dynamic ecosystems across the planet for future generations.",
+  "script": "Beavers, nature’s architects, transform flowing rivers into thriving wetlands with just wood and mud, creating habitats that support countless species across seasons. By felling trees, Castor species harvest timber, a behavior highlighted in modern ecological studies of ecosystem engineering that reshape water flow patterns. Their dams slow currents, raising water levels and allowing sediments to settle, which enriches floodplain soils over time, supporting diverse plant communities. Raised ponds create new aquatic habitats, attracting fish, amphibians, and waterfowl that would otherwise bypass the stream, enhancing regional biodiversity significantly today. Beaver activity also increases groundwater recharge, as stored water slowly infiltrates surrounding soils during dry periods, maintaining stream flow and supporting vegetation. These engineered wetlands boost carbon storage, as submerged plants and soils trap organic material longer than fast‑flowing rivers, contributing to climate mitigation. Beavers’ tree harvesting also creates early‑successional forests, fostering biodiversity by providing food and shelter for many mammals, including deer, squirrels, and birds. Thus, these modest engineers reshape entire river ecosystems, illustrating nature’s power to engineer resilience and abundance for future generations to cherish today.",
   "ai_provider": {
     "provider": "groq",
     "model": "openai/gpt-oss-120b"
@@ -218,17 +218,17 @@
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "BEAVERS: NATURE’S RIVER ENGINEERS"
+        "BEAVERS: NATURE’S ENGINEERS RESHAPING RIVERS"
       ],
       "hook_lines": [
-        "Beavers, the world’s",
-        "largest rodents, reshape",
-        "rivers with astonishing",
-        "engineering skill,",
-        "creating"
+        "Beavers, nature’s",
+        "architects, transform",
+        "flowing rivers into",
+        "thriving wetlands with",
+        "just wood"
       ],
-      "title_text": "Beavers: Nature’s River Engineers",
-      "hook_text": "Beavers, the world’s largest rodents, reshape rivers with astonishing engineering skill, creating",
+      "title_text": "Beavers: Nature’s Engineers Reshaping Rivers",
+      "hook_text": "Beavers, nature’s architects, transform flowing rivers into thriving wetlands with just wood",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,

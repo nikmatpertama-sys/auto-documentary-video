@@ -1,105 +1,240 @@
 {
   "status": "blocked",
   "method": "trusted-source fetch + independent evidence-grounded AI audit",
+  "fact_checker": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
+  },
   "claim_count": 8,
-  "fact_checker_failure": "ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 400; openrouter/baidu/ernie-5.5-flash-preview:free: HTTP 400; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 413; groq/openai/gpt-oss-120b: HTTP 413",
+  "supported_claim_count": 2,
+  "failed_claims": [
+    {
+      "claim_id": "C3",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "The provided excerpt contains isotopic data measurements for plant specimens and does not contain details about dams slowing currents, sediment settling, soil enrichment, or supporting plant communities."
+    },
+    {
+      "claim_id": "C4",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
+      ],
+      "reason": "The excerpts mention raised water levels, food caching, and local biodiversity impact generally, but do not state that raised ponds attract fish, amphibians, and waterfowl that would otherwise bypass the stream."
+    },
+    {
+      "claim_id": "C5",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "The excerpt mentions dissolved nitrates in water-logged soils and fossil faunal remains, but does not evidence groundwater recharge, infiltration during dry periods, or maintaining stream flow."
+    },
+    {
+      "claim_id": "C6",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "The excerpt discusses subfossil plant carbon/nitrogen isotopic ratios and paleodietary studies, but does not verify carbon storage in wetlands, comparisons to fast-flowing rivers, or climate mitigation."
+    },
+    {
+      "claim_id": "C7",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
+      ],
+      "reason": "The provided sources do not mention early-successional forests or tree harvesting providing food and shelter specifically for deer, squirrels, and birds."
+    },
+    {
+      "claim_id": "C8",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "While the source calls beavers ecosystem engineers affecting hydrology and biodiversity, it does not support the specific narrative assertions about engineering resilience and abundance for future generations to cherish today."
+    }
+  ],
+  "uncited_factual_sentences": [],
+  "coverage_note": "Every sentence in the script corresponds to a supplied claim, but claims C3 through C8 lack sufficient supporting evidence in the provided source excerpts.",
+  "claims": [
+    {
+      "id": "C1",
+      "scene": 1,
+      "sentence": "Fossil evidence from the High Arctic Beaver Pond site shows that woodcutting behavior in extinct beavers left preserved evidence of ancient beaver-cut wood.",
+      "source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC7403313/"
+      ],
+      "reason": "The excerpt explicitly confirms that the Pliocene-aged High Arctic Beaver Pond fossil site preserves evidence of beaver-cut wood associated with an extinct beaver."
+    },
+    {
+      "id": "C2",
+      "scene": 2,
+      "sentence": "As prolific ecosystem engineers, modern beavers of the genus Castor dramatically alter the landscape through tree harvesting and dam building.",
+      "source_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "The excerpt directly states: 'Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building.'"
+    },
+    {
+      "id": "C3",
+      "scene": 3,
+      "sentence": "Their dams slow currents, raising water levels and allowing sediments to settle, which enriches floodplain soils over time, supporting diverse plant communities.",
+      "source_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "The provided excerpt contains isotopic data measurements for plant specimens and does not contain details about dams slowing currents, sediment settling, soil enrichment, or supporting plant communities."
+    },
+    {
+      "id": "C4",
+      "scene": 4,
+      "sentence": "Raised ponds create new aquatic habitats, attracting fish, amphibians, and waterfowl that would otherwise bypass the stream, enhancing regional biodiversity significantly today.",
+      "source_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
+      ],
+      "reason": "The excerpts mention raised water levels, food caching, and local biodiversity impact generally, but do not state that raised ponds attract fish, amphibians, and waterfowl that would otherwise bypass the stream."
+    },
+    {
+      "id": "C5",
+      "scene": 5,
+      "sentence": "Beaver activity also increases groundwater recharge, as stored water slowly infiltrates surrounding soils during dry periods, maintaining stream flow and supporting vegetation.",
+      "source_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "The excerpt mentions dissolved nitrates in water-logged soils and fossil faunal remains, but does not evidence groundwater recharge, infiltration during dry periods, or maintaining stream flow."
+    },
+    {
+      "id": "C6",
+      "scene": 6,
+      "sentence": "These engineered wetlands boost carbon storage, as submerged plants and soils trap organic material longer than fast‑flowing rivers, contributing to climate mitigation.",
+      "source_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "The excerpt discusses subfossil plant carbon/nitrogen isotopic ratios and paleodietary studies, but does not verify carbon storage in wetlands, comparisons to fast-flowing rivers, or climate mitigation."
+    },
+    {
+      "id": "C7",
+      "scene": 7,
+      "sentence": "Beavers’ tree harvesting also creates early‑successional forests, fostering biodiversity by providing food and shelter for many mammals, including deer, squirrels, and birds.",
+      "source_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165"
+      ],
+      "reason": "The provided sources do not mention early-successional forests or tree harvesting providing food and shelter specifically for deer, squirrels, and birds."
+    },
+    {
+      "id": "C8",
+      "scene": 8,
+      "sentence": "Thus, these modest engineers reshape entire river ecosystems, illustrating nature’s power to engineer resilience and abundance for future generations to cherish today.",
+      "source_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+        "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "reason": "While the source calls beavers ecosystem engineers affecting hydrology and biodiversity, it does not support the specific narrative assertions about engineering resilience and abundance for future generations to cherish today."
+    }
+  ],
   "sources": [
     {
       "claim_id": "C1",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC7403313/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. As a result rodents represent nearly half of the current mammalian diversity with more than 2,261 species organized into 474 genera [ 13 ]. Imbalance and shifts in diversification rate within rodents Whole-tree tests conducted on the complete species sampling indicate significant variation in diversification rates among rodent lineages (Table 4 , Figure 3 ). Muroid rodents comprise 28% of mammal species and this superfamily [ 13 ] is larger than any other non-rodent orders. Methods Taxonomy All species names followed the rodents classification of Carleton and Musser [ 132 ]. The resulting dataset represents 100% of the families (33 families), 81% of the genera (387 of 474 genera), and 56% of the species (1,265 of 2,261 species) of rodents cur",
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "The only definitive evidence of woodcutting in extinct beavers is from the Pliocene-aged High Arctic Beaver Pond fossil site, which preserves evidence of beaver-cut wood and a possible dam-core associated with the extinct beaver genus, Dipoides (species not yet described) 9 – 11 . Stratigraphic and paleoenvironmental reconstruction of a mid-Pliocene fossil site in the High Arctic (Ellesmere Island, Nunavut): evidence of an ancient peatland with evidence of beaver activity. δ 13 C col and δ 15 N col within the context of the isotopic dietary baseline composed of coeval terrestrial and freshwater vegetation from the High Arctic Beaver Pond fossil site. We measured stable carbon and nitrogen isotopes ( δ 13 C and δ 15 N) of coeval subfossil plants and beaver collagen ( Dipoides sp.) from the Early Pliocene, High Arctic Beaver Pond fossil locality (Ellesmere Island), in order to reconstruct ",
       "source_kind": "planned",
       "status": "usable"
     },
     {
-      "claim_id": "C1",
+      "claim_id": "C2",
       "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
       "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
       "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. The only definitive evidence of woodcutting in extinct beavers is from the Pliocene-aged High Arctic Beaver Pond fossil site, which preserves evidence of beaver-cut wood and a possible dam-core associated with the extinct beaver genus, Dipoides (species not yet described) 9 – 11 . The appearance of woodcutting in Dipoides sp., a distant relative of Castor , implies that this behaviour originated 20 to 24 Ma ago, in a group of semiaquatic beavers that includes both extant species (C astor canadensis and Castor fiber ), the small Holarctic genus Dipoides , and the North American Ice Age giant beaver Castoroides 7 , 9 , 12 . The identified plant species in this study concur with previous interpretations that this was an open-forest landscape int",
+      "excerpt": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern beavers ( Castor ) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Swimming, woodcutting, and a diet of woody plants could have set the stage for the evolution of dam building behaviours—advantageous traits that may have been selected for by the cooling climate of the late Neogene, and which",
       "source_kind": "planned",
       "status": "usable"
     },
     {
-      "claim_id": "C2",
-      "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-      "resolved_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
-      "host": "www.itis.gov",
+      "claim_id": "C3",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
-      "page_title": "ITIS - Report: Castor fiber",
-      "excerpt": "Wood, 1955 Family Castoridae Hemprich, 1820 – Beavers Genus Castor Linnaeus, 1758 – beavers Species Castor fiber Linnaeus, 1758 – Eurasian Beaver References Expert(s): Expert: Don E. Contact Us Data Access and Tools Data Access Information ITIS Tools Advanced Search Web Services Web Service Information Description of ITIS Web Services Developing a Client ITIS Solr Web Services ITIS Solr WS Examples Hierarchical Report Compare Names Get ITIS Data Full Database Download Instructions Database Files Download Data in TWB Format Become a Data Partner Contribute Taxonomic Workbench Help Go to Print Version Castor fiber Linnaeus, 1758 Taxonomic Serial No.: 573165 (Download Help) Castor fiber TSN 573165 Taxonomy and Nomenclature Kingdom: Animalia Taxonomic Rank: Species Synonym(s): Castor fiber fiber Linnaeus, 1758 Castor fiber galliae Geoffroy, 1803 Castor fiber albicus Matschie, 1907 Castor fib",
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "Project sample ID δ 13 C ‰ (VPDB) δ 15 N ‰ (AIR) C (wt%) N (wt%) C/N (wt%) Atomic C:N Taxon Common name Description and sample treatment 1 − 36.6 + 4.8 36.8 0.5 77.4 90.25 Scorpidium scorpioides Hooked scorpion moss Bulk plant, dry pick cleaning, no ultrasonic water bath 2 − 35.3 + 4.7 41.9 0.6 76.9 89.64 Scorpidium scorpioides Hooked scorpion moss Bulk plant 2 MET DUP − 34.6 + 4.8 41.5 0.6 69.1 80.5 Scorpidium scorpioides Hooked scorpion moss Bulk plant 3 − 25.1 + 3.7 45.5 0.9 57.7 67.3 Larix Larch Scales from single dissected cone 5 − 25.4 + 3.8 45.0 0.8 57.5 67.1 Larix Larch Short shoots 7 − 23.3 + 2.1 48.0 0.3 140.7 164.0 Larix Larch Seeds from single dissected cone 8 − 23.6 + 2.3 46.9 0.3 145.7 169.9 Larix Larch Seeds (whole) 9 − 22.7 + 1.8 47.7 0.3 155.8 181.7 Larix Larch Seeds (split) 10 − 26.8 + 2.7 47.4 0.9 54.0 63.0 Betula Arboreal birch Birch cone bracts 11 − 26.7 Insufficient",
       "source_kind": "planned",
       "status": "usable"
     },
     {
-      "claim_id": "C2",
+      "claim_id": "C3",
+      "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Fetched page is about a different subject: it shares 0 of the claim's 17 content terms (needs 2)."
+    },
+    {
+      "claim_id": "C4",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "These behaviours have a profound effect on regional hydrology, nutrient flow across the landscape, and local biodiversity, thus making them exemplary “ecosystem engineers” 2 – 4 . Today, beaver ponds are considered to be N sinks, with elevated rates of bacterially mediated denitrification 69 . Raised water levels also create more favourable conditions for underwater food caching of branches in sub-freezing winter conditions because the deeper water would prevent an underwater food cache from being locked in ice. Comparisons of δ13C values in leaves of aquatic macrophytes from different habitats in Britain and Finland; The images or other third party material in this article are included in the article’s Creative Commons license, unless indicated otherwise in a credit line to the material. Subject terms: Palaeoecology, Biogeochemistry, Phylogenetics Introduction Beavers today are renowned",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C4",
       "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
       "resolved_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
       "host": "www.itis.gov",
       "http_status": 200,
       "page_title": "ITIS - Report: Castor canadensis",
-      "excerpt": "Wood, 1955 Family Castoridae Hemprich, 1820 – Beavers Genus Castor Linnaeus, 1758 – beavers Species Castor canadensis Kuhl, 1820 – castor, American Beaver, Castor Americano, North American Beaver References Expert(s): Expert: Alfred L. Monotremata to Rodentia Page(s): 631 Publisher: Lynx Edicions Publication Place: Barcelona ISBN/ISSN: 978-84-16728-343 Notes: Reference for: Castor canadensis , North American Beaver [English] Author(s)/Editor(s): Busher, P. 6: Lagomorphs and Rodents I Page(s): 150-168 Publisher: Lynx Edicions Publication Place: Barcelona, Spain ISBN/ISSN: 978-84-941892-34 Notes: Reference for: Castor canadensis , North American Beaver [English] Author(s)/Editor(s): Wilson, Don E., and DeeAnn M. Upmeyer Reference for: Castor canadensis , American Beaver [English] Geographic Information Geographic Division: North America Middle America Jurisdiction/Origin: Continental US, N",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C3",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern beavers ( Castor ) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. These behaviours have a profound effect on regional hydrology, nutrient flow across the landscape, and local biodiversity, thus making them exemplary “ecosystem engineers” 2 – 4 . In particular, how Castor ’s distinctive comp",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C3",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Development of phylogenetic methods that do not rely on fossils for the study of evolutionary processes through time have revolutionized the field of evolutionary biology and resulted in an unprecedented expansion of our knowledge about the tree of ... Development of phylogenetic methods that do not rely on fossils for the study of evolutionary processes through time have revolutionized the field of evolutionary biology and resulted in an unprecedented expansion of our knowledge about the tree of ... PMC Copyright notice PMCID: PMC3532383 PMID: 22697210 Abstract Background Development of phylogenetic methods that do not rely on fossils for the study of evolutionary processes through time have revolutionized the field of evolutionary",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C4",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Subject terms: Palaeoecology, Biogeochemistry, Phylogenetics Introduction Beavers today are renowned for their woodcutting behaviour and construction abilities. Woodcutting behavior in beavers (Castoridae, Rodentia): estimating ecological performance in a modern and a fossil taxon. Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. In a phylogenetic context, the isotopic evidence implies that woodcutting and consumption of woody plants can be traced back to a small-bodied, semiaquatic Miocene castorid, suggesting that beavers have been consuming woody plants for over 20 million years. The only definitive e",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C4",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "These small to medium-sized placentals have spread over all continents (except Antarctica) and most islands, where they occupy virtually all terrestrial ecosystems from tropical rainforests and deserts to the arctic tundra. We therefore expect that a more robust framework for rodent molecular phylogeny may benefit from a gene concatenation approach as illustrated by the family-level supermatrix tree of Meredith et al. Supplementary Material Additional file 1 Figure S1. Click here for file (15.5KB, xls) Additional file 18 Loci used in each molecular dating analysis (see Material and Methods). Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. The phylogeny of Cetartiodactyla: the importance of dense taxon sampling, missing data, and the remarkable promise of cytochrome b to provide reliable sp",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "These small to medium-sized placentals have spread over all continents (except Antarctica) and most islands, where they occupy virtually all terrestrial ecosystems from tropical rainforests and deserts to the arctic tundra. Throughout the Cenozoic, rodents underwent an extraordinary adaptive radiation. Using the topological imbalances and the time line we discuss the potential role of different diversification factors that might have shaped the rodents radiation. Conclusions The present glimpse on the diversification pattern of rodents can be used for further comparative meta-analyses. Our results show that rodents experienced shifts in diversification rate regularly through the Tertiary, but at different periods for each clade. As a result rodents represent nearly half of the current mammalian diversity with more than 2,261 species organized into 474 genera [ 13 ]. Rodents also display ",
+      "excerpt": "The ITIS mission is to communicate a comprehensive taxonomy of global species that enables biodiversity information to be discovered, indexed, and connected across all human endeavors. 166 Page(s): 79 Publisher: United States Department of the Interior Fish and Wildlife Service Publication Place: Washington, D.C., USA ISBN/ISSN: Notes: Reference for: Castor canadensis Author(s)/Editor(s): Burgin, Connor J., Don E. otherwise Lower Risk (lc) Comments: Reviewed by Jenkins and Busher (1979, Mammalian Species, 120).",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -110,20 +245,16 @@
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
       "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "If burrowing behaviour in semiaquatic castorids is the primitive condition, it is likely Dipoides burrowed as well, as seen in other semiaquatic rodents today such as Castor , but also Crossomys (earless water rat), Myocastor (nutria), and Ondatra (muskrat) 92 . Subject terms: Palaeoecology, Biogeochemistry, Phylogenetics Introduction Beavers today are renowned for their woodcutting behaviour and construction abilities. Castoridae is a diverse family of herbivorous Holarctic rodents, originating during the late Eocene 7 – 9 . Ellesmere Island today is a polar desert, with sparse flora and very little precipitation 24 . Pliocene-age sites with similar fauna and flora community composition are very rare—Idaho in mid-continent North America, and the high altitude Yushe Basin, in northeastern China are the only known sites with similar (but not equivalent) faunal assemblages 37 , 38 . The id",
+      "excerpt": "Given the proximity of wetlands, the root systems of larch trees may have had access to 15 N-enriched dissolved nitrates in the surrounding water-logged soils. Isotopic evidence indicates a diet of woody plants and freshwater macrophytes, supporting the hypothesis that this extinct semiaquatic beaver engaged in woodcutting behaviour for feeding purposes. The remains of a complex faunal community were discovered at the Beaver Pond site, including beaver ( Dipoides sp., see below), three-toed horse, bear, badger, “deerlet”, water fowl, fish and a rabbit relative 10 , 22 . δ 13 C col and δ 15 N col within the context of the isotopic dietary baseline composed of coeval terrestrial and freshwater vegetation from the High Arctic Beaver Pond fossil site. This is in keeping with the interpretation that the Beaver Pond was a fen (near neutral pH, cool water temperature) during the Pliocene. Beave",
       "source_kind": "planned",
       "status": "usable"
     },
     {
-      "claim_id": "C6",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. We assumed prior Yule speciation process and an uncorrelated lognormal distribution for the molecular clock model [ 156 ]. A relaxed molecular clock dating approach provided a time framework for speciation events. However, a resurgence of interest in rodent phylogeny using molecular markers, most notably mitochondrial markers [ 20 - 23 ], nuclear genes [ 16 , 24 - 30 ] and retroposed elements [ 31 ], has provided a new insight of familial relationships and has challenged traditional classifications based on myological ( e.g. However, several extensive mitochondrial molecular studies of other mammalian orders have been performed for Primates [ 64 - 66 ], Carnivora [ 67 ], Cetartiodactyla [ 68 , 69 ] and Chiroptera [ 70 ]. The molecular superma",
+      "claim_id": "C5",
+      "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
+      "status": "not_usable",
       "source_kind": "planned",
-      "status": "usable"
+      "reason": "Fetched page is about a different subject: it shares 1 of the claim's 17 content terms (needs 2)."
     },
     {
       "claim_id": "C6",
@@ -132,29 +263,36 @@
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
       "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Mitochondrial genomes reveal slow rates of molecular evolution and the timing of speciation in beavers (Castor), one of the largest rodent species. Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Hence, reconstructing the diet of herbivores that lived thousands or millions of years ago can be problematic when using isotopic data, as is very rare to find sufficiently preserved coeval plant material and faunal remains from the same geologic locality. © The Author(s) 2020 Open Access This article is licensed under a Creative Commons Attribution 4.0 International License, which permits use, sharing, adaptat",
+      "excerpt": "For these reasons, atomic C:N ratio and carbon and nitrogen content are not considered to be infallible indicators of organic preservation in subfossil plants 49 . Nitrogen and carbon isotopic dynamics of subarctic soils and plants in southern Yukon Territory and its implications for paleoecological and paleodietary studies. We measured stable carbon and nitrogen isotopes ( δ 13 C and δ 15 N) of coeval subfossil plants and beaver collagen ( Dipoides sp.) from the Early Pliocene, High Arctic Beaver Pond fossil locality (Ellesmere Island), in order to reconstruct Dipoides sp. And yet recent research shows that the diet of Ice Age Castoroides , a close relative of Dipoides , was dominated by submerged plants, not trees and shrubs 13 . using stable carbon and nitrogen isotope analysis of contemporary sub-fossil skeletal and plant macrofossil material from the Beaver Pond site. A particular c",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Fetched page is about a different subject: it shares 0 of the claim's 18 content terms (needs 2)."
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern beavers ( Castor ) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. In particular, how Castor ’s distinctive complex of behavioural traits (tree harvesting, underwater food caching, and construction behaviour) may have evolved. The Beaver Pond site supported higher faunal biodiversity than an",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C7",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5335264/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5335264/",
-      "host": "pmc.ncbi.nlm.nih.gov",
+      "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
+      "resolved_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165",
+      "host": "www.itis.gov",
       "http_status": 200,
-      "page_title": "The Beaver’s Phylogenetic Lineage Illuminated by Retroposon Reads - PMC The Beaver’s Phylogenetic Lineage Illuminated by Retroposon Reads Lock",
-      "excerpt": "While molecular sequence support for placing beaver together with kangaroo rat within the mouse-related clade, a group comprising Myodonta (e.g., mice, blind mole-rats, jerboas), Anomaluromorpha (scaly-tailed squirrels and springhares), and Castorimorpha (beavers, pocket gophers, kangaroo rats/mice), has accumulated 6 , 7 , so far only a single retroposon marker supported for placing the beaver inside this clade 5 . Comparative results provided significant support for a clear relationship between beavers (Castoridae) and kangaroo rat-related species (Geomyoidea) (p < 0.0015, six markers, no conflicting data) within a significantly supported mouse-related clade (including Myodonta, Anomaluromorpha, and Castorimorpha) (p < 0.0015, six markers, no conflicting data). To test the sister-group relationship between Castoridae and Geomyoidea (the Castorimorpha clade) to the exclusion of Myodonta",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C7",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "The Myodonta + Anomaluroidea and the Castorimorpha clade are grouped in the mouse-related clade (BP =57%). In the second group, the mouse-related clade and Ctenohystrica have the majority of generic divergences and SDR through the Neogene. We identified a number of shifts in diversification rates within the major clades: two in Castorimorpha, three in Ctenohystrica, 6 within the squirrel-related clade and 24 in the Myomorpha clade. Four main clades (Figure 1 and Additional file 1 : Figure S1) are recovered : (1) the Ctenohystrica (BP = 100% , Additional file 2 : Figure S2 and Additional file 3 : Figure S3), (2) a squirrel-related clade (BP = 100%, Additional file 4 : Figure S4 and Additional file 5 : Figure S5), (3) the Castorimorpha (BP = 100%, Additional file 6 : Figure S6) and (4) the Myodonta + Anomaluroidea (BP = 66%, Additional file 7 : Figure S7, Additional file 8 : Figure S8, Add",
+      "page_title": "ITIS - Report: Castor fiber",
+      "excerpt": "The ITIS mission is to communicate a comprehensive taxonomy of global species that enables biodiversity information to be discovered, indexed, and connected across all human endeavors. Contact Us Data Access and Tools Data Access Information ITIS Tools Advanced Search Web Services Web Service Information Description of ITIS Web Services Developing a Client ITIS Solr Web Services ITIS Solr WS Examples Hierarchical Report Compare Names Get ITIS Data Full Database Download Instructions Database Files Download Data in TWB Format Become a Data Partner Contribute Taxonomic Workbench Help Go to Print Version Castor fiber Linnaeus, 1758 Taxonomic Serial No.: 573165 (Download Help) Castor fiber TSN 573165 Taxonomy and Nomenclature Kingdom: Animalia Taxonomic Rank: Species Synonym(s): Castor fiber fiber Linnaeus, 1758 Castor fiber galliae Geoffroy, 1803 Castor fiber albicus Matschie, 1907 Castor f",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -165,20 +303,42 @@
       "host": "pmc.ncbi.nlm.nih.gov",
       "http_status": 200,
       "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
-      "excerpt": "Financial support for this research was provided by a Natural Sciences and Engineering Research Council Discovery grant (F.J.L.), Canada Research Chairs program (F.J.L.), Canada Foundation for Innovation (F.J.L.) and the Ontario Research Fund (F.J.L.). Ecological impact of beavers Castor fiber and Castor canadensis and their ability to modify ecosystems. Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern",
+      "excerpt": "These behaviours have a profound effect on regional hydrology, nutrient flow across the landscape, and local biodiversity, thus making them exemplary “ecosystem engineers” 2 – 4 . Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Modern beavers (Castor) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. PMC Copyright notice PMCID: PMC7403313 PMID: 32753594 Abstract Modern beavers ( Castor ) are prolific ecosystem engineers and dramatically alter the landscape through tree harvesting and dam building. Subject terms: Palaeoecology, Biogeochemistry",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C8",
-      "requested_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3532383/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
-      "excerpt": "These small to medium-sized placentals have spread over all continents (except Antarctica) and most islands, where they occupy virtually all terrestrial ecosystems from tropical rainforests and deserts to the arctic tundra. Thus, mitochondrial genes have been sequenced for most of the available species within our dataset, and mitochondrial markers like CYTB (with 1152 sequenced taxa; Because extinction processes may have biased the interpretation of SDR, future studies should incorporate fossil data in supermatrix/supertree inferences. Due to the size of this dataset many taxa suffer from large amount of missing data, but all share at least one mitochondrial or nuclear gene, thus avoiding the problem of non overlapping sequences [ 142 ]. Default prior distributions were used for all other parameters, and two independant MCMC chains were ran for 200 million generations. Mitochondrial geno",
+      "requested_url": "https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212",
+      "status": "not_usable",
       "source_kind": "planned",
-      "status": "usable"
+      "reason": "Fetched page is about a different subject: it shares 0 of the claim's 17 content terms (needs 2)."
     }
-  ]
+  ],
+  "blocked_at_claim": "C3",
+  "blocked_claim_sentence": "Their dams slow currents, raising water levels and allowing sediments to settle, which enriches floodplain soils over time, supporting diverse plant communities.",
+  "failure_reason": "C3=insufficient: The provided excerpt contains isotopic data measurements for plant specimens and does not contain details about dams slowing currents, sediment settling, soil enrichment, or supporting plant communities.",
+  "claim_repairs": [
+    {
+      "claim_id": "C1",
+      "scene": 1,
+      "original_sentence": "Beavers, nature’s architects, transform flowing rivers into thriving wetlands with just wood and mud, creating habitats that support countless species across seasons.",
+      "replacement_sentence": "Fossil evidence from the High Arctic Beaver Pond site shows that woodcutting behavior in extinct beavers left preserved evidence of ancient beaver-cut wood.",
+      "replacement_source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313"
+      ],
+      "status": "rewritten"
+    },
+    {
+      "claim_id": "C2",
+      "scene": 2,
+      "original_sentence": "By felling trees, Castor species harvest timber, a behavior highlighted in modern ecological studies of ecosystem engineering that reshape water flow patterns.",
+      "replacement_sentence": "As prolific ecosystem engineers, modern beavers of the genus Castor dramatically alter the landscape through tree harvesting and dam building.",
+      "replacement_source_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC7403313/"
+      ],
+      "status": "rewritten"
+    }
+  ],
+  "repair_exhausted": true
 }
