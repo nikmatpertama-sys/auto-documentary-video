@@ -11,71 +11,88 @@ AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
 Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, Stream restoration
 Source pool: 51 trusted page(s) cited by Beaver, Keystone species, Stream restoration.
-[stage] source_pool: completed in 0.8s
+[stage] source_pool: completed in 1.0s
 [stage] script_generation: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: trying groq / llama-3.3-70b-versatile for text/script_generation...
-AI router: route groq:llama-3.3-70b-versatile rejected configuration/request (HTTP 404); trying another route. The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.
-AI router: trying openrouter / meta-llama/llama-3.3-70b-instruct:free for text/script_generation...
-AI router: route openrouter:meta-llama/llama-3.3-70b-instruct:free rejected configuration/request (HTTP 404); trying another route. This model is unavailable for free. The paid version is available now - use this slug instead: meta-llama/llama-3.3-70b-instruct
-AI router: trying openrouter / qwen/qwen-2.5-72b-instruct:free for text/script_generation...
-AI router: route openrouter:qwen/qwen-2.5-72b-instruct:free rejected configuration/request (HTTP 404); trying another route. This model is unavailable for free. The paid version is available now - use this slug instead: qwen/qwen-2.5-72b-instruct
-AI router: retry pass 2/4 for text/script_generation in 5.0s with 1 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: retry pass 3/4 for text/script_generation in 10.0s with 1 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: retry pass 4/4 for text/script_generation in 20.0s with 1 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: the single-shot plan was rejected by every provider; retrying as two smaller, independently validated requests. First failure: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: trying groq / llama-3.3-70b-versatile for text/script_outline...
-AI router: route groq:llama-3.3-70b-versatile rejected configuration/request (HTTP 404); trying another route. The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.
-AI router: trying openrouter / meta-llama/llama-3.3-70b-instruct:free for text/script_outline...
-AI router: route openrouter:meta-llama/llama-3.3-70b-instruct:free rejected configuration/request (HTTP 404); trying another route. This model is unavailable for free. The paid version is available now - use this slug instead: meta-llama/llama-3.3-70b-instruct
-AI router: trying openrouter / qwen/qwen-2.5-72b-instruct:free for text/script_outline...
-AI router: route openrouter:qwen/qwen-2.5-72b-instruct:free rejected configuration/request (HTTP 404); trying another route. This model is unavailable for free. The paid version is available now - use this slug instead: qwen/qwen-2.5-72b-instruct
-AI router: retry pass 2/4 for text/script_outline in 5.0s with 1 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: retry pass 3/4 for text/script_outline in 10.0s with 1 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-AI router: retry pass 4/4 for text/script_outline in 20.0s with 1 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
-[stage] script_generation: FAILED after 101.5s
+Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+Gemini model gemini-2.5-flash answered HTTP 404; trying gemini-2.0-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.com/docs/get-s
+AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+Documentary plan generated by groq/openai/gpt-oss-120b: 168 words, 8 scenes.
+Opening validated before TTS: title=4 word(s), hook=12 word(s) (hook shortened to 12 words).
+[stage] script_generation: completed in 13.8s
+2/7 Fetching trusted source pages and auditing every factual assertion...
+[stage] fact_check: start
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+Fact-check source discovery: 88 trusted candidate URL(s) cited by related Wikipedia articles.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+Fact-check source temporarily unavailable (SSLError); retrying once in 3s.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+Fact-check source discovery: 159 trusted candidate URL(s) cited by related Wikipedia articles.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+Gemini model gemini-2.5-flash answered HTTP 404; trying gemini-2.0-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.com/docs/get-s
+AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_source_recovery...
+AI router: groq/openai/gpt-oss-120b returned a valid fact response.
+Fact-check source discovery unavailable: HTTPError
+Fact-check source discovery: 0 trusted candidate URL(s) cited by related Wikipedia articles.
+Fact-check scholarly discovery unavailable: ReadTimeout
+AI router: trying gemini / gemini-3.5-flash-lite for text/fact_check_repair...
+Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+Gemini model gemini-2.5-flash answered HTTP 404; trying gemini-2.0-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.com/docs/get-s
+AI router: trying groq / openai/gpt-oss-120b for text/fact_check_repair...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+Fact-check repair for C6 proposed by groq/openai/gpt-oss-120b: Beaver‑created ponds trap organic material, leading to long‑term carbon storage in saturated soils.
+Fact-check claim repair: C6 rewritten for scene 6.
+Fact-check source temporarily unavailable (SSLError); retrying once in 3s.
+AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_source_recovery...
+AI router: groq/openai/gpt-oss-120b returned a valid fact response.
+AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_source_recovery...
+AI router: groq/openai/gpt-oss-120b returned a valid fact response.
+Fact-check source discovery: 0 trusted candidate URL(s) cited by related Wikipedia articles.
+Fact-check scholarly discovery unavailable: ReadTimeout
+AI router: trying groq / openai/gpt-oss-120b for text/fact_check_repair...
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+Fact-check repair for C7 proposed by groq/openai/gpt-oss-120b: Beaver dams can change water chemistry, sometimes increasing nitrogen concentrations downstream, which can affect downstream aquatic communi
+Fact-check claim repair: C7 rewritten for scene 7.
+Fact-check source temporarily unavailable (SSLError); retrying once in 3s.
+AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_source_recovery...
+AI router: groq/openai/gpt-oss-120b returned a valid fact response.
+Fact-check source temporarily unavailable (ConnectionError); retrying once in 3s.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_audit...
+Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
+Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
+Gemini model gemini-2.5-flash answered HTTP 404; trying gemini-2.0-flash.
+AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.0-flash is no longer available. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.com/docs/get-s
+AI router: trying groq / openai/gpt-oss-120b for fact/fact_check_audit...
+AI router: groq/openai/gpt-oss-120b returned a valid fact response.
+Fact-check blocked sentence: Beavers engineer wetlands, turning fast streams into tranquil ponds that spark cascading ecological change, and creating habitats for countless species today.
+Fact-check source diagnostic: usable | https://www.who.int/news-room/fact-sheets/detail/biodiversity | Biodiversity
+Fact-check source diagnostic: not_usable | https://www.iucnredlist.org/resources/summary-statistics | Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again.
+Fact-check source diagnostic: usable | https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru | The State of the World’s Forests 2020: Forests, biodiversity and people [EN/AR/RU] - World | ReliefWeb UN OCHA
+Fact-check source diagnostic: not_usable | https://www.britannica.com/science/biodiversity-loss | Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again.
+Fact-check source diagnostic: usable | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560 | Mitochondrial Genomes Reveal Slow Rates of Molecular Evolution and the Timing of Speciation in Beavers (Castor), One of the Largest Rodent Species - PMC Mitochondrial Genomes Reveal Slow Rates of Molecular Evolution and the Timing of Specia
+Fact-check source diagnostic: usable | https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383 | A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock
+Fact-check source diagnostic: usable | https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165 | ITIS - Report: Castor fiber
+Fact-check source diagnostic: usable | https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212 | ITIS - Report: Castor canadensis
+[stage] fact_check: FAILED after 114.1s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 680, in gemini_plan
-    plan, provider, model = generate_json(
-                            ^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1239, in generate_json
-    return _route("text", prompt, validator=validator, stage=stage)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1223, in _route
-    raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 693, in gemini_plan
-    plan, provider, model = staged_plan(topic, source_pool, validate_plan)
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 492, in staged_plan
-    outline, provider, model = generate_json(
-                               ^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1239, in generate_json
-    return _route("text", prompt, validator=validator, stage=stage)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1223, in _route
-    raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3747, in _run_pipeline
+    fact_report = verify_documentary_facts(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1505, in verify_documentary_facts
+    raise FactCheckError(str(exc), report=report) from None
+fact_check.FactCheckError: Narration did not pass evidence validation. C1=insufficient: The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation.; C2=insufficient: The excerpt focuses on beaver phylogenetic lineage and exploitation history, not on dam effects on groundwater or floodplain soils.; C3=insufficient: The excerpt describes fossil beaver sites and paleo‑ecology, without any data on modern pond depth, thermal refuges, or fish survival.; C4=insufficient: The excerpt is about mitochondrial genomes and specimen collection, not about sediment trapping, water clarity, or nutrient delivery.; C5=insufficient: Both sources discuss biodiversity in broad human‑health or forest‑management contexts; they do not provide evidence that beaver activity raises biodiversity of amphibians, waterfowl, or mammals.; C6=insufficient: The excerpt again deals with beaver mitochondrial genetics, not with carbon storage in pond sediments.; C7=insufficient: The excerpt mentions rodent diversification and does not address water chemistry or nitrogen changes caused by beaver dams.; C8=insufficient: Both sources provide taxonomic information on beaver species; they contain no statements about beavers reshaping rivers or ecosystem services.
 
 The above exception was the direct cause of the following exception:
 
@@ -84,9 +101,6 @@ Traceback (most recent call last):
     main()
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3990, in main
     _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3736, in _run_pipeline
-    plan = gemini_plan(TOPIC, source_pool)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 695, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3776, in _run_pipeline
     raise RuntimeError(
-RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503 | staged fallback: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 503; groq/llama-3.3-70b-versatile: HTTP 404; openrouter/meta-llama/llama-3.3-70b-instruct:free: HTTP 404; openrouter/qwen/qwen-2.5-72b-instruct:free: HTTP 404; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503; gemini/gemini-3.5-flash-lite: HTTP 503
+RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C1=insufficient: The excerpt discusses rodent phylogeny and diversification, with no mention of beaver engineering of wetlands or habitat creation.; C2=insufficient: The excerpt focuses on beaver phylogenetic lineage and exploitation history, not on dam effects on groundwater or floodplain soils.; C3=insufficient: The excerpt describes fossil beaver sites and paleo‑ecology, without any data on modern pond depth, thermal refuges, or fish survival.; C4=insufficient: The excerpt is about mitochondrial genomes and specimen collection, not about sediment trapping, water clarity, or nutrient delivery.; C5=insufficient: Both sources discuss biodiversity in broad human‑health or forest‑management contexts; they do not provide evidence that beaver activity raises biodiversity of amphibians, waterfowl, or mammals.; C6=insufficient: The excerpt again deals with beaver mitochondrial genetics, not with carbon storage in pond sediments.; C7=insufficient: The excerpt mentions rodent diversification and does not address water chemistry or nitrogen changes caused by beaver dams.; C8=insufficient: Both sources provide taxonomic information on beaver species; they contain no statements about beavers reshaping rivers or ecosystem services.
