@@ -352,6 +352,51 @@ class ClaimRepairTests(unittest.TestCase):
                     with self.assertRaisesRegex(FactCheckError, "without narration"):
                         verify_documentary_facts(plan, passing_checker(), repair_claim=repair)
 
+    def test_quantitative_c2_claim_is_repaired_instead_of_blocking_the_run(self):
+        # Regression for the C2 failure: a numeric claim whose only relevant
+        # passage came from one organisation was blocked before the bounded
+        # repair mechanism could rewrite it, so no voice-over or video ran.
+        quantitative = "The basin lost 17 percent of its forest cover in the study period."
+        plan = build_plan({2: quantitative})
+        pages = pages_for_plan(plan)
+        replacement = (
+            "The Amazon basin lost extensive forest cover across the study region "
+            "during the measurement period."
+        )
+        repairs = []
+
+        def repair(claim, context, _plan):
+            repairs.append((claim["id"], dict(context["report"])))
+            return {
+                "sentence": replacement,
+                "source_urls": ["https://www.nasa.gov/scene-2"],
+            }
+
+        with patch.object(fact_check, "fetch_source_page", side_effect=lambda url: pages[url]):
+            with patch.object(
+                fact_check,
+                "_recover_independent_source_urls",
+                return_value=([], "", ""),
+            ):
+                with patch.object(fact_check, "discover_trusted_source_urls", return_value=[]):
+                    with patch.object(fact_check, "discover_scholarly_source_urls", return_value=[]):
+                        report = verify_documentary_facts(
+                            plan, passing_checker(), repair_claim=repair
+                        )
+
+        self.assertEqual(report["status"], "passed")
+        self.assertEqual(repairs[0][0], "C2")
+        self.assertEqual(
+            repairs[0][1]["failure_reason"],
+            "quantitative claim lacked a second independent organisation",
+        )
+        self.assertEqual(len(report["claim_repairs"]), 1)
+        self.assertEqual(report["claim_repairs"][0]["claim_id"], "C2")
+        self.assertEqual(report["claim_repairs"][0]["status"], "rewritten")
+        self.assertEqual(plan["scenes"][1]["narration"], replacement)
+        self.assertEqual(plan["fact_claims"][1]["sentence"], replacement)
+        self.assertNotIn("17 percent", plan["script"])
+
     def test_repair_never_accepts_an_invented_source(self):
         plan = build_plan()
         pages = pages_for_plan(
