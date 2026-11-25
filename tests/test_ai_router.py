@@ -106,6 +106,26 @@ class AIRouterTests(unittest.TestCase):
         self.assertNotIn("openai/gpt-oss-120b", models)
         self.assertIn("baidu/ernie-5.5-flash-preview:free", models)
 
+    def test_gemini_overloaded_model_falls_back_to_the_next_free_model(self):
+        overloaded = FakeResponse(503, {"error": {"message": "high demand"}})
+        valid = FakeResponse(200, {
+            "candidates": [{"content": {"parts": [{"text": json.dumps({"ready": True})}]}}]
+        })
+        with patch.dict(os.environ, {
+            "AI_TEXT_PROVIDER_ORDER": "gemini",
+            "GEMINI_API_KEY": "test-gemini-key",
+            "GEMINI_MODEL": "gemini-3.5-flash-lite",
+            "GEMINI_MODEL_FALLBACKS": "gemini-3.8-flash,gemini-2.5-flash",
+        }, clear=True), patch(
+            "ai_router.requests.post", side_effect=[overloaded, valid]
+        ) as post:
+            value, provider, _model = ai_router.generate_json("Return JSON")
+
+        self.assertEqual(value, {"ready": True})
+        self.assertEqual(provider, "gemini")
+        self.assertIn("gemini-3.5-flash-lite", post.call_args_list[0].args[0])
+        self.assertIn("gemini-3.8-flash", post.call_args_list[1].args[0])
+
     def test_gemini_retired_model_falls_back_to_the_next_free_model(self):
         missing = FakeResponse(404, {"error": {"message": "models/gemini-3.8-flash is not found"}})
         valid = FakeResponse(200, {
@@ -201,6 +221,9 @@ class AIRouterTests(unittest.TestCase):
             "DEEPSEEK_API_KEY": "test-deepseek",
             "AI_ALLOW_PAID_PROVIDERS": "true",
             "GEMINI_API_KEY": "test-gemini",
+            # One Gemini model per route keeps this case about provider
+            # failover; model-level failover has its own test.
+            "GEMINI_MODEL_FALLBACKS": "",
             "OPENROUTER_API_KEY": "test-openrouter",
         }, clear=True), patch(
             "ai_router.requests.post",
@@ -455,6 +478,7 @@ class AIRouterTests(unittest.TestCase):
         with patch.dict(os.environ, {
             "AI_TEXT_PROVIDER_ORDER": "gemini",
             "GEMINI_API_KEY": "test-gemini",
+            "GEMINI_MODEL_FALLBACKS": "",
         }, clear=True), patch(
             "ai_router.requests.post",
             side_effect=[first, ai_router.requests.exceptions.Timeout("read timeout")],
@@ -479,6 +503,7 @@ class AIRouterTests(unittest.TestCase):
             "GEMINI_API_KEY": "test-gemini-key",
             "GEMINI_MODEL": "gemini-3.8-flash",
             "GEMINI_VISION_MODEL": "gemini-3.8-flash",
+            "GEMINI_MODEL_FALLBACKS": "",
         }, clear=True), patch(
             "ai_router.requests.post",
             side_effect=[temporary, temporary, vision_response],

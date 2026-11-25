@@ -231,6 +231,7 @@ class ProviderStabilityTests(unittest.TestCase):
         with patch.dict(os.environ, {
             "AI_TEXT_PROVIDER_ORDER": "gemini",
             "GEMINI_API_KEY": "test-gemini",
+            "GEMINI_MODEL_FALLBACKS": "",
             "AI_ROUTER_MAX_PASSES": "2",
         }, clear=True), patch(
             "ai_router.requests.post",

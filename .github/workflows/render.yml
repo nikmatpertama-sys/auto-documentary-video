@@ -157,10 +157,7 @@ jobs:
           AI_TEXT_PROVIDER_ORDER: gemini,groq,openrouter
           AI_FACT_PROVIDER_ORDER: gemini,groq,openrouter
           AI_VISION_PROVIDER_ORDER: gemini,groq,openrouter
-          # A reasoning text model spends the free-tier completion budget on
-          # hidden thinking and hands back truncated JSON. The instruct model
-          # below answers the planner's structured request within the budget.
-          GROQ_MODEL: llama-3.3-70b-versatile
+          GROQ_MODEL: openai/gpt-oss-120b
           GROQ_VISION_MODEL: qwen/qwen3.8-27b
           DEEPSEEK_MODEL: deepseek-flash
           # 3.8 Flash was answering 503 (high demand) on the free tier, while
@@ -182,11 +179,8 @@ jobs:
           AI_RETRY_BASE_SECONDS: "5"
           AI_RETRY_MAX_SECONDS: "60"
           AI_ROUTER_WAIT_BUDGET_SECONDS: "1500"
-          # The dynamic free router picks reasoning models that return empty
-          # content with finish_reason=length. Pin structured-output instruct
-          # models instead (both are free slugs).
-          OPENROUTER_MODEL: meta-llama/llama-3.3-70b-instruct:free
-          OPENROUTER_TEXT_FALLBACK_MODEL: qwen/qwen-2.5-72b-instruct:free
+          OPENROUTER_MODEL: openrouter/free
+          OPENROUTER_TEXT_FALLBACK_MODEL: baidu/ernie-5.5-flash-preview:free
           OPENROUTER_VISION_MODEL: nvidia/nemotron-3.5-super-vl:free
           OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free
           FOOTAGE_VISION_REQUIRED: "true"

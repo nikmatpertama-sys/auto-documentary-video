@@ -812,10 +812,13 @@ def _gemini_request(
     timeout = (12, 50 if task == "vision" else 120)
 
     # Gemini model IDs change between releases. A model name that this key no
-    # longer serves answers 404, which used to end the whole run. Try the next
-    # configured free model instead, and remember the one that worked.
+    # longer serves answers 404, which used to end the whole run. A single free
+    # model can also answer 503 for minutes while the others stay healthy, so
+    # any "this model cannot serve right now" status advances to the next
+    # configured free model instead of spending a whole pass on it.
     models = _gemini_model_candidates(_GEMINI_WORKING_MODEL.get(task) or route.model)
     response = None
+    unavailable_statuses = {404, 429, 500, 502, 503, 504}
     for index, model in enumerate(models):
         endpoint = (
             "https://generativelanguage.googleapis.com/v1beta/models/"
@@ -824,12 +827,13 @@ def _gemini_request(
         response = requests.post(
             endpoint, headers=headers, json=payload, timeout=timeout
         )
-        if response.status_code != 404 or index == len(models) - 1:
-            if response.status_code < 400:
-                _GEMINI_WORKING_MODEL[task] = model
+        if response.status_code < 400:
+            _GEMINI_WORKING_MODEL[task] = model
+            break
+        if response.status_code not in unavailable_statuses or index == len(models) - 1:
             break
         print(
-            f"Gemini model {model} is not available for this key; "
+            f"Gemini model {model} answered HTTP {response.status_code}; "
             f"trying {models[index + 1]}."
         )
 
