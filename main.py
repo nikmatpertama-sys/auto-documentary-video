@@ -12,6 +12,7 @@ import subprocess
 import textwrap
 import sys
 import traceback
+import html
 from pathlib import Path
 from urllib.parse import quote, urlparse
 from datetime import datetime, timezone
@@ -20,19 +21,167 @@ from email.utils import parsedate_to_datetime
 import requests
 import edge_tts
 
+from quota_router import QuotaAwareRouter
+
 # ============================================================
 # CONFIG
 # ============================================================
 OUT = Path("output")
 FOOT = OUT / "footage"
 CACHE = Path(".api-cache")
+QUOTA_ROUTER = QuotaAwareRouter(probe_ttl_seconds=60, timeout=10)
 
 for folder in (OUT, FOOT, CACHE):
     folder.mkdir(parents=True, exist_ok=True)
 
-GROQ_KEY = os.getenv("GROQ_API_KEY", "").strip()
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
-GEMINI_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+def _collect_env_values(*base_names):
+    """Read one or more numbered API-key secrets without exposing their values."""
+    values = []
+    seen = set()
+    for base in base_names:
+        candidates = []
+        if os.getenv(base, "").strip():
+            candidates.append((0, base))
+        pattern = re.compile(r"^" + re.escape(base) + r"(?:_?(\d+))$", re.I)
+        numbered = []
+        for env_name, env_value in os.environ.items():
+            match = pattern.match(env_name)
+            if match and str(env_value or "").strip():
+                numbered.append((int(match.group(1)), env_name))
+        candidates.extend(sorted(numbered, key=lambda item: (item[0], item[1])))
+        for _, env_name in candidates:
+            value = os.getenv(env_name, "").strip()
+            if value and value not in seen:
+                seen.add(value)
+                values.append(value)
+    return values
+
+
+def _collect_cloudflare_credentials():
+    """Pair every configured Cloudflare token with its matching account ID."""
+    credentials = []
+    seen = set()
+    suffixes = [""]
+    for number in range(1, 21):
+        suffixes.extend((str(number), f"_{number}"))
+    pairs = []
+    for suffix in suffixes:
+        pairs.append((f"CLOUDFLARE_API_TOKEN{suffix}", f"CLOUDFLARE_ACCOUNT_ID{suffix}"))
+    # Explicit aliases supplied for this project.
+    for number in range(1, 21):
+        pairs.append((f"CF_API_TK{number}", f"CF_ID{number}"))
+    # Additional common aliases, while retaining explicit user-provided names.
+    pairs.extend([
+        ("CF_API_TOKEN", "CF_ACCOUNT_ID"),
+        ("CLOUDFLARE_TOKEN", "CLOUDFLARE_ACCOUNT_ID"),
+    ])
+    for token_name, account_name in pairs:
+        token = os.getenv(token_name, "").strip()
+        account_id = os.getenv(account_name, "").strip()
+        if not token or not account_id:
+            continue
+        fingerprint = hashlib.sha256((token + ":" + account_id).encode()).hexdigest()
+        if fingerprint in seen:
+            continue
+        seen.add(fingerprint)
+        credentials.append({"token": token, "account_id": account_id, "label": token_name})
+    return credentials
+
+
+def _quota_credential_id(provider, secret):
+    """Opaque credential identifier; never logs or persists the secret itself."""
+    return f"{str(provider).lower()}::{QuotaAwareRouter.fingerprint(secret)}"
+
+
+def _quota_scope(provider, api_key=None, account_id=None):
+    """Return the real or conservative shared quota pool for a provider."""
+    name = str(provider).lower()
+    if name == "groq":
+        # Groq limits are organization-scoped. Optional numbered group IDs let
+        # operators separate keys only when they know the keys belong to distinct orgs.
+        key_index = next((i for i, value in enumerate(GROQ_KEYS, 1) if value == api_key), None)
+        numbered = os.getenv(f"GROQ_QUOTA_GROUP_{key_index}", "").strip() if key_index else ""
+        group = numbered or os.getenv("GROQ_QUOTA_GROUP", "shared-organization").strip()
+        return f"Groq::{QuotaAwareRouter.fingerprint(group)}"
+    if name == "openrouter":
+        # Finite spending caps belong to each OpenRouter key.
+        return f"OpenRouterKey::{QuotaAwareRouter.fingerprint(api_key)}"
+    if name == "gemini":
+        # Gemini quotas are project-scoped, not key-scoped. Numbered project IDs
+        # are optional for keys deliberately created in different Google projects.
+        key_index = next((i for i, value in enumerate(GEMINI_KEYS, 1) if value == api_key), None)
+        numbered = os.getenv(f"GEMINI_PROJECT_ID_{key_index}", "").strip() if key_index else ""
+        project = numbered or os.getenv("GEMINI_PROJECT_ID", "").strip() or "unknown-shared-project"
+        return f"Gemini::{QuotaAwareRouter.fingerprint(project)}"
+    if name == "cloudflare":
+        # Workers AI usage/rate limits are tied to the Cloudflare account.
+        return f"Cloudflare::{QuotaAwareRouter.fingerprint(account_id or 'unknown-account')}"
+    if name == "speechify":
+        # Speechify request-rate/concurrency budgets are per account.
+        group = os.getenv("SPEECHIFY_QUOTA_GROUP", "shared-account").strip()
+        return f"Speechify::{QuotaAwareRouter.fingerprint(group)}"
+    return f"{name}::shared"
+
+
+def _openrouter_account_scope(api_key):
+    """Group OpenRouter keys that share one account-level free-model budget."""
+    key_index = next((i for i, value in enumerate(OPENROUTER_KEYS, 1) if value == api_key), None)
+    numbered = os.getenv(f"OPENROUTER_QUOTA_GROUP_{key_index}", "").strip() if key_index else ""
+    group = numbered or os.getenv("OPENROUTER_QUOTA_GROUP", "shared-account").strip()
+    return f"OpenRouterAccount::{QuotaAwareRouter.fingerprint(group)}"
+
+
+def _openrouter_model_scope(model):
+    return f"OpenRouterModel::{QuotaAwareRouter.fingerprint(model)}" if model else ""
+
+
+def _is_openrouter_free_model(model):
+    value = str(model or "").strip().lower()
+    return value == "openrouter/free" or value.endswith(":free")
+
+
+def _observe_provider_response(provider, response, api_key=None, account_id=None, model=None):
+    scope = _quota_scope(provider, api_key=api_key, account_id=account_id)
+    credential_id = _quota_credential_id(provider, api_key or account_id or provider)
+    shared_scope = _openrouter_account_scope(api_key) if str(provider).lower() == "openrouter" else None
+    model_scope = _openrouter_model_scope(model) if str(provider).lower() == "openrouter" else None
+    QUOTA_ROUTER.observe_response(
+        provider, scope, response, credential_id,
+        shared_scope=shared_scope, model_scope=model_scope,
+    )
+    return scope, credential_id
+
+
+def _quota_route(provider, name, api_key, callback, account_id=None, route_id=None, model=None):
+    scope = _quota_scope(provider, api_key=api_key, account_id=account_id)
+    credential_id = _quota_credential_id(provider, api_key or account_id or name)
+    route = {
+        "id": route_id or f"{str(provider).lower()}::{QuotaAwareRouter.fingerprint(api_key or account_id or name)}",
+        "name": name,
+        "provider": provider,
+        "scope": scope,
+        "credential_id": credential_id,
+        "run": callback,
+    }
+    if str(provider).lower() == "openrouter":
+        route["probe_key"] = api_key
+        route["shared_scope"] = _openrouter_account_scope(api_key)
+        route["model"] = str(model or OPENROUTER_MODEL)
+        route["model_scope"] = _openrouter_model_scope(route["model"])
+        route["uses_free_model"] = _is_openrouter_free_model(route["model"])
+    return route
+
+
+GROQ_KEYS = _collect_env_values("GROQ_API_KEY")
+OPENROUTER_KEYS = _collect_env_values("OPENROUTER_API_KEY")
+GEMINI_KEYS = _collect_env_values("GEMINI_API_KEY", "GOOGLE_API_KEY")
+SPEECHIFY_KEYS = _collect_env_values("SPVO_API", "SPEECHIFY_API_KEY")
+CLOUDFLARE_CREDENTIALS = _collect_cloudflare_credentials()
+
+# Backwards-compatible first-key aliases used by older helper code.
+GROQ_KEY = GROQ_KEYS[0] if GROQ_KEYS else ""
+OPENROUTER_KEY = OPENROUTER_KEYS[0] if OPENROUTER_KEYS else ""
+GEMINI_KEY = GEMINI_KEYS[0] if GEMINI_KEYS else ""
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
 PEXELS_KEY = os.getenv("PEXELS_API_KEY", "").strip()
 TOPIC = os.getenv("INPUT_TOPIC", "").strip()
@@ -44,9 +193,19 @@ OPENROUTER_MODEL = os.getenv(
     "OPENROUTER_MODEL", "openrouter/free"
 ).strip()
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
-VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural").strip()
+CLOUDFLARE_CHAT_MODEL = os.getenv(
+    "CLOUDFLARE_CHAT_MODEL", "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+).strip()
+CLOUDFLARE_VISION_MODEL = os.getenv(
+    "CLOUDFLARE_VISION_MODEL", "@cf/meta/llama-3.2-11b-vision-instruct"
+).strip()
+SPEECHIFY_MODEL = os.getenv("SPEECHIFY_MODEL", "simba-3.5").strip() or "simba-3.5"
+SPEECHIFY_VOICE_ID = os.getenv("SPEECHIFY_VOICE_ID", "").strip()
+VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural").strip()  # Edge TTS fallback only
 BASE_RATE = os.getenv("TTS_RATE", "-4%").strip()
 BASE_PITCH = os.getenv("TTS_PITCH", "-3Hz").strip()
+MIN_VIDEO_DURATION = 70.0
+MAX_VIDEO_DURATION = None  # Intentionally unlimited; final duration follows the complete VO.
 
 W, H, FPS = 1080, 1920, 30
 TARGET_SOURCE_ASPECT = 9 / 16
@@ -75,6 +234,8 @@ VISION_CANDIDATE_LIMIT = max(
     1, min(30, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "26")))
 )
 
+# Version 10.15: quota-aware provider routing using live quota telemetry and shared account/project scopes.
+# Version 10.14: provider key rotation, Cloudflare fallback, Speechify VO, 70s+ duration, 120-200 words.
 # Version 10.13: preserve hook/subtitle readability and reject non-native 9:16 footage.
 # Version 10.12: recover from Wikimedia download throttling and search sparse tiers better.
 # Internet Archive receives the largest candidate budget; the other sources
@@ -542,6 +703,7 @@ def call_openai_compatible(provider, api_key, model, prompt):
         json=payload,
         timeout=(20, 180),
     )
+    _observe_provider_response(provider, response, api_key=api_key, model=model)
 
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
@@ -551,6 +713,8 @@ def call_openai_compatible(provider, api_key, model, prompt):
         )
 
     data = response.json()
+    if provider == "OpenRouter":
+        QUOTA_ROUTER.invalidate_probe(_quota_credential_id(provider, api_key))
 
     try:
         return extract_json_object(
@@ -590,6 +754,7 @@ def call_gemini(api_key, model, prompt):
         json=payload,
         timeout=(20, 180),
     )
+    _observe_provider_response("Gemini", response, api_key=api_key)
 
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
@@ -612,154 +777,147 @@ def call_gemini(api_key, model, prompt):
         ) from exc
 
 
-def gemini_plan(topic):
-    """Generate the plan with automatic provider failover."""
-    prompt = documentary_prompt(topic)
-
-    providers = []
-
-    if GROQ_KEY:
-        providers.append((
-            "Groq",
-            lambda: call_openai_compatible(
-                "Groq",
-                GROQ_KEY,
-                GROQ_MODEL,
-                prompt
-            ),
-        ))
-
-    if OPENROUTER_KEY:
-        providers.append((
-            "OpenRouter",
-            lambda: call_openai_compatible(
-                "OpenRouter",
-                OPENROUTER_KEY,
-                OPENROUTER_MODEL,
-                prompt
-            ),
-        ))
-
-    if GEMINI_KEY:
-        providers.append((
-            "Gemini",
-            lambda: call_gemini(
-                GEMINI_KEY,
-                MODEL,
-                prompt
-            ),
-        ))
-
-    if not providers:
+def call_cloudflare_chat(api_token, account_id, model, prompt):
+    """Use Cloudflare Workers AI's OpenAI-compatible chat endpoint."""
+    url = (
+        "https://api.cloudflare.com/client/v4/accounts/"
+        f"{account_id}/ai/v1/chat/completions"
+    )
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are an expert documentary writer and visual producer. "
+                    "Follow the requested schema exactly. Return only one valid JSON object."
+                ),
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.35,
+        "max_tokens": 6000,
+    }
+    response = post_with_transient_retry(
+        url,
+        retries=1,
+        headers=headers,
+        json=payload,
+        timeout=(20, 180),
+    )
+    _observe_provider_response("Cloudflare", response, account_id=account_id)
+    if response.status_code >= 400:
         raise RuntimeError(
-            "No AI provider API key found. Add at least one GitHub "
-            "Secret: GROQ_API_KEY, OPENROUTER_API_KEY, or GEMINI_API_KEY."
+            f"Cloudflare AI HTTP {response.status_code}: "
+            f"{response.text[:700].replace(chr(10), ' ')}"
+        )
+    try:
+        data = response.json()
+        return extract_json_object(data["choices"][0]["message"]["content"])
+    except Exception as exc:
+        raise RuntimeError(
+            f"Cloudflare AI returned an unreadable response: {exc}; "
+            f"body={response.text[:700]}"
+        ) from exc
+
+
+def gemini_plan(topic):
+    """Generate the documentary plan through live quota-aware provider ranking."""
+    prompt = documentary_prompt(topic)
+    routes = []
+
+    for key_index, api_key in enumerate(GROQ_KEYS, 1):
+        routes.append(_quota_route(
+            "Groq", f"Groq key {key_index}", api_key,
+            lambda api_key=api_key: call_openai_compatible("Groq", api_key, GROQ_MODEL, prompt),
+        ))
+
+    for key_index, api_key in enumerate(OPENROUTER_KEYS, 1):
+        routes.append(_quota_route(
+            "OpenRouter", f"OpenRouter key {key_index}", api_key,
+            lambda api_key=api_key: call_openai_compatible("OpenRouter", api_key, OPENROUTER_MODEL, prompt),
+            model=OPENROUTER_MODEL,
+        ))
+
+    for key_index, api_key in enumerate(GEMINI_KEYS, 1):
+        routes.append(_quota_route(
+            "Gemini", f"Gemini key {key_index}", api_key,
+            lambda api_key=api_key: call_gemini(api_key, MODEL, prompt),
+            route_id=f"Gemini::{QuotaAwareRouter.fingerprint(api_key)}",
+        ))
+
+    for key_index, credentials in enumerate(CLOUDFLARE_CREDENTIALS, 1):
+        routes.append(_quota_route(
+            "Cloudflare", f"Cloudflare AI key pair {key_index}", credentials["token"],
+            lambda credentials=credentials: call_cloudflare_chat(
+                credentials["token"], credentials["account_id"], CLOUDFLARE_CHAT_MODEL, prompt
+            ),
+            account_id=credentials["account_id"],
+        ))
+
+    if not routes:
+        raise RuntimeError(
+            "No AI provider API key found. Configure at least one Groq, "
+            "OpenRouter, Gemini, or Cloudflare AI token/account pair."
         )
 
     errors = []
     plan = None
+    pending = list(routes)
 
-    for index, (provider_name, generate) in enumerate(providers, 1):
-        print(
-            f"Trying AI provider {index}/{len(providers)}: "
-            f"{provider_name}..."
-        )
+    while pending:
+        ranked = QUOTA_ROUTER.rank_routes(pending)
+        if not ranked:
+            break
+        route = ranked[0]
+        pending.remove(route)
+        QUOTA_ROUTER.mark_selected(route)
+        provider_name = route["name"]
+        print(f"Quota-aware selection: {provider_name} (best currently known capacity).")
 
         try:
-            candidate = generate()
-
+            candidate = route["run"]()
             candidate["scenes"] = candidate.get("scenes", [])
-
-            if (
-                not isinstance(candidate["scenes"], list)
-                or len(candidate["scenes"]) != 8
-            ):
-                raise RuntimeError(
-                    "AI returned an incomplete plan. "
-                    "Expected exactly 8 scenes."
-                )
+            if not isinstance(candidate["scenes"], list) or len(candidate["scenes"]) != 8:
+                raise RuntimeError("AI returned an incomplete plan. Expected exactly 8 scenes.")
 
             scene_narrations = []
-
-            for scene_index, scene in enumerate(
-                candidate["scenes"],
-                1
-            ):
+            for scene_index, scene in enumerate(candidate["scenes"], 1):
                 if not isinstance(scene, dict):
-                    raise RuntimeError(
-                        f"Scene {scene_index} is not a JSON object."
-                    )
-
-                narration = re.sub(
-                    r"\s+",
-                    " ",
-                    str(scene.get("narration", ""))
-                ).strip()
-
+                    raise RuntimeError(f"Scene {scene_index} is not a JSON object.")
+                narration = re.sub(r"\s+", " ", str(scene.get("narration", ""))).strip()
                 if not narration:
-                    raise RuntimeError(
-                        f"Scene {scene_index} has empty narration."
-                    )
-
+                    raise RuntimeError(f"Scene {scene_index} has empty narration.")
                 scene["narration"] = narration
                 scene_narrations.append(narration)
 
-            candidate["script"] = " ".join(
-                scene_narrations
-            ).strip()
-
-            word_count = len(
-                candidate["script"].split()
-            )
-
-            if not 100 <= word_count <= 190:
-                raise RuntimeError(
-                    f"Scene narration totals {word_count} words; "
-                    "expected 100-190."
-                )
+            candidate["script"] = " ".join(scene_narrations).strip()
+            word_count = len(candidate["script"].split())
+            if not 120 <= word_count <= 200:
+                raise RuntimeError(f"Scene narration totals {word_count} words; expected 120-200.")
 
             candidate["scenes"][0]["visual_type"] = "footage"
-
             assign_scene_sentence_ranges(candidate)
-
             plan = candidate
-
-            print(
-                f"Documentary plan generated successfully by {provider_name}."
-            )
+            print(f"Documentary plan generated successfully by {provider_name}.")
             break
-
         except Exception as exc:
-            message = f"{provider_name}: {exc}"
-            errors.append(message)
-
-            print(message)
-
-            if index < len(providers):
-                print(
-                    "Switching automatically to the next AI provider..."
-                )
+            errors.append(f"{provider_name}: {exc}")
+            print(errors[-1])
+            if pending:
+                print("Rechecking provider availability and ranking the remaining routes...")
 
     if plan is None:
-        raise RuntimeError(
-            "All configured AI providers failed:\n- "
-            + "\n- ".join(errors)
-        )
+        if not errors:
+            errors.append("All routes are exhausted, cooling down, or unauthorized.")
+        raise RuntimeError("All configured AI providers failed:\n- " + "\n- ".join(errors))
 
-    Path("plan.json").write_text(
-        json.dumps(
-            plan,
-            indent=2,
-            ensure_ascii=False
-        ),
-        encoding="utf-8"
-    )
-
-    print(
-        f"Script ready: {len(plan['script'].split())} words, "
-        f"{len(plan['scenes'])} scenes."
-    )
-
+    Path("plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"Script ready: {len(plan['script'].split())} words, {len(plan['scenes'])} scenes.")
     return plan
 
 
@@ -2435,7 +2593,7 @@ def _parse_visual_verdict(provider, raw_text):
     return relevant_value, confidence, reason
 
 
-def _verify_with_gemini(frames, prompt):
+def _verify_with_gemini(frames, prompt, api_key=None):
     parts = [{"text": prompt}]
 
     for frame in frames[:2]:
@@ -2462,13 +2620,15 @@ def _verify_with_gemini(frames, prompt):
         },
     }
 
+    effective_key = api_key or GEMINI_KEY
     response = post_with_transient_retry(
         url,
-        retries=0,
-        params={"key": GEMINI_KEY},
+        retries=1,
+        params={"key": effective_key},
         json=payload,
         timeout=(15, 55),
     )
+    _observe_provider_response("Gemini", response, api_key=effective_key)
 
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
@@ -2498,6 +2658,72 @@ def _verify_with_gemini(frames, prompt):
         "Gemini",
         raw_text
     )
+
+
+def _verify_with_cloudflare_vision(credentials, frames, prompt):
+    """Verify a representative frame with Cloudflare Llama 3.2 Vision."""
+    if not frames:
+        raise VisionResponseError("Cloudflare Vision received no image frames.")
+    frame = frames[len(frames) // 2]
+    encoded = base64.b64encode(frame).decode("ascii")
+    url = (
+        "https://api.cloudflare.com/client/v4/accounts/"
+        f"{credentials['account_id']}/ai/run/{CLOUDFLARE_VISION_MODEL}"
+    )
+    payload = {
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are a strict documentary footage reviewer. "
+                    "Return exactly one JSON object with relevant, confidence, and reason."
+                ),
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "image": f"data:image/jpeg;base64,{encoded}",
+        "max_tokens": 512,
+        "temperature": 0.1,
+    }
+    response = post_with_transient_retry(
+        url,
+        retries=1,
+        headers={
+            "Authorization": f"Bearer {credentials['token']}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
+        timeout=(20, 75),
+    )
+    _observe_provider_response("Cloudflare", response, account_id=credentials["account_id"])
+    if response.status_code >= 400:
+        raise VisionProviderError(
+            "Cloudflare Vision",
+            response.status_code,
+            response.text[:700].replace("\n", " "),
+        )
+    try:
+        data = response.json()
+        result = data.get("result", data)
+        if isinstance(result, str):
+            raw_text = result
+        elif isinstance(result, dict):
+            raw_text = (
+                result.get("response")
+                or result.get("output")
+                or result.get("text")
+                or ""
+            )
+        else:
+            raw_text = ""
+        if not raw_text:
+            raise ValueError("Cloudflare Vision response did not contain result.response.")
+    except Exception as exc:
+        raise VisionResponseError(
+            f"Cloudflare Vision returned an unreadable payload: {exc}; "
+            f"body={response.text[:500]}"
+        ) from exc
+    return _parse_visual_verdict("Cloudflare Vision", raw_text)
 
 
 def _verify_with_openai_compatible_vision(
@@ -2589,6 +2815,7 @@ def _verify_with_openai_compatible_vision(
         json=payload,
         timeout=(15, 65),
     )
+    _observe_provider_response(provider, response, api_key=api_key, model=model)
 
     if response.status_code >= 400:
         detail = response.text[:700].replace("\n", " ")
@@ -2743,104 +2970,81 @@ Set relevant=true only when the visual composition genuinely matches the SCENE P
 
     providers = []
 
-    if GROQ_KEY:
-        # Groq Qwen vision uses 2048 input tokens per image. One representative
-        # middle frame reduces TPM use while preserving the principal scene.
-        groq_frames = [
-            frames[len(frames) // 2]
-        ]
-
-        providers.append((
-            "Groq",
-            "Groq",
-            lambda: _verify_with_openai_compatible_vision(
-                "Groq",
-                GROQ_KEY,
-                GROQ_VISION_MODEL,
-                groq_frames,
-                prompt
-            ),
-        ))
-
-    if OPENROUTER_KEY:
-        models = []
-
-        for model_name in (
-            OPENROUTER_VISION_MODEL,
-            OPENROUTER_VISION_FALLBACK_MODEL,
-        ):
-            if (
-                model_name
-                and model_name not in models
-            ):
-                models.append(model_name)
-
-        openrouter_frames = (
-            [frames[0], frames[-1]]
-            if len(frames) > 1
-            else frames
-        )
-
-        for model_name in models:
-            route_id = f"OpenRouter::{model_name}"
-
-            providers.append((
-                route_id,
-                f"OpenRouter ({model_name})",
-                lambda model_name=model_name: (
-                    _verify_with_openai_compatible_vision(
-                        "OpenRouter",
-                        OPENROUTER_KEY,
-                        model_name,
-                        openrouter_frames,
-                        prompt
-                    )
+    if GROQ_KEYS:
+        groq_frames = [frames[len(frames) // 2]]
+        for key_index, api_key in enumerate(GROQ_KEYS, 1):
+            key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:10]
+            providers.append(_quota_route(
+                "Groq", f"Groq key {key_index} ({GROQ_VISION_MODEL})", api_key,
+                lambda api_key=api_key: _verify_with_openai_compatible_vision(
+                    "Groq", api_key, GROQ_VISION_MODEL, groq_frames, prompt
                 ),
+                route_id=f"Groq::{key_hash}",
             ))
 
-    if GEMINI_KEY:
-        gemini_frames = (
-            [frames[0], frames[-1]]
-            if len(frames) > 1
-            else frames
-        )
+    if OPENROUTER_KEYS:
+        models = []
+        for model_name in (OPENROUTER_VISION_MODEL, OPENROUTER_VISION_FALLBACK_MODEL):
+            if model_name and model_name not in models:
+                models.append(model_name)
+        openrouter_frames = [frames[0], frames[-1]] if len(frames) > 1 else frames
+        for key_index, api_key in enumerate(OPENROUTER_KEYS, 1):
+            key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:10]
+            for model_name in models:
+                providers.append(_quota_route(
+                    "OpenRouter", f"OpenRouter key {key_index} ({model_name})", api_key,
+                    lambda api_key=api_key, model_name=model_name: _verify_with_openai_compatible_vision(
+                        "OpenRouter", api_key, model_name, openrouter_frames, prompt
+                    ),
+                    route_id=f"OpenRouter::{key_hash}::{model_name}",
+                    model=model_name,
+                ))
 
-        providers.append((
-            "Gemini",
-            f"Gemini ({VISION_MODEL})",
-            lambda: _verify_with_gemini(
-                gemini_frames,
-                prompt
-            ),
+    gemini_frames = [frames[0], frames[-1]] if len(frames) > 1 else frames
+    for key_index, api_key in enumerate(GEMINI_KEYS, 1):
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:10]
+        providers.append(_quota_route(
+            "Gemini", f"Gemini key {key_index} ({VISION_MODEL})", api_key,
+            lambda api_key=api_key: _verify_with_gemini(gemini_frames, prompt, api_key=api_key),
+            route_id=f"Gemini::{key_hash}",
+        ))
+
+    for key_index, credentials in enumerate(CLOUDFLARE_CREDENTIALS, 1):
+        pair_hash = hashlib.sha256(
+            (credentials["token"] + ":" + credentials["account_id"]).encode()
+        ).hexdigest()[:10]
+        providers.append(_quota_route(
+            "Cloudflare", f"Cloudflare Vision key pair {key_index} ({CLOUDFLARE_VISION_MODEL})",
+            credentials["token"],
+            lambda credentials=credentials: _verify_with_cloudflare_vision(credentials, frames, prompt),
+            account_id=credentials["account_id"],
+            route_id=f"Cloudflare::{pair_hash}",
         ))
 
     errors = []
     attempted = 0
+    pending = list(providers)
 
-    for provider_id, provider_name, verify in providers:
-        if provider_id in VISION_DISABLED_PROVIDERS:
-            print(
-                f"Visual verifier: skipping {provider_name}; "
-                "route disabled after a hard error."
-            )
-            continue
-
-        cooldown = _provider_cooldown_remaining(
-            provider_id
-        )
-
-        if cooldown > 0:
-            print(
-                f"Visual verifier: {provider_name} cooling down for "
-                f"{cooldown:.0f}s; trying the next backup."
-            )
-            continue
-
+    while pending:
+        eligible = []
+        for candidate_route in pending:
+            candidate_id = candidate_route["id"]
+            if candidate_id in VISION_DISABLED_PROVIDERS:
+                continue
+            if _provider_cooldown_remaining(candidate_id) > 0:
+                continue
+            eligible.append(candidate_route)
+        ranked = QUOTA_ROUTER.rank_routes(eligible)
+        if not ranked:
+            break
+        route = ranked[0]
+        pending.remove(route)
+        provider_id = route["id"]
+        provider_name = route["name"]
+        verify = route["run"]
+        QUOTA_ROUTER.mark_selected(route)
         attempted += 1
-
-        print(
-            f"Visual verifier: trying {provider_name}..."
-        )
+        print(f"Visual verifier: quota-aware selection -> {provider_name}...")
 
         try:
             relevant, confidence, reason = verify()
@@ -2875,9 +3079,18 @@ Set relevant=true only when the visual composition genuinely matches the SCENE P
                     _provider_retry_delay(str(exc)),
                 )
 
-                VISION_PROVIDER_COOLDOWN_UNTIL[
-                    provider_id
-                ] = time.monotonic() + delay
+                now = time.monotonic()
+                VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = now + delay
+                # OpenRouter can expose several models on one exhausted key.
+                # Cool down all sibling models for that same credential so the
+                # pipeline advances to the next key/provider instead of wasting calls.
+                route_parts = provider_id.split("::")
+                if len(route_parts) >= 2:
+                    route_group = "::".join(route_parts[:2])
+                    for sibling_route in providers:
+                        sibling_id = sibling_route["id"]
+                        if sibling_id.startswith(route_group + "::"):
+                            VISION_PROVIDER_COOLDOWN_UNTIL[sibling_id] = now + delay
 
                 print(
                     f"Visual verifier {provider_name} rate-limited; "
@@ -2885,7 +3098,7 @@ Set relevant=true only when the visual composition genuinely matches the SCENE P
                 )
 
             elif exc.status_code in (
-                400, 401, 403, 404, 413, 415, 422
+                400, 401, 402, 403, 404, 413, 415, 422
             ):
                 VISION_DISABLED_PROVIDERS.add(
                     provider_id
@@ -3017,34 +3230,34 @@ def fetch_footage(plan):
 
     visual_provider_names = []
 
-    if GROQ_KEY:
+    if GROQ_KEYS:
         visual_provider_names.append(
-            f"Groq ({GROQ_VISION_MODEL})"
+            f"Groq ({len(GROQ_KEYS)} key(s), {GROQ_VISION_MODEL})"
         )
 
-    if OPENROUTER_KEY:
+    if OPENROUTER_KEYS:
         visual_provider_names.append(
-            f"OpenRouter ({OPENROUTER_VISION_MODEL})"
+            f"OpenRouter ({len(OPENROUTER_KEYS)} key(s), {OPENROUTER_VISION_MODEL})"
         )
-
-        if (
-            OPENROUTER_VISION_FALLBACK_MODEL
-            != OPENROUTER_VISION_MODEL
-        ):
+        if OPENROUTER_VISION_FALLBACK_MODEL != OPENROUTER_VISION_MODEL:
             visual_provider_names.append(
-                "OpenRouter fallback "
-                f"({OPENROUTER_VISION_FALLBACK_MODEL})"
+                f"OpenRouter backup model ({OPENROUTER_VISION_FALLBACK_MODEL})"
             )
 
-    if GEMINI_KEY:
+    if GEMINI_KEYS:
         visual_provider_names.append(
-            f"Gemini ({VISION_MODEL})"
+            f"Gemini ({len(GEMINI_KEYS)} key(s), {VISION_MODEL})"
+        )
+
+    if CLOUDFLARE_CREDENTIALS:
+        visual_provider_names.append(
+            f"Cloudflare Workers AI ({len(CLOUDFLARE_CREDENTIALS)} key pair(s), {CLOUDFLARE_VISION_MODEL})"
         )
 
     if VISION_REQUIRED and not visual_provider_names:
         raise RuntimeError(
             "Stage 1 requires visual verification. Add at least one of "
-            "GEMINI_API_KEY, GROQ_API_KEY, or OPENROUTER_API_KEY under "
+            "GEMINI_API_KEY, GROQ_API_KEY, OPENROUTER_API_KEY, or a Cloudflare token/account pair under "
             "GitHub Settings > Secrets and variables > Actions."
         )
 
@@ -3635,248 +3848,511 @@ def wrap_overlay_text(value, width=24, max_lines=4):
         line_width += max(4, int(len(clean) / max_lines / 8) or 4)
     return "\n".join(wrapped)
 
-def build_voice_and_subs(script):
-    """Sentence-level TTS with deliberate pauses and word timing."""
-    sentences = split_sentences(script)
+def _create_silence(path, duration):
+    duration = float(duration)
+    if duration <= 0.001:
+        return None
+    run([
+        "ffmpeg", "-y",
+        "-f", "lavfi",
+        "-i", "anullsrc=r=48000:cl=stereo",
+        "-t", f"{duration:.4f}",
+        "-c:a", "pcm_s16le",
+        str(path),
+    ])
+    return Path(path)
 
-    if not sentences:
-        raise RuntimeError(
-            "The script contains no speakable sentences."
+
+def _speechify_choose_voice(api_keys):
+    """Discover the best calm/deep male voice, rotating catalog keys and pages."""
+    if SPEECHIFY_VOICE_ID:
+        return SPEECHIFY_VOICE_ID
+
+    if isinstance(api_keys, str):
+        api_keys = [api_keys]
+    api_keys = [str(key).strip() for key in (api_keys or []) if str(key).strip()]
+    url = "https://api.speechify.ai/v1/voices"
+    preferred = ("george", "henry")
+
+    for key_index, api_key in enumerate(api_keys):
+        voices = []
+        cursor = None
+        seen_cursors = set()
+        try:
+            # The catalog is cursor-paginated. Read enough pages to avoid
+            # selecting a random early result when a better-fit voice is later.
+            for page_index in range(8):
+                params = {
+                    "type": "shared",
+                    "locale": "en",
+                    "gender": "male",
+                    "model": SPEECHIFY_MODEL,
+                    "limit": 200,
+                }
+                if cursor:
+                    params["cursor"] = cursor
+                response = requests.get(
+                    url,
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    params=params,
+                    timeout=(12, 35),
+                )
+                if response.status_code >= 400:
+                    raise RuntimeError(
+                        f"Speechify voice catalog HTTP {response.status_code}: {response.text[:250]}"
+                    )
+                data = response.json()
+                page_voices = data.get("voices", data.get("data", []))
+                if isinstance(page_voices, dict):
+                    page_voices = page_voices.get("voices", [])
+                if isinstance(page_voices, list):
+                    voices.extend(v for v in page_voices if isinstance(v, dict))
+
+                next_cursor = data.get("next_cursor") or data.get("nextCursor")
+                has_more = bool(data.get("has_more", data.get("hasMore", False)))
+                if not has_more or not next_cursor or next_cursor in seen_cursors:
+                    break
+                seen_cursors.add(next_cursor)
+                cursor = next_cursor
+
+            scored = []
+            for voice in voices:
+                voice_id = str(voice.get("id") or voice.get("voice_id") or "").strip()
+                if not voice_id:
+                    continue
+                tags = voice.get("tags", [])
+                if isinstance(tags, list):
+                    tags_text = " ".join(str(tag) for tag in tags)
+                else:
+                    tags_text = str(tags or "")
+                descriptor = " ".join([
+                    str(voice.get("display_name", "")),
+                    str(voice.get("name", "")),
+                    str(voice.get("description", "")),
+                    tags_text,
+                    voice_id,
+                ]).lower()
+                score = 0
+                for term, points in (
+                    ("calm", 5), ("deep", 5), ("baritone", 6),
+                    ("warm", 2), ("narration", 3), ("documentary", 4),
+                    ("authoritative", 2), ("grounded", 2), ("low-pitch", 3),
+                ):
+                    if term in descriptor:
+                        score += points
+                staff_rank = voice.get("staff_pick_rank")
+                try:
+                    staff_bonus = max(0, 3 - int(staff_rank)) if staff_rank is not None else 0
+                except (TypeError, ValueError):
+                    staff_bonus = 0
+                scored.append((score + staff_bonus, voice_id))
+
+            if scored:
+                scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+                best_score, best_id = scored[0]
+                if best_score > 0:
+                    print(
+                        f"Speechify selected calm/deep voice profile: {best_id} "
+                        f"(catalog key slot {key_index + 1})."
+                    )
+                    return best_id
+                for preferred_id in preferred:
+                    if any(voice_id.lower() == preferred_id for _, voice_id in scored):
+                        return preferred_id
+        except Exception as exc:
+            print(
+                f"Speechify voice catalog key slot {key_index + 1} unavailable; "
+                f"trying the next configured key: {str(exc)[:220]}"
+            )
+            continue
+
+    print("Speechify voice discovery found no matching catalog entry; using built-in voice fallback.")
+    return "george"
+
+
+def _speechify_sentence_ssml(sentence, index, total):
+    """Create calm, lower-pitched SSML with gentle variation for narrative emphasis."""
+    escaped = html.escape(sentence, quote=False)
+    if index == 0:
+        rate, pitch = "-3%", "-4%"  # restrained hook, still clear
+    elif sentence.rstrip().endswith("?"):
+        rate, pitch = "-3%", "-3%"  # lift a question slightly
+    elif index == total - 1:
+        rate, pitch = "-7%", "-10%"  # grounded final thought
+    else:
+        rate, pitch = "-6%", "-8%"  # calm, deep documentary baseline
+    return (
+        "<speak><prosody "
+        f'rate="{rate}" pitch="{pitch}"'
+        f">{escaped}</prosody></speak>"
+    )
+
+
+def _flatten_speechify_word_marks(value):
+    marks = []
+    def walk(item):
+        if isinstance(item, dict):
+            has_timing = (
+                item.get("start_time") is not None
+                and item.get("end_time") is not None
+                and (item.get("value") is not None or item.get("text") is not None)
+            )
+            if has_timing and str(item.get("type", "word")).lower() in ("word", "token", ""):
+                try:
+                    start_ms = float(item["start_time"])
+                    end_ms = float(item["end_time"])
+                    word = str(item.get("value", item.get("text", ""))).strip()
+                    if word and end_ms >= start_ms:
+                        marks.append({
+                            "text": word,
+                            "start": max(0.0, start_ms / 1000.0),
+                            "duration": max(0.01, (end_ms - start_ms) / 1000.0),
+                        })
+                except (TypeError, ValueError):
+                    pass
+            for child in item.values():
+                if isinstance(child, (dict, list)):
+                    walk(child)
+        elif isinstance(item, list):
+            for child in item:
+                walk(child)
+    walk(value)
+    marks.sort(key=lambda item: item["start"])
+    # Avoid accidental duplicates where an API wraps the same word-mark object twice.
+    unique = []
+    seen = set()
+    for mark in marks:
+        identity = (mark["text"], round(mark["start"], 4), round(mark["duration"], 4))
+        if identity not in seen:
+            seen.add(identity)
+            unique.append(mark)
+    return unique
+
+
+def _fallback_sentence_word_marks(sentence, duration):
+    words = re.findall(r"\S+", sentence)
+    if not words:
+        return []
+    weights = [max(1, len(re.sub(r"\W", "", word))) for word in words]
+    total_weight = float(sum(weights))
+    cursor = 0.0
+    marks = []
+    for word, weight in zip(words, weights):
+        span = max(0.035, duration * weight / total_weight)
+        marks.append({"text": word, "start": cursor, "duration": span})
+        cursor += span
+    if marks:
+        marks[-1]["duration"] = max(0.035, duration - marks[-1]["start"])
+    return marks
+
+
+def _request_speechify_audio(sentence, sentence_index, sentence_total, voice_id, api_keys, active_key_index):
+    """Try the current Speechify key, then rotate through remaining keys on quota/auth failures."""
+    body = {
+        "input": _speechify_sentence_ssml(sentence, sentence_index, sentence_total),
+        "voice_id": voice_id,
+        "audio_format": "wav",
+        "language": "en-US",
+        "model": SPEECHIFY_MODEL,
+    }
+    last_error = None
+    key_order = list(range(active_key_index, len(api_keys))) + list(range(0, active_key_index))
+    tried = set()
+    for key_index in key_order:
+        if key_index in tried:
+            continue
+        tried.add(key_index)
+        response = requests.post(
+            "https://api.speechify.ai/v1/audio/speech",
+            headers={
+                "Authorization": f"Bearer {api_keys[key_index]}",
+                "Content-Type": "application/json",
+            },
+            json=body,
+            timeout=(20, 120),
         )
+        _observe_provider_response("Speechify", response, api_key=api_keys[key_index])
+        if response.status_code >= 400:
+            detail = response.text[:400].replace("\n", " ")
+            last_error = RuntimeError(
+                f"Speechify key {key_index + 1} HTTP {response.status_code}: {detail}"
+            )
+            if response.status_code in (402, 429):
+                print(
+                    f"Speechify account quota/rate limit reached (HTTP {response.status_code}); "
+                    "all keys on this account share the same budget. Switching to the VO fallback."
+                )
+                raise last_error
+            if response.status_code in (401, 403) or response.status_code >= 500:
+                print(
+                    f"Speechify key slot {key_index + 1} unavailable "
+                    f"(HTTP {response.status_code}); checking whether another credential works."
+                )
+                continue
+            raise last_error
+        try:
+            data = response.json()
+            audio_data = data.get("audio_data") or data.get("audio")
+            if not audio_data:
+                raise ValueError("Speechify response contains no audio_data.")
+            if isinstance(audio_data, str) and ",base64," in audio_data:
+                audio_data = audio_data.split(",base64,", 1)[1]
+            audio_bytes = base64.b64decode(audio_data)
+            marks = _flatten_speechify_word_marks(data.get("speech_marks", []))
+            return audio_bytes, marks, key_index
+        except Exception as exc:
+            raise RuntimeError(f"Could not decode Speechify audio response: {exc}") from exc
+    raise RuntimeError(f"All configured Speechify API keys failed: {last_error}")
 
+
+def _generate_speechify_parts(sentences):
+    api_keys = SPEECHIFY_KEYS
+    if not api_keys:
+        raise RuntimeError("SPVO_API/SPEECHIFY_API_KEY is not configured.")
+    voice_id = _speechify_choose_voice(api_keys)
+    wav_parts = []
+    sentence_word_events = []
+    sentence_events = []
+    cursor = 0.0
+    key_index = 0
+
+    opening = _create_silence(OUT / "opening_silence.wav", OPENING_LEAD)
+    if opening:
+        wav_parts.append(opening)
+        cursor += ffprobe_duration(opening)
+
+    for index, sentence in enumerate(sentences):
+        if len(sentence) > 1950:
+            raise RuntimeError(
+                f"Speechify sentence {index + 1} exceeds the safe 1,950-character request budget."
+            )
+        audio_bytes, word_marks, key_index = _request_speechify_audio(
+            sentence, index, len(sentences), voice_id, api_keys, key_index
+        )
+        raw_path = OUT / f"tts_{index:02d}_speechify_raw.wav"
+        wav_path = OUT / f"tts_{index:02d}.wav"
+        raw_path.write_bytes(audio_bytes)
+        run([
+            "ffmpeg", "-y", "-i", str(raw_path),
+            "-ar", "48000", "-ac", "2", "-c:a", "pcm_s16le", str(wav_path),
+        ])
+        duration = ffprobe_duration(wav_path)
+        if duration <= 0.05:
+            raise RuntimeError(f"Speechify returned an empty audio segment for sentence {index + 1}.")
+        sentence_start = cursor
+        local_marks = word_marks or _fallback_sentence_word_marks(sentence, duration)
+        timed_sentence_words = []
+        for mark in local_marks:
+            local_start = min(max(0.0, mark["start"]), max(0.0, duration - 0.02))
+            local_duration = min(max(0.035, mark["duration"]), max(0.035, duration - local_start))
+            timed = {
+                "text": mark["text"],
+                "offset": cursor + local_start,
+                "duration": local_duration,
+            }
+            timed_sentence_words.append(timed)
+        terminal = re.search(r"([.!?][\"']?)$", sentence.strip())
+        if timed_sentence_words and terminal:
+            last_text = str(timed_sentence_words[-1].get("text") or "")
+            if not re.search(r"[.!?][\"']?$", last_text):
+                timed_sentence_words[-1]["text"] = last_text + terminal.group(1)
+        sentence_word_events.append(timed_sentence_words)
+        wav_parts.append(wav_path)
+        cursor += duration
+        sentence_events.append({"start": sentence_start, "end": cursor})
+        if index < len(sentences) - 1:
+            gap = HOOK_GAP if index == 0 else SENTENCE_GAP
+            silence = _create_silence(OUT / f"gap_{index:02d}.wav", gap)
+            if silence:
+                wav_parts.append(silence)
+                cursor += ffprobe_duration(silence)
+        print(f"Speechify VO sentence {index + 1}/{len(sentences)} rendered ({duration:.2f}s).")
+
+    return sentence_word_events, sentence_events, wav_parts
+
+
+def _generate_edge_parts(sentences):
+    """Sentence-level Edge TTS fallback, retained for resilience."""
     async def generate():
-        word_events = []
         sentence_word_events = []
         sentence_events = []
         wav_parts = []
         cursor = 0.0
-
-        opening_silence = OUT / "opening_silence.wav"
-
-        run([
-            "ffmpeg", "-y",
-            "-f", "lavfi",
-            "-i", "anullsrc=r=48000:cl=stereo",
-            "-t", str(OPENING_LEAD),
-            "-c:a", "pcm_s16le",
-            str(opening_silence)
-        ])
-
-        wav_parts.append(opening_silence)
-        cursor += OPENING_LEAD
-
+        opening = _create_silence(OUT / "opening_silence.wav", OPENING_LEAD)
+        if opening:
+            wav_parts.append(opening)
+            cursor += ffprobe_duration(opening)
         for index, sentence in enumerate(sentences):
-            rate_values = [
-                BASE_RATE, "-5%", "-3%", "-4%"
-            ]
-
-            pitch_values = [
-                BASE_PITCH, "-2Hz", "-4Hz", "-2Hz"
-            ]
-
+            rate_values = [BASE_RATE, "-5%", "-3%", "-4%"]
+            pitch_values = [BASE_PITCH, "-2Hz", "-4Hz", "-2Hz"]
             mp3_path = OUT / f"tts_{index:02d}.mp3"
             wav_path = OUT / f"tts_{index:02d}.wav"
-
             boundaries = []
-
             communicate = edge_tts.Communicate(
                 sentence,
                 VOICE,
-                rate=rate_values[
-                    index % len(rate_values)
-                ],
-                pitch=pitch_values[
-                    index % len(pitch_values)
-                ],
-                boundary="WordBoundary"
+                rate=rate_values[index % len(rate_values)],
+                pitch=pitch_values[index % len(pitch_values)],
+                boundary="WordBoundary",
             )
-
-            with open(mp3_path, "wb") as f:
+            with open(mp3_path, "wb") as audio_file:
                 async for message in communicate.stream():
                     if message["type"] == "audio":
-                        f.write(message["data"])
-
+                        audio_file.write(message["data"])
                     elif message["type"] == "WordBoundary":
                         boundaries.append({
                             "text": message["text"],
-                            "offset": (
-                                message["offset"] / 10_000_000
-                            ),
-                            "duration": (
-                                message["duration"] / 10_000_000
-                            )
+                            "offset": message["offset"] / 10_000_000,
+                            "duration": message["duration"] / 10_000_000,
                         })
-
-            if (
-                not mp3_path.exists()
-                or mp3_path.stat().st_size < 1000
-                or not boundaries
-            ):
-                raise RuntimeError(
-                    f"Edge TTS failed on sentence {index+1}."
-                )
-
+            if not mp3_path.exists() or mp3_path.stat().st_size < 1000 or not boundaries:
+                raise RuntimeError(f"Edge TTS failed on sentence {index + 1}.")
             run([
-                "ffmpeg", "-y",
-                "-i", str(mp3_path),
-                "-ar", "48000",
-                "-ac", "2",
-                "-c:a", "pcm_s16le",
-                str(wav_path)
+                "ffmpeg", "-y", "-i", str(mp3_path),
+                "-ar", "48000", "-ac", "2", "-c:a", "pcm_s16le", str(wav_path),
             ])
-
             duration = ffprobe_duration(wav_path)
             sentence_start = cursor
-
             timed_sentence_words = []
             for event in boundaries:
-                timed_event = {
+                timed_sentence_words.append({
                     **event,
-                    "offset": cursor + event["offset"]
-                }
-                word_events.append(timed_event)
-                timed_sentence_words.append(timed_event)
-
-            # TTS word-boundary payloads may omit punctuation. Restore the
-            # original sentence ending without changing the audio timing.
-            if timed_sentence_words:
-                terminal = re.search(r"([.!?][\"']?)$", sentence.strip())
+                    "offset": cursor + event["offset"],
+                })
+            terminal = re.search(r"([.!?][\"']?)$", sentence.strip())
+            if timed_sentence_words and terminal:
                 last_text = str(timed_sentence_words[-1].get("text") or "")
-                if terminal and not re.search(r"[.!?][\"']?$", last_text):
+                if not re.search(r"[.!?][\"']?$", last_text):
                     timed_sentence_words[-1]["text"] = last_text + terminal.group(1)
             sentence_word_events.append(timed_sentence_words)
-
             wav_parts.append(wav_path)
             cursor += duration
+            sentence_events.append({"start": sentence_start, "end": cursor})
+            if index < len(sentences) - 1:
+                gap = HOOK_GAP if index == 0 else SENTENCE_GAP
+                silence = _create_silence(OUT / f"gap_{index:02d}.wav", gap)
+                if silence:
+                    wav_parts.append(silence)
+                    cursor += ffprobe_duration(silence)
+        return sentence_word_events, sentence_events, wav_parts
+    return asyncio.run(generate())
 
-            sentence_events.append({
-                "start": sentence_start,
-                "end": cursor
-            })
 
-            gap = (
-                HOOK_GAP
-                if index == 0
-                else SENTENCE_GAP
+def build_voice_and_subs(script):
+    """Speechify-first calm/deep narration, Edge TTS backup, and 70s minimum."""
+    sentences = split_sentences(script)
+    if not sentences:
+        raise RuntimeError("The script contains no speakable sentences.")
+
+    # Clear partial artifacts from a previous failed Speechify attempt.
+    for pattern in ("tts_*.wav", "tts_*.mp3", "tts_*_speechify_raw.wav", "gap_*.wav"):
+        for stale in OUT.glob(pattern):
+            stale.unlink(missing_ok=True)
+
+    if SPEECHIFY_KEYS:
+        try:
+            sentence_word_events, sentence_events, wav_parts = _generate_speechify_parts(sentences)
+            voice_provider = "Speechify"
+            print("Voice-over provider: Speechify (primary, simba-3.5).")
+        except Exception as exc:
+            print(
+                "Speechify could not complete the full narration; "
+                f"restarting the complete VO with Edge TTS fallback: {str(exc)[:500]}"
             )
+            for pattern in ("tts_*.wav", "tts_*.mp3", "tts_*_speechify_raw.wav", "gap_*.wav"):
+                for stale in OUT.glob(pattern):
+                    stale.unlink(missing_ok=True)
+            sentence_word_events, sentence_events, wav_parts = _generate_edge_parts(sentences)
+            voice_provider = "Edge TTS fallback"
+            print(f"Voice-over provider: Edge TTS fallback ({VOICE}).")
+    else:
+        print("SPVO_API is not configured; using Edge TTS fallback.")
+        sentence_word_events, sentence_events, wav_parts = _generate_edge_parts(sentences)
+        voice_provider = "Edge TTS fallback"
+        print(f"Voice-over provider: Edge TTS fallback ({VOICE}).")
 
-            silence = OUT / f"gap_{index:02d}.wav"
-
-            run([
-                "ffmpeg", "-y",
-                "-f", "lavfi",
-                "-i", "anullsrc=r=48000:cl=stereo",
-                "-t", str(gap),
-                "-c:a", "pcm_s16le",
-                str(silence)
-            ])
-
-            wav_parts.append(silence)
-            cursor += gap
-
-        last_gap = wav_parts.pop()
-        last_gap.unlink(missing_ok=True)
-
-        ending = OUT / "ending_hold.wav"
-
-        run([
-            "ffmpeg", "-y",
-            "-f", "lavfi",
-            "-i", "anullsrc=r=48000:cl=stereo",
-            "-t", str(ENDING_HOLD),
-            "-c:a", "pcm_s16le",
-            str(ending)
-        ])
-
+    ending = _create_silence(OUT / "ending_hold.wav", ENDING_HOLD)
+    if ending:
         wav_parts.append(ending)
 
-        total_duration = sum(
-            ffprobe_duration(p)
-            for p in wav_parts
+    total_duration = sum(ffprobe_duration(part) for part in wav_parts)
+    if total_duration < MIN_VIDEO_DURATION:
+        # Add a tiny encoder/rounding cushion so the final mux cannot land just
+        # below the hard 70-second minimum because of container time-base rounding.
+        pad_duration = (MIN_VIDEO_DURATION - total_duration) + 0.20
+        padding = _create_silence(OUT / "minimum_duration_padding.wav", pad_duration)
+        if padding:
+            wav_parts.append(padding)
+        total_duration = sum(ffprobe_duration(part) for part in wav_parts)
+        print(
+            f"VO timeline was shorter than {MIN_VIDEO_DURATION:.0f}s; "
+            f"added {pad_duration:.2f}s of final silence to meet the minimum."
         )
 
-        concat = OUT / "voice_concat.txt"
+    concat = OUT / "voice_concat.txt"
+    concat.write_text(
+        "".join(f"file '{part.resolve()}'\n" for part in wav_parts),
+        encoding="utf-8",
+    )
+    run([
+        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat),
+        "-c:a", "pcm_s16le", "-ar", "48000", "-ac", "2", str(OUT / "voiceover.wav"),
+    ])
+    run([
+        "ffmpeg", "-y", "-i", str(OUT / "voiceover.wav"),
+        "-c:a", "libmp3lame", "-b:a", "192k", str(OUT / "voiceover.mp3"),
+    ])
 
-        concat.write_text(
-            "".join(
-                f"file '{p.resolve()}'\n"
-                for p in wav_parts
-            ),
-            encoding="utf-8"
+    lines = [
+        "[Script Info]",
+        "Title: Calm Deep Documentary Captions",
+        "ScriptType: v4.00+",
+        "WrapStyle: 2",
+        "ScaledBorderAndShadow: yes",
+        "PlayResX: 1080",
+        "PlayResY: 1920",
+        "[V4+ Styles]",
+        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
+        "Style: Default,DejaVu Sans,52,&H00FFFFFF,&H000000FF,&H00101A25,&H90000000,-1,0,0,0,100,100,0,0,1,3,1,2,90,90,360,1",
+        "[Events]",
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
+    ]
+    for sentence_group in sentence_word_events:
+        for group in build_caption_groups(sentence_group):
+            start = group[0]["offset"]
+            end = max(group[-1]["offset"] + group[-1]["duration"], start + 0.45)
+            phrase = " ".join(str(item["text"]) for item in group)
+            phrase = r"\N".join(textwrap.wrap(
+                phrase,
+                width=CAPTION_MAX_CHARS,
+                break_long_words=False,
+                break_on_hyphens=False,
+            ))
+            phrase = phrase.replace("{", r"\{").replace("}", r"\}")
+            lines.append(
+                f"Dialogue: 0,{ass_time(start)},{ass_time(end)},Default,,0,0,0,,{phrase}"
+            )
+    (OUT / "captions.ass").write_text("\n".join(lines), encoding="utf-8")
+    Path("timing.json").write_text(
+        json.dumps({
+            "sentences": sentence_events,
+            "total_duration": total_duration,
+            "minimum_duration": MIN_VIDEO_DURATION,
+            "maximum_duration": None,
+            "voice_provider": voice_provider,
+        }, indent=2),
+        encoding="utf-8",
+    )
+    if total_duration + 0.001 < MIN_VIDEO_DURATION:
+        raise RuntimeError(
+            f"Duration invariant failed: final VO timeline is {total_duration:.3f}s; "
+            f"minimum is {MIN_VIDEO_DURATION:.0f}s."
         )
-
-        run([
-            "ffmpeg", "-y",
-            "-f", "concat",
-            "-safe", "0",
-            "-i", str(concat),
-            "-c:a", "pcm_s16le",
-            "-ar", "48000",
-            "-ac", "2",
-            str(OUT / "voiceover.wav")
-        ])
-
-        run([
-            "ffmpeg", "-y",
-            "-i", str(OUT / "voiceover.wav"),
-            "-c:a", "libmp3lame",
-            "-b:a", "192k",
-            str(OUT / "voiceover.mp3")
-        ])
-
-        lines = [
-            "[Script Info]",
-            "Title: Consistent Sentence-Bounded Documentary Captions",
-            "ScriptType: v4.00+",
-            "WrapStyle: 2",
-            "ScaledBorderAndShadow: yes",
-            "PlayResX: 1080",
-            "PlayResY: 1920",
-            "[V4+ Styles]",
-            "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-            "Style: Default,DejaVu Sans,52,&H00FFFFFF,&H000000FF,&H00101A25,&H90000000,-1,0,0,0,100,100,0,0,1,3,1,2,90,90,360,1",
-            "[Events]",
-            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
-        ]
-
-        for sentence_group in sentence_word_events:
-            for group in build_caption_groups(sentence_group):
-                start = group[0]["offset"]
-                end = max(
-                    group[-1]["offset"] + group[-1]["duration"],
-                    start + 0.45,
-                )
-                phrase = " ".join(str(x["text"]) for x in group)
-                phrase = r"\N".join(
-                    textwrap.wrap(
-                        phrase,
-                        width=CAPTION_MAX_CHARS,
-                        break_long_words=False,
-                        break_on_hyphens=False,
-                    )
-                )
-                phrase = phrase.replace("{", r"\{").replace("}", r"\}")
-                lines.append(
-                    f"Dialogue: 0,{ass_time(start)},"
-                    f"{ass_time(end)},Default,,0,0,0,,{phrase}"
-                )
-
-        (OUT / "captions.ass").write_text(
-            "\n".join(lines),
-            encoding="utf-8"
-        )
-
-        Path("timing.json").write_text(
-            json.dumps({
-                "sentences": sentence_events,
-                "total_duration": total_duration
-            }, indent=2),
-            encoding="utf-8"
-        )
-
-        return sentence_events, total_duration
-
-    return asyncio.run(generate())
+    print(
+        f"VO timeline ready: {total_duration:.2f}s "
+        f"(minimum {MIN_VIDEO_DURATION:.0f}s; no maximum duration)."
+    )
+    return sentence_events, total_duration
 
 
 # ============================================================
@@ -4009,6 +4485,11 @@ def render_footage_scene(
 
 
 def render(plan, sentence_events, total_duration):
+    if float(total_duration) + 0.001 < MIN_VIDEO_DURATION:
+        raise RuntimeError(
+            f"Refusing to render a video shorter than {MIN_VIDEO_DURATION:.0f}s."
+        )
+    # There is deliberately no upper-duration guard: use the complete VO timeline.
     spans = scene_durations(
         plan,
         sentence_events,
@@ -4110,9 +4591,20 @@ def render(plan, sentence_events, total_duration):
         str(final)
     ])
 
+    final_duration = ffprobe_duration(final)
+    if final_duration + 0.15 < MIN_VIDEO_DURATION:
+        raise RuntimeError(
+            f"Rendered file is only {final_duration:.2f}s; "
+            f"the required minimum is {MIN_VIDEO_DURATION:.0f}s."
+        )
+    if final_duration + 0.20 < total_duration:
+        raise RuntimeError(
+            f"Rendered video ({final_duration:.2f}s) ended before the complete "
+            f"voice-over timeline ({total_duration:.2f}s)."
+        )
     print(
-        f"Final video: {final}; "
-        f"duration {ffprobe_duration(final):.2f}s"
+        f"Final video: {final}; duration {final_duration:.2f}s "
+        f"(complete VO timeline {total_duration:.2f}s; no upper limit)."
     )
 
 
@@ -4171,9 +4663,11 @@ def write_failure_diagnostics(exc):
         "finished_at_epoch": time.time(),
         "configuration": {
             "visual_verification_required": VISION_REQUIRED,
-            "groq_key_configured": bool(GROQ_KEY),
-            "openrouter_key_configured": bool(OPENROUTER_KEY),
-            "gemini_key_configured": bool(GEMINI_KEY),
+            "groq_keys_configured": len(GROQ_KEYS),
+            "openrouter_keys_configured": len(OPENROUTER_KEYS),
+            "gemini_keys_configured": len(GEMINI_KEYS),
+            "cloudflare_key_pairs_configured": len(CLOUDFLARE_CREDENTIALS),
+            "speechify_keys_configured": len(SPEECHIFY_KEYS),
             "pixabay_key_configured": bool(PIXABAY_KEY),
             "pexels_key_configured": bool(PEXELS_KEY),
             "source_priority": list(FOOTAGE_SOURCE_PRIORITY),
@@ -4208,10 +4702,10 @@ class _TeeStream:
 
 
 def validate_runtime_config():
-    if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
+    if not (GROQ_KEYS or OPENROUTER_KEYS or GEMINI_KEYS or CLOUDFLARE_CREDENTIALS):
         raise RuntimeError(
-            "Missing AI provider key. Add GROQ_API_KEY, "
-            "OPENROUTER_API_KEY, or GEMINI_API_KEY GitHub Secret."
+            "Missing AI provider credentials. Add one or more Groq, OpenRouter, "
+            "Gemini, or Cloudflare AI token/account pairs as GitHub Actions secrets."
         )
     if not TOPIC:
         raise RuntimeError("Enter a topic in the Run workflow form.")

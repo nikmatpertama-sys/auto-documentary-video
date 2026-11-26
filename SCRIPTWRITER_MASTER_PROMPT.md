@@ -10,7 +10,7 @@ Create an original, compelling English-language mini-documentary for a vertical 
 
 **TOPIC:** [[TOPIC]]
 
-The final narration must run approximately 60–75 seconds and contain **145–165 spoken words**. The story must feel like a polished short documentary, not a generic AI summary, listicle, advertisement, or school report.
+The complete narration must contain **120–200 spoken words**. The final video is at least 70 seconds; the renderer follows the complete voice-over duration without a 90-second upper limit. Aim for approximately 150–190 words when the story supports it, while never violating the strict 120–200-word boundary. The story must feel like a polished short documentary, not a generic AI summary, listicle, advertisement, or school report.
 
 ## FACTUAL INTEGRITY — NON-NEGOTIABLE
 
@@ -42,7 +42,7 @@ Return exactly **8 scenes** in story order. The complete spoken story must be di
 - Scene 1 contains the hook and must be supported by real-world footage.
 - Each scene must advance the story. Do not repeat the same fact or split one short sentence unnaturally just to fill a scene.
 - The concatenation of all eight scene narrations is the entire script. Do not omit lines, add a second unassigned script, or repeat the story in the scene fields.
-- Combined narration target: 145–165 words. Aim for roughly even pacing, but let the story determine each scene's length.
+- Combined narration must be 120–200 spoken words inclusive. Aim for roughly 150–190 words where the subject supports it, but keep the story factual and coherent. The finished video must be at least 70 seconds; it may exceed 90 seconds and must continue to the end of the complete voice-over.
 
 ## FOOTAGE QUERY DESIGN
 
@@ -64,7 +64,7 @@ Return **only one valid JSON object**. No Markdown fences, commentary, prefatory
 {
   "title": "Short documentary title",
   "hook": "The opening hook sentence",
-  "script": "The complete 145–165 word narration",
+  "script": "The complete 120–200 word narration",
   "scenes": [
     {
       "narration": "The complete spoken narration assigned to this scene",
@@ -84,7 +84,7 @@ Return **only one valid JSON object**. No Markdown fences, commentary, prefatory
 Before returning the JSON, verify all of the following:
 
 - Exactly 8 scenes are present.
-- The combined scene narration is 145–165 words and matches `script` exactly in substance and order.
+- The combined scene narration is 120–200 words and matches `script` exactly in substance and order.
 - The first sentence is a compelling hook of 12 words or fewer.
 - The story has a logical beginning, development, reveal, and ending.
 - No factual statement, statistic, date, source, quote, or URL has been invented.

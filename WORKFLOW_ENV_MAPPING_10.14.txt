@@ -1,0 +1,9 @@
+Add these under the existing GitHub Actions job or step `env:` block; preserve existing entries and never put literal key values here:
+
+CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+CF_API_TK1: ${{ secrets.CF_API_TK1 }}
+CF_ID1: ${{ secrets.CF_ID1 }}
+SPVO_API: ${{ secrets.SPVO_API }}
+
+Optional numbered backups use the same pattern, e.g. GROQ_API_KEY_1: ${{ secrets.GROQ_API_KEY_1 }}.
