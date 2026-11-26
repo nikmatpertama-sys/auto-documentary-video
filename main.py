@@ -7,9 +7,11 @@ import asyncio
 import hashlib
 import base64
 import tempfile
+import shutil
 import subprocess
 import textwrap
 from pathlib import Path
+from urllib.parse import quote
 
 import requests
 import edge_tts
@@ -63,6 +65,24 @@ VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "true").strip().lower() n
 VISION_CANDIDATE_LIMIT = max(
     1, min(30, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "26")))
 )
+
+# Version 10.10: selection is tiered by source, not globally by relevance.
+# Internet Archive receives the largest candidate budget; the other sources
+# are fallback tiers, ordered from open archives to stock-footage providers.
+FOOTAGE_SOURCE_PRIORITY = (
+    "Internet Archive",
+    "Wikimedia Commons",
+    "NASA",
+    "Pexels",
+    "Pixabay",
+)
+FOOTAGE_SOURCE_CANDIDATE_LIMITS = {
+    "Internet Archive": 10,
+    "Wikimedia Commons": 4,
+    "NASA": 4,
+    "Pexels": 4,
+    "Pixabay": 4,
+}
 
 try:
     VISION_MIN_CONFIDENCE = float(
@@ -206,59 +226,23 @@ def normalize_words(text):
 # ============================================================
 
 def documentary_prompt(topic):
-    return f"""Create an original, fact-conscious English mini-documentary
-for a vertical 9:16 video.
+    """Load the standalone single-role professional scriptwriter master prompt."""
+    prompt_path = Path(__file__).with_name("SCRIPTWRITER_MASTER_PROMPT.md")
 
-TOPIC: {topic}
+    if not prompt_path.is_file():
+        raise RuntimeError(
+            "SCRIPTWRITER_MASTER_PROMPT.md is missing. "
+            "Restore the prompt file from the project package before running."
+        )
 
-Target spoken length: 145-165 words, approximately 60-75 seconds
-including deliberate pauses.
+    prompt = prompt_path.read_text(encoding="utf-8").strip()
 
-Return ONLY valid JSON in this exact structure:
+    if "[[TOPIC]]" not in prompt:
+        raise RuntimeError(
+            "SCRIPTWRITER_MASTER_PROMPT.md must contain the [[TOPIC]] placeholder."
+        )
 
-{{
-"title":"...",
-"hook":"...",
-"script":"...",
-"scenes":[
-{{
-"narration":"complete spoken narration segment for this scene",
-"visual_query":"specific searchable real-world footage phrase, 3-6 words",
-"visual_queries":["alternate specific shot query","second alternate shot query"],
-"source_label":"verified institution name or empty",
-"source_url":"official URL or empty"
-}}
-]
-}}
-
-Requirements:
-- Exactly 8 scenes, in the same order as the script.
-- Scene 1 MUST be footage, not a diagram.
-- Its first sentence is a powerful curiosity hook, max 12 words.
-- Divide the complete spoken story across the 8 scene narration fields, in order.
-- Do not omit story content between scenes or repeat whole sentences.
-- The combined scene narration should form a coherent 145-165 word script.
-- ALL 8 scenes MUST use concrete, relevant real-world footage.
-- NEVER request diagrams, charts, infographics, title cards, or abstract graphics.
-- Each scene must focus on ONE practical, searchable footage shot.
-- visual_query must describe one dominant visible subject, ideally 3-7 words.
-- NEVER combine several things that are unlikely to appear in one clip (for example: a rainstorm + Amazon forest floor + orchids + jaguar).
-- Geographic identity such as Amazon belongs in source metadata; do not require the video image itself to prove a precise location.
-- Do not require weather (rain, mist, sunrise) unless it is the main visible subject. Weather is supporting context, not a hard requirement.
-- visual_queries must contain two alternative, independent shots that each illustrate the scene narration on their own. They must not repeat the full primary query or combine multiple unrelated subjects.
-- Prefer common searchable footage: aerial tropical canopy, rain falling on broad leaves, insects on wet leaves, orchid close-up in tropical forest, jaguar in rainforest, river through rainforest.
-- Avoid requesting a single clip that must show multiple rare species or several actions at once.
-- Avoid wildlife or objects unrelated to the specific narration.
-- Include a concrete subject and a useful environment or camera angle where appropriate.
-- Tell one coherent story with a reveal and satisfying payoff.
-- Avoid list-like narration and generic introductions.
-- Vary sentence length and cadence.
-- Write for a warm, deep, calm male documentary narrator.
-- Use punctuation to indicate natural breaths.
-- Never invent statistics, exact quantities, sources, or URLs.
-- Leave source fields empty unless genuinely certain.
-- End with a memorable final thought, not a call to action.
-"""
+    return prompt.replace("[[TOPIC]]", str(topic or "").strip())
 
 
 def extract_json_object(raw_text):
@@ -1151,10 +1135,279 @@ def commons_search(query):
     return results
 
 
+
+def internet_archive_search(query):
+    """Search Internet Archive for video files with an explicit reusable license."""
+    query = clean_query(query)
+    terms = [term for term in query.lower().split() if len(term) > 2]
+    if not terms:
+        return []
+
+    # Query title, description and subject separately so a single rare phrase
+    # is not required to match the item's full metadata.
+    clauses = []
+    for term in terms[:7]:
+        safe_term = re.sub(r"[^a-z0-9]", "", term)
+        if not safe_term:
+            continue
+        clauses.extend([
+            f'title:"{safe_term}"',
+            f'description:"{safe_term}"',
+            f'subject:"{safe_term}"',
+        ])
+
+    if not clauses:
+        return []
+
+    search_query = "mediatype:movies AND (" + " OR ".join(clauses) + ")"
+
+    try:
+        response = requests.get(
+            "https://archive.org/advancedsearch.php",
+            params=[
+                ("q", search_query),
+                ("fl[]", "identifier"),
+                ("fl[]", "title"),
+                ("fl[]", "description"),
+                ("fl[]", "creator"),
+                ("fl[]", "subject"),
+                ("fl[]", "licenseurl"),
+                ("fl[]", "rights"),
+                ("fl[]", "source_pixel_width"),
+                ("fl[]", "runtime"),
+                ("rows", "15"),
+                ("page", "1"),
+                ("output", "json"),
+            ],
+            headers={
+                "User-Agent": "AutoDocumentaryVideo/3.0 (footage research)"
+            },
+            timeout=40,
+        )
+        response.raise_for_status()
+        documents = response.json().get("response", {}).get("docs", [])
+    except requests.RequestException as exc:
+        if getattr(getattr(exc, "response", None), "status_code", None) == 429:
+            raise
+        print(f"  Internet Archive search failed: {exc}")
+        return []
+    except (ValueError, KeyError) as exc:
+        print(f"  Internet Archive search returned invalid data: {exc}")
+        return []
+
+    def classify_license(values):
+        raw = " ".join(str(value or "") for value in values).lower()
+        compact = re.sub(r"[\s_-]+", "", raw)
+
+        restricted = any(term in compact for term in (
+            "bync", "noncommercial", "bynd", "noderivatives",
+            "bysa", "sharealike"
+        ))
+        if restricted:
+            return None
+
+        if (
+            "creativecommons.org/publicdomain/zero" in raw
+            or re.search(r"\bcc0\b", raw)
+        ):
+            return "CC0"
+
+        if (
+            "creativecommons.org/licenses/by/" in raw
+            or re.search(r"\bcc[- ]by(?:\s|$)", raw)
+        ):
+            return "CC BY"
+
+        if (
+            "creativecommons.org/publicdomain/mark/" in raw
+            or re.search(r"\bpublic domain\b", raw)
+        ):
+            return "Public Domain"
+
+        return None
+
+    def parse_runtime(value):
+        if value in (None, ""):
+            return 0.0
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            parts = str(value).strip().split(":")
+            try:
+                seconds = 0.0
+                for part in parts:
+                    seconds = seconds * 60 + float(part)
+                return seconds
+            except (TypeError, ValueError):
+                return 0.0
+
+    results = []
+    metadata_checks = 0
+    for item in documents[:12]:
+        if len(results) >= 6 or metadata_checks >= 8:
+            break
+
+        identifier = str(item.get("identifier") or "").strip()
+        if not identifier:
+            continue
+
+        # Search results expose licenseurl. Reject unknown or restrictive
+        # declarations before making the per-item metadata request.
+        license_name = classify_license([
+            item.get("licenseurl"),
+            item.get("rights"),
+        ])
+        if not license_name:
+            continue
+
+        metadata_cache = CACHE / (
+            "internet-archive-"
+            + hashlib.sha256(identifier.encode()).hexdigest()
+            + ".json"
+        )
+        archive_item = None
+
+        if (
+            metadata_cache.exists()
+            and time.time() - metadata_cache.stat().st_mtime < 7 * 86400
+        ):
+            try:
+                archive_item = json.loads(
+                    metadata_cache.read_text(encoding="utf-8")
+                )
+            except Exception:
+                archive_item = None
+
+        if archive_item is None:
+            metadata_checks += 1
+            try:
+                metadata_response = requests.get(
+                    f"https://archive.org/metadata/{identifier}",
+                    headers={
+                        "User-Agent": "AutoDocumentaryVideo/3.0 (footage research)"
+                    },
+                    timeout=35,
+                )
+                metadata_response.raise_for_status()
+                archive_item = metadata_response.json()
+                try:
+                    metadata_cache.write_text(
+                        json.dumps(archive_item),
+                        encoding="utf-8"
+                    )
+                except Exception:
+                    pass
+            except requests.RequestException as exc:
+                if getattr(getattr(exc, "response", None), "status_code", None) == 429:
+                    raise
+                print(f"  Internet Archive metadata skipped ({identifier}): {exc}")
+                continue
+            except ValueError as exc:
+                print(f"  Internet Archive metadata skipped ({identifier}): {exc}")
+                continue
+
+        metadata = archive_item.get("metadata") or {}
+        license_name = classify_license([
+            item.get("licenseurl"),
+            item.get("rights"),
+            metadata.get("licenseurl"),
+            metadata.get("rights"),
+        ])
+        if not license_name:
+            continue
+
+        video_files = []
+        for archive_file in archive_item.get("files", []):
+            filename = str(archive_file.get("name") or "")
+            if not filename.lower().endswith((".mp4", ".m4v", ".mov")):
+                continue
+            if archive_file.get("private") in ("true", True, 1):
+                continue
+            try:
+                file_size = int(archive_file.get("size") or 0)
+            except (TypeError, ValueError):
+                continue
+            if file_size <= 50000 or file_size > MAX_CLIP_BYTES:
+                continue
+            video_files.append((archive_file, file_size))
+
+        if not video_files:
+            continue
+
+        def file_preference(entry):
+            archive_file, file_size = entry
+            filename = str(archive_file.get("name") or "").lower()
+            width_value = archive_file.get("width") or item.get("source_pixel_width") or 0
+            try:
+                width = int(float(width_value))
+            except (TypeError, ValueError):
+                width = 0
+            return (
+                0 if filename.endswith(".mp4") else 1,
+                0 if width >= MIN_CLIP_WIDTH else 1,
+                abs(width - 1080) if width else 99999,
+                file_size,
+            )
+
+        video_files.sort(key=file_preference)
+        selected_file = video_files[0][0]
+        filename = str(selected_file.get("name") or "")
+        if not filename:
+            continue
+
+        title = str(metadata.get("title") or item.get("title") or identifier)
+        description = metadata.get("description") or item.get("description") or ""
+        if isinstance(description, list):
+            description = " ".join(str(value) for value in description)
+
+        creator = metadata.get("creator") or item.get("creator") or "Unknown"
+        if isinstance(creator, list):
+            creator = ", ".join(str(value) for value in creator)
+
+        subjects = metadata.get("subject") or item.get("subject") or []
+        if isinstance(subjects, str):
+            subjects = [subjects]
+        subject_text = " ".join(str(value) for value in subjects)
+        combined_metadata = " ".join((title, str(description), subject_text, str(creator)))
+
+        width_value = (
+            selected_file.get("width")
+            or item.get("source_pixel_width")
+            or 0
+        )
+        try:
+            width = int(float(width_value))
+        except (TypeError, ValueError):
+            width = 0
+
+        file_url = (
+            "https://archive.org/download/"
+            + quote(identifier, safe="")
+            + "/"
+            + quote(filename, safe="")
+        )
+        page_url = "https://archive.org/details/" + quote(identifier, safe="")
+
+        results.append({
+            "source": "Internet Archive",
+            "id": identifier,
+            "url": file_url,
+            "width": width,
+            "duration": parse_runtime(item.get("runtime") or metadata.get("runtime")),
+            "metadata": combined_metadata,
+            "tags": subject_text or combined_metadata,
+            "creator": str(creator),
+            "page_url": page_url,
+            "license": license_name,
+        })
+
+    return results
+
 def search_all_footage_sources(query):
     """Query each configured/open source independently; disable throttled sources."""
     cache_sources = (
-        ("pixabay" if PIXABAY_KEY else "")
+        "internet-archive-v1|"
+        + ("pixabay" if PIXABAY_KEY else "")
         + ("|pexels" if PEXELS_KEY else "")
         + "|nasa|commons"
     )
@@ -1179,10 +1432,11 @@ def search_all_footage_sources(query):
             pass
 
     searches = [
-        ("Pixabay", pixabay_search),
-        ("Pexels", pexels_search),
-        ("NASA", nasa_search),
+        ("Internet Archive", internet_archive_search),
         ("Wikimedia Commons", commons_search),
+        ("NASA", nasa_search),
+        ("Pexels", pexels_search),
+        ("Pixabay", pixabay_search),
     ]
 
     combined = []
@@ -1359,26 +1613,50 @@ def query_concepts(text):
 
 
 def expand_visual_queries(raw_queries):
-    """Create targeted search variants while preserving the requested shot type."""
+    """Build deduplicated stock-footage searches without repeating query words."""
     expanded = []
+    seen = set()
 
     replacements = (
-        (r"\bAmazon\b", "tropical rainforest"),
-        (r"\bcanopy\b", "treetops"),
-        (r"\bsunrise\b", "dawn"),
-        (r"\baerial view\b", "drone view"),
+        (r"Amazon", "tropical rainforest"),
+        (r"canopy", "treetops"),
+        (r"sunrise", "dawn"),
+        (r"aerial view", "drone view"),
     )
+
+    mood_words = {
+        "sunrise", "sunset", "dawn", "dusk",
+        "morning", "evening", "golden",
+        "cinematic", "slow", "motion"
+    }
+
+    def add_query(value):
+        cleaned = clean_query(value)
+        if not cleaned:
+            return
+
+        # De-duplicate tokens such as the previous "amazon canopy canopy" query.
+        deduplicated = []
+        token_seen = set()
+        for token in normalize_words(cleaned):
+            if token not in token_seen:
+                token_seen.add(token)
+                deduplicated.append(token)
+
+        normalized = " ".join(deduplicated).strip()
+        key = normalized.lower()
+        if normalized and key not in seen:
+            expanded.append(normalized)
+            seen.add(key)
 
     for raw in raw_queries:
         base = clean_query(raw)
-
         if not base:
             continue
 
-        expanded.append(base)
+        add_query(base)
 
         variant = base
-
         for pattern, replacement in replacements:
             variant = re.sub(
                 pattern,
@@ -1386,57 +1664,122 @@ def expand_visual_queries(raw_queries):
                 variant,
                 flags=re.IGNORECASE
             )
-
-        if variant.lower() != base.lower():
-            expanded.append(
-                clean_query(variant)
-            )
-
-        mood_words = {
-            "sunrise", "sunset", "dawn", "dusk",
-            "morning", "evening", "golden",
-            "cinematic", "slow", "motion"
-        }
+        add_query(variant)
 
         core_words = [
             token
             for token in normalize_words(base)
-            if token not in STOP_WORDS
-            and token not in mood_words
+            if token not in STOP_WORDS and token not in mood_words
         ]
-
-        core = " ".join(core_words).strip()
-
-        if core and core.lower() != base.lower():
-            expanded.append(
-                clean_query(core)
-            )
+        add_query(" ".join(core_words))
 
     joined = " ".join(expanded).lower()
-
-    if (
-        "amazon" in joined
-        and ("canopy" in joined or "treetop" in joined)
-    ):
-        expanded.extend([
+    if "amazon" in joined and ("canopy" in joined or "treetop" in joined):
+        for query in (
             "Amazon rainforest aerial canopy",
             "Amazon rainforest drone canopy",
             "Brazil Amazon rainforest aerial treetops",
             "tropical rainforest canopy drone view",
             "Amazon jungle overhead forest canopy",
-        ])
+        ):
+            add_query(query)
+
+    return expanded[:12]
+
+
+def fallback_visual_queries(raw_queries):
+    """Broaden a sparse search with independent, subject-preserving query variants."""
+    primary = next(
+        (str(value).strip() for value in raw_queries if str(value).strip()),
+        "",
+    )
+    if not primary:
+        return []
+
+    _, groups = query_concepts(primary)
+    names = set(groups)
+    candidates = []
+
+    if "rainforest" in names and "canopy" in names:
+        candidates = [
+            "tropical rainforest canopy aerial",
+            "rainforest treetops drone",
+            "jungle canopy overhead",
+            "tropical forest canopy aerial",
+            "jungle treetops aerial",
+            "Amazon basin forest canopy",
+        ]
+    elif "rainforest" in names and "river" in names:
+        candidates = [
+            "tropical rainforest river aerial",
+            "jungle river winding",
+            "river through tropical forest",
+            "Amazon river forest aerial",
+        ]
+    elif "rainforest" in names:
+        candidates = [
+            "tropical rainforest aerial",
+            "jungle forest wildlife",
+            "tropical forest trees",
+            "rainforest landscape aerial",
+        ]
+    elif "canopy" in names:
+        candidates = [
+            "forest canopy aerial",
+            "tree canopy drone",
+            "forest treetops aerial",
+        ]
+    elif "waterfall" in names:
+        candidates = [
+            "waterfall flowing water",
+            "forest waterfall aerial",
+            "waterfall nature landscape",
+        ]
+    elif "river" in names:
+        candidates = [
+            "river flowing aerial",
+            "river winding through forest",
+            "river landscape drone",
+        ]
+    elif "insect" in names:
+        candidates = [
+            "insect macro nature",
+            "insect on leaf closeup",
+            "insect crawling plant",
+        ]
+    elif "orchid" in names:
+        candidates = [
+            "orchid flower closeup",
+            "orchid tropical plant",
+            "orchid growing tree",
+        ]
+    elif "jaguar" in names:
+        candidates = [
+            "jaguar walking forest",
+            "jaguar wildlife habitat",
+            "jaguar resting jungle",
+        ]
+    elif "bird" in names:
+        candidates = [
+            "tropical bird perched tree",
+            "bird flying forest",
+            "parrot wildlife closeup",
+        ]
 
     unique = []
     seen = set()
+    primary_tokens = set(normalize_words(primary))
+    for item in candidates:
+        cleaned = clean_query(item)
+        tokens = normalize_words(cleaned)
+        # Avoid fallback queries that add no meaningful search distinction.
+        key = " ".join(dict.fromkeys(tokens)).lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        unique.append(cleaned)
 
-    for item in expanded:
-        key = item.lower()
-
-        if item and key not in seen:
-            unique.append(item)
-            seen.add(key)
-
-    return unique[:12]
+    return unique
 
 
 def relevance_score(hit, query, narration):
@@ -2105,8 +2448,10 @@ VISUAL MATCH RULES:
 - Treat this individual search query as one independent shot option, not as a checklist of every detail mentioned anywhere in the scene.
 - The main concrete subject named in this query must be visible. For example, an orchid query must show an orchid; a jaguar query must show a jaguar; an insect query must show an insect.
 - Weather and mood words such as rain, mist, wet, or sunrise are supporting context. Do not reject a clearly matching subject only because a brief weather condition is not obvious in two or three sampled frames.
-- If the query asks for an aerial/drone canopy view, the frames must show a broad overhead view of dense forest treetops. A ground-level path, close-up leaves, isolated branches, hills, or a stylized animation is not a match.
-- Use the source catalog metadata to support geographic context. If metadata identifies tropical/Amazon rainforest and the frames show the requested subject in a compatible natural environment, do not demand that the exact country be visually recognizable.
+- If the query asks for an aerial/drone canopy view, the frames must show a broad overhead view of forest treetops. A ground-level path, close-up leaves, isolated branches, hills, or a stylized animation is not a match.
+- Judge the requested shot type and visible subject before guessing a region or tree species. Do not label a canopy as temperate/European merely because the exact location is not visually identifiable.
+- Use source catalog metadata for geographic provenance. If metadata supports a tropical/rainforest setting and the frames show compatible dense green forest canopy, accept the visual match without demanding that the exact country be visible.
+- If the catalog explicitly identifies a conflicting setting (for example, a manicured park or temperate autumn woodland), reject it. Never describe a generic canopy clip as confirmed Amazon footage unless the source metadata supports that claim.
 - The narration provides context, but do not require every fact in the narration to appear in one clip.
 - Do not infer the main subject if it is not visible. If the frames contradict the requested shot, reject.
 
@@ -2341,10 +2686,49 @@ Set relevant=true only when the visual composition is a genuine match and source
     )
 
 
+    return combined
+
+
+def rank_footage_candidates_by_source(candidates):
+    """Rank by relevance inside strict source tiers, with unknown sources last."""
+    candidates_by_source = {}
+
+    for candidate_item in candidates:
+        candidate_source = str(
+            candidate_item[1].get("source") or ""
+        ).strip()
+        candidates_by_source.setdefault(
+            candidate_source, []
+        ).append(candidate_item)
+
+    ranked = []
+
+    for candidate_source in FOOTAGE_SOURCE_PRIORITY:
+        source_candidates = sorted(
+            candidates_by_source.pop(candidate_source, []),
+            key=lambda item: item[0],
+            reverse=True
+        )
+        source_limit = FOOTAGE_SOURCE_CANDIDATE_LIMITS[candidate_source]
+        ranked.extend(source_candidates[:source_limit])
+
+    # Unknown future sources are fallback-only and remain after all known tiers.
+    for candidate_source in sorted(candidates_by_source):
+        source_candidates = sorted(
+            candidates_by_source[candidate_source],
+            key=lambda item: item[0],
+            reverse=True
+        )
+        ranked.extend(source_candidates[:4])
+
+    return ranked
+
+
 def fetch_footage(plan):
     credits = []
     used_ids = set()
     selected_tag_sets = []
+    verified_assets = []
 
     visual_provider_names = []
 
@@ -2385,6 +2769,12 @@ def fetch_footage(plan):
             "PEXELS_API_KEY is not configured."
         )
 
+    print(
+        "Footage selection priority (strict tiers): "
+        + " -> ".join(FOOTAGE_SOURCE_PRIORITY)
+        + ". Relevance is ranked only within each source."
+    )
+
     if not visual_provider_names:
         print(
             "WARNING: FOOTAGE_VISION_REQUIRED=false and no visual AI keys "
@@ -2420,107 +2810,84 @@ def fetch_footage(plan):
             f"each of {len(queries)} search variants."
         )
 
-        for query in queries:
+        def collect_query_candidates(query):
             for hit in search_all_footage_sources(query):
-                identity = (
-                    f"{hit.get('source')}:{hit.get('id')}"
-                )
+                identity = f"{hit.get('source')}:{hit.get('id')}"
 
-                if (
-                    not hit.get("url")
-                    or identity in used_ids
-                ):
+                if not hit.get("url") or identity in used_ids:
                     continue
 
-                if not candidate_matches_visual_anchors(
-                    hit,
-                    query
-                ):
+                if not candidate_matches_visual_anchors(hit, query):
                     continue
 
-                width = int(
-                    hit.get("width") or 0
-                )
-
-                duration = float(
-                    hit.get("duration") or 0
-                )
-
+                width = int(hit.get("width") or 0)
+                duration = float(hit.get("duration") or 0)
                 if width and width < MIN_CLIP_WIDTH:
                     continue
-
                 if duration and duration < 4:
                     continue
 
                 score, matched, total = relevance_score(
-                    hit,
-                    query,
-                    scene.get("narration", "")
+                    hit, query, scene.get("narration", "")
                 )
-
                 if matched < 1 or score < 0.20:
                     continue
 
-                metadata_tokens = set(
-                    normalize_words(
-                        str(hit.get("metadata", ""))
-                        + " "
-                        + str(hit.get("tags", ""))
-                    )
-                )
-
-                scene_context = set(
-                    normalize_words(
-                        scene.get("narration", "")
-                    )
-                )
+                metadata_tokens = set(normalize_words(
+                    str(hit.get("metadata", "")) + " " + str(hit.get("tags", ""))
+                ))
+                scene_context = set(normalize_words(scene.get("narration", "")))
 
                 if (
                     metadata_tokens & CONTEXT_CONFLICTS["snow_winter"]
                     and not scene_context & CONTEXT_CONFLICTS["snow_winter"]
                 ):
                     continue
-
                 if (
                     metadata_tokens & CONTEXT_CONFLICTS["underwater"]
                     and not scene_context & CONTEXT_CONFLICTS["underwater"]
                 ):
                     continue
 
-                tags = str(
-                    hit.get("tags")
-                    or hit.get("metadata")
-                    or ""
-                )
-
+                tags = str(hit.get("tags") or hit.get("metadata") or "")
                 similarity = max(
-                    [
-                        tag_similarity(tags, old)
-                        for old in selected_tag_sets
-                    ] or [0.0]
+                    [tag_similarity(tags, old) for old in selected_tag_sets] or [0.0]
                 )
-
                 if similarity > 0.78:
                     continue
 
                 previous = candidates.get(identity)
+                if previous is None or score > previous[0]:
+                    candidates[identity] = (score, hit, query, matched, total)
 
-                if (
-                    previous is None
-                    or score > previous[0]
-                ):
-                    candidates[identity] = (
-                        score,
-                        hit,
-                        query,
-                        matched,
-                        total
-                    )
+        for query in queries:
+            collect_query_candidates(query)
 
-        ranked = sorted(
-            candidates.values(),
-            key=lambda item: item[0],
-            reverse=True
+        # Only sparse scenes pay for additional searches. This keeps normal runs
+        # close to the previous cost while giving difficult scenes a wider pool.
+        fallback_threshold = min(20, VISION_CANDIDATE_LIMIT)
+        if len(candidates) < fallback_threshold:
+            extra_queries = fallback_visual_queries(raw_queries)
+            existing = {query.lower() for query in queries}
+            extra_queries = [q for q in extra_queries if q.lower() not in existing]
+
+            if extra_queries:
+                print(
+                    f"Scene {i}: only {len(candidates)} unique candidates qualified; "
+                    f"trying {len(extra_queries)} targeted fallback searches."
+                )
+
+            for query in extra_queries:
+                queries.append(query)
+                collect_query_candidates(query)
+                if len(candidates) >= VISION_CANDIDATE_LIMIT:
+                    break
+
+        # Never compare scores across different providers. Try the preferred
+        # source tier first; lower tiers are reached only when earlier candidates
+        # fail to download or fail visual verification.
+        ranked = rank_footage_candidates_by_source(
+            candidates.values()
         )
 
         print(
@@ -2650,6 +3017,97 @@ def fetch_footage(plan):
                         "provider failover. " + message
                     ) from exc
 
+        reused_from_scene = None
+
+        if selected is None and verified_assets:
+            print(
+                f"Scene {i}: no unique candidate passed; checking previously "
+                "verified footage as a last-resort related-scene fallback."
+            )
+
+            for previous_asset in verified_assets:
+                previous_hit = previous_asset["hit"]
+                previous_path = Path(previous_asset["path"])
+                if not previous_path.is_file():
+                    continue
+
+                for fallback_query in queries:
+                    if not candidate_matches_visual_anchors(
+                        previous_hit, fallback_query
+                    ):
+                        continue
+
+                    reuse_score, reuse_matched, reuse_total = relevance_score(
+                        previous_hit,
+                        fallback_query,
+                        scene.get("narration", ""),
+                    )
+                    if reuse_matched < 1 or reuse_score < 0.28:
+                        continue
+
+                    candidate_metadata = " | ".join([
+                        str(previous_hit.get("metadata", "")),
+                        str(previous_hit.get("tags", "")),
+                    ])
+
+                    try:
+                        if visual_provider_names:
+                            (
+                                reuse_relevant,
+                                reuse_confidence,
+                                reuse_reason,
+                                reuse_provider,
+                            ) = verify_footage_visually(
+                                previous_path,
+                                scene,
+                                fallback_query,
+                                candidate_metadata,
+                            )
+                            print(
+                                f"Scene {i}: reuse check of Scene "
+                                f"{previous_asset['scene']} via {reuse_provider} — "
+                                f"{'PASS' if reuse_relevant else 'REJECT'} "
+                                f"({reuse_confidence:.2f}): {reuse_reason[:180]}"
+                            )
+                        else:
+                            reuse_relevant = True
+                            reuse_confidence = None
+                            reuse_provider = "Metadata-only"
+                            reuse_reason = (
+                                "Previously accepted clip; metadata-only reuse "
+                                "is permitted by the explicit configuration."
+                            )
+
+                    except VisionVerificationError as exc:
+                        raise RuntimeError(
+                            "Visual verification cannot continue during the "
+                            "related-scene fallback. " + str(exc)
+                        ) from exc
+
+                    if not reuse_relevant:
+                        continue
+
+                    shutil.copyfile(previous_path, destination)
+                    selected = (
+                        reuse_score,
+                        previous_hit,
+                        fallback_query,
+                        reuse_matched,
+                        reuse_total,
+                        reuse_confidence,
+                        reuse_reason,
+                        reuse_provider,
+                    )
+                    reused_from_scene = previous_asset["scene"]
+                    print(
+                        f"Scene {i}: reusing the already verified clip from "
+                        f"Scene {reused_from_scene}; visual re-check passed."
+                    )
+                    break
+
+                if selected is not None:
+                    break
+
         if selected is None:
             if not ranked:
                 reason = (
@@ -2708,6 +3166,15 @@ def fetch_footage(plan):
             )
         )
 
+        if reused_from_scene is None:
+            verified_assets.append({
+                "scene": i,
+                "hit": hit,
+                "path": str(destination),
+            })
+        else:
+            scene["reused_footage_from_scene"] = reused_from_scene
+
         scene["media_file"] = str(destination)
         scene["visual_type"] = "footage"
         scene["selected_footage_source"] = hit.get("source")
@@ -2750,6 +3217,11 @@ def fetch_footage(plan):
             f"({matched}/{total} query concepts)"
             f"{vision_credit} | "
             f"License: {hit.get('license', 'Check source page')}"
+            + (
+                f" | Last-resort reuse of previously verified Scene {reused_from_scene}"
+                if reused_from_scene is not None
+                else ""
+            )
         )
 
         print(

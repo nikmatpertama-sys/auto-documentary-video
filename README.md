@@ -1,25 +1,47 @@
-Auto Documentary Video
-Automated vertical mini-documentary generator using Gemini for the story plan, Pixabay with NASA fallback for footage, Edge TTS for narration, Pillow for original explainer cards, and FFmpeg for rendering.
-Output
-documentary.mp4 — 1080 × 1920, 30 FPS, H.264/AAC
-plan.json — generated script, scene plan, source metadata, and render timing
-credits.txt — footage source/creator attribution
-output/ — downloaded media, voice-over, captions, scene cards, and intermediate renders
-GitHub Actions setup
-Add repository Actions secrets GEMINI_API_KEY and PIXABAY_API_KEY.
-Open Actions → Hybrid Documentary Generator → Run workflow.
-Enter a documentary topic and run it.
-Download the hybrid-documentary-* artifact when the workflow completes.
-Local setup
-Requires Python 3.11+, FFmpeg (including ffprobe and the subtitles/libass filter), and the two API keys.
-python -m pip install -r requirements.txt
-export GEMINI_API_KEY="..."
-export PIXABAY_API_KEY="..."
-export INPUT_TOPIC="Why do fireflies glow?"
-python main.py
-Editing pipeline
-Scene durations are allocated according to narration length. Each shot is formatted for vertical 9:16, receives restrained motion, contrast/saturation treatment and short fades. Diagram scenes use original Pillow-generated cards. Captions are generated from Edge TTS word-boundary timings. A quiet, original tonal ambience bed is synthesized during rendering so the project does not depend on an unlicensed music download.
-Notes
-Review factual claims and stock-footage relevance before publishing. Automated topic generation is not a substitute for editorial fact-checking.
-Pixabay/NASA asset availability varies by topic. credits.txt records the selected source where available.
-The synthetic ambience is intentionally subtle and is not a substitute for a properly licensed music track or bespoke sound design.
+# Auto Documentary Video — Version 10.10
+
+Automated vertical documentary generator. It builds a scene plan, searches for relevant real-world footage, performs visual verification, generates narration and captions, and renders the final video with FFmpeg.
+
+## Master scriptwriter prompt
+
+`SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, an eight-scene structure, a 145–165-word narration target, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
+
+## Footage source selection — version 10.10
+
+The active pipeline (`render.py` → `main.py`) enforces this **selection** priority:
+
+1. Internet Archive
+2. Wikimedia Commons
+3. NASA
+4. Pexels
+5. Pixabay
+
+Candidate relevance is ranked **within each source tier**, never globally across all providers. The default visual-check candidate budget is 10 Internet Archive candidates and up to 4 candidates from each fallback source. The generator attempts the Internet Archive tier first; it proceeds to Wikimedia Commons, NASA, Pexels, and Pixabay only when candidates in earlier tiers fail to download or fail visual verification.
+
+Important distinction: the existing search collector still gathers metadata from configured sources before candidate selection. This upgrade enforces which source's clips are attempted first; it does not yet make fallback API searches lazy. Pexels and Pixabay are fallback providers, not the top-ranked selection source.
+
+Internet Archive results are admitted only when metadata explicitly indicates CC0, CC BY, or Public Domain. Wikimedia Commons results are license-filtered. NASA assets may require checking third-party credits. Always verify the exact source-page license and attribution requirements before publishing.
+
+`footage.py` is a legacy standalone Pixabay utility and is not called by the active `render.py` → `main.py` pipeline. Use the integrated pipeline for documentary production.
+
+## GitHub Actions workflow preservation
+
+This ZIP intentionally **does not include** `.github/workflows/render.yml`. The bundled 10.9 workflow is older and would risk overwriting the newer permanent-apply workflow already configured in the target repository. Keep the updated workflow on your branch; this archive only overlays the project files it contains and does not alter that workflow.
+
+## Required GitHub Secrets
+
+Add at least one AI provider key: `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`. `PIXABAY_API_KEY` and `PEXELS_API_KEY` are optional fallback-provider keys. Internet Archive, Wikimedia Commons, and NASA searches do not require API keys.
+
+## Output
+
+The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.json`, and the voice-over/caption files.
+
+## Version 10.10 — source-priority enforcement
+
+- Enforces source-tier selection: Internet Archive → Wikimedia Commons → NASA → Pexels → Pixabay.
+- Ranks relevance only within each source, so a high Pexels/Pixabay relevance score cannot outrank an available Internet Archive candidate.
+- Gives Internet Archive a larger candidate-check budget than each fallback source.
+- Retains the existing visual verification and download-failure fallback behavior.
+- Keeps the 10.9 single-role scriptwriter master prompt unchanged and loaded at runtime.
+- Does not add a second LLM/API request for fact-checking.
+- Omits the outdated bundled `render.yml` so the target repository's updated permanent workflow is preserved.
