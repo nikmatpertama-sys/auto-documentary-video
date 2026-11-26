@@ -13,7 +13,9 @@ import textwrap
 import sys
 import traceback
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 
 import requests
 import edge_tts
@@ -68,7 +70,7 @@ VISION_CANDIDATE_LIMIT = max(
     1, min(30, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "26")))
 )
 
-# Version 10.11: source-tier selection plus resilient field-research footage recovery.
+# Version 10.12: recover from Wikimedia download throttling and search sparse tiers better.
 # Internet Archive receives the largest candidate budget; the other sources
 # are fallback tiers, ordered from open archives to stock-footage providers.
 FOOTAGE_SOURCE_PRIORITY = (
@@ -81,9 +83,9 @@ FOOTAGE_SOURCE_PRIORITY = (
 FOOTAGE_SOURCE_CANDIDATE_LIMITS = {
     "Internet Archive": 10,
     "Wikimedia Commons": 4,
-    "NASA": 4,
-    "Pexels": 4,
-    "Pixabay": 4,
+    "NASA": 8,
+    "Pexels": 8,
+    "Pixabay": 8,
 }
 
 try:
@@ -163,6 +165,58 @@ class VisionResponseError(RuntimeError):
 
     pass
 
+
+def response_retry_after_seconds(response, default_seconds=120):
+    """Read Retry-After (seconds or HTTP-date), with a bounded safe fallback."""
+    raw = (getattr(response, "headers", {}) or {}).get("Retry-After", "")
+    delay = None
+    if raw:
+        try:
+            delay = float(raw)
+        except (TypeError, ValueError):
+            try:
+                retry_at = parsedate_to_datetime(str(raw))
+                if retry_at.tzinfo is None:
+                    retry_at = retry_at.replace(tzinfo=timezone.utc)
+                delay = (retry_at - datetime.now(timezone.utc)).total_seconds()
+            except (TypeError, ValueError, OverflowError):
+                delay = None
+    if delay is None:
+        delay = float(default_seconds)
+    return max(15.0, min(900.0, float(delay)))
+
+
+def mark_footage_source_rate_limited(source, response=None):
+    """Put a throttled footage source in a timed cooldown for search and download."""
+    if not source:
+        return 0.0
+    default = 180.0 if source == "Wikimedia Commons" else 60.0
+    delay = response_retry_after_seconds(response, default)
+    until = time.monotonic() + delay
+    FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = max(
+        FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(source, 0.0), until
+    )
+    print(
+        f"{source} rate-limited; cooling this source for "
+        f"{delay:.0f}s before trying it again."
+    )
+    return delay
+
+
+def is_wikimedia_url(url):
+    """Recognize both Commons API and upload.wikimedia.org media URLs."""
+    host = (urlparse(str(url or "")).hostname or "").lower()
+    return host == "wikimedia.org" or host.endswith(".wikimedia.org")
+
+
+def pace_wikimedia_request():
+    """Apply one shared request interval to Commons API and media downloads."""
+    global WIKIMEDIA_LAST_REQUEST_AT
+    elapsed = time.monotonic() - WIKIMEDIA_LAST_REQUEST_AT
+    wait_for_interval = WIKIMEDIA_MIN_REQUEST_INTERVAL - elapsed
+    if wait_for_interval > 0:
+        time.sleep(wait_for_interval)
+    WIKIMEDIA_LAST_REQUEST_AT = time.monotonic()
 
 
 def run(cmd):
@@ -697,21 +751,33 @@ def assign_scene_sentence_ranges(plan):
 # FOOTAGE SEARCH AND RELEVANCE
 # ============================================================
 
-def download_stream(url, dest):
-    """Download safely; remove partial files on every failure."""
+def download_stream(url, dest, source=None):
+    """Download safely and cool down a source immediately after HTTP 429."""
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.unlink(missing_ok=True)
 
+    is_commons = is_wikimedia_url(url)
+    source = "Wikimedia Commons" if is_commons else source
+
     try:
+        if is_commons:
+            # Wikimedia throttles media downloads separately from API searches.
+            # Pace both through the same clock; do not hammer every candidate
+            # after the first upload.wikimedia.org 429 response.
+            pace_wikimedia_request()
+
         with requests.get(
             url,
             stream=True,
             timeout=(25, 180),
             headers={
-                "User-Agent": "AutoDocumentaryVideo/3.0"
+                "User-Agent": "AutoDocumentaryVideo/3.1 (documentary footage client)"
             }
         ) as response:
+
+            if response.status_code == 429:
+                mark_footage_source_rate_limited(source, response)
 
             response.raise_for_status()
 
@@ -1035,10 +1101,7 @@ def commons_search(query):
 
     response = None
     for attempt in range(WIKIMEDIA_MAX_RETRIES + 1):
-        elapsed = time.monotonic() - WIKIMEDIA_LAST_REQUEST_AT
-        wait_for_interval = WIKIMEDIA_MIN_REQUEST_INTERVAL - elapsed
-        if wait_for_interval > 0:
-            time.sleep(wait_for_interval)
+        pace_wikimedia_request()
 
         response = requests.get(
             "https://commons.wikimedia.org/w/api.php",
@@ -1046,8 +1109,6 @@ def commons_search(query):
             headers=headers,
             timeout=35,
         )
-        WIKIMEDIA_LAST_REQUEST_AT = time.monotonic()
-
         if response.status_code != 429:
             response.raise_for_status()
             break
@@ -1462,15 +1523,9 @@ def search_all_footage_sources(query):
                 getattr(exc, "response", None), "status_code", None
             )
             if status_code == 429:
-                cooldown = 90.0 if source == "Wikimedia Commons" else 60.0
-                FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = (
-                    time.monotonic() + cooldown
-                )
+                response = getattr(exc, "response", None)
+                mark_footage_source_rate_limited(source, response)
                 complete_search = False
-                print(
-                    f"  {source} rate-limited (HTTP 429); "
-                    f"cooling for {cooldown:.0f}s, then it can recover."
-                )
             else:
                 complete_search = False
                 print(
@@ -1637,8 +1692,8 @@ def query_concepts(text):
     return tokens, concepts
 
 
-def expand_visual_queries(raw_queries):
-    """Build deduplicated stock-footage searches without repeating query words."""
+def expand_visual_queries(raw_queries, narration=""):
+    """Build deduplicated, scene-aware footage searches without repeating words."""
     expanded = []
     seen = set()
 
@@ -1699,6 +1754,9 @@ def expand_visual_queries(raw_queries):
         add_query(" ".join(core_words))
 
     joined = " ".join(expanded).lower()
+    context_text = (joined + " " + str(narration or "")).lower()
+    context_tokens = set(normalize_words(context_text))
+
     if "amazon" in joined and ("canopy" in joined or "treetop" in joined):
         for query in (
             "Amazon rainforest aerial canopy",
@@ -1709,14 +1767,48 @@ def expand_visual_queries(raw_queries):
         ):
             add_query(query)
 
+    has_research_context = bool(context_tokens & {
+        "researcher", "researchers", "scientist", "scientists", "research",
+        "fieldwork", "field", "study", "studying", "measurement", "measuring",
+    })
+    has_forest_context = bool(context_tokens & {
+        "forest", "forests", "rainforest", "amazon", "jungle", "woodland",
+    })
+    has_climate_model_context = (
+        "climate" in context_tokens
+        and bool(context_tokens & {
+            "model", "models", "modeling", "modelling", "simulation",
+            "computer", "computers", "projection", "projections", "data",
+        })
+    )
+
+    # Make the most useful fieldwork/data alternatives part of the first search
+    # wave. Relying only on the later sparse-pool fallback missed scenes whose
+    # raw metadata count was high but whose candidates were semantically weak.
+    if has_research_context and has_forest_context:
+        for query in (
+            "field researcher measuring humidity in tropical forest",
+            "forest weather station environmental sensors",
+        ):
+            add_query(query)
+
+    if has_climate_model_context:
+        for query in (
+            "climate model simulation visualization earth atmosphere",
+            "NASA atmospheric climate model data visualization",
+            "scientist analyzing climate model data computer screen",
+        ):
+            add_query(query)
+
     return expanded[:12]
 
 
 def fallback_visual_queries(raw_queries, narration=""):
     """Broaden sparse searches with independent, subject-preserving variants.
 
-    10.11 adds a branch for documentary fieldwork: people, research activity,
-    and environmental instruments. The variants deliberately separate wide
+    Version 10.12 expands sparse-tier search and climate-model shot recovery.
+    Version 10.11 added documentary fieldwork: people, research activity, and
+    environmental instruments. The variants deliberately separate wide
     shots of researchers from close-ups of sensors so a scene can be covered
     by a truthful, visually verified relevant shot without demanding every
     object appear in the same frame.
@@ -1752,6 +1844,13 @@ def fallback_visual_queries(raw_queries, narration=""):
         "humidity", "sensor", "sensors", "weather", "meteorological",
         "station", "temperature", "climate", "measurement", "measuring",
     })
+    has_climate_model_context = (
+        "climate" in context_tokens
+        and bool(context_tokens & {
+            "model", "models", "modeling", "modelling", "simulation",
+            "computer", "computers", "projection", "projections", "data",
+        })
+    )
 
     if has_research_context:
         if has_forest_context:
@@ -1762,20 +1861,27 @@ def fallback_visual_queries(raw_queries, narration=""):
                 "research team conducting rainforest fieldwork",
                 "forest weather station sensors and monitoring equipment",
                 "climate monitoring instruments in tropical forest",
-                "researcher using handheld humidity sensor outdoors",
-                "scientist collecting leaf samples in rainforest",
             ])
         else:
             candidates.extend([
                 "scientist conducting outdoor field research",
                 "field researcher recording environmental measurements",
                 "research team monitoring scientific instruments outdoors",
-                "researcher using handheld environmental sensor",
                 "weather station sensors and monitoring equipment",
                 "temperature humidity data logger field equipment",
                 "meteorological instruments at research station",
-                "scientist collecting environmental samples outdoors",
             ])
+
+    if has_climate_model_context:
+        # A scientific model can be represented truthfully by its data output;
+        # the clip need not show a researcher physically operating a computer.
+        # These are separate shot options and still pass the same visual check.
+        candidates.extend([
+            "climate model simulation visualization of earth atmosphere",
+            "NASA atmospheric climate model data visualization",
+            "scientist analyzing climate model data on computer screen",
+            "global temperature climate projection data visualization",
+        ])
 
     if has_weather_context:
         candidates.extend([
@@ -1860,9 +1966,9 @@ def fallback_visual_queries(raw_queries, narration=""):
         seen.add(key)
         unique.append(cleaned)
 
-    # Bound the additional API work per scene; the candidate pool itself has
-    # an independent cap and still undergoes the same visual verification.
-    return unique[:8]
+    # Bound the additional API work per difficult scene; every alternative
+    # remains independently metadata-filtered and visually verified.
+    return unique[:12]
 
 
 def relevance_score(hit, query, narration):
@@ -1984,6 +2090,10 @@ def candidate_matches_visual_anchors(hit, query):
             "amazon", "rainforest", "jungle",
             "tropical", "tropics", "equatorial"
         },
+        "forest": {
+            "forest", "forests", "woodland", "woods",
+            "timberland", "tree", "trees", "rainforest", "jungle",
+        },
         "canopy": {
             "canopy", "canopies", "treetop",
             "treetops", "foliage", "crown",
@@ -2042,7 +2152,7 @@ def candidate_matches_visual_anchors(hit, query):
             matched.add(name)
 
     subject_groups = {
-        "canopy", "river", "waterfall", "wildlife", "insect",
+        "forest", "canopy", "river", "waterfall", "wildlife", "insect",
         "orchid", "jaguar", "bird", "mountain", "ocean", "desert",
         "forest_floor",
     }
@@ -2904,7 +3014,8 @@ def fetch_footage(plan):
         )
 
         queries = expand_visual_queries(
-            raw_queries
+            raw_queries,
+            scene.get("narration", ""),
         )
 
         candidates = {}
@@ -2972,10 +3083,12 @@ def fetch_footage(plan):
         for query in queries:
             collect_query_candidates(query)
 
-        # Only sparse scenes pay for additional searches. This keeps normal runs
-        # close to the previous cost while giving difficult scenes a wider pool.
-        fallback_threshold = VISION_CANDIDATE_LIMIT
-        if len(candidates) < fallback_threshold:
+        # Only genuinely sparse selectable pools pay for the larger fallback
+        # search wave. Measure the source-capped shortlist, not the raw metadata
+        # pool: dozens of hits can still collapse to a handful after tier caps.
+        ranked = rank_footage_candidates_by_source(candidates.values())
+        targeted_search_threshold = min(12, VISION_CANDIDATE_LIMIT)
+        if len(ranked) < targeted_search_threshold:
             extra_queries = fallback_visual_queries(
                 raw_queries,
                 scene.get("narration", ""),
@@ -2985,22 +3098,23 @@ def fetch_footage(plan):
 
             if extra_queries:
                 print(
-                    f"Scene {i}: only {len(candidates)} unique candidates qualified; "
-                    f"trying {len(extra_queries)} targeted fallback searches."
+                    f"Scene {i}: only {len(ranked)} selectable candidates "
+                    f"after source-tier limits (target: {targeted_search_threshold}); "
+                    f"trying {len(extra_queries)} "
+                    "targeted fallback searches."
                 )
 
             for query in extra_queries:
                 queries.append(query)
                 collect_query_candidates(query)
-                if len(candidates) >= VISION_CANDIDATE_LIMIT:
+                ranked = rank_footage_candidates_by_source(candidates.values())
+                if len(ranked) >= VISION_CANDIDATE_LIMIT:
                     break
 
         # Never compare scores across different providers. Try the preferred
         # source tier first; lower tiers are reached only when earlier candidates
         # fail to download or fail visual verification.
-        ranked = rank_footage_candidates_by_source(
-            candidates.values()
-        )
+        ranked = rank_footage_candidates_by_source(candidates.values())
 
         print(
             f"Scene {i}: {len(candidates)} metadata-qualified "
@@ -3045,12 +3159,25 @@ def fetch_footage(plan):
             total
         ) in ranked[:VISION_CANDIDATE_LIMIT]:
 
+            candidate_source = str(hit.get("source") or "").strip()
+            cooldown_until = FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(
+                candidate_source, 0.0
+            )
+            if time.monotonic() < cooldown_until:
+                remaining = max(1, int(cooldown_until - time.monotonic()))
+                print(
+                    f"Scene {i}: skipping remaining {candidate_source} "
+                    f"candidates during its {remaining}s rate-limit cooldown."
+                )
+                continue
+
             checked += 1
 
             try:
                 download_stream(
                     hit["url"],
-                    destination
+                    destination,
+                    source=candidate_source,
                 )
 
                 if visual_provider_names:
