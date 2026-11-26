@@ -1,0 +1,1047 @@
+{
+  "sentences": [
+    {
+      "start": 0.75,
+      "end": 7.47,
+      "duration": 6.72
+    },
+    {
+      "start": 8.17,
+      "end": 15.082,
+      "duration": 6.912
+    },
+    {
+      "start": 15.382000000000001,
+      "end": 21.91,
+      "duration": 6.528
+    },
+    {
+      "start": 22.21,
+      "end": 29.53,
+      "duration": 7.32
+    },
+    {
+      "start": 29.830000000000002,
+      "end": 36.118,
+      "duration": 6.288
+    },
+    {
+      "start": 36.418,
+      "end": 43.402,
+      "duration": 6.984
+    },
+    {
+      "start": 43.702,
+      "end": 50.565999999999995,
+      "duration": 6.864
+    },
+    {
+      "start": 50.86599999999999,
+      "end": 57.56199999999999,
+      "duration": 6.696
+    }
+  ],
+  "word_events": [
+    {
+      "text": "Beavers",
+      "offset": 0.852083,
+      "duration": 0.442708,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "live",
+      "offset": 1.320833,
+      "duration": 0.182291,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "in",
+      "offset": 1.529166,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "freshwater",
+      "offset": 1.659375,
+      "duration": 0.585958,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "ecosystems",
+      "offset": 2.271375,
+      "duration": 0.690125,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "such",
+      "offset": 2.9875,
+      "duration": 0.195333,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "as",
+      "offset": 3.195833,
+      "duration": 0.117208,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "rivers,",
+      "offset": 3.339083,
+      "duration": 0.403666,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "streams,",
+      "offset": 3.951041,
+      "duration": 0.507833,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "lakes",
+      "offset": 4.6672080000000005,
+      "duration": 0.286458,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "and",
+      "offset": 5.057833,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "ponds",
+      "offset": 5.175,
+      "duration": 0.286458,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "across",
+      "offset": 5.4875,
+      "duration": 0.351583,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "the",
+      "offset": 5.865125,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "landscape.",
+      "offset": 5.969291,
+      "duration": 0.572916,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "River",
+      "offset": 8.272083,
+      "duration": 0.390625,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "ecosystems",
+      "offset": 8.68875,
+      "duration": 0.690125,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "are",
+      "offset": 9.404916,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "flowing",
+      "offset": 9.522083,
+      "duration": 0.364583,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "waters",
+      "offset": 9.912708,
+      "duration": 0.377625,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "that",
+      "offset": 10.316375,
+      "duration": 0.15625,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "drain",
+      "offset": 10.485624999999999,
+      "duration": 0.260416,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "the",
+      "offset": 10.772083,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "landscape",
+      "offset": 10.902291,
+      "duration": 0.520833,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "and",
+      "offset": 11.449166,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "include",
+      "offset": 11.566375,
+      "duration": 0.351583,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "living",
+      "offset": 11.943958,
+      "duration": 0.3125,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "interactions",
+      "offset": 12.282499999999999,
+      "duration": 0.690125,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "amongst",
+      "offset": 12.998666,
+      "duration": 0.377625,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "many",
+      "offset": 13.402291,
+      "duration": 0.273458,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "parts.",
+      "offset": 13.701791,
+      "duration": 0.46875,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "The",
+      "offset": 15.484083000000002,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "major",
+      "offset": 15.627333000000002,
+      "duration": 0.338541,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "zones",
+      "offset": 15.991916000000002,
+      "duration": 0.351583,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "in",
+      "offset": 16.369500000000002,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "river",
+      "offset": 16.525750000000002,
+      "duration": 0.3125,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "ecosystems",
+      "offset": 16.864291,
+      "duration": 0.742208,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "are",
+      "offset": 17.632541000000003,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "determined",
+      "offset": 17.749708000000002,
+      "duration": 0.533875,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "by",
+      "offset": 18.309625,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "the",
+      "offset": 18.452833000000002,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "river",
+      "offset": 18.609083000000002,
+      "duration": 0.325541,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "bed",
+      "offset": 18.947625000000002,
+      "duration": 0.208333,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "gradient",
+      "offset": 19.182000000000002,
+      "duration": 0.507833,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "or",
+      "offset": 19.715875,
+      "duration": 0.14325,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "current",
+      "offset": 19.885125000000002,
+      "duration": 0.338541,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "velocity.",
+      "offset": 20.249708000000002,
+      "duration": 0.716166,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "In",
+      "offset": 22.312083,
+      "duration": 0.195333,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "Europe,",
+      "offset": 22.533458,
+      "duration": 0.377625,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "beavers",
+      "offset": 23.106375,
+      "duration": 0.416666,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "were",
+      "offset": 23.549083,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "reduced",
+      "offset": 23.705333,
+      "duration": 0.364583,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "to",
+      "offset": 24.095958,
+      "duration": 0.078125,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "fragmented",
+      "offset": 24.200125,
+      "duration": 0.572916,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "populations",
+      "offset": 24.799083,
+      "duration": 0.742208,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "with",
+      "offset": 25.554291,
+      "duration": 0.15625,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "combined",
+      "offset": 25.736583,
+      "duration": 0.45575,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "population",
+      "offset": 26.205333,
+      "duration": 0.664083,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "numbers",
+      "offset": 26.895416,
+      "duration": 0.416666,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "estimated",
+      "offset": 27.338125,
+      "duration": 0.585958,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "in",
+      "offset": 27.950125,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "areas.",
+      "offset": 28.080333,
+      "duration": 0.520833,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "The",
+      "offset": 29.932083000000002,
+      "duration": 0.14325,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "concept",
+      "offset": 30.101375,
+      "duration": 0.494791,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "became",
+      "offset": 30.622208,
+      "duration": 0.338541,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "popular",
+      "offset": 30.986791,
+      "duration": 0.559916,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "in",
+      "offset": 31.559708,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "conservation",
+      "offset": 31.676875000000003,
+      "duration": 0.76825,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "and",
+      "offset": 32.458125,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "was",
+      "offset": 32.588333,
+      "duration": 0.15625,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "deployed",
+      "offset": 32.770625,
+      "duration": 0.45575,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "in",
+      "offset": 33.239375,
+      "duration": 0.078125,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "a",
+      "offset": 33.343541,
+      "duration": 0.065125,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "range",
+      "offset": 33.421666,
+      "duration": 0.3125,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "of",
+      "offset": 33.747208,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "contexts",
+      "offset": 33.864375,
+      "duration": 0.585958,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "for",
+      "offset": 34.476375000000004,
+      "duration": 0.14325,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "support.",
+      "offset": 34.645625,
+      "duration": 0.546875,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "Human",
+      "offset": 36.520083,
+      "duration": 0.390625,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "activities",
+      "offset": 36.936749999999996,
+      "duration": 0.625,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "had",
+      "offset": 37.587790999999996,
+      "duration": 0.15625,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "damaged",
+      "offset": 37.770083,
+      "duration": 0.429708,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "ecosystems",
+      "offset": 38.212790999999996,
+      "duration": 0.742208,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "such",
+      "offset": 38.981041,
+      "duration": 0.208333,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "as",
+      "offset": 39.202374999999996,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "by",
+      "offset": 39.358624999999996,
+      "duration": 0.15625,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "removing",
+      "offset": 39.540915999999996,
+      "duration": 0.507833,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "keystone",
+      "offset": 40.074791,
+      "duration": 0.481791,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "predators",
+      "offset": 40.569583,
+      "duration": 0.533875,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "from",
+      "offset": 41.129458,
+      "duration": 0.169291,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "the",
+      "offset": 41.311749999999996,
+      "duration": 0.078125,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "natural",
+      "offset": 41.415915999999996,
+      "duration": 0.403666,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "landscape.",
+      "offset": 41.845625,
+      "duration": 0.625,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "Wolves",
+      "offset": 43.804083,
+      "duration": 0.416666,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "often",
+      "offset": 44.246791,
+      "duration": 0.325541,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "kept",
+      "offset": 44.598375,
+      "duration": 0.247416,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "animals",
+      "offset": 44.871791,
+      "duration": 0.442708,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "from",
+      "offset": 45.340541,
+      "duration": 0.169291,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "grazing",
+      "offset": 45.535875,
+      "duration": 0.442708,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "in",
+      "offset": 45.991583,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "riparian",
+      "offset": 46.108791,
+      "duration": 0.559916,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "areas",
+      "offset": 46.694708,
+      "duration": 0.403666,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "which",
+      "offset": 47.124416,
+      "duration": 0.195333,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "protected",
+      "offset": 47.33275,
+      "duration": 0.533875,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "beavers",
+      "offset": 47.892624999999995,
+      "duration": 0.390625,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "from",
+      "offset": 48.309291,
+      "duration": 0.15625,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "having",
+      "offset": 48.491583,
+      "duration": 0.2995,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "food",
+      "offset": 48.804083,
+      "duration": 0.247416,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "sources.",
+      "offset": 49.077541,
+      "duration": 0.559916,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "Abiotic",
+      "offset": 50.96808299999999,
+      "duration": 0.651041,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "nonliving",
+      "offset": 51.64516599999999,
+      "duration": 0.546875,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "physical",
+      "offset": 52.21808299999999,
+      "duration": 0.481791,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "and",
+      "offset": 52.72591599999999,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "chemical",
+      "offset": 52.85612499999999,
+      "duration": 0.46875,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "interactions",
+      "offset": 53.35091599999999,
+      "duration": 0.651041,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "of",
+      "offset": 54.01495799999999,
+      "duration": 0.078125,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "its",
+      "offset": 54.10612499999999,
+      "duration": 0.169291,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "many",
+      "offset": 54.28841599999999,
+      "duration": 0.273458,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "parts",
+      "offset": 54.58787499999999,
+      "duration": 0.3125,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "shape",
+      "offset": 54.92641599999999,
+      "duration": 0.273458,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "these",
+      "offset": 55.21287499999999,
+      "duration": 0.182291,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "flowing",
+      "offset": 55.42120799999999,
+      "duration": 0.351583,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "river",
+      "offset": 55.78579099999999,
+      "duration": 0.286458,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "waters.",
+      "offset": 56.09829099999999,
+      "duration": 0.520833,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    }
+  ],
+  "caption_groups": [
+    {
+      "start": 0.852083,
+      "end": 3.182833,
+      "text": "Beavers live in freshwater ecosystems such"
+    },
+    {
+      "start": 3.195833,
+      "end": 5.839083,
+      "text": "as rivers, streams, lakes and ponds across"
+    },
+    {
+      "start": 5.865125,
+      "end": 6.542207,
+      "text": "the landscape."
+    },
+    {
+      "start": 8.272083,
+      "end": 10.472625,
+      "text": "River ecosystems are flowing waters that"
+    },
+    {
+      "start": 10.485624999999999,
+      "end": 12.256458,
+      "text": "drain the landscape and include living"
+    },
+    {
+      "start": 12.282499999999999,
+      "end": 14.170541,
+      "text": "interactions amongst many parts."
+    },
+    {
+      "start": 15.484083000000002,
+      "end": 17.723707000000005,
+      "text": "The major zones in river ecosystems are"
+    },
+    {
+      "start": 17.749708000000002,
+      "end": 19.859125,
+      "text": "determined by the river bed gradient or"
+    },
+    {
+      "start": 19.885125000000002,
+      "end": 20.965874000000003,
+      "text": "current velocity."
+    },
+    {
+      "start": 22.312083,
+      "end": 24.174083,
+      "text": "In Europe, beavers were reduced to"
+    },
+    {
+      "start": 24.200125,
+      "end": 26.192332999999998,
+      "text": "fragmented populations with combined"
+    },
+    {
+      "start": 26.205333,
+      "end": 28.601166,
+      "text": "population numbers estimated in areas."
+    },
+    {
+      "start": 29.932083000000002,
+      "end": 32.445125000000004,
+      "text": "The concept became popular in conservation"
+    },
+    {
+      "start": 32.458125,
+      "end": 33.838374,
+      "text": "and was deployed in a range of"
+    },
+    {
+      "start": 33.864375,
+      "end": 35.1925,
+      "text": "contexts for support."
+    },
+    {
+      "start": 36.520083,
+      "end": 39.189374,
+      "text": "Human activities had damaged ecosystems such"
+    },
+    {
+      "start": 39.202374999999996,
+      "end": 41.389874999999996,
+      "text": "as by removing keystone predators from the"
+    },
+    {
+      "start": 41.415915999999996,
+      "end": 42.470625,
+      "text": "natural landscape."
+    },
+    {
+      "start": 43.804083,
+      "end": 46.095749,
+      "text": "Wolves often kept animals from grazing in"
+    },
+    {
+      "start": 46.108791,
+      "end": 48.465541,
+      "text": "riparian areas which protected beavers from"
+    },
+    {
+      "start": 48.491583,
+      "end": 49.637457,
+      "text": "having food sources."
+    },
+    {
+      "start": 50.96808299999999,
+      "end": 53.32487499999999,
+      "text": "Abiotic nonliving physical and chemical"
+    },
+    {
+      "start": 53.35091599999999,
+      "end": 55.39516599999999,
+      "text": "interactions of its many parts shape these"
+    },
+    {
+      "start": 55.42120799999999,
+      "end": 56.61912399999999,
+      "text": "flowing river waters."
+    }
+  ],
+  "alignment": {
+    "total_words": 124,
+    "edge_timed_words": 124,
+    "estimated_words": 0,
+    "full_sentence_estimate_words": 0,
+    "edge_timing_coverage": 1.0,
+    "caption_group_count": 24,
+    "alignment_status": "complete_edge_timing"
+  },
+  "total_duration": 58.812,
+  "timing_master": "validated_voiceover"
+}
