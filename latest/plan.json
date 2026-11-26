@@ -1,18 +1,18 @@
 {
-  "title": "How Beavers Reshape Ecosystems",
-  "hook": "Beavers transform running water.",
+  "title": "How Beavers Shape Ecosystems",
+  "hook": "Beavers live in freshwater ecosystems such as rivers.",
   "scenes": [
     {
-      "narration": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at various locations.",
-      "visual_focus": "European beaver in river",
-      "visual_query": "European beaver swimming in river",
+      "narration": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across various regions.",
+      "visual_focus": "beavers live in freshwater",
+      "visual_query": "beavers live in freshwater",
       "visual_queries": [
-        "european beaver swimming in river",
-        "beaver resting near stream bank"
+        "beaver swimming in river stream",
+        "beaver in freshwater lake pond"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "European beaver swimming in river",
+      "reference_query": "beavers live in freshwater",
       "source_label": "Wikipedia",
       "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
@@ -20,184 +20,184 @@
       "sentence_end": 0,
       "voice_timing": {
         "start_seconds": 0.0,
-        "spoken_end_seconds": 9.174,
-        "visual_end_seconds": 9.874,
-        "duration_seconds": 9.874,
+        "spoken_end_seconds": 7.686,
+        "visual_end_seconds": 8.386,
+        "duration_seconds": 8.386,
         "first_sentence_index": 0,
         "last_sentence_index": 0
       }
     },
     {
-      "narration": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across their natural range.",
-      "visual_focus": "beaver swimming in pond",
-      "visual_query": "beaver swimming in forest pond",
+      "narration": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at various locations.",
+      "visual_focus": "beavers reduced to",
+      "visual_query": "beavers reduced to",
       "visual_queries": [
-        "beaver swimming in forest pond",
-        "beavers active in freshwater stream"
+        "european beaver in",
+        "wild beaver in river"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver swimming in forest pond",
+      "reference_query": "beavers reduced to",
       "source_label": "Wikipedia",
       "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1,
       "voice_timing": {
-        "start_seconds": 9.874,
-        "spoken_end_seconds": 16.882,
-        "visual_end_seconds": 17.182,
-        "duration_seconds": 7.308,
+        "start_seconds": 8.386,
+        "spoken_end_seconds": 16.81,
+        "visual_end_seconds": 17.11,
+        "duration_seconds": 8.724,
         "first_sentence_index": 1,
         "last_sentence_index": 1
       }
     },
     {
-      "narration": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
-      "visual_focus": "worker in river",
-      "visual_query": "worker in river",
+      "narration": "These estimated groups survived in places like the Rhône of France, the Elbe in Germany, and southern Norway.",
+      "visual_focus": "rh ne of france and elbe",
+      "visual_query": "rh ne of france and elbe",
       "visual_queries": [
-        "worker in river",
-        "river field study shot"
+        "rhone river france landscape",
+        "elbe river germany stream"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "worker in river",
+      "reference_query": "rh ne of france and elbe",
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2,
       "voice_timing": {
-        "start_seconds": 17.182,
-        "spoken_end_seconds": 24.19,
-        "visual_end_seconds": 24.49,
-        "duration_seconds": 7.308,
+        "start_seconds": 17.11,
+        "spoken_end_seconds": 23.854,
+        "visual_end_seconds": 24.154,
+        "duration_seconds": 7.044,
         "first_sentence_index": 2,
         "last_sentence_index": 2
       }
     },
     {
-      "narration": "This approach was mobilized especially where human activities had damaged ecosystems, such as by removing keystone predators.",
-      "visual_focus": "forest landscape shot",
-      "visual_query": "forest landscape view",
+      "narration": "Additional survivors remained near the Neman river and Dnieper Basin in Belarus, along with the Voronezh river in Russia.",
+      "visual_focus": "neman river and dnieper basin",
+      "visual_query": "neman river and dnieper basin",
       "visual_queries": [
-        "forest landscape view",
-        "damaged river view"
+        "neman river belarus water",
+        "voronezh river russia stream"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "forest landscape view",
+      "reference_query": "neman river and dnieper basin",
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3,
       "voice_timing": {
-        "start_seconds": 24.49,
-        "spoken_end_seconds": 32.41,
-        "visual_end_seconds": 32.71,
-        "duration_seconds": 8.22,
+        "start_seconds": 24.154,
+        "spoken_end_seconds": 31.81,
+        "visual_end_seconds": 32.11,
+        "duration_seconds": 7.956,
         "first_sentence_index": 3,
         "last_sentence_index": 3
       }
     },
     {
-      "narration": "In addition, wolves often kept animals from grazing in riparian areas, maintaining the balance of local wildlife.",
-      "visual_focus": "wolf walking in forest",
-      "visual_query": "wolf walking in forest",
+      "narration": "The concept became popular in conservation, and was deployed in a range of contexts by wildlife protection groups.",
+      "visual_focus": "concept popular in",
+      "visual_query": "concept popular in",
       "visual_queries": [
-        "wolf walking in forest",
-        "gray wolf in riparian area"
+        "wildlife forest area",
+        "nature river"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "wolf walking in forest",
+      "reference_query": "concept popular in",
       "source_label": "Wikipedia",
       "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4,
       "voice_timing": {
-        "start_seconds": 32.71,
-        "spoken_end_seconds": 40.318,
-        "visual_end_seconds": 40.618,
-        "duration_seconds": 7.908,
+        "start_seconds": 32.11,
+        "spoken_end_seconds": 39.43,
+        "visual_end_seconds": 39.73,
+        "duration_seconds": 7.62,
         "first_sentence_index": 4,
         "last_sentence_index": 4
       }
     },
     {
-      "narration": "This protection prevented beavers from having their vital food sources encroached upon by large herbivores.",
-      "visual_focus": "beaver eating woody branch",
-      "visual_query": "beaver eating woody branch",
+      "narration": "This framework was mobilized to engender support for conservation, especially where human activities had damaged natural ecosystems significantly.",
+      "visual_focus": "support for",
+      "visual_query": "support for",
       "visual_queries": [
-        "beaver eating woody branch",
-        "beaver chewing on tree bark"
+        "river bank",
+        "protection area"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver eating woody branch",
+      "reference_query": "support for",
       "source_label": "Wikipedia",
       "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5,
       "voice_timing": {
-        "start_seconds": 40.618,
-        "spoken_end_seconds": 47.386,
-        "visual_end_seconds": 47.686,
-        "duration_seconds": 7.068,
+        "start_seconds": 39.73,
+        "spoken_end_seconds": 48.994,
+        "visual_end_seconds": 49.294,
+        "duration_seconds": 9.564,
         "first_sentence_index": 5,
         "last_sentence_index": 5
       }
     },
     {
-      "narration": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role.",
-      "visual_focus": "stream flowing through floodplain",
-      "visual_query": "stream flowing through floodplain",
+      "narration": "Such conservation strategies were applied especially where human activities had damaged ecosystems, such as by removing keystone predators.",
+      "visual_focus": "removing keystone predators",
+      "visual_query": "removing keystone predators",
       "visual_queries": [
-        "stream flowing through floodplain",
-        "river meandering across open floodplain"
+        "keystone predator in wilderness",
+        "wolf in riparian"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "stream flowing through floodplain",
+      "reference_query": "removing keystone predators",
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6,
       "voice_timing": {
-        "start_seconds": 47.686,
-        "spoken_end_seconds": 54.07,
-        "visual_end_seconds": 54.37,
-        "duration_seconds": 6.684,
+        "start_seconds": 49.294,
+        "spoken_end_seconds": 57.958,
+        "visual_end_seconds": 58.258,
+        "duration_seconds": 8.964,
         "first_sentence_index": 6,
         "last_sentence_index": 6
       }
     },
     {
-      "narration": "Stream restoration or river restoration aims to improve the environmental health of a river or stream.",
-      "visual_focus": "river flowing in nature",
-      "visual_query": "river flowing through green nature",
+      "narration": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.",
+      "visual_focus": "wolves kept animals from grazing",
+      "visual_query": "wolves kept animals from grazing",
       "visual_queries": [
-        "river flowing through green nature",
-        "natural stream site"
+        "wolves in riparian river area",
+        "wolf patrolling river bank"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "river flowing through green nature",
+      "reference_query": "wolves kept animals from grazing",
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7,
       "voice_timing": {
-        "start_seconds": 54.37,
-        "spoken_end_seconds": 60.922,
-        "visual_end_seconds": 62.172,
-        "duration_seconds": 7.802,
+        "start_seconds": 58.258,
+        "spoken_end_seconds": 67.018,
+        "visual_end_seconds": 68.268,
+        "duration_seconds": 10.01,
         "first_sentence_index": 7,
         "last_sentence_index": 7
       }
@@ -206,62 +206,62 @@
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at various locations.",
+      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across various regions.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 2,
-      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across their natural range.",
+      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at various locations.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 3,
-      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
+      "sentence": "These estimated groups survived in places like the Rhône of France, the Elbe in Germany, and southern Norway.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 4,
-      "sentence": "This approach was mobilized especially where human activities had damaged ecosystems, such as by removing keystone predators.",
+      "sentence": "Additional survivors remained near the Neman river and Dnieper Basin in Belarus, along with the Voronezh river in Russia.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 5,
-      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, maintaining the balance of local wildlife.",
+      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts by wildlife protection groups.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 6,
-      "sentence": "This protection prevented beavers from having their vital food sources encroached upon by large herbivores.",
+      "sentence": "This framework was mobilized to engender support for conservation, especially where human activities had damaged natural ecosystems significantly.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 7,
-      "sentence": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role.",
+      "sentence": "Such conservation strategies were applied especially where human activities had damaged ecosystems, such as by removing keystone predators.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stream_restoration"
+        "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Stream restoration or river restoration aims to improve the environmental health of a river or stream.",
+      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stream_restoration"
+        "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     }
   ],
-  "script": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at various locations. Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across their natural range. The concept became popular in conservation, and was deployed in a range of contexts to engender support. This approach was mobilized especially where human activities had damaged ecosystems, such as by removing keystone predators. In addition, wolves often kept animals from grazing in riparian areas, maintaining the balance of local wildlife. This protection prevented beavers from having their vital food sources encroached upon by large herbivores. The connectivity of streams to their adjacent floodplain along their entire length plays an important role. Stream restoration or river restoration aims to improve the environmental health of a river or stream.",
+  "script": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across various regions. In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at various locations. These estimated groups survived in places like the Rhône of France, the Elbe in Germany, and southern Norway. Additional survivors remained near the Neman river and Dnieper Basin in Belarus, along with the Voronezh river in Russia. The concept became popular in conservation, and was deployed in a range of contexts by wildlife protection groups. This framework was mobilized to engender support for conservation, especially where human activities had damaged natural ecosystems significantly. Such conservation strategies were applied especially where human activities had damaged ecosystems, such as by removing keystone predators. In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.",
   "ai_provider": {
     "provider": "gemini",
     "model": "gemini-3.5-flash-lite"
@@ -272,14 +272,15 @@
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "HOW BEAVERS RESHAPE ECOSYSTEMS"
+        "HOW BEAVERS SHAPE ECOSYSTEMS"
       ],
       "hook_lines": [
-        "Beavers transform",
-        "running water."
+        "Beavers live in",
+        "freshwater ecosystems",
+        "such as rivers."
       ],
-      "title_text": "How Beavers Reshape Ecosystems",
-      "hook_text": "Beavers transform running water.",
+      "title_text": "How Beavers Shape Ecosystems",
+      "hook_text": "Beavers live in freshwater ecosystems such as rivers.",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,
@@ -287,7 +288,7 @@
         48,
         150,
         1032,
-        402
+        470
       ]
     }
   },
