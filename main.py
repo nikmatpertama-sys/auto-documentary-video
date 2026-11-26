@@ -1085,7 +1085,7 @@ def download_stream(url, dest, alternate_urls=None):
     errors = []
 
     for candidate_url in urls:
-        for attempt in range(2):
+        for attempt in range(3):
             if time.monotonic() >= deadline:
                 break
 
@@ -1100,6 +1100,18 @@ def download_stream(url, dest, alternate_urls=None):
                     "Accept": "video/mp4,video/*;q=0.9,*/*;q=0.8",
                 }
                 host = urlparse(candidate_url).hostname or ""
+                if host.endswith("wikimedia.org"):
+                    # Wikimedia's CDN rate-limits automated clients that send a
+                    # generic browser agent; every Commons clip returned HTTP 429
+                    # until this descriptive agent was used.
+                    headers["User-Agent"] = (
+                        "AutoDocumentaryVideo/1.0 "
+                        "(https://github.com/nikmatpertama-sys/auto-documentary-video; "
+                        "automated documentary footage download)"
+                    )
+                    headers["Accept"] = (
+                        "video/mp4,video/*;q=0.9,image/*;q=0.8,*/*;q=0.5"
+                    )
                 if host.endswith("pixabay.com"):
                     headers["Referer"] = "https://pixabay.com/"
                     headers["Origin"] = "https://pixabay.com"
@@ -1116,12 +1128,12 @@ def download_stream(url, dest, alternate_urls=None):
                     retry_after = response.headers.get("Retry-After", "")
                     response.close()
                     response = None
-                    if attempt == 0:
+                    if attempt < 2:
                         try:
                             delay = float(retry_after)
                         except (TypeError, ValueError):
-                            delay = 2.0
-                        time.sleep(max(1.0, min(delay, 5.0)))
+                            delay = 3.0 * (attempt + 1)
+                        time.sleep(max(1.0, min(delay, 12.0)))
                         continue
                     errors.append(f"HTTP {status} from {host or 'media host'}")
                     break
@@ -1550,7 +1562,11 @@ def commons_search(query):
             "iiprop": "url|size|mime|extmetadata"
         },
         headers={
-            "User-Agent": "AutoDocumentaryVideo/3.0 (video research)"
+            "User-Agent": (
+                "AutoDocumentaryVideo/3.0 "
+                "(https://github.com/nikmatpertama-sys/auto-documentary-video; "
+                "video research)"
+            )
         },
         timeout=35
     )
