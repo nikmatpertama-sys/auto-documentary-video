@@ -459,10 +459,12 @@ SCENES AND VISUALS
 - visual_focus and visual_query must represent the central subject of the whole
   narration, not a minor word. A generic forest, river or sky shot is not
   acceptable for a scene about a named animal, plant, machine, person or
-  specific process.
+  specific process. A bare word like wildlife, nature or landscape returns a
+  lion or a hillside; name the specific subject and keep the documentary's own
+  subject visible in most scenes.
 - visual_focus is 2-6 concrete words and at least half of them must appear
   verbatim in visual_query (case-insensitive) as a searchable real-footage
-  phrase. Do not substitute a synonym when the exact term fits naturally.
+  phrase.
 - visual_focus must be something a real stock clip actually shows: a named
   animal, plant, object, place or simple action (for example "beaver in pond").
   Never make an abstract stage or invisible process the focus ("dam
@@ -492,6 +494,8 @@ SCENES AND VISUALS
   angle or environment.
 - Give every scene a clear visual match, and the story a hook, explanation,
   reveal and satisfying payoff.
+- Write natural spoken narration in your own words, never copied encyclopedia
+  phrasing; keep the passage's key terms in a plain paraphrase.
 - Do not pad the script with generic statements to reach the word count.
 - Write for a calm documentary narrator: varied sentence lengths, spoken
   punctuation.
