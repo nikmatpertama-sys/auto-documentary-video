@@ -49,6 +49,11 @@ BASE_RATE = os.getenv("TTS_RATE", "-4%").strip()
 BASE_PITCH = os.getenv("TTS_PITCH", "-3Hz").strip()
 
 W, H, FPS = 1080, 1920, 30
+TARGET_SOURCE_ASPECT = 9 / 16
+SOURCE_ASPECT_TOLERANCE = 0.003  # native portrait 9:16 only; no landscape/4:5 crop
+MIN_CLIP_SHORT_SIDE = 640
+CAPTION_MAX_WORDS = 5
+CAPTION_MAX_CHARS = 32
 X264_PRESET = os.getenv("X264_PRESET", "ultrafast").strip() or "ultrafast"
 
 OPENING_LEAD = 0.75
@@ -70,6 +75,7 @@ VISION_CANDIDATE_LIMIT = max(
     1, min(30, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "26")))
 )
 
+# Version 10.13: preserve hook/subtitle readability and reject non-native 9:16 footage.
 # Version 10.12: recover from Wikimedia download throttling and search sparse tiers better.
 # Internet Archive receives the largest candidate budget; the other sources
 # are fallback tiers, ordered from open archives to stock-footage providers.
@@ -258,6 +264,83 @@ def ffprobe_duration(path):
     )
 
     return max(0.0, float(result.stdout.strip()))
+
+
+
+def ffprobe_video_info(path):
+    """Return displayed source dimensions, honoring 90-degree rotation metadata."""
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error", "-select_streams", "v:0",
+            "-show_entries",
+            "stream=width,height,sample_aspect_ratio:stream_tags=rotate:stream_side_data=rotation",
+            "-of", "json", str(path),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    try:
+        stream = (json.loads(result.stdout or "{}").get("streams") or [])[0]
+        width = int(stream.get("width") or 0)
+        height = int(stream.get("height") or 0)
+    except (ValueError, TypeError, IndexError, KeyError) as exc:
+        raise RuntimeError("Source video has no readable video dimensions.") from exc
+
+    rotation = 0.0
+    has_side_data_rotation = False
+    for side_data in stream.get("side_data_list") or []:
+        try:
+            if "rotation" in side_data:
+                rotation = float(side_data["rotation"])
+                has_side_data_rotation = True
+                break
+        except (TypeError, ValueError):
+            pass
+    if not has_side_data_rotation:
+        try:
+            rotation = float((stream.get("tags") or {}).get("rotate", 0.0))
+        except (TypeError, ValueError):
+            rotation = 0.0
+
+    # A landscape-coded file with a 90-degree display rotation is portrait
+    # when played. FFmpeg's normal autorotation is retained during rendering.
+    rotated_90 = int(round(abs(rotation))) % 180 == 90
+    if rotated_90:
+        width, height = height, width
+
+    sar = str(stream.get("sample_aspect_ratio") or "1:1")
+    try:
+        sar_num, sar_den = (int(value) for value in sar.split(":", 1))
+        if sar_num <= 0 or sar_den <= 0:
+            raise ValueError("invalid sample aspect ratio")
+        # Pixel aspect is inverted when the image is rotated by 90 degrees.
+        pixel_aspect = sar_den / sar_num if rotated_90 else sar_num / sar_den
+        display_aspect = (width / max(1, height)) * pixel_aspect
+    except (ValueError, ZeroDivisionError):
+        display_aspect = width / max(1, height)
+
+    return {
+        "width": width,
+        "height": height,
+        "sample_aspect_ratio": sar,
+        "aspect_ratio": round(display_aspect, 6),
+        "rotation_degrees": rotation,
+    }
+
+
+def is_native_portrait_916(
+    width, height, tolerance=SOURCE_ASPECT_TOLERANCE, aspect_ratio=None
+):
+    """True only for genuine portrait source dimensions close to 9:16."""
+    try:
+        width, height = int(width), int(height)
+        ratio = float(aspect_ratio) if aspect_ratio is not None else width / height
+    except (TypeError, ValueError, ZeroDivisionError):
+        return False
+    if min(width, height) < MIN_CLIP_SHORT_SIDE or height <= width:
+        return False
+    return abs(ratio - TARGET_SOURCE_ASPECT) <= tolerance
 
 
 def split_sentences(text):
@@ -883,12 +966,23 @@ def pixabay_search(query):
     for hit in data.get("hits", []):
         renditions = hit.get("videos", {})
 
-        rendition = (
-            renditions.get("large")
-            or renditions.get("medium")
-            or renditions.get("small")
-            or {}
+        available_renditions = [
+            rendition for rendition in renditions.values()
+            if isinstance(rendition, dict) and rendition.get("url")
+        ]
+        available_renditions.sort(
+            key=lambda item: (
+                0 if is_native_portrait_916(
+                    item.get("width") or 0, item.get("height") or 0
+                ) else 1,
+                0 if min(
+                    int(item.get("width") or 0),
+                    int(item.get("height") or 0),
+                ) >= MIN_CLIP_SHORT_SIDE else 1,
+                -int(item.get("height") or 0),
+            )
         )
+        rendition = available_renditions[0] if available_renditions else {}
 
         if not rendition.get("url"):
             continue
@@ -898,6 +992,7 @@ def pixabay_search(query):
             "id": str(hit.get("id")),
             "url": rendition.get("url"),
             "width": int(rendition.get("width") or 0),
+            "height": int(rendition.get("height") or 0),
             "duration": float(hit.get("duration") or 0),
             "metadata": " ".join([
                 str(hit.get("tags", "")),
@@ -942,8 +1037,9 @@ def pexels_search(query):
         files = sorted(
             video.get("video_files", []),
             key=lambda x: (
+                0 if is_native_portrait_916(x.get("width") or 0, x.get("height") or 0) else 1,
                 0 if x.get("quality") == "hd" else 1,
-                abs(int(x.get("width") or 0) - 1920)
+                -int(x.get("height") or 0),
             )
         )
 
@@ -956,10 +1052,7 @@ def pexels_search(query):
         if not files:
             continue
 
-        file = min(
-            files,
-            key=lambda x: int(x.get("width") or 99999)
-        )
+        file = files[0]
 
         slug = re.sub(
             r"[-_/]+",
@@ -972,6 +1065,7 @@ def pexels_search(query):
             "id": str(video.get("id")),
             "url": file["link"],
             "width": int(file.get("width") or 0),
+            "height": int(file.get("height") or 0),
             "duration": float(video.get("duration") or 0),
             "metadata": slug,
             "tags": slug,
@@ -1063,7 +1157,10 @@ def nasa_search(query):
             "source": "NASA",
             "id": str(nasa_id),
             "url": urls[0],
-            "width": MIN_CLIP_WIDTH,
+            # NASA search does not consistently expose video dimensions;
+            # the downloaded asset is checked with ffprobe before vision/API use.
+            "width": 0,
+            "height": 0,
             "duration": 0,
             "metadata": metadata,
             "tags": metadata,
@@ -1181,6 +1278,7 @@ def commons_search(query):
             "id": str(page.get("pageid")),
             "url": url,
             "width": int(info.get("width") or 0),
+            "height": int(info.get("height") or 0),
             "duration": 0,
             "metadata": metadata,
             "tags": metadata,
@@ -1402,7 +1500,12 @@ def internet_archive_search(query):
                 width = int(float(width_value))
             except (TypeError, ValueError):
                 width = 0
+            try:
+                height = int(float(archive_file.get("height") or 0))
+            except (TypeError, ValueError):
+                height = 0
             return (
+                0 if is_native_portrait_916(width, height) else 1,
                 0 if filename.endswith(".mp4") else 1,
                 0 if width >= MIN_CLIP_WIDTH else 1,
                 abs(width - 1080) if width else 99999,
@@ -1453,6 +1556,7 @@ def internet_archive_search(query):
             "id": identifier,
             "url": file_url,
             "width": width,
+            "height": int(selected_file.get("height") or 0),
             "duration": parse_runtime(item.get("runtime") or metadata.get("runtime")),
             "metadata": combined_metadata,
             "tags": subject_text or combined_metadata,
@@ -1665,6 +1769,10 @@ CONTEXT_CONFLICTS = {
         "shuttle", "spacecraft", "astronaut", "astronauts", "rocket",
         "launchpad", "liftoff", "orbiter", "kennedy", "columbiaaccident",
     },
+    "volcanic_ash": {
+        "volcanic", "volcano", "volcanoes", "eruption", "eruptions",
+        "ash", "sulfur", "sulphur", "sulfurdioxide",
+    },
 }
 
 
@@ -1698,10 +1806,10 @@ def expand_visual_queries(raw_queries, narration=""):
     seen = set()
 
     replacements = (
-        (r"Amazon", "tropical rainforest"),
-        (r"canopy", "treetops"),
-        (r"sunrise", "dawn"),
-        (r"aerial view", "drone view"),
+        (r"\bAmazon\b", "tropical rainforest"),
+        (r"\bcanopy\b", "treetops"),
+        (r"\bsunrise\b", "dawn"),
+        (r"\baerial view\b", "drone view"),
     )
 
     mood_words = {
@@ -1806,7 +1914,9 @@ def expand_visual_queries(raw_queries, narration=""):
 def fallback_visual_queries(raw_queries, narration=""):
     """Broaden sparse searches with independent, subject-preserving variants.
 
-    Version 10.12 expands sparse-tier search and climate-model shot recovery.
+    Version 10.13 adds safe hook layout, sentence-bounded captions, strict visual anchors,
+    and native 9:16 source validation. Version 10.12 expands sparse-tier search and
+    climate-model shot recovery.
     Version 10.11 added documentary fieldwork: people, research activity, and
     environmental instruments. The variants deliberately separate wide
     shots of researchers from close-ups of sensors so a scene can be covered
@@ -2063,146 +2173,103 @@ def required_visual_anchors(query):
     return groups
 
 
-def candidate_matches_visual_anchors(hit, query):
-    """Require metadata to support this candidate's own visual query.
+def candidate_matches_visual_anchors(hit, query, primary_query=None):
+    """Require metadata to preserve the candidate shot and the scene's core intent.
 
-    Each alternative query represents an independent possible shot. A clip
-    about insects should not be forced to contain orchids just because orchids
-    appeared in the scene's primary query.
+    Search alternatives may broaden wording, but they must not erase the
+    primary requested subject/shot. This prevents a generic "tropical forest"
+    fallback from substituting a bird nest for a rainforest canopy aerial.
     """
     anchors = required_visual_anchors(query)
-
     if not anchors:
-        return True
+        return False
 
     metadata = " ".join([
         str(hit.get("metadata", "")),
         str(hit.get("tags", "")),
         str(hit.get("page_url", "")),
     ])
-
-    tokens = set(
-        normalize_words(metadata)
-    )
+    tokens = set(normalize_words(metadata))
 
     strict_aliases = {
-        "rainforest": {
-            "amazon", "rainforest", "jungle",
-            "tropical", "tropics", "equatorial"
-        },
-        "forest": {
-            "forest", "forests", "woodland", "woods",
-            "timberland", "tree", "trees", "rainforest", "jungle",
-        },
-        "canopy": {
-            "canopy", "canopies", "treetop",
-            "treetops", "foliage", "crown",
-            "leaf", "leaves"
-        },
-        "aerial": {
-            "aerial", "drone", "overhead",
-            "topdown", "birdseye", "helicopter", "fromabove"
-        },
-        "insect": {
-            "insect", "insects", "bug", "bugs", "ant", "ants",
-            "beetle", "beetles", "butterfly", "butterflies",
-            "mosquito", "mosquitoes", "dragonfly", "dragonflies"
-        },
-        "orchid": {
-            "orchid", "orchids", "orchidaceae"
-        },
-        "jaguar": {
-            "jaguar", "jaguars"
-        },
-        "forest_floor": {
-            "floor", "undergrowth", "understory",
-            "understorey", "leaflitter", "groundcover"
-        },
-        "rain": {
-            "rain", "rainstorm", "rainstorms", "rainfall",
-            "raining", "downpour", "monsoon", "raindrop", "raindrops"
-        },
-        "research_activity": {
-            "researcher", "researchers", "scientist", "scientists",
-            "research", "researching", "fieldwork", "field", "fieldstudy",
-            "investigator", "technician", "biologist", "ecologist",
-            "team", "crew", "expedition", "sampling", "sample",
-        },
-        "field_instrument": {
-            "sensor", "sensors", "humidity", "humidimeter", "hygrometer",
-            "thermometer", "barometer", "anemometer", "station",
-            "weatherstation", "meteorological", "temperature", "measurement",
-            "measuring", "instrument", "instruments", "equipment", "datalogger",
-            "logger",
-        },
+        "rainforest": {"amazon", "rainforest", "jungle", "tropical", "tropics", "equatorial"},
+        "forest": {"forest", "forests", "woodland", "woods", "timberland", "tree", "trees", "rainforest", "jungle"},
+        "canopy": {"canopy", "canopies", "treetop", "treetops", "foliage", "crown", "leaf", "leaves", "tree", "trees"},
+        "aerial": {"aerial", "drone", "overhead", "topdown", "birdseye", "helicopter", "fromabove"},
+        "insect": {"insect", "insects", "bug", "bugs", "ant", "ants", "beetle", "beetles", "butterfly", "butterflies", "mosquito", "mosquitoes", "dragonfly", "dragonflies"},
+        "orchid": {"orchid", "orchids", "orchidaceae"},
+        "jaguar": {"jaguar", "jaguars"},
+        "forest_floor": {"floor", "undergrowth", "understory", "understorey", "leaflitter", "groundcover", "underbrush"},
+        "rain": {"rain", "rainstorm", "rainstorms", "rainfall", "raining", "downpour", "monsoon", "raindrop", "raindrops"},
+        "river": {"river", "rivers", "waterway", "tributary", "stream"},
+        "waterfall": {"waterfall", "falls", "cascade", "cascades"},
+        "wildlife": {"wildlife", "animal", "animals", "fauna"},
+        "bird": {"bird", "birds", "avian", "parrot", "parrots", "macaw", "macaws"},
+        "research_activity": {"researcher", "researchers", "scientist", "scientists", "research", "researching", "fieldwork", "field", "fieldstudy", "investigator", "technician", "biologist", "ecologist", "team", "crew", "expedition", "sampling", "sample"},
+        "field_instrument": {"sensor", "sensors", "humidity", "humidimeter", "hygrometer", "thermometer", "barometer", "anemometer", "station", "weatherstation", "meteorological", "temperature", "measurement", "measuring", "instrument", "instruments", "equipment", "datalogger", "logger"},
     }
 
-    matched = set()
-
-    for name, aliases in anchors.items():
+    def anchor_matches(name, aliases):
         if name.startswith("term:"):
-            term = name.split(":", 1)[1]
-            has_match = term in tokens
-        else:
-            has_match = bool(
-                tokens & strict_aliases.get(name, aliases)
-            )
+            return name.split(":", 1)[1] in tokens
+        return bool(tokens & strict_aliases.get(name, aliases))
 
-        if has_match:
-            matched.add(name)
-
+    matched = {name for name, aliases in anchors.items() if anchor_matches(name, aliases)}
     subject_groups = {
         "forest", "canopy", "river", "waterfall", "wildlife", "insect",
-        "orchid", "jaguar", "bird", "mountain", "ocean", "desert",
-        "forest_floor",
+        "orchid", "jaguar", "bird", "mountain", "ocean", "desert", "forest_floor",
     }
+    requested_subjects = subject_groups.intersection(anchors.keys())
+    requested_specific = {"insect", "orchid", "jaguar", "bird", "wildlife"}.intersection(anchors.keys())
 
-    requested_subjects = subject_groups.intersection(
-        anchors.keys()
-    )
-
-    specific_subjects = {
-        "insect", "orchid", "jaguar", "bird", "wildlife"
-    }
-
-    requested_specific = specific_subjects.intersection(
-        anchors.keys()
-    )
-
-    # Specific organisms/plants and technical subject anchors named in a query
-    # are mandatory. A generic metadata overlap must not admit unrelated clips.
     if requested_specific and not requested_specific.issubset(matched):
         return False
-
     for mandatory_anchor in ("research_activity", "field_instrument"):
         if mandatory_anchor in anchors and mandatory_anchor not in matched:
             return False
-
-    # For broader landscape queries, at least one requested subject/shot group
-    # must be present in the source metadata.
-    if (
-        requested_subjects
-        and not requested_subjects.intersection(matched)
-    ):
+    if requested_subjects and not requested_subjects.issubset(matched):
+        return False
+    if "rainforest" in anchors and "rainforest" not in matched:
+        return False
+    if "aerial" in anchors and "aerial" not in matched:
         return False
 
-    # When a tropical/Amazon setting is explicitly requested, require the
-    # listing to carry at least one compatible location/environment term.
-    if (
-        "rainforest" in anchors
-        and "rainforest" not in matched
-    ):
-        return False
+    # Preserve core anchors from the original scene query even when the
+    # current search is a broad fallback variant. Mood words like sunrise
+    # are intentionally excluded.
+    if primary_query:
+        primary = required_visual_anchors(primary_query)
+        primary_core = {
+            "rainforest", "forest", "canopy", "aerial", "river", "waterfall",
+            "wildlife", "insect", "orchid", "jaguar", "bird", "rain", "ocean",
+            "desert", "forest_floor", "mountain",
+        }
+        for name, aliases in primary.items():
+            if name in primary_core and not anchor_matches(name, aliases):
+                return False
 
-    # An aerial request must be supported by metadata describing a drone or
-    # overhead shot. The visual model then confirms the actual composition.
-    if (
-        "aerial" in anchors
-        and "aerial" not in matched
-    ):
-        return False
+        primary_tokens = set(normalize_words(primary_query))
+        exact_intents = {
+            "satellite": {"satellite", "satellites", "spaceborne", "remote", "sensing"},
+            "cloud": {"cloud", "clouds", "cloudbank", "cloudscape"},
+            "plume": {"plume", "plumes", "moisture", "vapor", "vapour"},
+            "window": {"window", "windows", "glass", "pane", "panes"},
+        }
+        for source_term, aliases in exact_intents.items():
+            if source_term in primary_tokens and not (tokens & aliases):
+                return False
 
-    return bool(matched)
+        # "Clear-cut" is a defining ecological condition, not a generic forest shot.
+        if "clear" in primary_tokens and "cut" in primary_tokens:
+            clearcut_terms = {
+                "clearcut", "deforestation", "deforested", "logging", "logged",
+                "clearing", "cleared", "clearance", "treecutting", "landclearing",
+                "forestloss", "burned", "burnt", "slashburn",
+            }
+            if not (tokens & clearcut_terms):
+                return False
+
+    return bool(matched) or bool(primary_query and required_visual_anchors(primary_query))
 
 
 def tag_similarity(tags_a, tags_b):
@@ -2644,7 +2711,8 @@ def verify_footage_visually(
     prompt = f"""You are a strict documentary footage verifier.
 Inspect the attached frames sampled from one candidate video clip.
 
-SCENE VISUAL QUERY: {query}
+SCENE PRIMARY VISUAL QUERY: {scene.get('visual_query') or query}
+CANDIDATE SEARCH VARIANT: {query}
 SCENE NARRATION: {scene.get('narration', '')}
 SOURCE CATALOG METADATA: {metadata_context or 'Not supplied'}
 
@@ -2655,10 +2723,13 @@ IMPORTANT DISTINCTION:
 - However, metadata alone cannot turn an unrelated image into a match. The visible footage must still show the requested type of scene.
 
 VISUAL MATCH RULES:
-- Treat this individual search query as one independent shot option, not as a checklist of every detail mentioned anywhere in the scene.
-- The main concrete subject named in this query must be visible. For example, an orchid query must show an orchid; a jaguar query must show a jaguar; an insect query must show an insect.
+- The SCENE PRIMARY VISUAL QUERY is authoritative. A fallback search phrase may change wording, but it may not replace the main subject, requested shot type, or defining visual condition.
+- The main concrete subject named in the primary query must be visible. For example, a jaguar primary query must show a jaguar; a rainforest-canopy-aerial primary query must show a broad overhead rainforest canopy; a raindrop-on-window primary query must show rain/water drops on glass.
+- A generic forest, green foliage, wildlife, or atmospheric shot is NOT a match for a more specific primary query.
+- Alternative shot details may support the narration, but they cannot be used to bypass the primary visual intent.
 - Weather and mood words such as rain, mist, wet, or sunrise are supporting context. Do not reject a clearly matching subject only because a brief weather condition is not obvious in two or three sampled frames.
-- If the query asks for an aerial/drone canopy view, the frames must show a broad overhead view of forest treetops. A ground-level path, close-up leaves, isolated branches, hills, or a stylized animation is not a match.
+- If the primary query asks for an aerial/drone canopy view, the frames must show a broad overhead view of forest treetops. A ground-level path, close-up leaves, isolated branches, hills, or a stylized animation is not a match.
+- If the primary query asks for a specific phenomenon (for example deforestation, rainfall, or a moisture plume), unrelated phenomena with similar shapes (such as volcanic ash clouds) must be rejected.
 - Judge the requested shot type and visible subject before guessing a region or tree species. Do not label a canopy as temperate/European merely because the exact location is not visually identifiable.
 - Use source catalog metadata for geographic provenance. If metadata supports a tropical/rainforest setting and the frames show compatible dense green forest canopy, accept the visual match without demanding that the exact country be visible.
 - If the catalog explicitly identifies a conflicting setting (for example, a manicured park or temperate autumn woodland), reject it. Never describe a generic canopy clip as confirmed Amazon footage unless the source metadata supports that claim.
@@ -2668,7 +2739,7 @@ VISUAL MATCH RULES:
 Return ONLY JSON:
 {{"relevant": true, "confidence": 0.0, "reason": "brief visible evidence and metadata basis"}}
 
-Set relevant=true only when the visual composition is a genuine match and source metadata supports any specific geographic claim. If uncertain about the actual shot, set false. Confidence must be a number from 0 to 1."""
+Set relevant=true only when the visual composition genuinely matches the SCENE PRIMARY VISUAL QUERY and source metadata supports any specific geographic claim. If only a broad setting matches, or the main requested subject/condition is absent, set false. If uncertain about the actual shot, set false. Confidence must be a number from 0 to 1."""
 
     providers = []
 
@@ -3032,12 +3103,17 @@ def fetch_footage(plan):
                 if not hit.get("url") or identity in used_ids:
                     continue
 
-                if not candidate_matches_visual_anchors(hit, query):
+                if not candidate_matches_visual_anchors(
+                    hit, query, primary_query=scene.get("visual_query")
+                ):
                     continue
 
                 width = int(hit.get("width") or 0)
+                height = int(hit.get("height") or 0)
                 duration = float(hit.get("duration") or 0)
                 if width and width < MIN_CLIP_WIDTH:
+                    continue
+                if width and height and not is_native_portrait_916(width, height):
                     continue
                 if duration and duration < 4:
                     continue
@@ -3053,19 +3129,10 @@ def fetch_footage(plan):
                 ))
                 scene_context = set(normalize_words(scene.get("narration", "")))
 
-                if (
-                    metadata_tokens & CONTEXT_CONFLICTS["snow_winter"]
-                    and not scene_context & CONTEXT_CONFLICTS["snow_winter"]
-                ):
-                    continue
-                if (
-                    metadata_tokens & CONTEXT_CONFLICTS["underwater"]
-                    and not scene_context & CONTEXT_CONFLICTS["underwater"]
-                ):
-                    continue
-                if (
-                    metadata_tokens & CONTEXT_CONFLICTS["spaceflight"]
-                    and not scene_context & CONTEXT_CONFLICTS["spaceflight"]
+                if any(
+                    metadata_tokens & conflict_terms
+                    and not scene_context & conflict_terms
+                    for conflict_terms in CONTEXT_CONFLICTS.values()
                 ):
                     continue
 
@@ -3180,6 +3247,20 @@ def fetch_footage(plan):
                     source=candidate_source,
                 )
 
+                source_video_info = ffprobe_video_info(destination)
+                if not is_native_portrait_916(
+                    source_video_info["width"], source_video_info["height"],
+                    aspect_ratio=source_video_info["aspect_ratio"],
+                ):
+                    raise RuntimeError(
+                        "Source footage rejected: native 9:16 portrait is required; "
+                        f"downloaded source is {source_video_info['width']}x"
+                        f"{source_video_info['height']} "
+                        f"(aspect {source_video_info['aspect_ratio']:.4f}). "
+                        "The generator will not crop landscape, square, or 4:5 footage."
+                    )
+                hit["_source_video_info"] = source_video_info
+
                 if visual_provider_names:
                     candidate_metadata = " | ".join([
                         str(hit.get("metadata", "")),
@@ -3272,7 +3353,8 @@ def fetch_footage(plan):
 
                 for fallback_query in queries:
                     if not candidate_matches_visual_anchors(
-                        previous_hit, fallback_query
+                        previous_hit, fallback_query,
+                        primary_query=scene.get("visual_query"),
                     ):
                         continue
 
@@ -3425,6 +3507,8 @@ def fetch_footage(plan):
             "page_url",
             ""
         )
+        scene["source_video_dimensions"] = hit.get("_source_video_info", {})
+        scene["source_native_aspect_ratio_required"] = "9:16"
 
         scene["visual_verification"] = {
             "method": (
@@ -3504,6 +3588,53 @@ def ass_time(seconds):
     )
 
 
+
+def build_caption_groups(events, max_words=CAPTION_MAX_WORDS, max_chars=CAPTION_MAX_CHARS):
+    """Chunk timed words from one sentence; never join adjacent sentences."""
+    groups = []
+    current = []
+    for event in events:
+        word = str(event.get("text") or "").strip()
+        if not word:
+            continue
+        candidate_chars = sum(len(str(item.get("text") or "")) for item in current)
+        candidate_chars += len(word) + max(0, len(current))
+        if current and (len(current) >= max_words or candidate_chars > max_chars):
+            groups.append(current)
+            current = []
+        current.append(event)
+    if current:
+        groups.append(current)
+
+    # Avoid a dangling one-word caption when the previous phrase can be split evenly.
+    if len(groups) > 1 and len(groups[-1]) == 1 and len(groups[-2]) > 3:
+        groups[-1].insert(0, groups[-2].pop())
+    return groups
+
+
+def wrap_overlay_text(value, width=24, max_lines=4):
+    """Wrap an opening hook without dropping any text at the line limit."""
+    clean = re.sub(r"[\r\n\t]+", " ", str(value or ""))
+    clean = re.sub(r"\s+", " ", clean).strip()
+    if not clean:
+        return ""
+
+    line_width = max(1, int(width))
+    max_lines = max(1, int(max_lines))
+    while True:
+        wrapped = textwrap.wrap(
+            clean,
+            width=line_width,
+            break_long_words=True,
+            break_on_hyphens=False,
+        )
+        if len(wrapped) <= max_lines:
+            break
+        # Increase width in small steps until every character fits. This is
+        # preferable to silently slicing off the final line of a long hook.
+        line_width += max(4, int(len(clean) / max_lines / 8) or 4)
+    return "\n".join(wrapped)
+
 def build_voice_and_subs(script):
     """Sentence-level TTS with deliberate pauses and word timing."""
     sentences = split_sentences(script)
@@ -3515,6 +3646,7 @@ def build_voice_and_subs(script):
 
     async def generate():
         word_events = []
+        sentence_word_events = []
         sentence_events = []
         wav_parts = []
         cursor = 0.0
@@ -3596,11 +3728,23 @@ def build_voice_and_subs(script):
             duration = ffprobe_duration(wav_path)
             sentence_start = cursor
 
+            timed_sentence_words = []
             for event in boundaries:
-                word_events.append({
+                timed_event = {
                     **event,
                     "offset": cursor + event["offset"]
-                })
+                }
+                word_events.append(timed_event)
+                timed_sentence_words.append(timed_event)
+
+            # TTS word-boundary payloads may omit punctuation. Restore the
+            # original sentence ending without changing the audio timing.
+            if timed_sentence_words:
+                terminal = re.search(r"([.!?][\"']?)$", sentence.strip())
+                last_text = str(timed_sentence_words[-1].get("text") or "")
+                if terminal and not re.search(r"[.!?][\"']?$", last_text):
+                    timed_sentence_words[-1]["text"] = last_text + terminal.group(1)
+            sentence_word_events.append(timed_sentence_words)
 
             wav_parts.append(wav_path)
             cursor += duration
@@ -3680,28 +3824,9 @@ def build_voice_and_subs(script):
             str(OUT / "voiceover.mp3")
         ])
 
-        groups = []
-        current = []
-
-        for event in word_events:
-            current.append(event)
-
-            if (
-                len(current) >= 5
-                or re.search(
-                    r'[.!?]["\']?$',
-                    event["text"]
-                )
-            ):
-                groups.append(current)
-                current = []
-
-        if current:
-            groups.append(current)
-
         lines = [
             "[Script Info]",
-            "Title: Cinematic Documentary Captions",
+            "Title: Consistent Sentence-Bounded Documentary Captions",
             "ScriptType: v4.00+",
             "WrapStyle: 2",
             "ScaledBorderAndShadow: yes",
@@ -3709,40 +3834,32 @@ def build_voice_and_subs(script):
             "PlayResY: 1920",
             "[V4+ Styles]",
             "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-            "Style: Default,DejaVu Sans,49,&H00FFFFFF,&H000000FF,&H00101A25,&H90000000,-1,0,0,0,100,100,0,0,1,4,1,2,75,75,500,1",
+            "Style: Default,DejaVu Sans,52,&H00FFFFFF,&H000000FF,&H00101A25,&H90000000,-1,0,0,0,100,100,0,0,1,3,1,2,90,90,360,1",
             "[Events]",
             "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
         ]
 
-        for group in groups:
-            start = group[0]["offset"]
-
-            end = max(
-                group[-1]["offset"] + group[-1]["duration"],
-                start + 0.45
-            )
-
-            phrase = " ".join(
-                x["text"] for x in group
-            )
-
-            phrase = r"\N".join(
-                textwrap.wrap(
-                    phrase,
-                    width=29,
-                    break_long_words=False
+        for sentence_group in sentence_word_events:
+            for group in build_caption_groups(sentence_group):
+                start = group[0]["offset"]
+                end = max(
+                    group[-1]["offset"] + group[-1]["duration"],
+                    start + 0.45,
                 )
-            )
-
-            phrase = (
-                phrase.replace("{", r"\{")
-                .replace("}", r"\}")
-            )
-
-            lines.append(
-                f"Dialogue: 0,{ass_time(start)},"
-                f"{ass_time(end)},Default,,0,0,0,,{phrase}"
-            )
+                phrase = " ".join(str(x["text"]) for x in group)
+                phrase = r"\N".join(
+                    textwrap.wrap(
+                        phrase,
+                        width=CAPTION_MAX_CHARS,
+                        break_long_words=False,
+                        break_on_hyphens=False,
+                    )
+                )
+                phrase = phrase.replace("{", r"\{").replace("}", r"\}")
+                lines.append(
+                    f"Dialogue: 0,{ass_time(start)},"
+                    f"{ass_time(end)},Default,,0,0,0,,{phrase}"
+                )
 
         (OUT / "captions.ass").write_text(
             "\n".join(lines),
@@ -3820,6 +3937,17 @@ def render_footage_scene(
     output,
     hook_text=None
 ):
+    source_info = ffprobe_video_info(source)
+    if not is_native_portrait_916(
+        source_info["width"], source_info["height"],
+        aspect_ratio=source_info["aspect_ratio"],
+    ):
+        raise RuntimeError(
+            "Render refused non-native-9:16 footage: "
+            f"{source_info['width']}x{source_info['height']} "
+            f"(aspect {source_info['aspect_ratio']:.4f})."
+        )
+
     source_duration = ffprobe_duration(source)
 
     loop_args = (
@@ -3828,32 +3956,34 @@ def render_footage_scene(
         else []
     )
 
+    # The downloaded source has been checked as native 9:16. Fit the complete
+    # frame into the canvas; never enlarge-and-crop or apply artificial panning.
     vf = (
-        f"scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,"
-        f"crop={W}:{H}:"
-        f"x='(iw-ow)/2+(iw-ow)*0.08*sin(t*0.22)':"
-        f"y='(ih-oh)/2+(ih-oh)*0.08*cos(t*0.18)',"
+        f"scale={W}:{H}:force_original_aspect_ratio=decrease:flags=lanczos,"
+        f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black,"
         f"fps={FPS},setsar=1,format=yuv420p"
     )
 
     if hook_text:
         hook_file = OUT / "hook.txt"
-
-        hook_file.write_text(
-            hook_text,
-            encoding="utf-8"
+        wrapped_hook = wrap_overlay_text(hook_text, width=24, max_lines=5)
+        hook_file.write_text(wrapped_hook, encoding="utf-8")
+        longest_hook_line = max(
+            (len(line) for line in wrapped_hook.splitlines()),
+            default=1,
+        )
+        hook_font_size = max(
+            32,
+            min(54, int((W - 180) / max(1, longest_hook_line * 0.62))),
         )
 
         vf += (
-            ",drawbox=x=0:y=170:w=1080:h=420:"
-            "color=black@0.38:t=fill:"
-            "enable='between(t,0.6,4.5)'"
-
             f",drawtext=fontfile=/usr/share/fonts/truetype/dejavu/"
             f"DejaVuSans-Bold.ttf:textfile={hook_file}:"
-            "fontcolor=white:fontsize=66:line_spacing=14:"
-            "borderw=2:bordercolor=black@0.65:"
-            "x=70:y=260:"
+            f"fontcolor=white:fontsize={hook_font_size}:line_spacing=8:"
+            "borderw=2:bordercolor=black@0.70:"
+            "box=1:boxcolor=black@0.42:boxborderw=30:"
+            "x=(w-text_w)/2:y=160:"
             "alpha='if(lt(t,1.0),(t-0.6)/0.4,"
             "if(gt(t,4.1),(4.5-t)/0.4,1))':"
             "enable='between(t,0.6,4.5)'"
@@ -3904,7 +4034,7 @@ def render(plan, sentence_events, total_duration):
                     r"[^A-Za-z0-9 ,.!?\-]",
                     "",
                     str(plan.get("hook") or "")
-                )[:90]
+                ).strip()
 
             render_footage_scene(
                 source,
