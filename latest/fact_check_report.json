@@ -9,12 +9,12 @@
   "supported_claim_count": 8,
   "failed_claims": [],
   "uncited_factual_sentences": [],
-  "coverage_note": "All sentences in the script correspond directly to valid, supported claims backed by the provided source excerpts.",
+  "coverage_note": "All sentences in the script correspond directly to the supplied claims, and every claim is fully supported by the provided evidence excerpts.",
   "claims": [
     {
       "id": "C1",
       "scene": 1,
-      "sentence": "In Europe, beavers were reduced to fragmented populations across several regions before conservation efforts successfully helped them recover.",
+      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
@@ -22,12 +22,12 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
-      "reason": "The excerpt explicitly states that in Europe, beavers were reduced to fragmented populations before conservation efforts successfully helped them recover or protections allowed them to rebound."
+      "reason": "The fetched excerpt explicitly states that beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds."
     },
     {
       "id": "C2",
       "scene": 2,
-      "sentence": "Combined population numbers were estimated at small totals for specific rivers and basins located throughout Europe.",
+      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
@@ -35,38 +35,38 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
-      "reason": "The excerpt mentions combined population numbers being estimated at specific totals (such as 1,200 individuals) for specific rivers and basins located throughout Europe."
+      "reason": "The excerpt confirms that in Europe, beavers were reduced to fragmented populations with combined population numbers being estimated."
     },
     {
       "id": "C3",
       "scene": 3,
-      "sentence": "Beavers live naturally in freshwater ecosystems such as rivers, streams, lakes and ponds where they build dams.",
+      "sentence": "River ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/River_ecosystem"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/River_ecosystem"
       ],
-      "reason": "The excerpt states that beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds, and that they build dams."
+      "reason": "The excerpt states that river ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants."
     },
     {
       "id": "C4",
       "scene": 4,
-      "sentence": "The keystone species concept became popular in conservation and was deployed to engender support for protecting damaged ecosystems.",
+      "sentence": "The major zones in river ecosystems are determined by the river bed gradient or current velocity.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/River_ecosystem"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/River_ecosystem"
       ],
-      "reason": "The excerpt states that the concept became popular in conservation and was deployed to engender support for conservation, especially where human activities had damaged ecosystems."
+      "reason": "The excerpt states that the major zones in river ecosystems are determined by the river bed's gradient or by the velocity of the current."
     },
     {
       "id": "C5",
       "scene": 5,
-      "sentence": "Conservation initiatives were mobilized where human activities had damaged ecosystems, especially by removing vital keystone predators.",
+      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ],
@@ -74,12 +74,12 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ],
-      "reason": "The excerpt notes the concept was deployed to engender support for conservation especially where human activities had damaged ecosystems, such as by removing keystone predators."
+      "reason": "The excerpt confirms that the concept became popular in conservation, and was deployed in a range of contexts to engender support."
     },
     {
       "id": "C6",
       "scene": 6,
-      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having food sources encroached upon.",
+      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from encroachment.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ],
@@ -87,33 +87,33 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ],
-      "reason": "The excerpt explicitly states that wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon."
+      "reason": "The excerpt explicitly notes that wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon."
     },
     {
       "id": "C7",
       "scene": 7,
-      "sentence": "Ecological engineering uses ecology and engineering to predict, design, construct or restore, and manage ecosystems for mutual benefit.",
+      "sentence": "However, it is important to note that these groups do not cover the entire range known.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ecological_engineering"
+        "https://www.iucnredlist.org/species/4003/22187946"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ecological_engineering"
+        "https://www.iucnredlist.org/species/4003/22187946"
       ],
-      "reason": "The excerpt states that ecological engineering uses ecology and engineering to predict, design, construct or restore, and manage ecosystems."
+      "reason": "The excerpt states that these groups do not cover the entire range known to be occupied by the subspecies."
     },
     {
       "id": "C8",
       "scene": 8,
-      "sentence": "These engineered ecosystems integrate human society with its natural environment for the benefit of both balanced living systems.",
+      "sentence": "Therefore, we divided spatial units by clusters of states to understand the range occupied by subspecies.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ecological_engineering"
+        "https://www.iucnredlist.org/species/4003/22187946"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ecological_engineering"
+        "https://www.iucnredlist.org/species/4003/22187946"
       ],
-      "reason": "The excerpt indicates that these ecosystems integrate human society with its natural environment for the benefit of both."
+      "reason": "The excerpt confirms that we divided spatial units by clusters of states."
     }
   ],
   "sources": [
@@ -124,7 +124,7 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Beaver",
-      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. still far lower than the originally estimated 60–400 million North American beavers before the fur trade. Beaver populations now range across western, central, and eastern Europe, and western Russia and the Scandinavian Peninsula. Beginning in 2009, beavers have been successfully reintroduced to parts of Great Britain. North American beavers prefer trees being 60 m (200 ft) or less from the water, but will roam several hundred meters to find more. Dispersing beavers will use certain habitats temporarily before finding their ideal home. The presence of beavers can increase wild salmon and trout populations, and the averag",
+      "excerpt": "== Ecology ==\n\nBeavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. When building dams, beavers alter the paths of streams and rivers, allowing for the creation of extensive wetland habitats. These ponds can increase the productivity of freshwater ecosystems by accumulating nitrogen in sediments. In a study of Wyoming streams and rivers, watercourses with beavers had 75 times as many ducks as those without. Beavers prefer slower moving streams, typically with a gradient (steepness) of one percent, though they have been recorded using streams with gradients as high as 15 percent. Beavers are found in wider streams more often than in narrower ones. === Infrastructure ===\n\nBeavers need trees and shrubs to use as building material for dams, which restrict flowing wate",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -135,29 +135,29 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Beaver",
-      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. In 2020, the total Eurasian beaver population in Europe was estimated at over one million. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. In 2016 their numbers were estimated at 150 and 700, respectively. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. == Taxonomy ==\nCarl Linnaeus coined the genus name Castor as well as the specific (species) epithet fiber for the Eurasian species. The diffe",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. In 2020, the total Eurasian beaver population in Europe was estimated at over one million. As of 2019, the introduced population of North American beavers in Finland has been moving closer to the habitat of the Eurasian beaver. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the originally estimated 60–400 million North American beavers before the fur trade. The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. Beaver populations now range across western, central, and easter",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C3",
-      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
-      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "requested_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "resolved_url": "https://en.wikipedia.org/wiki/River_ecosystem",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Beaver",
-      "excerpt": "== Ecology ==\n\nBeavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. When building dams, beavers alter the paths of streams and rivers, allowing for the creation of extensive wetland habitats. Beavers build dams and lodges using tree branches, vegetation, rocks and mud; === Infrastructure ===\n\nBeavers need trees and shrubs to use as building material for dams, which restrict flowing water to create a pond for them to live in, and for lodges, which act as shelters and refuges from predators and the elements. Lake-dwelling beavers do not need to build dams. These ponds can increase the productivity of freshwater ecosystems by accumulating nitrogen in sediments. In a study of Wyoming streams and rivers, watercourses with beavers had 75 times as many ducks as those wit",
+      "page_title": "River ecosystem",
+      "excerpt": "River ecosystems are flowing waters that drain the landscape, and include the biotic (living) interactions amongst plants, animals and micro-organisms, as well as abiotic (nonliving) physical and chemical interactions of its many parts. River ecosystems are part of larger watershed networks or catchments, where smaller headwater streams drain into mid-size streams, which progressively drain into larger river networks. The common orders of insects that are found in river ecosystems include Ephemeroptera (also known as a mayfly), Trichoptera (also known as a caddisfly), Plecoptera (also known as a stonefly, Diptera (also known as a true fly), some types of Coleoptera (also known as a beetle), Odonata (the group that includes the dragonfly and the damselfly), and some types of Hemiptera (also known as true bugs). Additional invertebrate taxa common to flowing waters include mollusks such as",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C4",
-      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
-      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "requested_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "resolved_url": "https://en.wikipedia.org/wiki/River_ecosystem",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Keystone species",
-      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. It became a popular concept in conservation biology, alongside flagship and umbrella species. In this it overlaps with several other species conservation concepts such as flagship species (attracting support), indicator species (showing the health of the environment), and umbrella species (indirectly protecting many other species). === Multiple meanings ===\nAlthough the concept of the keystone species has a value in describing particularly strong inter-species interactions, and for allowing easier communication between ecologists and conservation policy-makers, it has been criticized by L. Although the concept is valued as a descriptor for particularly stron",
+      "page_title": "River ecosystem",
+      "excerpt": "The major zones in river ecosystems are determined by the river bed's gradient or by the velocity of the current. River ecosystems are flowing waters that drain the landscape, and include the biotic (living) interactions amongst plants, animals and micro-organisms, as well as abiotic (nonliving) physical and chemical interactions of its many parts. River ecosystems are part of larger watershed networks or catchments, where smaller headwater streams drain into mid-size streams, which progressively drain into larger river networks. River ecosystems are prime examples of lotic ecosystems. === Chemistry ===\nWater chemistry in river ecosystems varies depending on which dissolved solutes and gases are present in the water column of the stream. Specifically river water can include, apart from the water itself,\n\ndissolved inorganic matter and major ions (calcium, sodium, magnesium, potassium, bi",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -168,7 +168,7 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Keystone species",
-      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. Some keystone species, such as the wolf and lion, are also apex predators. If prey numbers are low, keystone predators can be even less abundant and still be effective. The keystone concept is defined by its ecological effects, and these in turn make it important for conservation. === The wolf, Yellowstone's apex predator ===\n\nKeystone predators may increase the biodiversity of communities by preventing a single species from becoming dominant. === Multiple meanings ===\nAlthough the concept of the keystone species has a value in describing particularly strong inter-species interactions, and for allowing easier communication between ecologists and conservation",
+      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. It became a popular concept in conservation biology, alongside flagship and umbrella species. Although the concept is valued as a descriptor for particularly strong inter-species interactions, and has allowed easier communication between ecologists and conservation policy-makers, it has been criticized for oversimplifying complex ecological systems. The keystone concept is defined by its ecological effects, and these in turn make it important for conservation. In this it overlaps with several other species conservation concepts such as flagship species (attracting support), indicator species (showing the health of the environment), and umbrella species (indi",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -179,29 +179,29 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Keystone species",
-      "excerpt": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon. Beavers affect the environment first altering the edges of riparian areas by cutting down older trees to use for their dams. It promotes the goals of carnivore recovery, protecting and restoring connectivity through Madrean woodland and riparian areas, and protecting and restoring riparian areas. The removal of wolves had a direct effect on beaver populations, as their habitat became grazing territory. When wolves were reintroduced, the beaver population and the whole riparian ecosystem recovered dramatically within a few years. In his 1966 paper, Food Web Complexity and Species Diversity, Paine had described such a system in Makah Bay in Washington. The favourite food for these starfish is the mussel which is a dominant competitor for the space o",
+      "excerpt": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon. Beavers affect the environment first altering the edges of riparian areas by cutting down older trees to use for their dams. It promotes the goals of carnivore recovery, protecting and restoring connectivity through Madrean woodland and riparian areas, and protecting and restoring riparian areas. The removal of wolves had a direct effect on beaver populations, as their habitat became grazing territory. When wolves were reintroduced, the beaver population and the whole riparian ecosystem recovered dramatically within a few years. Increased browsing on willows and conifers along Blacktail Creek due to a lack of predation caused channel incision because the beavers helped slow the water down, allowing soil to stay in place. Prairie dog burrows provid",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C7",
-      "requested_url": "https://en.wikipedia.org/wiki/Ecological_engineering",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ecological_engineering",
-      "host": "en.wikipedia.org",
+      "requested_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "resolved_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "host": "www.iucnredlist.org",
       "http_status": 200,
-      "page_title": "Ecological engineering",
-      "excerpt": "Ecological engineering uses ecology and engineering to predict, design, construct or restore, and manage ecosystems that integrate \"human society with its natural environment for the benefit of both\". Mitsch and Jorgensen summarized five basic concepts that differentiate ecological engineering from other approaches to addressing problems to benefit society and nature: 1) it is based on the self-designing capacity of ecosystems; Mitsch and Jorgensen were the first to define ecological engineering as designing societal services such that they benefit society and nature, and later noted the design should be systems based, sustainable, and integrate society with its natural environment. Barrett (1999) offers a more literal definition of the term: \"the design, construction, operation and management (that is, engineering) of landscape/aquatic structures and associated plant and animal communit",
+      "page_title": "Castor canadensis (North American Beaver) | IUCN Red List of Threatened Species Castor canadensis. The IUCN Red List of Threatened Species 2016: e.T4003A22187946",
+      "excerpt": "However, it is important to note that these groups do not cover the entire range known to be occupied by the subspecies and thus further genetic analysis is needed. Therefore, as we could not solely rely on biological information to define spatial units for the entire range and there is sufficient information at the state level, we divided spatial units by clusters of states. Ecological Function in detail Threats Threats in detail Use and Trade Wearing apparel, accessories Local: ✘ National: ✔ International: ✔ Use and Trade in detail Conservation Actions In-place land/water protection Conservation sites identified : Yes, over entire range In-place species management Harvest management plan : Yes Conservation Actions in detail Bibliography Red List Bibliography Green Status Bibliography External Data Images and External Links Images and External Links in detail CITES Legislation from Spec",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C8",
-      "requested_url": "https://en.wikipedia.org/wiki/Ecological_engineering",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ecological_engineering",
-      "host": "en.wikipedia.org",
+      "requested_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "resolved_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "host": "www.iucnredlist.org",
       "http_status": 200,
-      "page_title": "Ecological engineering",
-      "excerpt": "Ecological engineering uses ecology and engineering to predict, design, construct or restore, and manage ecosystems that integrate \"human society with its natural environment for the benefit of both\". Mitsch and Jorgensen were the first to define ecological engineering as designing societal services such that they benefit society and nature, and later noted the design should be systems based, sustainable, and integrate society with its natural environment. Mitsch and Jorgensen summarized five basic concepts that differentiate ecological engineering from other approaches to addressing problems to benefit society and nature: 1) it is based on the self-designing capacity of ecosystems; Implementation of ecological engineering has focused on the creation or restoration of ecosystems, from degraded wetlands to multi-celled tubs and greenhouses that integrate microbial, fish, and plant service",
+      "page_title": "Castor canadensis (North American Beaver) | IUCN Red List of Threatened Species Castor canadensis. The IUCN Red List of Threatened Species 2016: e.T4003A22187946",
+      "excerpt": "Therefore, as we could not solely rely on biological information to define spatial units for the entire range and there is sufficient information at the state level, we divided spatial units by clusters of states. Version 2026-1 Geographic range in detail Taxonomy Assessment Information Green Status Assessment Information Geographic Range Indigenous and Expected Additional Range Population Spatial Units Habitat and Ecology Ecological Function Threats Use and Trade Conservation Actions Bibliography External Data Expand all Collapse all Taxonomy Kingdom Animalia Phylum Chordata Class Mammalia Order Rodentia Family Castoridae Genus Castor Taxonomy in detail Assessment Information Global Assessment IUCN Red List Category and Criteria - Global Assessment Least Concern ver 3.1 Date assessed 07 August 2016 Year published 2016 Assessment Information in detail Green Status Assessment Information ",
       "source_kind": "planned",
       "status": "usable"
     }
