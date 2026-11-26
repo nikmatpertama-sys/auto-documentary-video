@@ -509,9 +509,9 @@ SCENES AND VISUALS
   conservation, process or impact are rejected as focus terms because no clip
   can show them; keep those ideas in the narration and focus the picture on the
   concrete thing it is about.
-- Every scene must name the concrete subject its shot shows; a sentence about
-  only an idea or process is invalid, and any named organism, object or action
-  must be that scene's visual focus.
+- Every scene must stay on the documentary's own subject and name the concrete
+  thing its shot shows ("beaver at a dam"); a sentence about only an idea, or a
+  drift into a general concept such as conservation or ecology, is invalid.
 - Scene 1 is real moving footage, not a diagram; its first sentence is a
   curiosity hook of at most 12 words.
 - visual_query must be filmable; never put map, chart, graph, diagram, table,
