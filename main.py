@@ -462,9 +462,8 @@ SCENES AND VISUALS
   specific process. A bare word like wildlife, nature or landscape returns a
   lion or a hillside; name the specific subject and keep the documentary's own
   subject visible in most scenes.
-- visual_focus is 2-6 concrete words and at least half of them must appear
-  verbatim in visual_query (case-insensitive) as a searchable real-footage
-  phrase.
+- visual_focus is 2-6 concrete words and at least half must appear verbatim in
+  visual_query (case-insensitive) as a real-footage phrase.
 - visual_focus must be something a real stock clip actually shows: a named
   animal, plant, object, place or simple action (for example "beaver in pond").
   Never make an abstract stage or invisible process the focus ("dam
@@ -473,8 +472,9 @@ SCENES AND VISUALS
   conservation, process or impact are rejected as focus terms because no clip
   can show them; keep those ideas in the narration and focus the picture on the
   concrete thing it is about.
-- Any named organism, object or specific action in a scene must be the visual
-  focus or be removed from that narration.
+- Every scene must name the concrete subject its shot shows; a sentence about
+  only an idea or process is invalid, and any named organism, object or action
+  must be that scene's visual focus.
 - Scene 1 is real moving footage, not a diagram; its first sentence is a
   curiosity hook of at most 12 words.
 - visual_query must be filmable; never put map, chart, graph, diagram, table,
@@ -492,14 +492,14 @@ SCENES AND VISUALS
   establishes it; generic rainforest footage does not prove a location.
 - Each query is one practical shot with one dominant subject, optionally a camera
   angle or environment.
-- Give every scene a clear visual match, and the story a hook, explanation,
-  reveal and satisfying payoff.
+- Give every scene a clear visual match; the story needs a hook, reveal and
+  payoff.
 - Write natural spoken narration in your own words, never copied encyclopedia
-  phrasing; keep the passage's key terms in a plain paraphrase.
+  phrasing; paraphrase while keeping the passage's key terms.
 - Do not pad the script with generic statements to reach the word count.
 - Write for a calm documentary narrator: varied sentence lengths, spoken
   punctuation.
-- End on a memorable, evidence-consistent thought, not a generic call to action.
+- End on a memorable, evidence-consistent thought, not a call to action.
 """
 
 

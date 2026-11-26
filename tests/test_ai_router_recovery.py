@@ -274,7 +274,7 @@ class DocumentaryPromptBudgetTests(unittest.TestCase):
             "Exactly 8 scenes",
             "110-180",
             "visual_focus",
-            "at least half of them must appear",
+            "at least half must appear verbatim",
             "TWO independent trusted hosts",
             "copied exactly from this list",
             "Never invent a source",

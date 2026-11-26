@@ -50,6 +50,9 @@ _GENERIC_SUBJECTS = {
     "global", "tropical", "rainfall", "precipitation", "rain", "water",
     "river", "stream", "forest", "rainforest", "region", "regional", "world",
     "area", "landscape", "nature", "wildlife", "country", "riverbed",
+    "worker", "workers", "people", "person", "human", "humans", "researcher",
+    "scientist", "team", "community", "communities", "concept", "policy",
+    "conservation", "process", "history",
 }
 
 
