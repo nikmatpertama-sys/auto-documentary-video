@@ -228,19 +228,40 @@ INVISIBLE_FOCUS_TERMS = {
 }
 
 
+def _filmable_words(text):
+    return [
+        word
+        for word in normalize_words(text)
+        if word not in INVISIBLE_FOCUS_TERMS
+    ]
+
+
+def sanitize_visual_focus(visual_focus, visual_query=""):
+    """Rewrite a scene focus into what a camera can film.
+
+    Free-tier planners kept writing ideas like "fragmented populations", which
+    no clip can show, and rejecting the plan for that burned twenty minutes of
+    retries without changing the answer. The idea stays in the narration; the
+    picture is focused on the concrete subject named in the focus or, when the
+    focus was entirely abstract, in the search query.
+    """
+    words = _filmable_words(visual_focus)
+    if len(words) < 2:
+        words = list(dict.fromkeys(words + _filmable_words(visual_query)))
+    return " ".join(dict.fromkeys(words))[:80] if words else ""
+
+
+def sanitize_visual_query(visual_query, limit=8):
+    """Drop invisible idea words from a footage search phrase."""
+    words = _filmable_words(visual_query)
+    return " ".join(words[:limit]) if len(words) >= 1 else ""
+
+
 def validate_visual_focus(visual_focus, index):
-    """Reject a scene focus a camera cannot actually film."""
+    """Require a scene focus a camera can actually film."""
     words = normalize_words(visual_focus)
     if not 2 <= len(words) <= 6:
         raise ValueError(f"Scene {index} needs a concrete 2-6 word visual_focus.")
-    invisible = [word for word in words if word in INVISIBLE_FOCUS_TERMS]
-    if invisible:
-        raise ValueError(
-            f"Scene {index} visual_focus names an invisible idea "
-            f"({', '.join(invisible)}). Name only what a camera can film - a "
-            "named animal, plant, object, place or simple action, such as "
-            "\"beaver swimming in a pond\" - and move the idea into the narration."
-        )
 
 
 # ============================================================
@@ -636,6 +657,14 @@ def staged_plan(topic, source_pool, validate_plan, evidence=None):
             visual_focus = re.sub(r"\s+", " ", str(scene.get("visual_focus", ""))).strip()
             if not visual_query or not visual_focus:
                 raise ValueError(f"Scene {index} needs both visual_focus and visual_query.")
+            sanitized_focus = sanitize_visual_focus(visual_focus, visual_query)
+            if sanitized_focus != visual_focus.lower():
+                print(
+                    f"Plan repair: scene {index} visual_focus rewritten to "
+                    f"{sanitized_focus!r} (invisible idea kept in narration)."
+                )
+                visual_focus = sanitized_focus
+                visual_query = sanitize_visual_query(visual_query) or visual_query
             validate_visual_focus(visual_focus, index)
             alternatives = scene.get("visual_queries")
             if not isinstance(alternatives, list) or len(
@@ -759,9 +788,17 @@ def gemini_plan(topic, source_pool=None, evidence=None):
             if not visual_query:
                 raise ValueError(f"Scene {scene_index} has no primary visual_query.")
             visual_focus = re.sub(r"\s+", " ", str(scene.get("visual_focus", ""))).strip()
+            sanitized_focus = sanitize_visual_focus(visual_focus, visual_query)
+            if sanitized_focus != visual_focus.lower():
+                print(
+                    f"Plan repair: scene {scene_index} visual_focus rewritten to "
+                    f"{sanitized_focus!r} (invisible idea kept in narration)."
+                )
+                visual_focus = sanitized_focus
+                visual_query = sanitize_visual_query(visual_query) or visual_query
+            validate_visual_focus(visual_focus, scene_index)
             focus_tokens = set(normalize_words(visual_focus))
             query_tokens_for_focus = set(normalize_words(visual_query))
-            validate_visual_focus(visual_focus, scene_index)
             focus_overlap = len(focus_tokens & query_tokens_for_focus) / max(1, len(focus_tokens))
             if focus_overlap < 0.5:
                 # A near miss here is a search-phrase problem, not a factual
@@ -787,6 +824,9 @@ def gemini_plan(topic, source_pool=None, evidence=None):
                 raise ValueError(f"Scene {scene_index} visual_queries must be a list of two alternatives.")
             alternatives = [re.sub(r"\s+", " ", str(item)).strip() for item in alternatives]
             alternatives = [item for item in alternatives if item]
+            # Search phrases name the same invisible ideas; drop them so the
+            # alternate shots are looked up by what they can actually show.
+            alternatives = [sanitize_visual_query(item) or item for item in alternatives]
             if len(alternatives) < 2:
                 raise ValueError(f"Scene {scene_index} needs two independent visual_queries.")
             scene["visual_query"] = visual_query
