@@ -349,3 +349,13 @@ jobs:
             output/pipeline.log
           if-no-files-found: warn
           retention-days: 7
+          
+                - name: Persist generated Markdown cleanup to this branch
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f persist_generated_markdown.py ]]; then
+            python persist_generated_markdown.py
+          else
+            echo "Cleanup persistence helper is not installed yet; skipping this step."
+          fi
