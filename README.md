@@ -1,4 +1,4 @@
-# Auto Documentary Video — Version 10.20
+# Auto Documentary Video — MM1
 
 Automated vertical documentary generator. It builds a scene plan, searches for relevant real-world footage, performs visual verification, generates narration and captions, and renders the final video with FFmpeg.
 
@@ -6,23 +6,31 @@ Automated vertical documentary generator. It builds a scene plan, searches for r
 
 `SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, an eight-scene structure, a strict 120–200-word narration boundary, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
 
-## Footage discovery — version 10.20
+## Footage discovery — MM1
 
-The active footage search prioritizes open-web/archive sources: Internet Archive, Wikimedia Commons, and NASA. Google Search is also queried for directly indexed video files with public-domain/Creative Commons reuse signals. Google is a discovery index, not a video host; ordinary YouTube/social pages are not scraped or downloaded. Google HTML results can be rate-limited or changed by Google, so the archive APIs remain the dependable open-source search routes.
+The active footage search uses Internet Archive, Wikimedia Commons, NASA, and Google Search for directly indexed reusable video files. The open archives are preferred when candidates are similarly relevant; Google Search is a discovery index, not a video host. Ordinary YouTube/social pages are not scraped or downloaded. Google HTML results can be rate-limited or changed, so its candidates are ranked behind comparable archive results.
 
-Pexels and Pixabay are **disabled by default** because their catalogs were repeatedly too limited or mismatched for this project. They can only be enabled intentionally with `ENABLE_PEXELS_FALLBACK=true` or `ENABLE_PIXABAY_FALLBACK=true` in the workflow environment, and their API keys.
+Pexels and Pixabay remain **disabled by default** because their catalogs were repeatedly too limited or mismatched for this project. They are not enabled by MM1. They can only be enabled intentionally with `ENABLE_PEXELS_FALLBACK=true` or `ENABLE_PIXABAY_FALLBACK=true` in the workflow environment, and their API keys.
 
-Every selected clip still passes native 9:16, minimum resolution/duration, relevance, and visual-AI verification. The pipeline does not silently substitute unrelated footage. License information must be checked against the original source page before publication; Google-indexed license snippets are not a substitute for the source's actual terms.
+MM1 adds four footage-intelligence improvements:
+- Intent-aware ranking separates title, tags, descriptive metadata, scene subject, requested action, and camera viewpoint. A title/tag match weighs more than an incidental word buried in a long description.
+- Strong off-topic contexts such as military training, urban traffic, industrial scenes, sports, and agriculture are filtered when they are not part of the scene intent.
+- Generic forest/tree metadata is never treated as proof of a rainforest match; it may enter the relaxed AI-gated queue only when the request still has enough supporting context, and it cannot satisfy a missing mandatory shot-type anchor by itself.
+- If the first candidate batch is exhausted, one bounded second search wave creates up to four subject-preserving queries informed by the visual-review rejection reason and checks at most twelve additional candidates.
+
+With the default `FOOTAGE_VISION_REQUIRED=true`, every selected clip still passes native 9:16, minimum resolution/duration, metadata relevance, and visual-AI verification. The pipeline remains fail-closed: it does not lower the visual confidence threshold or silently substitute unrelated footage. Metadata-only selection is possible only when the operator explicitly disables required visual verification. Wikimedia 429s now trigger an immediate timed cooldown instead of short repeat requests; source 5xx/timeouts also cool down temporarily, while downloads use a bounded transient retry policy. License information must be checked against the original source page before publication; Google-indexed license snippets are not a substitute for the source's actual terms.
 
 `footage.py` was a legacy standalone Pixabay utility and is not part of the active `render.py` → `main.py` pipeline.
 
-## Automatic Markdown cleanup
+## Automatic Markdown cleanup — carried forward from 10.21
 
-`main.py` runs cleanup at startup and after success or failure. The separate `.github/workflows/cleanup-generated-markdown.yml` also runs on repository pushes, deletes matching files, and commits those deletions back to GitHub. It removes Markdown filenames containing `upgrade` and validation-report Markdown files recursively, while preserving `README.md`, `SCRIPTWRITER_MASTER_PROMPT.md`, and unrelated documentation. `cleanup_old_markdown.sh` performs the same cleanup manually.
+`main.py` removes generated upgrade notes and validation-report Markdown files from the local project workspace at startup and after success or failure. Version 10.21 adds `persist_generated_markdown.py`, which stages and commits only those matching tracked files that are already gone from the workspace. The supplied `render.yml` calls it after artifact upload even when video generation fails. The separate `.github/workflows/cleanup-generated-markdown.yml` runs on pushes (and can be run manually), invokes the same cleanup and persistence scripts, and commits deletions to the triggering branch. `README.md`, `SCRIPTWRITER_MASTER_PROMPT.md`, unrelated documentation, and unrelated staged changes are protected.
+
+**One-time installation note:** the existing ZIP-upgrade workflow intentionally preserves the repository's `.github` directory instead of replacing workflows from a project ZIP. To enable cleanup after ordinary pushes, copy this archive's `.github/workflows/cleanup-generated-markdown.yml` into the repository at that exact path on each branch that should be cleaned. The ZIP's normal project overlay installs `cleanup_old_markdown.sh` and `persist_generated_markdown.py` at the repository root. For cleanup to persist at the end of a `workflow_dispatch` video run, add the included `Persist generated Markdown cleanup to this branch` step to the existing `render.yml` after its artifact-upload step. Do not replace unrelated workflow steps. A local run of `main.py` deletes files from the extracted working directory; it does not rewrite the original ZIP archive or push changes to GitHub by itself.
 
 ## GitHub Actions workflow preservation
 
-This ZIP intentionally does not include `.github/workflows/render.yml`. Keep the existing workflow on your branch; this archive overlays project files only.
+The archive contains a snapshot of `.github/workflows/render.yml` for reference and local setup. The automated ZIP installer deliberately skips the `.github` directory so it cannot overwrite the repository's permanent workflow. Install the cleanup workflow separately as described above; keep the repository's existing render workflow unchanged unless you intentionally update it.
 
 ## Required GitHub Secrets
 
@@ -124,3 +132,16 @@ The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.jso
 - Treats Groq limits as organization-scoped, Gemini limits as project-scoped, Cloudflare Workers AI limits as account-scoped, and Speechify rate/concurrency limits as account-scoped. Same-pool keys are not falsely counted as independent quota pools.
 - Supports optional numbered `OPENROUTER_QUOTA_GROUP_n` labels for keys belonging to different OpenRouter accounts; `GEMINI_PROJECT_ID_n` and `GROQ_QUOTA_GROUP_n` remain available for genuinely separate projects/organizations.
 - Keeps Speechify as primary VO, with Edge TTS as a full-script fallback when Speechify account-level quota/balance or service availability prevents completion.
+
+
+## MM1 — smart footage discovery
+
+- Uses metadata title, tags, description, scene intent, and shot-type anchors as separate scoring signals.
+- Lets a more relevant candidate outrank source preference; trusted open archives break close-score ties.
+- Rejects unrequested military, industrial, agricultural, sports, urban, winter, and other conflicting contexts before download/visual review.
+- Keeps ambiguous tree/forest-only candidates in the relaxed queue, where they must pass downloaded-video visual verification.
+- Adds one bounded rejection-guided query retry per scene (up to four new search queries and twelve new candidate checks).
+- Applies timed source cooldowns after 429, 5xx, and network failures; avoids immediate repeat hits against Wikimedia Commons after HTTP 429.
+- Keeps Pixabay/Pexels disabled and preserves strict native 9:16 validation and fail-closed visual verification.
+
+The project ZIP filename is intentionally not used by the GitHub extraction step. The workflow selects the newest ZIP whose contents contain the required project markers, so `mm1.zip`, `mm2.zip`, and later names are supported without changing the extraction script.

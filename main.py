@@ -236,24 +236,25 @@ VISION_CANDIDATE_LIMIT = max(
     1, min(50, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "36")))
 )
 
-# Version 10.20: open-web discovery first, stock libraries disabled by default, and automatic Markdown cleanup.
+# MM1: intent-aware footage ranking, rejection-guided search retry, and source resilience.
+# Base release: project1-10.21.
+# Version 10.21: persist generated Markdown cleanup to GitHub branches.
 # Version 10.19: tiered metadata discovery, broader candidate pool, balanced stock-source priority, and footage diagnostics.
 # Version 10.18: accept common stock-library forest/tree metadata for rainforest close-ups; keep visual verification mandatory.
 # Version 10.15: quota-aware provider routing using live quota telemetry and shared account/project scopes.
 # Version 10.14: provider key rotation, Cloudflare fallback, Speechify VO, 70s+ duration, 120-200 words.
 # Version 10.13: preserve hook/subtitle readability and reject non-native 9:16 footage.
 # Version 10.12: recover from Wikimedia download throttling and search sparse tiers better.
-# Stock-footage providers are prioritized for documentary B-roll; open archives
-# remain active as additional fallback sources when their APIs are available.
-# Search the open web/archive sources first. Stock libraries are intentionally
-# opt-in because their limited catalog repeatedly produced poor scene matches.
+# Open archives are preferred only when candidates are similarly relevant;
+# a much stronger semantic match can outrank source preference. Stock libraries
+# remain opt-in because their catalogs repeatedly produced poor scene matches.
 ENABLE_PEXELS_FALLBACK = os.getenv("ENABLE_PEXELS_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 ENABLE_PIXABAY_FALLBACK = os.getenv("ENABLE_PIXABAY_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 FOOTAGE_SOURCE_PRIORITY = (
-    "Google Search",
     "Internet Archive",
     "Wikimedia Commons",
     "NASA",
+    "Google Search",
     "Pexels",
     "Pixabay",
 )
@@ -315,8 +316,10 @@ VISION_PROVIDER_COOLDOWN_UNTIL = {}
 FOOTAGE_SOURCE_DISABLED = set()  # retained for compatibility with cached runs
 FOOTAGE_SOURCE_COOLDOWN_UNTIL = {}
 WIKIMEDIA_LAST_REQUEST_AT = 0.0
-WIKIMEDIA_MIN_REQUEST_INTERVAL = 1.2
-WIKIMEDIA_MAX_RETRIES = 2
+WIKIMEDIA_MIN_REQUEST_INTERVAL = 2.0
+# Do not immediately retry Commons 429s; the caller cools the source and continues elsewhere.
+MAX_ADAPTIVE_FOOTAGE_QUERIES = 4
+MAX_ADAPTIVE_FOOTAGE_CANDIDATES = 12
 
 PIPELINE_STATE = {
     "status": "not_started",
@@ -376,6 +379,22 @@ def mark_footage_source_rate_limited(source, response=None):
     )
     print(
         f"{source} rate-limited; cooling this source for "
+        f"{delay:.0f}s before trying it again."
+    )
+    return delay
+
+
+def mark_footage_source_temporarily_unavailable(source, seconds=45.0):
+    """Avoid repeatedly hitting a source that is timing out or returning 5xx."""
+    if not source:
+        return 0.0
+    delay = max(15.0, min(180.0, float(seconds)))
+    until = time.monotonic() + delay
+    FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = max(
+        FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(source, 0.0), until
+    )
+    print(
+        f"{source} temporarily unavailable; cooling this source for "
         f"{delay:.0f}s before trying it again."
     )
     return delay
@@ -1004,72 +1023,103 @@ def assign_scene_sentence_ranges(plan):
 # ============================================================
 
 def download_stream(url, dest, source=None):
-    """Download safely and cool down a source immediately after HTTP 429."""
+    """Download with bounded transient retries and immediate 429 source cooldown."""
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.unlink(missing_ok=True)
 
     is_commons = is_wikimedia_url(url)
     source = "Wikimedia Commons" if is_commons else source
+    max_attempts = 3
 
-    try:
-        if is_commons:
-            # Wikimedia throttles media downloads separately from API searches.
-            # Pace both through the same clock; do not hammer every candidate
-            # after the first upload.wikimedia.org 429 response.
-            pace_wikimedia_request()
+    for attempt in range(1, max_attempts + 1):
+        dest.unlink(missing_ok=True)
+        try:
+            if is_commons:
+                # Share one polite request clock between Commons API and media URLs.
+                pace_wikimedia_request()
 
-        with requests.get(
-            url,
-            stream=True,
-            timeout=(25, 180),
-            headers={
-                "User-Agent": "AutoDocumentaryVideo/3.1 (documentary footage client)"
-            }
-        ) as response:
+            with requests.get(
+                url,
+                stream=True,
+                timeout=(25, 180),
+                headers={
+                    "User-Agent": "AutoDocumentaryVideo/MM1 (documentary footage client)"
+                },
+            ) as response:
+                status = int(getattr(response, "status_code", 0) or 0)
+                if status == 429:
+                    # Let the single exception handler apply one source cooldown.
+                    response.raise_for_status()
 
-            if response.status_code == 429:
-                mark_footage_source_rate_limited(source, response)
-
-            response.raise_for_status()
-
-            declared = int(
-                response.headers.get("Content-Length") or 0
-            )
-
-            if declared > MAX_CLIP_BYTES:
-                raise RuntimeError(
-                    f"Clip is {declared / 1024 / 1024:.1f} MB, "
-                    f"above the {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB limit."
-                )
-
-            total = 0
-
-            with open(dest, "wb") as f:
-                for chunk in response.iter_content(
-                    1024 * 1024
-                ):
-                    if not chunk:
+                if status in (408, 425) or 500 <= status <= 599:
+                    if attempt < max_attempts:
+                        delay = response_retry_after_seconds(
+                            response, default_seconds=5 * attempt
+                        )
+                        delay = min(30.0, max(3.0, delay))
+                        print(
+                            f"{source or 'Footage source'} returned HTTP {status}; "
+                            f"retrying download in {delay:.0f}s "
+                            f"({attempt}/{max_attempts - 1})."
+                        )
+                        time.sleep(delay)
                         continue
 
-                    total += len(chunk)
+                response.raise_for_status()
+                declared = int(response.headers.get("Content-Length") or 0)
+                if declared > MAX_CLIP_BYTES:
+                    raise RuntimeError(
+                        f"Clip is {declared / 1024 / 1024:.1f} MB, "
+                        f"above the {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB limit."
+                    )
 
-                    if total > MAX_CLIP_BYTES:
-                        raise RuntimeError(
-                            f"Clip exceeded "
-                            f"{MAX_CLIP_BYTES / 1024 / 1024:.0f} MB safety limit."
-                        )
+                total = 0
+                with open(dest, "wb") as handle:
+                    for chunk in response.iter_content(1024 * 1024):
+                        if not chunk:
+                            continue
+                        total += len(chunk)
+                        if total > MAX_CLIP_BYTES:
+                            raise RuntimeError(
+                                f"Clip exceeded {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB safety limit."
+                            )
+                        handle.write(chunk)
 
-                    f.write(chunk)
+            if not dest.is_file() or dest.stat().st_size < 50000:
+                raise RuntimeError("Downloaded clip is unexpectedly small.")
+            return
 
-        if dest.stat().st_size < 50000:
-            raise RuntimeError(
-                "Downloaded clip is unexpectedly small."
+        except requests.RequestException as exc:
+            response = getattr(exc, "response", None)
+            status = getattr(response, "status_code", None)
+            if status == 429:
+                # The first 429 is enough: keep the source in cooldown and move on.
+                mark_footage_source_rate_limited(source, response)
+                dest.unlink(missing_ok=True)
+                raise
+            transient = status in (None, 408, 425) or (
+                isinstance(status, int) and 500 <= status <= 599
             )
+            if transient and attempt < max_attempts:
+                delay = min(20.0, 3.0 * (2 ** (attempt - 1)))
+                print(
+                    f"Temporary download error from {source or 'footage source'}: "
+                    f"{exc}; retrying in {delay:.0f}s "
+                    f"({attempt}/{max_attempts - 1})."
+                )
+                time.sleep(delay)
+                continue
+            if transient:
+                mark_footage_source_temporarily_unavailable(source, 45.0)
+            dest.unlink(missing_ok=True)
+            raise
+        except Exception:
+            dest.unlink(missing_ok=True)
+            raise
 
-    except Exception:
-        dest.unlink(missing_ok=True)
-        raise
+    dest.unlink(missing_ok=True)
+    raise RuntimeError("Footage download exhausted its retry budget.")
 
 
 def clean_query(query):
@@ -1122,7 +1172,7 @@ def google_open_web_video_search(query):
         "https://www.google.com/search",
         params={"q": search_text, "num": 30, "filter": "0"},
         headers={
-            "User-Agent": "Mozilla/5.0 (compatible; AutoDocumentaryVideo/10.20; footage research)",
+            "User-Agent": "Mozilla/5.0 (compatible; AutoDocumentaryVideo/MM1; footage research)",
             "Accept-Language": "en-US,en;q=0.9",
         },
         timeout=30,
@@ -1160,6 +1210,7 @@ def google_open_web_video_search(query):
             "width": 0,
             "height": 0,
             "duration": 0,
+            "title": title,
             "metadata": result_context[:1200],
             "tags": title,
             "creator": "See source page",
@@ -1386,6 +1437,9 @@ def nasa_search(query):
             ).get("items", [])
 
         except Exception as exc:
+            if getattr(getattr(exc, "response", None), "status_code", None) == 429:
+                # Propagate rate limits so the shared source cooldown is applied.
+                raise
             print(
                 f"NASA asset lookup skipped ({nasa_id}): {exc}"
             )
@@ -1418,6 +1472,7 @@ def nasa_search(query):
         results.append({
             "source": "NASA",
             "id": str(nasa_id),
+            "title": str(data.get("title", "")),
             "url": urls[0],
             # NASA search does not consistently expose video dimensions;
             # the downloaded asset is checked with ffprobe before vision/API use.
@@ -1441,7 +1496,7 @@ def nasa_search(query):
 
 
 def commons_search(query):
-    """Search Commons videos with a polite request interval and 429 recovery."""
+    """Make one paced Commons search; the caller cools the source after HTTP 429."""
     global WIKIMEDIA_LAST_REQUEST_AT
 
     params = {
@@ -1455,38 +1510,17 @@ def commons_search(query):
         "iiprop": "url|size|mime|extmetadata",
     }
     headers = {
-        "User-Agent": "AutoDocumentaryVideo/3.1 (video research; Wikimedia Commons API client)"
+        "User-Agent": "AutoDocumentaryVideo/MM1 (documentary footage research; Wikimedia Commons API client)"
     }
 
-    response = None
-    for attempt in range(WIKIMEDIA_MAX_RETRIES + 1):
-        pace_wikimedia_request()
-
-        response = requests.get(
-            "https://commons.wikimedia.org/w/api.php",
-            params=params,
-            headers=headers,
-            timeout=35,
-        )
-        if response.status_code != 429:
-            response.raise_for_status()
-            break
-
-        if attempt >= WIKIMEDIA_MAX_RETRIES:
-            response.raise_for_status()
-
-        retry_after = response.headers.get("Retry-After", "")
-        try:
-            delay = float(retry_after)
-        except (TypeError, ValueError):
-            delay = 3.0 * (attempt + 1)
-        delay = max(2.0, min(15.0, delay))
-        print(
-            f"Wikimedia Commons returned HTTP 429; "
-            f"waiting {delay:.1f}s before retry {attempt + 1}/"
-            f"{WIKIMEDIA_MAX_RETRIES}."
-        )
-        time.sleep(delay)
+    pace_wikimedia_request()
+    response = requests.get(
+        "https://commons.wikimedia.org/w/api.php",
+        params=params,
+        headers=headers,
+        timeout=35,
+    )
+    response.raise_for_status()
 
     pages = response.json().get("query", {}).get("pages", {})
     results = []
@@ -1538,6 +1572,7 @@ def commons_search(query):
         results.append({
             "source": "Wikimedia Commons",
             "id": str(page.get("pageid")),
+            "title": str(page.get("title", "")),
             "url": url,
             "width": int(info.get("width") or 0),
             "height": int(info.get("height") or 0),
@@ -1816,6 +1851,7 @@ def internet_archive_search(query):
         results.append({
             "source": "Internet Archive",
             "id": identifier,
+            "title": title,
             "url": file_url,
             "width": width,
             "height": int(selected_file.get("height") or 0),
@@ -1832,7 +1868,8 @@ def internet_archive_search(query):
 def search_all_footage_sources(query):
     """Search configured sources; avoid caching partial results after throttling."""
     cache_sources = (
-        "footage-sources-v4|open-web-google-direct-cc|internet-archive-v1|"
+        "footage-sources-v5|mm1-intent-ranking|adaptive-visual-retry|"
+        "open-web-google-direct-cc|internet-archive-v1|"
         + ("|pixabay" if ENABLE_PIXABAY_FALLBACK and PIXABAY_KEY else "")
         + ("|pexels" if ENABLE_PEXELS_FALLBACK and PEXELS_KEY else "")
         + "|nasa|commons"
@@ -1853,10 +1890,10 @@ def search_all_footage_sources(query):
             pass
 
     searches = [
-        ("Google Search", google_open_web_video_search),
         ("Internet Archive", internet_archive_search),
         ("Wikimedia Commons", commons_search),
         ("NASA", nasa_search),
+        ("Google Search", google_open_web_video_search),
     ]
     if ENABLE_PEXELS_FALLBACK and PEXELS_KEY:
         searches.append(("Pexels", pexels_search))
@@ -1897,6 +1934,10 @@ def search_all_footage_sources(query):
                 complete_search = False
             else:
                 complete_search = False
+                if status_code is None or (
+                    isinstance(status_code, int) and 500 <= status_code <= 599
+                ):
+                    mark_footage_source_temporarily_unavailable(source, 45.0)
                 print(
                     f"  {source} search unavailable for '{query}': {exc}"
                 )
@@ -2033,6 +2074,24 @@ CONTEXT_CONFLICTS = {
     "spaceflight": {
         "shuttle", "spacecraft", "astronaut", "astronauts", "rocket",
         "launchpad", "liftoff", "orbiter", "kennedy", "columbiaaccident",
+    },
+    "military": {
+        "military", "soldier", "soldiers", "army", "troop", "troops",
+        "combat", "battle", "warfare", "tactical", "weapon", "weapons",
+        "rifle", "firearm", "bootcamp", "drill", "barracks",
+    },
+    "industrial": {
+        "industrial", "industry", "factory", "factories", "refinery",
+        "manufacturing", "warehouse", "workshop", "assemblyline",
+    },
+    "agriculture": {
+        "agriculture", "agricultural", "farmland", "farm", "farms",
+        "farmer", "farmers", "tractor", "crop", "crops", "livestock",
+        "pasture", "plantation",
+    },
+    "sports": {
+        "sport", "sports", "athlete", "athletes", "stadium", "match",
+        "soccer", "football", "basketball", "tennis", "racing", "racecar",
     },
     "volcanic_ash": {
         "volcanic", "volcano", "volcanoes", "eruption", "eruptions",
@@ -2346,90 +2405,125 @@ def fallback_visual_queries(raw_queries, narration=""):
     return unique[:12]
 
 
-def relevance_score(hit, query, narration):
-    """Score subject, setting and requested shot type from source metadata."""
+def unrequested_context_conflicts(hit, query, narration=""):
+    """Return strong off-topic contexts found in metadata but absent from scene intent."""
     metadata = " ".join([
-        str(hit.get("metadata", "")),
+        str(hit.get("title", "")),
         str(hit.get("tags", "")),
-        str(hit.get("page_url", "")),
+        str(hit.get("metadata", "")),
     ])
-
-    metadata_tokens = set(
-        normalize_words(metadata)
+    metadata_tokens = set(normalize_words(metadata))
+    intent_tokens = set(normalize_words(f"{query or ''} {narration or ''}"))
+    return tuple(
+        name for name, conflict_terms in CONTEXT_CONFLICTS.items()
+        if metadata_tokens & conflict_terms and not intent_tokens & conflict_terms
     )
 
+
+def relevance_score(hit, query, narration):
+    """Score explicit title/tags strongly and treat long descriptions as supporting evidence."""
+    title_tokens = set(normalize_words(hit.get("title", "")))
+    tag_tokens = set(normalize_words(hit.get("tags", "")))
+    description_tokens = set(normalize_words(hit.get("metadata", "")))
+    page_tokens = set(normalize_words(hit.get("page_url", "")))
+    primary_metadata_tokens = title_tokens | tag_tokens
+    supporting_metadata_tokens = description_tokens | page_tokens
+    metadata_tokens = primary_metadata_tokens | supporting_metadata_tokens
+
     query_tokens, query_groups = query_concepts(query)
-    narration_tokens, narration_groups = query_concepts(narration)
+    _narration_tokens, narration_groups = query_concepts(narration)
 
     if not metadata_tokens or not query_tokens:
         return 0.0, 0, max(1, len(query_groups))
 
-    matched_groups = 0
+    # Core subject and shot-type concepts outweigh mood or generic wording.
+    weights = {
+        "rainforest": 3.0, "jaguar": 3.2, "insect": 3.0, "orchid": 3.0,
+        "wildlife": 2.8, "bird": 2.6, "canopy": 2.7, "aerial": 2.7,
+        "river": 2.6, "waterfall": 2.6, "forest_floor": 2.4,
+        "ocean": 2.5, "desert": 2.5, "mountain": 2.3,
+        "research_activity": 2.4, "field_instrument": 2.4,
+    }
+    total_weight = sum(
+        weights.get(name, 1.0 if name.startswith("term:") else 1.25)
+        for name in query_groups
+    ) or 1.0
 
-    for aliases in query_groups.values():
-        if metadata_tokens & aliases:
-            matched_groups += 1
+    def group_coverage(tokens):
+        covered = sum(
+            weights.get(name, 1.0 if name.startswith("term:") else 1.25)
+            for name, aliases in query_groups.items()
+            if tokens & aliases
+        )
+        return covered / total_weight
 
-    direct_hits = query_tokens & metadata_tokens
+    title_group_coverage = group_coverage(title_tokens)
+    tag_group_coverage = group_coverage(tag_tokens)
+    supporting_group_coverage = group_coverage(supporting_metadata_tokens)
 
-    group_coverage = (
-        matched_groups / max(1, len(query_groups))
-    )
+    # Normalize over fields that actually exist. If a source provides only a
+    # long description, it remains discoverable but receives a conservative cap.
+    group_parts = []
+    if title_tokens:
+        group_parts.append((0.42, title_group_coverage))
+    if tag_tokens:
+        group_parts.append((0.38, tag_group_coverage))
+    if supporting_metadata_tokens:
+        group_parts.append((0.20, supporting_group_coverage))
+    if group_parts:
+        part_weight = sum(weight for weight, _coverage in group_parts)
+        weighted_group_coverage = sum(
+            weight * coverage for weight, coverage in group_parts
+        ) / max(0.01, part_weight)
+    else:
+        weighted_group_coverage = 0.0
+    if not primary_metadata_tokens:
+        weighted_group_coverage *= 0.45
 
     direct_coverage = (
-        len(direct_hits) / max(1, len(query_tokens))
+        len(query_tokens & primary_metadata_tokens) / max(1, len(query_tokens))
+        if primary_metadata_tokens else 0.0
     )
+    title_coverage = len(query_tokens & title_tokens) / max(1, len(query_tokens))
+    tag_coverage = len(query_tokens & tag_tokens) / max(1, len(query_tokens))
+    description_coverage = len(
+        query_tokens & supporting_metadata_tokens
+    ) / max(1, len(query_tokens))
 
     narration_matches = sum(
-        1 for aliases in narration_groups.values()
-        if metadata_tokens & aliases
+        1 for aliases in narration_groups.values() if metadata_tokens & aliases
     )
-
-    narration_coverage = (
-        narration_matches / max(1, min(6, len(narration_groups)))
-    )
+    narration_coverage = narration_matches / max(1, min(6, len(narration_groups)))
 
     camera_aliases = CONCEPT_GROUPS.get("aerial", set())
-    camera_requested = bool(
-        query_tokens & camera_aliases
-    )
-    camera_match = bool(
-        metadata_tokens & camera_aliases
-    )
+    camera_requested = bool(query_tokens & camera_aliases)
+    camera_match = bool(metadata_tokens & camera_aliases)
+    camera_bonus = 0.08 if camera_requested and camera_match else 0.0
+    camera_penalty = 0.10 if camera_requested and not camera_match else 0.0
 
-    camera_bonus = (
-        0.10 if camera_requested and camera_match else 0.0
-    )
-    camera_penalty = (
-        0.04 if camera_requested and not camera_match else 0.0
-    )
-
-    context_tokens = query_tokens | narration_tokens
-    conflicts = 0
-
-    for conflict_terms in CONTEXT_CONFLICTS.values():
-        if (
-            metadata_tokens & conflict_terms
-            and not context_tokens & conflict_terms
-        ):
-            conflicts += 1
+    conflicts = unrequested_context_conflicts(hit, query, narration)
+    conflict_penalty = 0.0
+    for conflict in conflicts:
+        conflict_penalty += 0.32 if conflict in {"military", "sports"} else 0.24
 
     score = (
-        0.58 * group_coverage
-        + 0.18 * direct_coverage
-        + 0.18 * narration_coverage
+        0.42 * weighted_group_coverage
+        + 0.16 * direct_coverage
+        + 0.14 * title_coverage
+        + 0.12 * tag_coverage
+        + 0.06 * description_coverage
+        + 0.10 * narration_coverage
         + camera_bonus
         - camera_penalty
+        - min(0.72, conflict_penalty)
     )
 
-    if conflicts:
-        score -= min(0.55, 0.30 * conflicts)
-
-    return (
-        max(0.0, score),
-        matched_groups,
-        max(1, len(query_groups))
+    # The matched count still uses combined metadata for relaxed discovery;
+    # admission is never acceptance and still requires the configured visual gate.
+    matched_groups = sum(
+        1 for aliases in query_groups.values() if metadata_tokens & aliases
     )
+    return max(0.0, min(1.0, score)), matched_groups, max(1, len(query_groups))
 
 
 def required_visual_anchors(query):
@@ -2450,6 +2544,7 @@ def candidate_matches_visual_anchors(hit, query, primary_query=None):
         return False
 
     metadata = " ".join([
+        str(hit.get("title", "")),
         str(hit.get("metadata", "")),
         str(hit.get("tags", "")),
         str(hit.get("page_url", "")),
@@ -2457,15 +2552,11 @@ def candidate_matches_visual_anchors(hit, query, primary_query=None):
     tokens = set(normalize_words(metadata))
 
     strict_aliases = {
-        # Stock-footage catalogs often tag a genuine tree/forest close-up simply
-    # as "trees", "forest" or "woodland" and omit the biome word "rainforest".
-    # Accept those visually relevant labels here; the later vision verifier
-    # still checks the actual clip against the scene before it is selected.
-    "rainforest": {
-        "amazon", "rainforest", "jungle", "tropical", "tropics", "equatorial",
-        "forest", "forests", "woodland", "woods", "tree", "trees",
-        "vegetation", "flora",
-    },
+        # Generic forest/tree wording is not enough to claim a rainforest match.
+        # Such candidates can still enter the relaxed queue for visual-AI review.
+        "rainforest": {
+            "amazon", "rainforest", "jungle", "tropical", "tropics", "equatorial",
+        },
         "forest": {"forest", "forests", "woodland", "woods", "timberland", "tree", "trees", "rainforest", "jungle"},
         "canopy": {"canopy", "canopies", "treetop", "treetops", "foliage", "crown", "leaf", "leaves", "tree", "trees"},
         "aerial": {"aerial", "drone", "overhead", "topdown", "birdseye", "helicopter", "fromabove"},
@@ -2545,7 +2636,7 @@ def candidate_matches_visual_anchors(hit, query, primary_query=None):
     return bool(matched) or bool(primary_query and required_visual_anchors(primary_query))
 
 
-def candidate_matches_relaxed_metadata(hit, query, narration="", min_score=0.10):
+def candidate_matches_relaxed_metadata(hit, query, narration="", min_score=0.08):
     """Admit plausible metadata matches to the visual-AI queue.
 
     This is deliberately not an acceptance decision: every candidate admitted
@@ -3381,38 +3472,120 @@ Set relevant=true only when the visual composition genuinely matches the SCENE P
 
 
 def rank_footage_candidates_by_source(candidates):
-    """Rank by relevance inside strict source tiers, with unknown sources last."""
+    """Rank primarily by visual-intent relevance; trust tier breaks near-ties only."""
     candidates_by_source = {}
-
     for candidate_item in candidates:
-        candidate_source = str(
-            candidate_item[1].get("source") or ""
-        ).strip()
-        candidates_by_source.setdefault(
-            candidate_source, []
-        ).append(candidate_item)
+        candidate_source = str(candidate_item[1].get("source") or "").strip()
+        candidates_by_source.setdefault(candidate_source, []).append(candidate_item)
 
-    ranked = []
+    source_order = {name: index for index, name in enumerate(FOOTAGE_SOURCE_PRIORITY)}
+    capped = []
+    for candidate_source, source_candidates in candidates_by_source.items():
+        source_candidates.sort(key=lambda item: float(item[0]), reverse=True)
+        source_limit = FOOTAGE_SOURCE_CANDIDATE_LIMITS.get(candidate_source, 4)
+        capped.extend(source_candidates[:source_limit])
 
-    for candidate_source in FOOTAGE_SOURCE_PRIORITY:
-        source_candidates = sorted(
-            candidates_by_source.pop(candidate_source, []),
-            key=lambda item: item[0],
-            reverse=True
-        )
-        source_limit = FOOTAGE_SOURCE_CANDIDATE_LIMITS[candidate_source]
-        ranked.extend(source_candidates[:source_limit])
+    # A 0.08 score band lets a more relevant clip beat source preference, while
+    # keeping the more reliable open archives ahead when candidates are close.
+    def sort_key(item):
+        score = max(0.0, float(item[0]))
+        source = str(item[1].get("source") or "").strip()
+        trust_rank = source_order.get(source, len(source_order) + 1)
+        return (int(score / 0.08), -trust_rank, score)
 
-    # Unknown future sources are fallback-only and remain after all known tiers.
-    for candidate_source in sorted(candidates_by_source):
-        source_candidates = sorted(
-            candidates_by_source[candidate_source],
-            key=lambda item: item[0],
-            reverse=True
-        )
-        ranked.extend(source_candidates[:4])
+    return sorted(capped, key=sort_key, reverse=True)
 
-    return ranked
+
+def visual_rejection_context_groups(feedback, query, narration=""):
+    """Identify metadata contexts the visual verifier rejected for this scene."""
+    feedback_text = " ".join(
+        str(item.get("reason", "") if isinstance(item, dict) else item)
+        for item in (feedback or [])
+    )
+    feedback_tokens = set(normalize_words(feedback_text))
+    requested_tokens = set(normalize_words(f"{query or ''} {narration or ''}"))
+    return {
+        name for name, terms in CONTEXT_CONFLICTS.items()
+        if feedback_tokens & terms and not requested_tokens & terms
+    }
+
+
+def adaptive_visual_retry_queries(scene, rejection_feedback=None):
+    """Create a small, subject-preserving second-wave search from failed scene intent."""
+    primary = clean_query(scene.get("visual_query", ""))
+    narration = str(scene.get("narration", "") or "")
+    combined = f"{primary} {narration}"
+    tokens = set(normalize_words(combined))
+    _, groups = query_concepts(primary)
+    group_names = set(groups)
+    feedback_text = " ".join(
+        str(item.get("reason", "") if isinstance(item, dict) else item)
+        for item in (rejection_feedback or [])
+    ).lower()
+    feedback_tokens = set(normalize_words(feedback_text))
+
+    queries = []
+    seen = set()
+
+    def add(value):
+        cleaned = clean_query(value)
+        normalized_tokens = list(dict.fromkeys(normalize_words(cleaned)))
+        normalized = " ".join(normalized_tokens)
+        key = normalized.lower()
+        if normalized and key not in seen and key != " ".join(normalize_words(primary)).lower():
+            seen.add(key)
+            queries.append(normalized)
+
+    wants_aerial = "aerial" in group_names or bool(tokens & CONCEPT_GROUPS.get("aerial", set()))
+    wants_rainforest = "rainforest" in group_names
+    wants_canopy = "canopy" in group_names
+
+    if wants_rainforest and wants_canopy and wants_aerial:
+        add("Amazon tropical rainforest continuous canopy drone aerial overhead perspective wide")
+        add("Brazil rainforest treetops high altitude drone panorama natural forest canopy")
+    elif wants_rainforest and wants_canopy:
+        add("Amazon tropical rainforest treetop foliage canopy detailed close view")
+        add("dense tropical jungle canopy leaves treetops natural habitat")
+    elif wants_aerial and "river" in group_names:
+        add("river winding through tropical forest drone aerial overhead")
+        add("natural river course landscape overhead perspective aerial footage")
+    elif wants_aerial and "forest" in group_names:
+        add("remote natural forest canopy drone overhead wide aerial landscape")
+        add("continuous woodland treetops overhead perspective aerial documentary")
+    elif "jaguar" in group_names:
+        add("wild jaguar moving in natural rainforest habitat camera trap")
+        add("jaguar wildlife in dense tropical forest natural environment")
+    elif "insect" in group_names:
+        add("insect macro closeup on natural leaf detailed wildlife footage")
+        add("wild insect crawling on plant macro documentary video")
+    elif "orchid" in group_names:
+        add("wild tropical orchid flowering naturally on tree closeup")
+        add("orchid epiphyte growing on rainforest tree macro footage")
+    elif group_names & {"research_activity", "field_instrument"} or tokens & {
+        "research", "researcher", "scientist", "measuring", "measurement", "sensor", "humidity"
+    }:
+        add("field scientist collecting environmental data in natural forest research station")
+        add("researcher measuring humidity with portable sensor in tropical forest")
+        add("outdoor weather station instruments environmental monitoring closeup")
+    elif wants_aerial:
+        add(f"{primary} drone aerial overhead perspective wide documentary footage")
+        add(f"{primary} high altitude aerial camera wide landscape")
+    else:
+        add(f"{primary} authentic real world documentary video")
+        add(f"{primary} close detailed natural environment footage")
+
+    # A visual rejection can reveal the shot-type mismatch even when metadata did not.
+    if wants_aerial and feedback_tokens & {
+        "ground", "groundlevel", "path", "trail", "closeup", "close", "leaves", "branch"
+    }:
+        add(f"{primary} drone overhead perspective high altitude wide shot")
+
+    # If the failed clip was an off-topic human activity, bias the next query
+    # toward an unpopulated landscape while preserving the original anchors.
+    if feedback_tokens & CONTEXT_CONFLICTS.get("military", set()) and wants_rainforest:
+        add("remote Amazon rainforest unpopulated natural canopy drone aerial")
+
+    return queries[:MAX_ADAPTIVE_FOOTAGE_QUERIES]
 
 
 def fetch_footage(plan):
@@ -3455,8 +3628,8 @@ def fetch_footage(plan):
         )
 
     print(
-        "Footage discovery priority: Google Search direct reusable-video files -> "
-        "Internet Archive -> Wikimedia Commons -> NASA. "
+        "Footage discovery priority: Internet Archive -> Wikimedia Commons -> "
+        "NASA -> Google Search direct reusable-video files. "
         "Pexels/Pixabay are disabled unless explicitly enabled with "
         "ENABLE_PEXELS_FALLBACK / ENABLE_PIXABAY_FALLBACK."
     )
@@ -3501,8 +3674,11 @@ def fetch_footage(plan):
         relaxed_candidate_count = 0
         rejection_counts = {
             "metadata": 0, "resolution": 0, "aspect_ratio": 0,
-            "duration": 0, "relevance": 0, "context": 0, "duplicate": 0,
+            "duration": 0, "relevance": 0, "context": 0,
+            "visual_context": 0, "duplicate": 0,
         }
+        visual_rejection_feedback = []
+        rejected_context_groups = set()
 
         def collect_query_candidates(query, allow_relaxed=False):
             nonlocal strict_candidate_count, relaxed_candidate_count
@@ -3512,12 +3688,24 @@ def fetch_footage(plan):
                 if not hit.get("url") or identity in used_ids:
                     continue
 
+                candidate_tokens = set(normalize_words(" ".join([
+                    str(hit.get("title", "")),
+                    str(hit.get("tags", "")),
+                    str(hit.get("metadata", "")),
+                ])))
+                if any(
+                    candidate_tokens & CONTEXT_CONFLICTS.get(group, set())
+                    for group in rejected_context_groups
+                ):
+                    rejection_counts["visual_context"] += 1
+                    continue
+
                 strict_match = candidate_matches_visual_anchors(
                     hit, query, primary_query=scene.get("visual_query")
                 )
                 if not strict_match:
                     if not allow_relaxed or not candidate_matches_relaxed_metadata(
-                        hit, query, scene.get("narration", ""), min_score=0.10
+                        hit, query, scene.get("narration", ""), min_score=0.08
                     ):
                         rejection_counts["metadata"] += 1
                         continue
@@ -3549,13 +3737,15 @@ def fetch_footage(plan):
                 metadata_tokens = set(normalize_words(
                     str(hit.get("metadata", "")) + " " + str(hit.get("tags", ""))
                 ))
-                scene_context = set(normalize_words(scene.get("narration", "")))
-
-                if any(
-                    metadata_tokens & conflict_terms
-                    and not scene_context & conflict_terms
-                    for conflict_terms in CONTEXT_CONFLICTS.values()
-                ):
+                scene_context = (
+                    str(scene.get("visual_query", "")) + " "
+                    + str(query or "") + " "
+                    + str(scene.get("narration", ""))
+                )
+                context_conflicts = unrequested_context_conflicts(
+                    hit, scene_context, scene.get("narration", "")
+                )
+                if context_conflicts:
                     rejection_counts["context"] += 1
                     continue
 
@@ -3619,9 +3809,8 @@ def fetch_footage(plan):
             )
         )
 
-        # Never compare scores across different providers. Try the preferred
-        # source tier first; lower tiers are reached only when earlier candidates
-        # fail to download or fail visual verification.
+        # Semantic relevance is the primary sort signal. Trusted open archives
+        # only break close-score ties; a much stronger match can rank first.
         ranked = rank_footage_candidates_by_source(candidates.values())
 
         print(
@@ -3659,13 +3848,61 @@ def fetch_footage(plan):
         selected = None
         checked = 0
 
-        for (
-            score,
-            hit,
-            query,
-            matched,
-            total
-        ) in ranked[:VISION_CANDIDATE_LIMIT]:
+        candidate_attempts = list(ranked[:VISION_CANDIDATE_LIMIT])
+        attempted_candidate_ids = set()
+        attempt_cursor = 0
+        adaptive_search_done = False
+        adaptive_retry_queries_used = []
+
+        while True:
+            if attempt_cursor >= len(candidate_attempts):
+                if not adaptive_search_done and selected is None:
+                    adaptive_search_done = True
+                    retry_queries = adaptive_visual_retry_queries(
+                        scene, visual_rejection_feedback
+                    )
+                    existing_queries = {value.lower() for value in queries}
+                    retry_queries = [
+                        value for value in retry_queries
+                        if value.lower() not in existing_queries
+                    ]
+
+                    if retry_queries:
+                        print(
+                            f"Scene {i}: initial candidates exhausted; starting "
+                            f"one rejection-guided search retry with "
+                            f"{len(retry_queries)} targeted query variant(s)."
+                        )
+                    for retry_query in retry_queries:
+                        queries.append(retry_query)
+                        adaptive_retry_queries_used.append(retry_query)
+                        collect_query_candidates(retry_query, allow_relaxed=True)
+
+                    if retry_queries:
+                        ranked = rank_footage_candidates_by_source(candidates.values())
+                        new_candidates = [
+                            item for item in ranked
+                            if f"{item[1].get('source')}:{item[1].get('id')}"
+                            not in attempted_candidate_ids
+                        ]
+                        retry_batch = new_candidates[:MAX_ADAPTIVE_FOOTAGE_CANDIDATES]
+                        if retry_batch:
+                            print(
+                                f"Scene {i}: adaptive retry found "
+                                f"{len(new_candidates)} untried candidate(s); "
+                                f"checking up to {len(retry_batch)} of them."
+                            )
+                            candidate_attempts.extend(retry_batch)
+                            continue
+                        print(f"Scene {i}: adaptive retry added no new eligible candidates.")
+                break
+
+            score, hit, query, matched, total = candidate_attempts[attempt_cursor]
+            attempt_cursor += 1
+            identity = f"{hit.get('source')}:{hit.get('id')}"
+            if identity in attempted_candidate_ids:
+                continue
+            attempted_candidate_ids.add(identity)
 
             candidate_source = str(hit.get("source") or "").strip()
             cooldown_until = FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(
@@ -3704,8 +3941,9 @@ def fetch_footage(plan):
 
                 if visual_provider_names:
                     candidate_metadata = " | ".join([
-                        str(hit.get("metadata", "")),
-                        str(hit.get("tags", "")),
+                        f"TITLE: {hit.get('title', '')}",
+                        f"TAGS: {hit.get('tags', '')}",
+                        f"DESCRIPTION: {hit.get('metadata', '')}",
                     ])
 
                     (
@@ -3730,9 +3968,19 @@ def fetch_footage(plan):
                     )
 
                     if not visually_relevant:
-                        destination.unlink(
-                            missing_ok=True
+                        visual_rejection_feedback.append({
+                            "reason": visual_reason,
+                            "query": query,
+                            "metadata": candidate_metadata[:900],
+                        })
+                        rejected_context_groups.update(
+                            visual_rejection_context_groups(
+                                [visual_rejection_feedback[-1]],
+                                scene.get("visual_query", ""),
+                                scene.get("narration", ""),
+                            )
                         )
+                        destination.unlink(missing_ok=True)
                         continue
 
                 else:
@@ -3951,6 +4199,9 @@ def fetch_footage(plan):
         scene["source_video_dimensions"] = hit.get("_source_video_info", {})
         scene["source_native_aspect_ratio_required"] = "9:16"
 
+        scene["footage_search_retry_count"] = len(adaptive_retry_queries_used)
+        scene["footage_search_retry_queries"] = list(adaptive_retry_queries_used)
+        scene["footage_visual_rejection_count"] = len(visual_rejection_feedback)
         scene["visual_verification"] = {
             "method": (
                 f"{vision_provider} Vision"
@@ -4890,6 +5141,7 @@ def write_failure_diagnostics(exc):
         "traceback": traceback.format_exc(),
         "finished_at_epoch": time.time(),
         "configuration": {
+            "project_release": "MM1",
             "visual_verification_required": VISION_REQUIRED,
             "groq_keys_configured": len(GROQ_KEYS),
             "openrouter_keys_configured": len(OPENROUTER_KEYS),
