@@ -93,6 +93,7 @@ class MM1RelevanceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             cache_dir = Path(temp_dir) / ".api-cache"
             with patch.object(main, "CACHE", cache_dir), \
+                 patch.object(main, "ROOT_FOOTAGE_SOURCE_STATE_FILE", Path(temp_dir) / "footage_source_state.json"), \
                  patch.object(main, "FOOTAGE_SOURCE_COOLDOWN_UNTIL", {}), \
                  patch.object(main, "internet_archive_search", return_value=[]), \
                  patch.object(main, "commons_search", side_effect=rate_limit) as commons, \
@@ -104,12 +105,13 @@ class MM1RelevanceTests(unittest.TestCase):
                 self.assertEqual(first, [{"source": "NASA"}])
                 self.assertEqual(second, [{"source": "NASA"}])
                 self.assertEqual(commons.call_count, 1)
-                self.assertEqual(nasa.call_count, 2)
+                self.assertEqual(nasa.call_count, 1)
                 self.assertGreater(
                     main.FOOTAGE_SOURCE_COOLDOWN_UNTIL["Wikimedia Commons"],
                     __import__("time").monotonic(),
                 )
-                self.assertFalse(list(cache_dir.glob("*.sources.json")))
+                self.assertGreaterEqual(len(list(cache_dir.glob("source-*.json"))), 3)
+                self.assertTrue((Path(temp_dir) / "footage_source_state.json").exists())
 
     def test_wikimedia_429_is_not_retried_and_leaves_no_partial_file(self):
         import requests
@@ -133,7 +135,11 @@ class MM1RelevanceTests(unittest.TestCase):
         response = RateLimitedResponse()
         with tempfile.TemporaryDirectory() as temp_dir:
             target = Path(temp_dir) / "clip.mp4"
-            with patch.object(main.requests, "get", return_value=response) as get, \
+            cache_dir = Path(temp_dir) / ".api-cache"
+            with patch.object(main, "CACHE", cache_dir), \
+                 patch.object(main, "ROOT_FOOTAGE_SOURCE_STATE_FILE", Path(temp_dir) / "footage_source_state.json"), \
+                 patch.object(main, "FOOTAGE_SOURCE_COOLDOWN_UNTIL", {}), \
+                 patch.object(main.requests, "get", return_value=response) as get, \
                  patch.object(main, "mark_footage_source_rate_limited") as cooldown:
                 with self.assertRaises(requests.HTTPError):
                     main.download_stream(
@@ -168,6 +174,47 @@ class MM1RelevanceTests(unittest.TestCase):
                     primary_query=self.query,
                 )
             )
+
+    def test_landscape_coded_metadata_is_deferred_for_display_rotation_check(self):
+        # Some archives publish encoded dimensions (1920x1080) while the file
+        # itself carries a 90-degree display rotation. ffprobe decides later.
+        hit = {"width": 1920, "height": 1080}
+        self.assertIsNone(main.candidate_metadata_precheck(hit))
+
+    def test_native_portrait_metadata_is_a_positive_ranking_hint(self):
+        hit = {"width": 720, "height": 1280}
+        self.assertTrue(main.has_native_portrait_metadata_hint(hit))
+
+    def test_ffprobe_display_rotation_can_confirm_native_portrait(self):
+        from unittest.mock import Mock
+
+        completed = Mock()
+        completed.stdout = (
+            '{"streams":[{"width":1920,"height":1080,'
+            '"sample_aspect_ratio":"1:1",'
+            '"side_data_list":[{"rotation":90}]}]}'
+        )
+        with patch.object(main.subprocess, "run", return_value=completed):
+            info = main.ffprobe_video_info("rotated-portrait.mp4")
+        self.assertEqual((info["width"], info["height"]), (1080, 1920))
+        self.assertTrue(
+            main.is_native_portrait_916(
+                info["width"], info["height"], aspect_ratio=info["aspect_ratio"]
+            )
+        )
+
+    def test_genuinely_low_resolution_candidates_are_still_filtered_early(self):
+        hit = {"width": 480, "height": 854}
+        self.assertEqual(main.candidate_metadata_precheck(hit), "resolution")
+
+    def test_known_native_portrait_hint_breaks_a_relevance_band_tie(self):
+        portrait = {"source": "Internet Archive", "id": "portrait", "width": 720, "height": 1280}
+        unknown_orientation = {"source": "Internet Archive", "id": "encoded-landscape", "width": 1920, "height": 1080}
+        ranked = main.rank_footage_candidates_by_source([
+            (0.84, unknown_orientation, "q", 3, 3),
+            (0.84, portrait, "q", 3, 3),
+        ])
+        self.assertEqual(ranked[0][1]["id"], "portrait")
 
 
 class MM1AdaptiveRetryIntegrationTests(unittest.TestCase):

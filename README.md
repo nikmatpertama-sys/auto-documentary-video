@@ -1,4 +1,4 @@
-# Auto Documentary Video — MM1
+# Auto Documentary Video — MM3
 
 Automated vertical documentary generator. It builds a scene plan, searches for relevant real-world footage, performs visual verification, generates narration and captions, and renders the final video with FFmpeg.
 
@@ -6,11 +6,11 @@ Automated vertical documentary generator. It builds a scene plan, searches for r
 
 `SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, an eight-scene structure, a strict 120–200-word narration boundary, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
 
-## Footage discovery — MM1
+## Footage discovery — MM3
 
 The active footage search uses Internet Archive, Wikimedia Commons, NASA, and Google Search for directly indexed reusable video files. The open archives are preferred when candidates are similarly relevant; Google Search is a discovery index, not a video host. Ordinary YouTube/social pages are not scraped or downloaded. Google HTML results can be rate-limited or changed, so its candidates are ranked behind comparable archive results.
 
-Pexels and Pixabay remain **disabled by default** because their catalogs were repeatedly too limited or mismatched for this project. They are not enabled by MM1. They can only be enabled intentionally with `ENABLE_PEXELS_FALLBACK=true` or `ENABLE_PIXABAY_FALLBACK=true` in the workflow environment, and their API keys.
+Pexels and Pixabay remain **disabled by default** because their catalogs were repeatedly too limited or mismatched for this project. They remain disabled through MM1, MM2 and MM3. They can only be enabled intentionally with `ENABLE_PEXELS_FALLBACK=true` or `ENABLE_PIXABAY_FALLBACK=true` in the workflow environment, and their API keys.
 
 MM1 adds four footage-intelligence improvements:
 - Intent-aware ranking separates title, tags, descriptive metadata, scene subject, requested action, and camera viewpoint. A title/tag match weighs more than an incidental word buried in a long description.
@@ -18,19 +18,19 @@ MM1 adds four footage-intelligence improvements:
 - Generic forest/tree metadata is never treated as proof of a rainforest match; it may enter the relaxed AI-gated queue only when the request still has enough supporting context, and it cannot satisfy a missing mandatory shot-type anchor by itself.
 - If the first candidate batch is exhausted, one bounded second search wave creates up to four subject-preserving queries informed by the visual-review rejection reason and checks at most twelve additional candidates.
 
-With the default `FOOTAGE_VISION_REQUIRED=true`, every selected clip still passes native 9:16, minimum resolution/duration, metadata relevance, and visual-AI verification. The pipeline remains fail-closed: it does not lower the visual confidence threshold or silently substitute unrelated footage. Metadata-only selection is possible only when the operator explicitly disables required visual verification. Wikimedia 429s now trigger an immediate timed cooldown instead of short repeat requests; source 5xx/timeouts also cool down temporarily, while downloads use a bounded transient retry policy. License information must be checked against the original source page before publication; Google-indexed license snippets are not a substitute for the source's actual terms.
+With the default `FOOTAGE_VISION_REQUIRED=true`, every selected clip still passes native 9:16, minimum resolution/duration, metadata relevance, and visual-AI verification. MM2 fixes one false-negative in discovery: catalog width/height values can describe encoded dimensions without exposing the file's 90-degree display rotation. The search stage now uses catalog dimensions only for a low-resolution precheck and a positive portrait-ranking hint; it defers the final aspect-ratio decision until the actual downloaded file is inspected by `ffprobe_video_info()`, which applies display rotation and sample-aspect-ratio metadata. True landscape, square, 4:5, and other non-9:16 sources are still rejected before visual verification/rendering. The pipeline remains fail-closed: it does not lower the visual confidence threshold or silently substitute unrelated footage. Metadata-only selection is possible only when the operator explicitly disables required visual verification. Wikimedia 429s now trigger an immediate timed cooldown instead of short repeat requests; source 5xx/timeouts also cool down temporarily, while downloads use a bounded transient retry policy. License information must be checked against the original source page before publication; Google-indexed license snippets are not a substitute for the source's actual terms.
 
-`footage.py` was a legacy standalone Pixabay utility and is not part of the active `render.py` → `main.py` pipeline.
+`footage.py` is retained as a harmless legacy compatibility shim; it no longer contains the old hard-coded Pixabay downloader and is not part of the active `render.py` → `main.py` pipeline.
 
 ## Automatic Markdown cleanup — carried forward from 10.21
 
-`main.py` removes generated upgrade notes and validation-report Markdown files from the local project workspace at startup and after success or failure. Version 10.21 adds `persist_generated_markdown.py`, which stages and commits only those matching tracked files that are already gone from the workspace. The supplied `render.yml` calls it after artifact upload even when video generation fails. The separate `.github/workflows/cleanup-generated-markdown.yml` runs on pushes (and can be run manually), invokes the same cleanup and persistence scripts, and commits deletions to the triggering branch. `README.md`, `SCRIPTWRITER_MASTER_PROMPT.md`, unrelated documentation, and unrelated staged changes are protected.
+`main.py` removes generated upgrade notes and validation-report Markdown files from the local project workspace at startup and after success or failure. Version 10.21 adds `persist_generated_markdown.py`, which stages and commits only those matching tracked files that are already gone from the workspace. The supplied `render.yml` calls it after artifact upload even when video generation fails. MM3 also uses that same step to persist the small, non-secret source cooldown state. The archive also carries an optional `.github/workflows/cleanup-generated-markdown.yml` template for users who want cleanup on ordinary pushes; it is not active in a branch unless copied there manually. `README.md`, `SCRIPTWRITER_MASTER_PROMPT.md`, unrelated documentation, and unrelated staged changes are protected.
 
-**One-time installation note:** the existing ZIP-upgrade workflow intentionally preserves the repository's `.github` directory instead of replacing workflows from a project ZIP. To enable cleanup after ordinary pushes, copy this archive's `.github/workflows/cleanup-generated-markdown.yml` into the repository at that exact path on each branch that should be cleaned. The ZIP's normal project overlay installs `cleanup_old_markdown.sh` and `persist_generated_markdown.py` at the repository root. For cleanup to persist at the end of a `workflow_dispatch` video run, add the included `Persist generated Markdown cleanup to this branch` step to the existing `render.yml` after its artifact-upload step. Do not replace unrelated workflow steps. A local run of `main.py` deletes files from the extracted working directory; it does not rewrite the original ZIP archive or push changes to GitHub by itself.
+**Workflow note:** the ZIP-upgrade workflow intentionally preserves the repository's `.github` directory instead of replacing workflows from a project ZIP. On the current `main` branch, the permanent `render.yml` already calls `persist_generated_markdown.py` after artifact upload (with `if: always()`), so generated Markdown deletions are persisted after both successful and failed video runs. The separate cleanup workflow template is optional and only needed for cleanup on ordinary pushes; it is not required for the video-run cleanup path. A local run of `main.py` deletes files from the extracted working directory; it does not rewrite the original ZIP archive or push changes to GitHub by itself.
 
 ## GitHub Actions workflow preservation
 
-The archive contains a snapshot of `.github/workflows/render.yml` for reference and local setup. The automated ZIP installer deliberately skips the `.github` directory so it cannot overwrite the repository's permanent workflow. Install the cleanup workflow separately as described above; keep the repository's existing render workflow unchanged unless you intentionally update it.
+The archive contains a snapshot of `.github/workflows/render.yml` for reference and local setup. The automated ZIP installer deliberately skips the `.github` directory so it cannot overwrite the repository's permanent workflow. The cleanup template is optional; the active render workflow already persists cleanup after video runs. Keep the repository's existing render workflow unchanged; MM3 uses the already-present always-run persistence step to save the small source cooldown state file.
 
 ## Required GitHub Secrets
 
@@ -105,7 +105,7 @@ The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.jso
 ## Version 10.13 — portrait integrity, visual relevance, and readable overlays
 
 - Requires downloaded source clips to be genuine portrait 9:16 footage (minimum short side 640 px, with a small aspect-ratio tolerance). The check uses `ffprobe` display dimensions and honors 90-degree rotation metadata; landscape, square, 4:5, and other non-9:16 sources are rejected before visual verification and rendering.
-- Prefers native 9:16 renditions when providers expose multiple resolutions, including Pexels, Pixabay, and Internet Archive. Provider metadata dimensions are only an early filter; the actual downloaded file is always probed before acceptance.
+- Prefers native 9:16 renditions when providers expose multiple resolutions, including Pexels, Pixabay, and Internet Archive. MM2 keeps a low-resolution metadata precheck but defers authoritative aspect-ratio validation to the downloaded file's `ffprobe` display dimensions, including 90-degree rotation.
 - Removes the fill-and-center-crop rendering path. Approved clips are fit to the 1080×1920 canvas without cropping, and the render stage independently rechecks the source ratio as a second guard.
 - Makes scene-primary visual intent mandatory across fallback searches. A broad query such as “tropical forest” can no longer erase the requested aerial canopy, jaguar, raindrop-on-window, or other defining shot. The vision prompt explicitly rejects visually similar but unrelated phenomena such as volcanic ash for a moisture-plume scene.
 - Reflows the opening hook over multiple centered lines, calculates a safer font size for longer lines, and no longer cuts the hook at an arbitrary 90-character limit.
@@ -144,4 +144,28 @@ The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.jso
 - Applies timed source cooldowns after 429, 5xx, and network failures; avoids immediate repeat hits against Wikimedia Commons after HTTP 429.
 - Keeps Pixabay/Pexels disabled and preserves strict native 9:16 validation and fail-closed visual verification.
 
-The project ZIP filename is intentionally not used by the GitHub extraction step. The workflow selects the newest ZIP whose contents contain the required project markers, so `mm1.zip`, `mm2.zip`, and later names are supported without changing the extraction script.
+The project ZIP filename is intentionally not used by the GitHub extraction step. The workflow selects the newest ZIP whose contents contain the required project markers, so `mm1.zip`, `mm2.zip`, `mm3.zip`, and later names are supported without changing the extraction script.
+
+
+## MM2 — display-orientation-aware footage discovery
+
+- Stops discarding search candidates solely because catalog metadata reports landscape-coded width/height; some providers omit 90-degree display-rotation metadata from search results.
+- Keeps early minimum-resolution filtering and uses known native-portrait dimensions as a ranking hint within the same relevance band.
+- Uses the downloaded file's `ffprobe` display dimensions and sample-aspect-ratio data as the final orientation authority. True landscape, square, 4:5, and other non-native 9:16 footage remains rejected; no crop-based workaround is introduced.
+- Keeps title/tag/context ranking, visual verification, rejection-guided retries, and 429/5xx source cooldowns intact.
+- CI now runs the complete discovered unittest suite instead of only quota-router tests.
+- Replaces the old hard-coded standalone Pixabay demo with an inactive compatibility shim. Pixabay/Pexels remain disabled by default.
+
+
+## MM3 — persistent source rate-limit protection
+
+- Persists provider cooldowns in `footage_source_state.json` and `.api-cache/footage_source_state.json`. The root state file contains only source names, cooldown timestamps, HTTP status and short reason labels—never API keys, topics, candidate URLs or user data. The existing `persist_generated_markdown.py` always-run workflow step commits this state alongside eligible Markdown deletions, including after a failed render.
+- Reads both numeric and HTTP-date `Retry-After` values and retains long provider reset windows (up to a defensive seven-day ceiling). HTTP 429 is not immediately retried; the affected source is skipped until its saved cooldown expires.
+- Caches each provider's search results independently. A Wikimedia 429 no longer prevents successful Internet Archive or NASA results from being cached. Successful empty searches are cached too, avoiding repeated no-hit requests. Normal cache TTLs are six hours for Internet Archive and Wikimedia, twelve hours for NASA, and three hours for Google Search.
+- Uses a stale per-source result cache for up to seven days when a provider is cooling down or a refresh fails. Stale candidates still pass the same metadata, downloaded-file native 9:16, license and visual-verification checks before selection.
+- Adds source-specific request pacing and per-run request ceilings for Internet Archive, Wikimedia Commons, NASA and Google Search. Pacing applies to discovery, metadata/manifest requests and downloads. Request ceilings are safety limits, not goals.
+- Caches NASA asset manifests for thirty days and keeps the existing seven-day Internet Archive item-metadata cache.
+- Deduplicates candidate URLs across providers before ranking. Source cooldowns reset only after their saved expiry; missing or corrupt cache/state files remain non-fatal.
+- Does not add providers, turn on Pixabay/Pexels, weaken footage relevance, lower the visual-confidence threshold, or accept non-native 9:16 footage.
+
+**Workflow note:** no YML replacement is required on the current `main` workflow because its existing final `Persist generated Markdown cleanup to this branch` step already runs with `if: always()` and calls `persist_generated_markdown.py`. MM3 extends that existing helper to commit the small cooldown-state file. Keep the current workflow and upload `mm3.zip` as the project archive.

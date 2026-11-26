@@ -13,6 +13,7 @@ import textwrap
 import sys
 import traceback
 import html
+import threading
 from pathlib import Path
 from urllib.parse import quote, urlparse, parse_qs, urljoin
 from html.parser import HTMLParser
@@ -236,6 +237,8 @@ VISION_CANDIDATE_LIMIT = max(
     1, min(50, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "36")))
 )
 
+# MM3: persistent provider cooldowns, independent source caches, request governor and NASA manifest cache.
+# MM2: defer orientation rejection until ffprobe can read display-rotation metadata.
 # MM1: intent-aware footage ranking, rejection-guided search retry, and source resilience.
 # Base release: project1-10.21.
 # Version 10.21: persist generated Markdown cleanup to GitHub branches.
@@ -315,8 +318,50 @@ VISION_DISABLED_PROVIDERS = set()
 VISION_PROVIDER_COOLDOWN_UNTIL = {}
 FOOTAGE_SOURCE_DISABLED = set()  # retained for compatibility with cached runs
 FOOTAGE_SOURCE_COOLDOWN_UNTIL = {}
-WIKIMEDIA_LAST_REQUEST_AT = 0.0
-WIKIMEDIA_MIN_REQUEST_INTERVAL = 2.0
+# MM3: polite, bounded request pacing for every footage provider. These limits
+# are deliberately generous ceilings, not targets; source-specific cache hits
+# should make most repeat queries avoid the network entirely.
+FOOTAGE_SOURCE_MIN_INTERVAL = {
+    "Internet Archive": 1.0,
+    "Wikimedia Commons": 3.0,
+    "NASA": 1.0,
+    "Google Search": 5.0,
+    "Pexels": 1.0,
+    "Pixabay": 1.0,
+}
+FOOTAGE_SOURCE_MAX_REQUESTS_PER_RUN = {
+    "Internet Archive": 240,
+    "Wikimedia Commons": 48,
+    "NASA": 240,
+    "Google Search": 36,
+    "Pexels": 48,
+    "Pixabay": 48,
+}
+FOOTAGE_SOURCE_REQUEST_COUNTS = {}
+FOOTAGE_SOURCE_LAST_REQUEST_AT = {}
+FOOTAGE_SOURCE_REQUEST_LOCK = threading.Lock()
+FOOTAGE_SOURCE_CACHE_TTL = {
+    "Internet Archive": 6 * 3600,
+    "Wikimedia Commons": 6 * 3600,
+    "NASA": 12 * 3600,
+    "Google Search": 3 * 3600,
+    "Pexels": 6 * 3600,
+    "Pixabay": 6 * 3600,
+}
+FOOTAGE_SOURCE_STALE_CACHE_TTL = 7 * 86400
+FOOTAGE_SOURCE_CACHE_SCHEMA = 3
+FOOTAGE_SOURCE_STATE_SCHEMA = 1
+FOOTAGE_SOURCE_STATE_FILE = "footage_source_state.json"
+ROOT_FOOTAGE_SOURCE_STATE_FILE = Path(
+    os.getenv("FOOTAGE_SOURCE_STATE_FILE", FOOTAGE_SOURCE_STATE_FILE)
+)
+WIKIMEDIA_CONTACT = os.getenv("FOOTAGE_CONTACT_EMAIL", "").strip()
+WIKIMEDIA_USER_AGENT = (
+    "AutoDocumentaryVideo/3.0 "
+    "(+https://github.com/nikmatpertama-sys/auto-documentary-video"
+    + (f"; mailto:{WIKIMEDIA_CONTACT}" if WIKIMEDIA_CONTACT else "")
+    + ")"
+)
 # Do not immediately retry Commons 429s; the caller cools the source and continues elsewhere.
 MAX_ADAPTIVE_FOOTAGE_QUERIES = 4
 MAX_ADAPTIVE_FOOTAGE_CANDIDATES = 12
@@ -348,7 +393,7 @@ class VisionResponseError(RuntimeError):
 
 
 def response_retry_after_seconds(response, default_seconds=120):
-    """Read Retry-After (seconds or HTTP-date), with a bounded safe fallback."""
+    """Read Retry-After seconds or HTTP-date; retain long server reset windows."""
     raw = (getattr(response, "headers", {}) or {}).get("Retry-After", "")
     delay = None
     if raw:
@@ -364,56 +409,316 @@ def response_retry_after_seconds(response, default_seconds=120):
                 delay = None
     if delay is None:
         delay = float(default_seconds)
-    return max(15.0, min(900.0, float(delay)))
+    # Keep a defensive one-week ceiling for malformed headers while honoring
+    # normal provider reset windows, including daily quota resets.
+    return max(15.0, min(7 * 86400.0, float(delay)))
+
+
+def _source_state_payload():
+    """Merge the runtime cache and tracked state file without trusting their contents."""
+    paths = [CACHE / FOOTAGE_SOURCE_STATE_FILE, ROOT_FOOTAGE_SOURCE_STATE_FILE]
+    merged = {"schema_version": FOOTAGE_SOURCE_STATE_SCHEMA, "updated_at": 0.0, "sources": {}}
+    for path in paths:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError):
+            continue
+        if not isinstance(payload, dict) or payload.get("schema_version") != FOOTAGE_SOURCE_STATE_SCHEMA:
+            continue
+        sources = payload.get("sources")
+        if not isinstance(sources, dict):
+            continue
+        for source, details in sources.items():
+            if source not in FOOTAGE_SOURCE_PRIORITY or not isinstance(details, dict):
+                continue
+            try:
+                until = float(details.get("cooldown_until", 0.0))
+                updated = float(details.get("updated_at", 0.0))
+            except (TypeError, ValueError):
+                continue
+            if until <= 0:
+                continue
+            previous = merged["sources"].get(source, {})
+            if updated >= float(previous.get("updated_at", 0.0)):
+                merged["sources"][source] = {
+                    "cooldown_until": until,
+                    "updated_at": updated,
+                    "last_status": int(details.get("last_status", 0) or 0),
+                    "reason": str(details.get("reason", ""))[:100],
+                }
+            merged["updated_at"] = max(merged["updated_at"], updated)
+    return merged
+
+
+def _atomic_write_json(path, payload):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
+        encoding="utf-8",
+    )
+    os.replace(temporary, path)
+
+
+def _write_source_state(payload):
+    """Persist only public provider cooldown metadata; never keys or user data."""
+    safe_sources = {}
+    for source, details in (payload.get("sources") or {}).items():
+        if source not in FOOTAGE_SOURCE_PRIORITY or not isinstance(details, dict):
+            continue
+        try:
+            until = float(details.get("cooldown_until", 0.0))
+            updated = float(details.get("updated_at", time.time()))
+            last_status = int(details.get("last_status", 0) or 0)
+        except (TypeError, ValueError):
+            continue
+        if until <= 0:
+            continue
+        safe_sources[source] = {
+            "cooldown_until": until,
+            "updated_at": updated,
+            "last_status": last_status,
+            "reason": str(details.get("reason", ""))[:100],
+        }
+    safe_payload = {
+        "schema_version": FOOTAGE_SOURCE_STATE_SCHEMA,
+        "updated_at": time.time(),
+        "sources": safe_sources,
+    }
+    # Cache restore gives fast reuse; the small root file survives failed
+    # workflow runs because persist_generated_markdown.py commits it in an
+    # always() step. Either copy can be missing without breaking the pipeline.
+    for path in (CACHE / FOOTAGE_SOURCE_STATE_FILE, ROOT_FOOTAGE_SOURCE_STATE_FILE):
+        try:
+            _atomic_write_json(path, safe_payload)
+        except OSError as exc:
+            print(f"Could not persist footage source state to {path}: {exc}")
+    return safe_payload
+
+
+def _restore_footage_source_cooldowns():
+    """Hydrate monotonic in-run timers from epoch timestamps saved by older runs."""
+    now_epoch = time.time()
+    now_monotonic = time.monotonic()
+    state = _source_state_payload()
+    active = {}
+    for source, details in state.get("sources", {}).items():
+        remaining = float(details.get("cooldown_until", 0.0)) - now_epoch
+        if remaining > 0:
+            active[source] = details
+            FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = max(
+                FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(source, 0.0),
+                now_monotonic + remaining,
+            )
+        else:
+            FOOTAGE_SOURCE_COOLDOWN_UNTIL.pop(source, None)
+    root_state = {}
+    try:
+        root_payload = json.loads(ROOT_FOOTAGE_SOURCE_STATE_FILE.read_text(encoding="utf-8"))
+        if isinstance(root_payload, dict) and root_payload.get("schema_version") == FOOTAGE_SOURCE_STATE_SCHEMA:
+            root_state = root_payload.get("sources", {}) if isinstance(root_payload.get("sources"), dict) else {}
+    except (OSError, ValueError, TypeError):
+        root_state = {}
+    if active != state.get("sources", {}) or active != root_state:
+        _write_source_state({"sources": active})
+
+
+def footage_source_cooldown_remaining(source):
+    """Return cooldown left, reloading epoch state to survive a new runner process."""
+    if not source:
+        return 0.0
+    now_mono = time.monotonic()
+    remaining = max(0.0, FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(source, 0.0) - now_mono)
+    state = _source_state_payload()
+    details = state.get("sources", {}).get(source)
+    if details:
+        remaining = max(remaining, float(details.get("cooldown_until", 0.0)) - time.time())
+        if remaining > 0:
+            FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = now_mono + remaining
+    if remaining <= 0:
+        FOOTAGE_SOURCE_COOLDOWN_UNTIL.pop(source, None)
+    return max(0.0, remaining)
+
+
+def _persist_source_cooldown(source, delay, status, reason):
+    state = _source_state_payload()
+    now = time.time()
+    current = state.setdefault("sources", {}).get(source, {})
+    until = max(float(current.get("cooldown_until", 0.0)), now + float(delay))
+    state["sources"][source] = {
+        "cooldown_until": until,
+        "updated_at": now,
+        "last_status": int(status or 0),
+        "reason": str(reason or "")[:100],
+    }
+    _write_source_state(state)
+    return until
 
 
 def mark_footage_source_rate_limited(source, response=None):
-    """Put a throttled footage source in a timed cooldown for search and download."""
+    """Persist a provider's 429 cooldown across jobs and across failed runs."""
     if not source:
         return 0.0
-    default = 180.0 if source == "Wikimedia Commons" else 60.0
+    default = 300.0 if source == "Wikimedia Commons" else 90.0
     delay = response_retry_after_seconds(response, default)
-    until = time.monotonic() + delay
-    FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = max(
-        FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(source, 0.0), until
-    )
+    until_epoch = _persist_source_cooldown(source, delay, 429, "http_429")
+    remaining = max(0.0, until_epoch - time.time())
+    FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = time.monotonic() + remaining
     print(
-        f"{source} rate-limited; cooling this source for "
-        f"{delay:.0f}s before trying it again."
+        f"{source} rate-limited; persisted cooldown for "
+        f"{remaining:.0f}s (Retry-After respected when supplied)."
     )
-    return delay
+    return remaining
 
 
 def mark_footage_source_temporarily_unavailable(source, seconds=45.0):
-    """Avoid repeatedly hitting a source that is timing out or returning 5xx."""
+    """Persist a short backoff after network failure or provider 5xx."""
     if not source:
         return 0.0
-    delay = max(15.0, min(180.0, float(seconds)))
-    until = time.monotonic() + delay
-    FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = max(
-        FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(source, 0.0), until
-    )
+    delay = max(30.0, min(900.0, float(seconds)))
+    until_epoch = _persist_source_cooldown(source, delay, 0, "temporary_unavailable")
+    remaining = max(0.0, until_epoch - time.time())
+    FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = time.monotonic() + remaining
     print(
-        f"{source} temporarily unavailable; cooling this source for "
-        f"{delay:.0f}s before trying it again."
+        f"{source} temporarily unavailable; persisted cooldown for "
+        f"{remaining:.0f}s."
     )
-    return delay
+    return remaining
 
+
+class FootageSourceBudgetExceeded(RuntimeError):
+    """Local per-provider request ceiling reached; no remote request was made."""
+
+
+class FootageSourceCooldownActive(RuntimeError):
+    """A persisted source cooldown prevented a request before it reached the network."""
+
+
+def _footage_source_get(source, url, **kwargs):
+    """Rate-governed GET for footage discovery, manifests, metadata and downloads."""
+    remaining = footage_source_cooldown_remaining(source)
+    if remaining > 0:
+        raise FootageSourceCooldownActive(
+            f"{source} is in cooldown for about {remaining:.0f}s; request skipped."
+        )
+    minimum_interval = float(FOOTAGE_SOURCE_MIN_INTERVAL.get(source, 1.0))
+    maximum_requests = int(FOOTAGE_SOURCE_MAX_REQUESTS_PER_RUN.get(source, 120))
+    with FOOTAGE_SOURCE_REQUEST_LOCK:
+        count = int(FOOTAGE_SOURCE_REQUEST_COUNTS.get(source, 0))
+        if count >= maximum_requests:
+            raise FootageSourceBudgetExceeded(
+                f"{source} reached its local request ceiling ({maximum_requests}) for this run."
+            )
+        elapsed = time.monotonic() - FOOTAGE_SOURCE_LAST_REQUEST_AT.get(source, 0.0)
+        wait = minimum_interval - elapsed
+        if wait > 0:
+            time.sleep(wait)
+        FOOTAGE_SOURCE_REQUEST_COUNTS[source] = count + 1
+        FOOTAGE_SOURCE_LAST_REQUEST_AT[source] = time.monotonic()
+
+    try:
+        response = requests.get(url, **kwargs)
+    except requests.RequestException:
+        mark_footage_source_temporarily_unavailable(source, 60.0)
+        raise
+    status = int(getattr(response, "status_code", 0) or 0)
+    if status == 429:
+        mark_footage_source_rate_limited(source, response)
+    elif status in (408, 425):
+        mark_footage_source_temporarily_unavailable(source, 45.0)
+    elif 500 <= status <= 599:
+        mark_footage_source_temporarily_unavailable(source, 90.0)
+    return response
+
+
+def _footage_source_cache_path(source, query):
+    normalized_query = clean_query(query).lower()
+    key = hashlib.sha256(
+        (f"mm3-source-cache-v{FOOTAGE_SOURCE_CACHE_SCHEMA}|{source}|{normalized_query}").encode("utf-8")
+    ).hexdigest()
+    return CACHE / f"source-{key}.json"
+
+
+def _read_footage_source_cache(source, query, allow_stale=False):
+    path = _footage_source_cache_path(source, query)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(payload, dict)
+            or payload.get("schema_version") != FOOTAGE_SOURCE_CACHE_SCHEMA
+            or payload.get("source") != source
+            or payload.get("query") != clean_query(query).lower()
+            or not isinstance(payload.get("results"), list)
+        ):
+            return None
+        age = max(0.0, time.time() - float(payload.get("cached_at", 0.0)))
+    except (OSError, ValueError, TypeError):
+        return None
+    ttl = int(FOOTAGE_SOURCE_CACHE_TTL.get(source, 21600))
+    if age <= ttl:
+        return {"results": payload["results"], "age": age, "stale": False}
+    if allow_stale and age <= FOOTAGE_SOURCE_STALE_CACHE_TTL:
+        return {"results": payload["results"], "age": age, "stale": True}
+    return None
+
+
+def _write_footage_source_cache(source, query, results):
+    payload = {
+        "schema_version": FOOTAGE_SOURCE_CACHE_SCHEMA,
+        "source": source,
+        "query": clean_query(query).lower(),
+        "cached_at": time.time(),
+        "results": results if isinstance(results, list) else [],
+    }
+    try:
+        _atomic_write_json(_footage_source_cache_path(source, query), payload)
+        return True
+    except OSError as exc:
+        print(f"Could not write {source} search cache: {exc}")
+        return False
+
+
+def _nasa_manifest_cache_path(nasa_id):
+    digest = hashlib.sha256(str(nasa_id).encode("utf-8")).hexdigest()
+    return CACHE / f"nasa-manifest-{digest}.json"
+
+
+def _get_nasa_asset_manifest(nasa_id):
+    """Reuse NASA asset manifests; only valid responses are cached for 30 days."""
+    cache_path = _nasa_manifest_cache_path(nasa_id)
+    if cache_path.exists() and time.time() - cache_path.stat().st_mtime < 30 * 86400:
+        try:
+            cached = json.loads(cache_path.read_text(encoding="utf-8"))
+            if isinstance(cached, list):
+                return cached
+        except (OSError, ValueError):
+            pass
+    response = _footage_source_get(
+        "NASA",
+        f"https://images-api.nasa.gov/asset/{quote(str(nasa_id), safe='')}",
+        timeout=35,
+        headers={"User-Agent": "AutoDocumentaryVideo/3.0 (+https://github.com/nikmatpertama-sys/auto-documentary-video)"},
+    )
+    response.raise_for_status()
+    assets = response.json().get("collection", {}).get("items", [])
+    if not isinstance(assets, list):
+        assets = []
+    try:
+        _atomic_write_json(cache_path, assets)
+    except OSError:
+        pass
+    return assets
+
+
+# Load saved source cooldowns immediately on process startup. Missing/corrupt
+# files are expected (for example after a GitHub cache eviction) and harmless.
+_restore_footage_source_cooldowns()
 
 def is_wikimedia_url(url):
     """Recognize both Commons API and upload.wikimedia.org media URLs."""
     host = (urlparse(str(url or "")).hostname or "").lower()
     return host == "wikimedia.org" or host.endswith(".wikimedia.org")
-
-
-def pace_wikimedia_request():
-    """Apply one shared request interval to Commons API and media downloads."""
-    global WIKIMEDIA_LAST_REQUEST_AT
-    elapsed = time.monotonic() - WIKIMEDIA_LAST_REQUEST_AT
-    wait_for_interval = WIKIMEDIA_MIN_REQUEST_INTERVAL - elapsed
-    if wait_for_interval > 0:
-        time.sleep(wait_for_interval)
-    WIKIMEDIA_LAST_REQUEST_AT = time.monotonic()
 
 
 def run(cmd):
@@ -532,6 +837,38 @@ def is_native_portrait_916(
     if min(width, height) < MIN_CLIP_SHORT_SIDE or height <= width:
         return False
     return abs(ratio - TARGET_SOURCE_ASPECT) <= tolerance
+
+
+def candidate_metadata_precheck(hit):
+    """Reject only clearly under-sized source metadata before downloading.
+
+    Catalog APIs often report encoded width/height without rotation metadata.
+    A portrait phone clip can therefore look landscape-coded in search results.
+    Aspect ratio is authoritative only after download, when ffprobe_video_info()
+    can apply display rotation and sample-aspect-ratio metadata.
+    """
+    try:
+        width = int(float(hit.get("width") or 0))
+        height = int(float(hit.get("height") or 0))
+    except (TypeError, ValueError):
+        return None
+
+    if width > 0 and height > 0:
+        if min(width, height) < MIN_CLIP_SHORT_SIDE:
+            return "resolution"
+    elif max(width, height) > 0 and max(width, height) < MIN_CLIP_SHORT_SIDE:
+        return "resolution"
+    return None
+
+
+def has_native_portrait_metadata_hint(hit):
+    """Use catalog dimensions as a ranking hint, never as a final orientation verdict."""
+    try:
+        width = int(float(hit.get("width") or 0))
+        height = int(float(hit.get("height") or 0))
+    except (TypeError, ValueError):
+        return False
+    return bool(width and height and is_native_portrait_916(width, height))
 
 
 def split_sentences(text):
@@ -1035,16 +1372,15 @@ def download_stream(url, dest, source=None):
     for attempt in range(1, max_attempts + 1):
         dest.unlink(missing_ok=True)
         try:
-            if is_commons:
-                # Share one polite request clock between Commons API and media URLs.
-                pace_wikimedia_request()
-
-            with requests.get(
+            with _footage_source_get(
+                source or "Internet Archive",
                 url,
                 stream=True,
                 timeout=(25, 180),
                 headers={
-                    "User-Agent": "AutoDocumentaryVideo/MM1 (documentary footage client)"
+                    "User-Agent": WIKIMEDIA_USER_AGENT if is_commons else (
+                        "AutoDocumentaryVideo/3.0 (+https://github.com/nikmatpertama-sys/auto-documentary-video)"
+                    )
                 },
             ) as response:
                 status = int(getattr(response, "status_code", 0) or 0)
@@ -1053,6 +1389,8 @@ def download_stream(url, dest, source=None):
                     response.raise_for_status()
 
                 if status in (408, 425) or 500 <= status <= 599:
+                    if footage_source_cooldown_remaining(source) > 0:
+                        response.raise_for_status()
                     if attempt < max_attempts:
                         delay = response_retry_after_seconds(
                             response, default_seconds=5 * attempt
@@ -1094,8 +1432,7 @@ def download_stream(url, dest, source=None):
             response = getattr(exc, "response", None)
             status = getattr(response, "status_code", None)
             if status == 429:
-                # The first 429 is enough: keep the source in cooldown and move on.
-                mark_footage_source_rate_limited(source, response)
+                # _footage_source_get persisted Retry-After before raising.
                 dest.unlink(missing_ok=True)
                 raise
             transient = status in (None, 408, 425) or (
@@ -1168,11 +1505,12 @@ def google_open_web_video_search(query):
     search_text = (
         f'{query} filetype:mp4 ("public domain" OR "Creative Commons" OR CC0 OR "CC BY")'
     )
-    response = requests.get(
+    response = _footage_source_get(
+        "Google Search",
         "https://www.google.com/search",
         params={"q": search_text, "num": 30, "filter": "0"},
         headers={
-            "User-Agent": "Mozilla/5.0 (compatible; AutoDocumentaryVideo/MM1; footage research)",
+            "User-Agent": "AutoDocumentaryVideo/3.0 (+https://github.com/nikmatpertama-sys/auto-documentary-video)",
             "Accept-Language": "en-US,en;q=0.9",
         },
         timeout=30,
@@ -1247,7 +1585,8 @@ def pixabay_search(query):
         except Exception:
             pass
 
-    response = requests.get(
+    response = _footage_source_get(
+        "Pixabay",
         "https://pixabay.com/api/videos/",
         params={
             "key": PIXABAY_KEY,
@@ -1324,7 +1663,8 @@ def pexels_search(query):
     if not PEXELS_KEY:
         return []
 
-    response = requests.get(
+    response = _footage_source_get(
+        "Pexels",
         "https://api.pexels.com/v1/videos/search",
         headers={
             "Authorization": PEXELS_KEY
@@ -1394,7 +1734,8 @@ def pexels_search(query):
 
 def nasa_search(query):
     """NASA public media API; video assets only."""
-    response = requests.get(
+    response = _footage_source_get(
+        "NASA",
         "https://images-api.nasa.gov/search",
         params={
             "q": query,
@@ -1425,24 +1766,21 @@ def nasa_search(query):
         ])
 
         try:
-            manifest = requests.get(
-                f"https://images-api.nasa.gov/asset/{nasa_id}",
-                timeout=35
-            )
-
-            manifest.raise_for_status()
-
-            assets = manifest.json().get(
-                "collection", {}
-            ).get("items", [])
-
+            assets = _get_nasa_asset_manifest(nasa_id)
+        except (FootageSourceCooldownActive, FootageSourceBudgetExceeded) as exc:
+            exc.partial_results = list(results)
+            raise
         except Exception as exc:
-            if getattr(getattr(exc, "response", None), "status_code", None) == 429:
-                # Propagate rate limits so the shared source cooldown is applied.
+            if (
+                getattr(getattr(exc, "response", None), "status_code", None) == 429
+                or footage_source_cooldown_remaining("NASA") > 0
+            ):
+                try:
+                    exc.partial_results = list(results)
+                except Exception:
+                    pass
                 raise
-            print(
-                f"NASA asset lookup skipped ({nasa_id}): {exc}"
-            )
+            print(f"NASA asset lookup skipped ({nasa_id}): {exc}")
             continue
 
         urls = [
@@ -1510,11 +1848,11 @@ def commons_search(query):
         "iiprop": "url|size|mime|extmetadata",
     }
     headers = {
-        "User-Agent": "AutoDocumentaryVideo/MM1 (documentary footage research; Wikimedia Commons API client)"
+        "User-Agent": WIKIMEDIA_USER_AGENT
     }
 
-    pace_wikimedia_request()
-    response = requests.get(
+    response = _footage_source_get(
+        "Wikimedia Commons",
         "https://commons.wikimedia.org/w/api.php",
         params=params,
         headers=headers,
@@ -1617,7 +1955,8 @@ def internet_archive_search(query):
     search_query = "mediatype:movies AND (" + " OR ".join(clauses) + ")"
 
     try:
-        response = requests.get(
+        response = _footage_source_get(
+            "Internet Archive",
             "https://archive.org/advancedsearch.php",
             params=[
                 ("q", search_query),
@@ -1642,7 +1981,10 @@ def internet_archive_search(query):
         response.raise_for_status()
         documents = response.json().get("response", {}).get("docs", [])
     except requests.RequestException as exc:
-        if getattr(getattr(exc, "response", None), "status_code", None) == 429:
+        if (
+            getattr(getattr(exc, "response", None), "status_code", None) == 429
+            or footage_source_cooldown_remaining("Internet Archive") > 0
+        ):
             raise
         print(f"  Internet Archive search failed: {exc}")
         return []
@@ -1736,7 +2078,8 @@ def internet_archive_search(query):
         if archive_item is None:
             metadata_checks += 1
             try:
-                metadata_response = requests.get(
+                metadata_response = _footage_source_get(
+                    "Internet Archive",
                     f"https://archive.org/metadata/{identifier}",
                     headers={
                         "User-Agent": "AutoDocumentaryVideo/3.0 (footage research)"
@@ -1752,8 +2095,15 @@ def internet_archive_search(query):
                     )
                 except Exception:
                     pass
+            except (FootageSourceCooldownActive, FootageSourceBudgetExceeded) as exc:
+                exc.partial_results = list(results)
+                raise
             except requests.RequestException as exc:
-                if getattr(getattr(exc, "response", None), "status_code", None) == 429:
+                if (
+                    getattr(getattr(exc, "response", None), "status_code", None) == 429
+                    or footage_source_cooldown_remaining("Internet Archive") > 0
+                ):
+                    exc.partial_results = list(results)
                     raise
                 print(f"  Internet Archive metadata skipped ({identifier}): {exc}")
                 continue
@@ -1865,30 +2215,24 @@ def internet_archive_search(query):
 
     return results
 
+def _deduplicate_footage_results(items):
+    deduplicated = []
+    seen = set()
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        identity = str(item.get("url") or "").strip().lower()
+        if not identity:
+            identity = f"{item.get('source', '')}:{item.get('id', '')}".lower()
+        if not identity or identity in seen:
+            continue
+        seen.add(identity)
+        deduplicated.append(item)
+    return deduplicated
+
+
 def search_all_footage_sources(query):
-    """Search configured sources; avoid caching partial results after throttling."""
-    cache_sources = (
-        "footage-sources-v5|mm1-intent-ranking|adaptive-visual-retry|"
-        "open-web-google-direct-cc|internet-archive-v1|"
-        + ("|pixabay" if ENABLE_PIXABAY_FALLBACK and PIXABAY_KEY else "")
-        + ("|pexels" if ENABLE_PEXELS_FALLBACK and PEXELS_KEY else "")
-        + "|nasa|commons"
-    )
-    cache_file = CACHE / (
-        hashlib.sha256(
-            (cache_sources + "|" + query.lower()).encode()
-        ).hexdigest() + ".sources.json"
-    )
-
-    if (
-        cache_file.exists()
-        and time.time() - cache_file.stat().st_mtime < 21600
-    ):
-        try:
-            return json.loads(cache_file.read_text(encoding="utf-8"))
-        except Exception:
-            pass
-
+    """Search sources independently so one 429 cannot discard successful providers."""
     searches = [
         ("Internet Archive", internet_archive_search),
         ("Wikimedia Commons", commons_search),
@@ -1899,60 +2243,91 @@ def search_all_footage_sources(query):
         searches.append(("Pexels", pexels_search))
     if ENABLE_PIXABAY_FALLBACK and PIXABAY_KEY:
         searches.append(("Pixabay", pixabay_search))
+
     combined = []
-    complete_search = True
-
     for source, search_fn in searches:
-        cooldown_until = FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(source, 0.0)
-        if time.monotonic() < cooldown_until:
-            complete_search = False
-            remaining = max(1, int(cooldown_until - time.monotonic()))
+        cached = _read_footage_source_cache(source, query, allow_stale=False)
+        if cached is not None:
             print(
-                f"  {source} is cooling down after rate limiting; "
-                f"retry eligible in about {remaining}s."
+                f"  {source}: {len(cached['results'])} cached candidate(s) "
+                f"(independent source cache, age {cached['age'] / 60:.0f}m)."
             )
+            combined.extend(cached["results"])
             continue
-        FOOTAGE_SOURCE_COOLDOWN_UNTIL.pop(source, None)
 
-        # Backward compatibility: an old disabled marker is cleared once its
-        # cooldown has elapsed, rather than making the source unavailable forever.
+        stale_cache = _read_footage_source_cache(source, query, allow_stale=True)
+        cooldown = footage_source_cooldown_remaining(source)
+        if cooldown > 0:
+            if stale_cache is not None:
+                print(
+                    f"  {source}: serving {len(stale_cache['results'])} stale cached candidate(s) "
+                    f"while source cools down ({cooldown:.0f}s remaining)."
+                )
+                combined.extend(stale_cache["results"])
+            else:
+                print(
+                    f"  {source}: skipped during persisted cooldown "
+                    f"({cooldown:.0f}s remaining); no stale cache available."
+                )
+            continue
+
         FOOTAGE_SOURCE_DISABLED.discard(source)
-
         try:
             found = search_fn(query)
+            if not isinstance(found, list):
+                found = []
             combined.extend(found)
-            if found:
-                print(f"  {source}: {len(found)} candidate(s)")
-
-        except Exception as exc:
-            status_code = getattr(
-                getattr(exc, "response", None), "status_code", None
-            )
-            if status_code == 429:
-                response = getattr(exc, "response", None)
-                mark_footage_source_rate_limited(source, response)
-                complete_search = False
+            if footage_source_cooldown_remaining(source) > 0:
+                # A nested metadata/manifest request failed. Keep the partial
+                # candidates for this run, but never cache them as a complete search.
+                print(f"  {source}: source entered cooldown mid-search; partial results were not cached.")
+                if stale_cache is not None:
+                    combined.extend(stale_cache["results"])
             else:
-                complete_search = False
-                if status_code is None or (
-                    isinstance(status_code, int) and 500 <= status_code <= 599
-                ):
-                    mark_footage_source_temporarily_unavailable(source, 45.0)
+                # Cache successful empty results too: repeated no-hit queries should
+                # not hammer the same catalog for the full TTL.
+                _write_footage_source_cache(source, query, found)
+                print(f"  {source}: {len(found)} candidate(s); source result cached.")
+        except (FootageSourceBudgetExceeded, FootageSourceCooldownActive) as exc:
+            partial = getattr(exc, "partial_results", [])
+            if isinstance(partial, list):
+                combined.extend(partial)
+            if stale_cache is not None:
                 print(
-                    f"  {source} search unavailable for '{query}': {exc}"
+                    f"  {source}: using stale cache after source governor skip "
+                    f"({len(stale_cache['results'])} candidate(s))."
                 )
+                combined.extend(stale_cache["results"])
+            else:
+                print(f"  {source}: {exc}")
+        except Exception as exc:
+            partial = getattr(exc, "partial_results", [])
+            if isinstance(partial, list):
+                combined.extend(partial)
+            response = getattr(exc, "response", None)
+            status_code = getattr(response, "status_code", None)
+            if status_code == 429:
+                # The request wrapper normally persists this before the error
+                # reaches here; repeat safely for custom provider call paths.
+                mark_footage_source_rate_limited(source, response)
+            elif status_code in (408, 425):
+                mark_footage_source_temporarily_unavailable(source, 45.0)
+            elif status_code is not None and 500 <= int(status_code) <= 599:
+                mark_footage_source_temporarily_unavailable(source, 90.0)
+            elif isinstance(exc, requests.RequestException):
+                mark_footage_source_temporarily_unavailable(source, 60.0)
+            print(f"  {source} search unavailable for '{query}': {exc}")
+            if stale_cache is not None:
+                print(
+                    f"  {source}: using stale cache after failed refresh "
+                    f"({len(stale_cache['results'])} candidate(s))."
+                )
+                combined.extend(stale_cache["results"])
 
-    # Partial results must not be cached: otherwise a transient 429 can hide
-    # Commons/other sources for the full six-hour cache lifetime.
-    if complete_search:
-        try:
-            cache_file.write_text(
-                json.dumps(combined), encoding="utf-8"
-            )
-        except Exception:
-            pass
-
-    return combined
+    deduplicated = _deduplicate_footage_results(combined)
+    if len(deduplicated) != len(combined):
+        print(f"  Source deduplication: {len(combined) - len(deduplicated)} duplicate candidate(s) removed.")
+    return deduplicated
 
 
 STOP_WORDS = {
@@ -3489,9 +3864,14 @@ def rank_footage_candidates_by_source(candidates):
     # keeping the more reliable open archives ahead when candidates are close.
     def sort_key(item):
         score = max(0.0, float(item[0]))
-        source = str(item[1].get("source") or "").strip()
+        hit = item[1]
+        source = str(hit.get("source") or "").strip()
         trust_rank = source_order.get(source, len(source_order) + 1)
-        return (int(score / 0.08), -trust_rank, score)
+        # Within the same relevance band, try known native-portrait media first.
+        # Other candidates remain eligible because catalog dimensions may omit
+        # display rotation; their actual ratio is checked after download.
+        portrait_hint = int(has_native_portrait_metadata_hint(hit))
+        return (int(score / 0.08), portrait_hint, -trust_rank, score)
 
     return sorted(capped, key=sort_key, reverse=True)
 
@@ -3673,7 +4053,7 @@ def fetch_footage(plan):
         strict_candidate_count = 0
         relaxed_candidate_count = 0
         rejection_counts = {
-            "metadata": 0, "resolution": 0, "aspect_ratio": 0,
+            "metadata": 0, "resolution": 0,
             "duration": 0, "relevance": 0, "context": 0,
             "visual_context": 0, "duplicate": 0,
         }
@@ -3713,15 +4093,14 @@ def fetch_footage(plan):
                 else:
                     strict_candidate_count += 1
 
-                width = int(hit.get("width") or 0)
-                height = int(hit.get("height") or 0)
                 duration = float(hit.get("duration") or 0)
-                if width and width < MIN_CLIP_WIDTH:
+                if candidate_metadata_precheck(hit) == "resolution":
                     rejection_counts["resolution"] += 1
                     continue
-                if width and height and not is_native_portrait_916(width, height):
-                    rejection_counts["aspect_ratio"] += 1
-                    continue
+                # Do not reject catalog-reported landscape dimensions here.
+                # Some providers expose encoded dimensions but omit 90-degree
+                # display-rotation metadata. ffprobe after download is the
+                # authoritative native-9:16 check and still rejects true landscape.
                 if duration and duration < 4:
                     rejection_counts["duration"] += 1
                     continue
@@ -3812,6 +4191,18 @@ def fetch_footage(plan):
         # Semantic relevance is the primary sort signal. Trusted open archives
         # only break close-score ties; a much stronger match can rank first.
         ranked = rank_footage_candidates_by_source(candidates.values())
+        portrait_hints = sum(
+            1 for item in ranked if has_native_portrait_metadata_hint(item[1])
+        )
+        deferred_orientation = sum(
+            1 for item in ranked
+            if item[1].get("width") and item[1].get("height")
+            and not has_native_portrait_metadata_hint(item[1])
+        )
+        print(
+            f"Scene {i}: portrait metadata hints={portrait_hints}; "
+            f"orientation deferred to downloaded-file ffprobe={deferred_orientation}."
+        )
 
         print(
             f"Scene {i}: {len(candidates)} metadata-qualified "
@@ -3905,11 +4296,9 @@ def fetch_footage(plan):
             attempted_candidate_ids.add(identity)
 
             candidate_source = str(hit.get("source") or "").strip()
-            cooldown_until = FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(
-                candidate_source, 0.0
-            )
-            if time.monotonic() < cooldown_until:
-                remaining = max(1, int(cooldown_until - time.monotonic()))
+            cooldown_remaining = footage_source_cooldown_remaining(candidate_source)
+            if cooldown_remaining > 0:
+                remaining = max(1, int(cooldown_remaining))
                 print(
                     f"Scene {i}: skipping remaining {candidate_source} "
                     f"candidates during its {remaining}s rate-limit cooldown."
@@ -5141,7 +5530,7 @@ def write_failure_diagnostics(exc):
         "traceback": traceback.format_exc(),
         "finished_at_epoch": time.time(),
         "configuration": {
-            "project_release": "MM1",
+            "project_release": "MM3",
             "visual_verification_required": VISION_REQUIRED,
             "groq_keys_configured": len(GROQ_KEYS),
             "openrouter_keys_configured": len(OPENROUTER_KEYS),
@@ -5151,6 +5540,12 @@ def write_failure_diagnostics(exc):
             "pixabay_key_configured": bool(PIXABAY_KEY),
             "pexels_key_configured": bool(PEXELS_KEY),
             "source_priority": list(FOOTAGE_SOURCE_PRIORITY),
+            "footage_source_requests": dict(FOOTAGE_SOURCE_REQUEST_COUNTS),
+            "footage_source_cooldowns_seconds": {
+                source: int(footage_source_cooldown_remaining(source))
+                for source in FOOTAGE_SOURCE_PRIORITY
+                if footage_source_cooldown_remaining(source) > 0
+            },
         },
     }
     PIPELINE_STATE["failure"] = {
