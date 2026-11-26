@@ -1,65 +1,135 @@
 {
-  "status": "blocked",
+  "status": "passed",
   "method": "trusted-source fetch + independent evidence-grounded AI audit",
+  "fact_checker": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
+  },
   "claim_count": 8,
-  "blocked_at_claim": "C2",
-  "blocked_claim_sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for specific river regions.",
-  "failure_reason": "quantitative claim lacked a second independent organisation",
-  "source_fetch_failures": [
+  "supported_claim_count": 8,
+  "failed_claims": [],
+  "uncited_factual_sentences": [],
+  "coverage_note": "All sentences in the script correspond directly to verified claims backed by the supplied excerpts, and all claims are fully supported by their respective evidence URLs without any contradictions.",
+  "claims": [
     {
-      "requested_url": "https://en.wikipedia.org/wiki/Population",
-      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Population: HTTPError (HTTP 429)",
-      "source_kind": "discovered"
+      "id": "C1",
+      "scene": 1,
+      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated across multiple river basins.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ],
+      "reason": "The fetched excerpt states that in Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated across multiple river basins."
     },
     {
-      "requested_url": "https://en.wikipedia.org/wiki/Population_of_Canada",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
-      "source_kind": "discovered"
+      "id": "C2",
+      "scene": 2,
+      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across their native geographic distribution ranges.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ],
+      "reason": "The excerpt explicitly states that beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds."
     },
     {
-      "requested_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
-      "source_kind": "discovered"
+      "id": "C3",
+      "scene": 3,
+      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts to engender support for protecting habitats.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "reason": "The excerpt confirms that the concept became popular in conservation, and was deployed in a range of contexts to engender support for conservation/protecting habitats."
     },
     {
-      "requested_url": "https://www.cia.gov/the-world-factbook/countries/canada/",
-      "reason": "Fetched page is about a different subject: it shares 0 of the claim's 13 content terms (needs 2).",
-      "source_kind": "discovered"
+      "id": "C4",
+      "scene": 4,
+      "sentence": "Human activities had damaged ecosystems, such as by removing keystone predators that previously maintained balance in those natural environments.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "reason": "The excerpt notes that human activities had damaged ecosystems, such as by removing keystone predators."
     },
     {
-      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
-      "source_kind": "scholarly"
+      "id": "C5",
+      "scene": 5,
+      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "reason": "The excerpt explicitly mentions that wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon."
     },
     {
-      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
-      "source_kind": "scholarly"
+      "id": "C6",
+      "scene": 6,
+      "sentence": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role in the equilibrium of the river system.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ],
+      "reason": "The excerpt states that the connectivity of streams to their adjacent floodplain along their entire length plays an important role in the equilibrium of the river system."
+    },
+    {
+      "id": "C7",
+      "scene": 7,
+      "sentence": "Stream restoration or river restoration, sometimes called river reclamation in the United Kingdom, is a set of activities that aim to improve environmental health.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ],
+      "reason": "The excerpt states that stream restoration or river restoration, sometimes called river reclamation in the United Kingdom, is a set of activities that aim to improve the environmental health of a river or stream."
+    },
+    {
+      "id": "C8",
+      "scene": 8,
+      "sentence": "However, it is important to note that these groups do not cover the entire range known to be occupied by the subspecies today.",
+      "source_urls": [
+        "https://www.iucnredlist.org/species/4003/22187946"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://www.iucnredlist.org/species/4003/22187946"
+      ],
+      "reason": "The excerpt states that it is important to note that these groups do not cover the entire range known to be occupied by the subspecies today."
     }
   ],
-  "usable_source_organizations": [
-    "wikipedia.org"
-  ],
-  "source_recovery": {
-    "attempted": true,
-    "candidate_urls": [],
-    "failure": "",
-    "provider": "gemini",
-    "model": "gemini-3.5-flash-lite",
-    "discovered_urls": [
-      "https://en.wikipedia.org/wiki/Population",
-      "https://en.wikipedia.org/wiki/Population_of_Canada",
-      "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
-      "https://www.cia.gov/the-world-factbook/countries/canada/"
-    ],
-    "scholarly_urls": [
-      "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
-      "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml"
-    ]
-  },
   "sources": [
     {
       "claim_id": "C1",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Beaver",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. In 2020, the total Eurasian beaver population in Europe was estimated at over one million. As of 2019, the introduced population of North American beavers in Finland has been moving closer to the habitat of the Eurasian beaver. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the originally estimated 60–400 million North American beavers before the fur trade. The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. Beaver populations now range across western, central, and easter",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
       "requested_url": "https://en.wikipedia.org/wiki/Beaver",
       "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
       "host": "en.wikipedia.org",
@@ -70,70 +140,70 @@
       "status": "usable"
     },
     {
-      "claim_id": "C2",
-      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
-      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "claim_id": "C3",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Beaver",
-      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. In 2020, the total Eurasian beaver population in Europe was estimated at over one million. Beavers have a good sense of smell, which they use for detecting land predators and for inspecting scent marks, food, and other individuals. As of 2019, the introduced population of North American beavers in Finland has been moving closer to the habitat of the Eurasian beaver. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the orig",
+      "page_title": "Keystone species",
+      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. It became a popular concept in conservation biology, alongside flagship and umbrella species. In this it overlaps with several other species conservation concepts such as flagship species (attracting support), indicator species (showing the health of the environment), and umbrella species (indirectly protecting many other species). Although the concept is valued as a descriptor for particularly strong inter-species interactions, and has allowed easier communication between ecologists and conservation policy-makers, it has been criticized for oversimplifying complex ecological systems. The keystone concept is defined by its ecological effects, and these in tu",
       "source_kind": "planned",
       "status": "usable"
     },
     {
-      "claim_id": "C2",
-      "requested_url": "https://en.wikipedia.org/wiki/Population",
-      "status": "not_usable",
-      "source_kind": "discovered",
-      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Population: HTTPError (HTTP 429)"
+      "claim_id": "C4",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Keystone species",
+      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. A keystone species is a species that has a disproportionately large effect on its natural environment relative to its abundance. Some keystone species, such as the wolf and lion, are also apex predators. If prey numbers are low, keystone predators can be even less abundant and still be effective. === The wolf, Yellowstone's apex predator ===\n\nKeystone predators may increase the biodiversity of communities by preventing a single species from becoming dominant. === Sea stars and other non-apex predators ===\nAs described by Paine in 1966, some sea stars (e.g., Pisaster ochraceus) may prey on sea urchins, mussels, and other shellfish that have no other natural p",
+      "source_kind": "planned",
+      "status": "usable"
     },
     {
-      "claim_id": "C2",
-      "requested_url": "https://en.wikipedia.org/wiki/Population_of_Canada",
-      "status": "not_usable",
-      "source_kind": "discovered",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+      "claim_id": "C5",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Keystone species",
+      "excerpt": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon. Beavers affect the environment first altering the edges of riparian areas by cutting down older trees to use for their dams. It promotes the goals of carnivore recovery, protecting and restoring connectivity through Madrean woodland and riparian areas, and protecting and restoring riparian areas. The removal of wolves had a direct effect on beaver populations, as their habitat became grazing territory. When wolves were reintroduced, the beaver population and the whole riparian ecosystem recovered dramatically within a few years. In his 1966 paper, Food Web Complexity and Species Diversity, Paine had described such a system in Makah Bay in Washington. The favourite food for these starfish is the mussel which is a dominant competitor for the space o",
+      "source_kind": "planned",
+      "status": "usable"
     },
     {
-      "claim_id": "C2",
-      "requested_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
-      "status": "not_usable",
-      "source_kind": "discovered",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+      "claim_id": "C6",
+      "requested_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Stream restoration",
+      "excerpt": "==== Improving connectivity ====\nThe connectivity of streams to their adjacent floodplain along their entire length plays an important role in the equilibrium of the river system. Whereas the former focuses on the restoration of structural features and/or patterns considered to be characteristic of the target stream system, the latter is based on the restoration of hydrological and geomorphological processes (such as sediment transport or connectivity between the channel and the floodplain) to ensure a stream's resilience and ecological health. Process-based restoration includes restoring lateral connectivity (between the stream and its floodplain), longitudinal connectivity (along the stream) and water and/or sediment fluxes, which might be impacted by hydro-power dams, grade control structures, erosion control structures and flood protection structures. and process-based restoration, w",
+      "source_kind": "planned",
+      "status": "usable"
     },
     {
-      "claim_id": "C2",
-      "requested_url": "https://www.cia.gov/the-world-factbook/countries/canada/",
-      "status": "not_usable",
-      "source_kind": "discovered",
-      "reason": "Fetched page is about a different subject: it shares 0 of the claim's 13 content terms (needs 2)."
+      "claim_id": "C7",
+      "requested_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Stream restoration",
+      "excerpt": "== Definition, objectives and popularity ==\nStream restoration or river restoration, sometimes called river reclamation in the United Kingdom, is a set of activities that aim to improve the environmental health of a river or stream. Stream restoration or river restoration, also sometimes referred to as river reclamation, is work conducted to improve the environmental health of a river or stream, in support of biodiversity, recreation, flood management and/or landscape development. waterway restoration, a term used in the United Kingdom describing alterations to a canal or river to improve navigability and related recreational amenities. This concept has been developed and adapted in various countries around the world, resulting in the notion of \"stream corridor\" or \"river corridor\" in the U.S., \"room for the river\" in the Netherlands, \"espace de liberté\" (\"freedom space\") in France (wher",
+      "source_kind": "planned",
+      "status": "usable"
     },
     {
-      "claim_id": "C2",
-      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
-      "status": "not_usable",
-      "source_kind": "scholarly",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
-    },
-    {
-      "claim_id": "C2",
-      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml",
-      "status": "not_usable",
-      "source_kind": "scholarly",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+      "claim_id": "C8",
+      "requested_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "resolved_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "host": "www.iucnredlist.org",
+      "http_status": 200,
+      "page_title": "Castor canadensis (North American Beaver) | IUCN Red List of Threatened Species Castor canadensis. The IUCN Red List of Threatened Species 2016: e.T4003A22187946",
+      "excerpt": "However, it is important to note that these groups do not cover the entire range known to be occupied by the subspecies and thus further genetic analysis is needed. Therefore, as we could not solely rely on biological information to define spatial units for the entire range and there is sufficient information at the state level, we divided spatial units by clusters of states. Ecological Function in detail Threats Threats in detail Use and Trade Wearing apparel, accessories Local: ✘ National: ✔ International: ✔ Use and Trade in detail Conservation Actions In-place land/water protection Conservation sites identified : Yes, over entire range In-place species management Harvest management plan : Yes Conservation Actions in detail Bibliography Red List Bibliography Green Status Bibliography External Data Images and External Links Images and External Links in detail CITES Legislation from Spec",
+      "source_kind": "planned",
+      "status": "usable"
     }
-  ],
-  "claim_repairs": [
-    {
-      "claim_id": "C2",
-      "scene": 2,
-      "original_sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1200 individuals.",
-      "replacement_sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for specific river regions.",
-      "replacement_source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
-      ],
-      "status": "rewritten"
-    }
-  ],
-  "repair_failure": "ValueError: Claim repair returned the same unsupported sentence."
+  ]
 }

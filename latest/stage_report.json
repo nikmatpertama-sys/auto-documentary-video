@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-26T19:04:47+00:00",
+  "generated_at": "2026-11-26T19:16:37+00:00",
   "environment": {
     "python": "3.11.18",
-    "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
+    "platform": "Linux-7.0.0-1018-aws-x86_64-with-glibc2.43",
     "machine": "x86_64",
     "cpu_count": 4,
     "cwd": "/home/runner/work/auto-documentary-video/auto-documentary-video",
@@ -28,21 +28,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 224.263,
-    "stage_count": 5,
-    "failed_stage": "fact_check",
+    "total_elapsed_seconds": 299.535,
+    "stage_count": 9,
+    "failed_stage": "footage",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-26T19:01:03+00:00",
+        "started_at": "2026-11-26T19:11:38+00:00",
         "details": {},
         "duration_seconds": 0.002
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-26T19:01:03+00:00",
+        "started_at": "2026-11-26T19:11:38+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -52,33 +52,67 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-26T19:01:03+00:00",
+        "started_at": "2026-11-26T19:11:38+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "urls": "24",
-          "excerpts": "3"
+          "excerpts": "4"
         },
-        "duration_seconds": 38.955
+        "duration_seconds": 41.049
       },
       {
         "stage": "script_generation",
         "status": "completed",
-        "started_at": "2026-11-26T19:01:42+00:00",
+        "started_at": "2026-11-26T19:12:19+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
-          "words": "141"
+          "words": "166"
         },
-        "duration_seconds": 146.056
+        "duration_seconds": 12.457
       },
       {
         "stage": "fact_check",
-        "status": "failed",
-        "started_at": "2026-11-26T19:04:08+00:00",
+        "status": "completed",
+        "started_at": "2026-11-26T19:12:31+00:00",
         "details": {
-          "claims": "8"
+          "claims": "8",
+          "status": "passed"
         },
-        "duration_seconds": 39.082,
-        "error": "RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Quantitative claim C2 needs relevant evidence from two distinct trusted source organizations; only 1 supplied or recovered source organization(s) produced a relevant passage. Source recovery: no additional relevant independent source found. Claim repair failed: ValueError: Claim repair returned the same unsupported sentence."
+        "duration_seconds": 7.949
+      },
+      {
+        "stage": "voiceover",
+        "status": "completed",
+        "started_at": "2026-11-26T19:12:39+00:00",
+        "details": {
+          "sentences": "166",
+          "duration_seconds": "73.452"
+        },
+        "duration_seconds": 11.844
+      },
+      {
+        "stage": "timeline_lock",
+        "status": "completed",
+        "started_at": "2026-11-26T19:12:51+00:00",
+        "details": {},
+        "duration_seconds": 0.001
+      },
+      {
+        "stage": "subtitles",
+        "status": "completed",
+        "started_at": "2026-11-26T19:12:51+00:00",
+        "details": {
+          "caption_groups": "31"
+        },
+        "duration_seconds": 0.004
+      },
+      {
+        "stage": "footage",
+        "status": "failed",
+        "started_at": "2026-11-26T19:12:51+00:00",
+        "details": {},
+        "duration_seconds": 226.104,
+        "error": "RuntimeError: Scene 1 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 13 attempted candidates could be downloaded and accepted under the visual verification policy."
       }
     ]
   }
