@@ -301,7 +301,10 @@ class QuotaAwareRouter:
             return
         credential = self._credential(credential_id)
         now = time.monotonic()
-        if now - credential.get("last_probe", 0.0) < self.probe_ttl_seconds:
+        last_probe = float(credential.get("last_probe", 0.0) or 0.0)
+        # A fresh GitHub Actions runner can have a monotonic clock below the
+        # probe TTL. Treat 0 as "never probed", not as a recent probe.
+        if last_probe > 0.0 and now - last_probe < self.probe_ttl_seconds:
             return
         credential["last_probe"] = now
         try:
