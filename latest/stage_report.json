@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T19:47:18+00:00",
+  "generated_at": "2026-11-26T20:33:30+00:00",
   "environment": {
     "python": "3.11.18",
     "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
@@ -28,21 +28,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 1442.729,
+    "total_elapsed_seconds": 2419.22,
     "stage_count": 4,
     "failed_stage": "script_generation",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-26T19:23:16+00:00",
+        "started_at": "2026-11-26T19:53:11+00:00",
         "details": {},
         "duration_seconds": 0.002
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-26T19:23:16+00:00",
+        "started_at": "2026-11-26T19:53:11+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -52,23 +52,23 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-26T19:23:16+00:00",
+        "started_at": "2026-11-26T19:53:11+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "urls": "24",
-          "excerpts": "3"
+          "excerpts": "1"
         },
-        "duration_seconds": 35.808
+        "duration_seconds": 47.741
       },
       {
         "stage": "script_generation",
         "status": "failed",
-        "started_at": "2026-11-26T19:23:51+00:00",
+        "started_at": "2026-11-26T19:53:59+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems"
         },
-        "duration_seconds": 1406.791,
-        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene 3 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as \"beaver swimming in a pond\" - and move the idea into the narration.); groq/openai/gpt-oss-120b: invalid response (Scene 4 visual_focus names an invisible idea (habitat, diversity). Name only what a camera can film - a named animal, pla | staged fallback: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene 4 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as \"beaver swimming in a pond\" - and move the idea into the narration.); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON"
+        "duration_seconds": 2371.319,
+        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 124 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 46 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 116 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 54 wo | staged fallback: ValueError: Fact claim 1 states a specific figure (1200); narration must not include numbers, percentages, dates or measurements. Rewrite the sentence qualitatively with the same meaning and no figures."
       }
     ]
   }

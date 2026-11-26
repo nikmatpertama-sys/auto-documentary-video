@@ -9,8 +9,11 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, River ecosystem
-Source pool: 71 trusted page(s) cited by Beaver, Keystone species, River ecosystem.
+Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Ecological effects of beavers
+Source pool: 40 trusted page(s) cited by Beaver, Ecological effects of beavers.
+Fact-check source temporarily unavailable (HTTPError HTTP 429); retrying in 4s.
+Fact-check source temporarily unavailable (HTTPError HTTP 429); retrying in 7s.
+Evidence brief: skipped https://en.wikipedia.org/wiki/Ecological_effects_of_beavers (FactCheckError: Could not fetch evidence source https://en.wikipedia.org/wiki/Ecological_effects_of_beavers: HTTPError (HTTP 429))
 Evidence brief: skipped https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165 (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
 Evidence brief: skipped https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212 (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
 Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383
@@ -30,77 +33,93 @@ Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/9237306 (FactCheckError:
 Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5773300
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/29375773 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://www.iucnredlist.org/species/4003/22187946 (FactCheckError: Could not fetch evidence source https://www.iucnredlist.org/species/4003/22187946: HTTPError (HTTP 403))
-Evidence brief: 3 source passages fetched for planning.
-[stage] source_pool: completed in 35.8s
+Evidence brief: skipped https://www.iucnredlist.org/species/4007/197499749 (FactCheckError: Could not fetch evidence source https://www.iucnredlist.org/species/4007/197499749: HTTPError (HTTP 403))
+Evidence brief: 1 source passages fetched for planning.
+[stage] source_pool: completed in 47.7s
 [stage] script_generation: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
+Plan repair: scene 3 visual_focus rewritten to 'rh ne of france' (invisible idea kept in narration).
+Plan repair: scene 3 visual_query rewritten to name its visual_focus ('rh ne of france').
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 3 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
+Plan repair: scene 2 visual_focus rewritten to 'rh ne of france river' (invisible idea kept in narration).
+Plan repair: scene 2 visual_query rewritten to name its visual_focus ('rh ne of france river').
+Plan repair: scene 5 visual_focus rewritten to 'freshwater stream' (invisible idea kept in narration).
+Plan repair: scene 8 visual_focus rewritten to 'freshwater water' (invisible idea kept in narration).
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 124 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 46 words overall across the scenes.
 AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 4 visual_focus names an invisible idea (habitat, diversity). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
+AI router: groq rate limited (HTTP 429); provider paused for 417s and the next route is used now.
 AI router: trying openrouter / openrouter/free for text/script_generation...
 AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
-AI router: retry pass 2/4 for text/script_generation in 59.8s with 2 route(s).
+AI router: retry pass 2/4 for text/script_generation in 416.8s with 2 route(s).
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
+Plan repair: scene 2 visual_focus rewritten to 'beaver river' (invisible idea kept in narration).
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 5 visual_focus names an invisible idea (conservation). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
+Plan repair: scene 2 visual_focus rewritten to 'beaver in europe' (invisible idea kept in narration).
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 116 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 54 words overall across the scenes.
+AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
+AI router: groq rate limited (HTTP 429); provider paused for 850s and the next route is used now.
+AI router: retry pass 3/4 for text/script_generation in 850.0s with 2 route(s).
+AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
+Plan repair: scene 2 visual_focus rewritten to 'europe nature' (invisible idea kept in narration).
+Plan repair: scene 7 visual_focus rewritten to 'freshwater rivers streams' (invisible idea kept in narration).
+AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
+Plan repair: scene 2 visual_focus rewritten to 'rh ne river' (invisible idea kept in narration).
+Plan repair: scene 2 visual_query rewritten to name its visual_focus ('rh ne river').
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 105 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 65 words overall across the scenes.
 AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
 AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
 AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 4 visual_focus names an invisible idea (conservation). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
-AI router: retry pass 3/4 for text/script_generation in 60.0s with 2 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-Plan repair: scene 4 visual_query rewritten to name its visual_focus ('physical and chemical').
-AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 5 visual_focus names an invisible idea (conservation). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
-AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq/openai/gpt-oss-120b returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 5 visual_focus names an invisible idea (habitat). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
-AI router: retry pass 4/4 for text/script_generation in 60.0s with 2 route(s).
+AI router: groq rate limited (HTTP 429); provider paused for 776s and the next route is used now.
+AI router: groq:openai/gpt-oss-120b needs 776s before it can answer again; that exceeds the remaining wait budget, so this run will not block on it.
+AI router: retry pass 4/4 for text/script_generation in 20.0s with 1 route(s).
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 4 visual_focus names an invisible idea (ecosystems). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
-AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
-AI router: the single-shot plan was rejected by every provider; retrying as two smaller, independently validated requests. First failure: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene 3 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and m
+Plan repair: scene 8 visual_focus rewritten to 'freshwater rivers ponds' (invisible idea kept in narration).
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 94 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 76 words overall across the scenes.
+AI router: the single-shot plan was rejected by every provider; retrying as two smaller, independently validated requests. First failure: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 124 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 46 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; openrouter/
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 4 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
+Plan repair: scene 1 visual_focus rewritten to 'freshwater river' (invisible idea kept in narration).
+Plan repair: scene 2 visual_focus rewritten to 'in europe' (invisible idea kept in narration).
+Plan repair: scene 3 visual_focus rewritten to 'rh ne of france river' (invisible idea kept in narration).
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 129 words; expected 130-195. Rewrite the scenes to 17-23 words each.
 AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
-AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: groq:openai/gpt-oss-120b still truncates its output after shrinking the budget; retrying later in this run.
+AI router: groq rate limited (HTTP 429); provider paused for 182s and the next route is used now.
 AI router: trying openrouter / openrouter/free for text/script_outline...
 AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
-AI router: retry pass 2/4 for text/script_outline in 59.8s with 2 route(s).
+AI router: retry pass 2/4 for text/script_outline in 181.8s with 2 route(s).
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+Plan repair: scene 2 visual_focus rewritten to 'beaver european wild wildlife' (invisible idea kept in narration).
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
 AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 1 narration is 12 words; add words to reach 17-23 words for this scene.
 AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
-AI router: groq rate limited (HTTP 429); provider paused for 429s and the next route is used now.
-AI router: retry pass 3/4 for text/script_outline in 429.0s with 2 route(s).
+Plan repair: scene 2 visual_focus rewritten to 'beaver river' (invisible idea kept in narration).
+AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
+AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: groq rate limited (HTTP 429); provider paused for 722s and the next route is used now.
+AI router: retry pass 3/4 for text/script_outline in 722.0s with 2 route(s).
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+Plan repair: scene 1 visual_focus rewritten to 'freshwater river' (invisible idea kept in narration).
+Plan repair: scene 3 visual_focus rewritten to 'rh ne of france' (invisible idea kept in narration).
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 7 visual_focus names an invisible idea (conservation). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 7 narration is 14 words; add words to reach 17-23 words for this scene.
 AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
-AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: groq rate limited (HTTP 429); provider paused for 400s and the next route is used now.
-AI router: retry pass 4/4 for text/script_outline in 400.0s with 2 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
+Plan repair: scene 7 visual_focus rewritten to 'beaver count' (invisible idea kept in narration).
+Plan repair: scene 8 visual_focus rewritten to 'beaver presence' (invisible idea kept in narration).
+AI router: groq/openai/gpt-oss-120b returned a valid text response.
+AI router: trying gemini / gemini-3.5-flash-lite for text/claim_sourcing...
+AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
+AI router: trying gemini / gemini-3.5-flash-lite for text/claim_sourcing...
+AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
+AI router: trying gemini / gemini-3.5-flash-lite for text/claim_sourcing...
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene 3 visual_focus names an invisible idea (ecosystem). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.
-AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
-AI router: groq:openai/gpt-oss-120b exhausted its output budget; retrying with a 0.30x completion budget.
-AI router: groq rate limited (HTTP 429); provider paused for 397s and the next route is used now.
-[stage] script_generation: FAILED after 1406.8s
+AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
+AI router: trying gemini / gemini-3.5-flash-lite for text/claim_sourcing...
+AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
+[stage] script_generation: FAILED after 2371.3s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 947, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 987, in gemini_plan
     plan, provider, model = generate_json(
                             ^^^^^^^^^^^^^^
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1251, in generate_json
@@ -108,34 +127,31 @@ Traceback (most recent call last):
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1235, in _route
     raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene 3 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: invalid response (Scene 4 visual_focus names an invisible idea (habitat, diversity). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene 5 visual_focus names an invisible idea (conservation). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: invalid response (Scene 4 visual_focus names an invisible idea (conservation). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); gemini/gemini-3.5-flash-lite: invalid response (Scene 5 visual_focus names an invisible idea (conservation). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: invalid response (Scene 5 visual_focus names an invisible idea (habitat). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); gemini/gemini-3.5-flash-lite: invalid response (Scene 4 visual_focus names an invisible idea (ecosystems). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON)
+ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 124 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 46 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 116 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 54 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 105 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 65 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 94 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 76 words overall across the scenes.)
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 960, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 1000, in gemini_plan
     plan, provider, model = staged_plan(
                             ^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 658, in staged_plan
-    outline, provider, model = generate_json(
-                               ^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1251, in generate_json
-    return _route("text", prompt, validator=validator, stage=stage)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1235, in _route
-    raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene 4 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene 1 narration is 12 words; add words to reach 17-23 words for this scene.); groq/openai/gpt-oss-120b: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene 7 visual_focus names an invisible idea (conservation). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene 3 visual_focus names an invisible idea (ecosystem). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: HTTP 429
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 745, in staged_plan
+    return validate_plan(candidate), provider, model
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 951, in validate_plan
+    raise ValueError(
+ValueError: Fact claim 1 states a specific figure (1200); narration must not include numbers, percentages, dates or measurements. Rewrite the sentence qualitatively with the same meaning and no figures.
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4305, in <module>
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4345, in <module>
     main()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4285, in main
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4325, in main
     _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4031, in _run_pipeline
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4071, in _run_pipeline
     plan = gemini_plan(TOPIC, source_pool, evidence)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 964, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 1004, in gemini_plan
     raise RuntimeError(
-RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene 3 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: invalid response (Scene 4 visual_focus names an invisible idea (habitat, diversity). Name only what a camera can film - a named animal, pla | staged fallback: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene 4 visual_focus names an invisible idea (fragmented, populations). Name only what a camera can film - a named animal, plant, object, place or simple action, such as "beaver swimming in a pond" - and move the idea into the narration.); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON); groq/openai/gpt-oss-120b: truncated output (AI response contained incomplete JSON
+RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 124 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 46 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 116 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 54 wo | staged fallback: ValueError: Fact claim 1 states a specific figure (1200); narration must not include numbers, percentages, dates or measurements. Rewrite the sentence qualitatively with the same meaning and no figures.
