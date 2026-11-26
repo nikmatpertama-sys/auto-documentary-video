@@ -1,4 +1,4 @@
-# Auto Documentary Video — Version 10.15
+# Auto Documentary Video — Version 10.20
 
 Automated vertical documentary generator. It builds a scene plan, searches for relevant real-world footage, performs visual verification, generates narration and captions, and renders the final video with FFmpeg.
 
@@ -6,29 +6,23 @@ Automated vertical documentary generator. It builds a scene plan, searches for r
 
 `SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, an eight-scene structure, a strict 120–200-word narration boundary, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
 
-## Footage source selection — version 10.12
+## Footage discovery — version 10.20
 
-Version 10.13 adds strict source-orientation and scene-relevance gates on top of the existing provider priority.
+The active footage search prioritizes open-web/archive sources: Internet Archive, Wikimedia Commons, and NASA. Google Search is also queried for directly indexed video files with public-domain/Creative Commons reuse signals. Google is a discovery index, not a video host; ordinary YouTube/social pages are not scraped or downloaded. Google HTML results can be rate-limited or changed by Google, so the archive APIs remain the dependable open-source search routes.
 
-The active pipeline (`render.py` → `main.py`) enforces this **selection** priority:
+Pexels and Pixabay are **disabled by default** because their catalogs were repeatedly too limited or mismatched for this project. They can only be enabled intentionally with `ENABLE_PEXELS_FALLBACK=true` or `ENABLE_PIXABAY_FALLBACK=true` in the workflow environment, and their API keys.
 
-1. Internet Archive
-2. Wikimedia Commons
-3. NASA
-4. Pexels
-5. Pixabay
+Every selected clip still passes native 9:16, minimum resolution/duration, relevance, and visual-AI verification. The pipeline does not silently substitute unrelated footage. License information must be checked against the original source page before publication; Google-indexed license snippets are not a substitute for the source's actual terms.
 
-Candidate relevance is ranked **within each source tier**, never globally across all providers. The default total visual-check budget is up to 26 candidates. Per-source caps are 10 for Internet Archive, 4 for Wikimedia Commons, and 8 each for NASA, Pexels, and Pixabay; the total cap and source availability still apply. The generator attempts the Internet Archive tier first; it proceeds to Wikimedia Commons, NASA, Pexels, and Pixabay only when candidates in earlier tiers fail to download or fail visual verification.
+`footage.py` was a legacy standalone Pixabay utility and is not part of the active `render.py` → `main.py` pipeline.
 
-Important distinction: the existing search collector still gathers metadata from configured sources before candidate selection. This upgrade enforces which source's clips are attempted first; it does not yet make fallback API searches lazy. Pexels and Pixabay are fallback providers, not the top-ranked selection source.
+## Automatic Markdown cleanup
 
-Internet Archive results are admitted only when metadata explicitly indicates CC0, CC BY, or Public Domain. Wikimedia Commons results are license-filtered. NASA assets may require checking third-party credits. Always verify the exact source-page license and attribution requirements before publishing.
-
-`footage.py` is a legacy standalone Pixabay utility and is not called by the active `render.py` → `main.py` pipeline. Use the integrated pipeline for documentary production.
+`main.py` runs cleanup at startup and after success or failure. The separate `.github/workflows/cleanup-generated-markdown.yml` also runs on repository pushes, deletes matching files, and commits those deletions back to GitHub. It removes Markdown filenames containing `upgrade` and validation-report Markdown files recursively, while preserving `README.md`, `SCRIPTWRITER_MASTER_PROMPT.md`, and unrelated documentation. `cleanup_old_markdown.sh` performs the same cleanup manually.
 
 ## GitHub Actions workflow preservation
 
-This ZIP intentionally **does not include** `.github/workflows/render.yml`. The bundled 10.9 workflow is older and would risk overwriting the newer permanent-apply workflow already configured in the target repository. Keep the updated workflow on your branch; this archive only overlays the project files it contains and does not alter that workflow.
+This ZIP intentionally does not include `.github/workflows/render.yml`. Keep the existing workflow on your branch; this archive overlays project files only.
 
 ## Required GitHub Secrets
 

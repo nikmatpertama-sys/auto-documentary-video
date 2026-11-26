@@ -14,7 +14,8 @@ import sys
 import traceback
 import html
 from pathlib import Path
-from urllib.parse import quote, urlparse
+from urllib.parse import quote, urlparse, parse_qs, urljoin
+from html.parser import HTMLParser
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
@@ -232,16 +233,24 @@ VISION_REQUIRED = os.getenv("FOOTAGE_VISION_REQUIRED", "true").strip().lower() n
 
 # Search more of the metadata-ranked pool before declaring a scene impossible.
 VISION_CANDIDATE_LIMIT = max(
-    1, min(30, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "26")))
+    1, min(50, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "36")))
 )
 
+# Version 10.20: open-web discovery first, stock libraries disabled by default, and automatic Markdown cleanup.
+# Version 10.19: tiered metadata discovery, broader candidate pool, balanced stock-source priority, and footage diagnostics.
+# Version 10.18: accept common stock-library forest/tree metadata for rainforest close-ups; keep visual verification mandatory.
 # Version 10.15: quota-aware provider routing using live quota telemetry and shared account/project scopes.
 # Version 10.14: provider key rotation, Cloudflare fallback, Speechify VO, 70s+ duration, 120-200 words.
 # Version 10.13: preserve hook/subtitle readability and reject non-native 9:16 footage.
 # Version 10.12: recover from Wikimedia download throttling and search sparse tiers better.
-# Internet Archive receives the largest candidate budget; the other sources
-# are fallback tiers, ordered from open archives to stock-footage providers.
+# Stock-footage providers are prioritized for documentary B-roll; open archives
+# remain active as additional fallback sources when their APIs are available.
+# Search the open web/archive sources first. Stock libraries are intentionally
+# opt-in because their limited catalog repeatedly produced poor scene matches.
+ENABLE_PEXELS_FALLBACK = os.getenv("ENABLE_PEXELS_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
+ENABLE_PIXABAY_FALLBACK = os.getenv("ENABLE_PIXABAY_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 FOOTAGE_SOURCE_PRIORITY = (
+    "Google Search",
     "Internet Archive",
     "Wikimedia Commons",
     "NASA",
@@ -249,11 +258,12 @@ FOOTAGE_SOURCE_PRIORITY = (
     "Pixabay",
 )
 FOOTAGE_SOURCE_CANDIDATE_LIMITS = {
-    "Internet Archive": 10,
-    "Wikimedia Commons": 4,
-    "NASA": 8,
-    "Pexels": 8,
-    "Pixabay": 8,
+    "Internet Archive": 20,
+    "Wikimedia Commons": 16,
+    "NASA": 12,
+    "Google Search": 12,
+    "Pexels": 4,
+    "Pixabay": 4,
 }
 
 try:
@@ -1070,6 +1080,99 @@ def clean_query(query):
     ).strip()[:95]
 
 
+class _GoogleResultParser(HTMLParser):
+    """Extract ordinary result links and their visible title text from Google HTML."""
+    def __init__(self):
+        super().__init__()
+        self.results = []
+        self._href = None
+        self._text = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            self._href = dict(attrs).get("href")
+            self._text = []
+
+    def handle_data(self, data):
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self._href:
+            self.results.append((self._href, " ".join(self._text).strip()))
+            self._href = None
+            self._text = []
+
+
+def google_open_web_video_search(query):
+    """Discover directly indexed reusable MP4 files through Google Search.
+
+    Google is a discovery index, not a video host. Only direct video-file URLs
+    carrying an explicit public-domain/CC reuse signal in the indexed result
+    are admitted; ordinary YouTube/social pages are not scraped or downloaded.
+    """
+    query = clean_query(query)
+    if not query:
+        return []
+
+    search_text = (
+        f'{query} filetype:mp4 ("public domain" OR "Creative Commons" OR CC0 OR "CC BY")'
+    )
+    response = requests.get(
+        "https://www.google.com/search",
+        params={"q": search_text, "num": 30, "filter": "0"},
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; AutoDocumentaryVideo/10.20; footage research)",
+            "Accept-Language": "en-US,en;q=0.9",
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    parser = _GoogleResultParser()
+    parser.feed(response.text)
+
+    results = []
+    seen = set()
+    reuse_terms = re.compile(r"public\s*domain|creative\s*commons|\bcc0\b|\bcc\s*by\b", re.I)
+    for raw_url, title in parser.results:
+        if raw_url.startswith("/url?"):
+            raw_url = parse_qs(urlparse(raw_url).query).get("q", [""])[0]
+        if not raw_url.startswith(("http://", "https://")):
+            continue
+        parsed = urlparse(raw_url)
+        if parsed.scheme != "https" or not parsed.path.lower().endswith((".mp4", ".m4v", ".mov", ".webm")):
+            continue
+        if raw_url in seen:
+            continue
+        # Google places useful license/context text near the result anchor,
+        # often outside the anchor title itself. Inspect a bounded local slice.
+        position = response.text.find(raw_url)
+        nearby_html = response.text[max(0, position - 1200):position + 1800] if position >= 0 else title
+        nearby_text = html.unescape(re.sub(r"<[^>]+>", " ", nearby_html))
+        result_context = " ".join((title, nearby_text))
+        if not reuse_terms.search(result_context):
+            continue
+        seen.add(raw_url)
+        results.append({
+            "source": "Google Search",
+            "id": hashlib.sha256(raw_url.encode()).hexdigest()[:20],
+            "url": raw_url,
+            "width": 0,
+            "height": 0,
+            "duration": 0,
+            "metadata": result_context[:1200],
+            "tags": title,
+            "creator": "See source page",
+            "page_url": raw_url,
+            "license": "Google indexed result indicates public-domain/Creative Commons; verify source terms",
+        })
+        if len(results) >= 12:
+            break
+    if results:
+        print(f"  Google Search: {len(results)} direct reusable-video file candidate(s)")
+    return results
+
+
 def pixabay_search(query):
     if not PIXABAY_KEY:
         return []
@@ -1245,7 +1348,7 @@ def nasa_search(query):
         params={
             "q": query,
             "media_type": "video",
-            "page_size": 8
+            "page_size": 16
         },
         timeout=35
     )
@@ -1347,7 +1450,7 @@ def commons_search(query):
         "generator": "search",
         "gsrsearch": f"filetype:video {clean_query(query)}",
         "gsrnamespace": 6,
-        "gsrlimit": 10,
+        "gsrlimit": 20,
         "prop": "imageinfo",
         "iiprop": "url|size|mime|extmetadata",
     }
@@ -1492,7 +1595,7 @@ def internet_archive_search(query):
                 ("fl[]", "rights"),
                 ("fl[]", "source_pixel_width"),
                 ("fl[]", "runtime"),
-                ("rows", "15"),
+                ("rows", "30"),
                 ("page", "1"),
                 ("output", "json"),
             ],
@@ -1729,9 +1832,9 @@ def internet_archive_search(query):
 def search_all_footage_sources(query):
     """Search configured sources; avoid caching partial results after throttling."""
     cache_sources = (
-        "footage-sources-v2|internet-archive-v1|"
-        + ("pixabay" if PIXABAY_KEY else "")
-        + ("|pexels" if PEXELS_KEY else "")
+        "footage-sources-v4|open-web-google-direct-cc|internet-archive-v1|"
+        + ("|pixabay" if ENABLE_PIXABAY_FALLBACK and PIXABAY_KEY else "")
+        + ("|pexels" if ENABLE_PEXELS_FALLBACK and PEXELS_KEY else "")
         + "|nasa|commons"
     )
     cache_file = CACHE / (
@@ -1750,12 +1853,15 @@ def search_all_footage_sources(query):
             pass
 
     searches = [
+        ("Google Search", google_open_web_video_search),
         ("Internet Archive", internet_archive_search),
         ("Wikimedia Commons", commons_search),
         ("NASA", nasa_search),
-        ("Pexels", pexels_search),
-        ("Pixabay", pixabay_search),
     ]
+    if ENABLE_PEXELS_FALLBACK and PEXELS_KEY:
+        searches.append(("Pexels", pexels_search))
+    if ENABLE_PIXABAY_FALLBACK and PIXABAY_KEY:
+        searches.append(("Pixabay", pixabay_search))
     combined = []
     complete_search = True
 
@@ -2351,7 +2457,15 @@ def candidate_matches_visual_anchors(hit, query, primary_query=None):
     tokens = set(normalize_words(metadata))
 
     strict_aliases = {
-        "rainforest": {"amazon", "rainforest", "jungle", "tropical", "tropics", "equatorial"},
+        # Stock-footage catalogs often tag a genuine tree/forest close-up simply
+    # as "trees", "forest" or "woodland" and omit the biome word "rainforest".
+    # Accept those visually relevant labels here; the later vision verifier
+    # still checks the actual clip against the scene before it is selected.
+    "rainforest": {
+        "amazon", "rainforest", "jungle", "tropical", "tropics", "equatorial",
+        "forest", "forests", "woodland", "woods", "tree", "trees",
+        "vegetation", "flora",
+    },
         "forest": {"forest", "forests", "woodland", "woods", "timberland", "tree", "trees", "rainforest", "jungle"},
         "canopy": {"canopy", "canopies", "treetop", "treetops", "foliage", "crown", "leaf", "leaves", "tree", "trees"},
         "aerial": {"aerial", "drone", "overhead", "topdown", "birdseye", "helicopter", "fromabove"},
@@ -2429,6 +2543,16 @@ def candidate_matches_visual_anchors(hit, query, primary_query=None):
                 return False
 
     return bool(matched) or bool(primary_query and required_visual_anchors(primary_query))
+
+
+def candidate_matches_relaxed_metadata(hit, query, narration="", min_score=0.10):
+    """Admit plausible metadata matches to the visual-AI queue.
+
+    This is deliberately not an acceptance decision: every candidate admitted
+    only by this relaxed path must still pass downloaded-video visual review.
+    """
+    score, matched, _total = relevance_score(hit, query, narration)
+    return matched >= 1 and score >= float(min_score)
 
 
 def tag_similarity(tags_a, tags_b):
@@ -3330,16 +3454,11 @@ def fetch_footage(plan):
             "GitHub Settings > Secrets and variables > Actions."
         )
 
-    if not PEXELS_KEY:
-        print(
-            "Footage source: Pexels disabled because "
-            "PEXELS_API_KEY is not configured."
-        )
-
     print(
-        "Footage selection priority (strict tiers): "
-        + " -> ".join(FOOTAGE_SOURCE_PRIORITY)
-        + ". Relevance is ranked only within each source."
+        "Footage discovery priority: Google Search direct reusable-video files -> "
+        "Internet Archive -> Wikimedia Commons -> NASA. "
+        "Pexels/Pixabay are disabled unless explicitly enabled with "
+        "ENABLE_PEXELS_FALLBACK / ENABLE_PIXABAY_FALLBACK."
     )
 
     if not visual_provider_names:
@@ -3378,32 +3497,53 @@ def fetch_footage(plan):
             f"each of {len(queries)} search variants."
         )
 
-        def collect_query_candidates(query):
+        strict_candidate_count = 0
+        relaxed_candidate_count = 0
+        rejection_counts = {
+            "metadata": 0, "resolution": 0, "aspect_ratio": 0,
+            "duration": 0, "relevance": 0, "context": 0, "duplicate": 0,
+        }
+
+        def collect_query_candidates(query, allow_relaxed=False):
+            nonlocal strict_candidate_count, relaxed_candidate_count
             for hit in search_all_footage_sources(query):
                 identity = f"{hit.get('source')}:{hit.get('id')}"
 
                 if not hit.get("url") or identity in used_ids:
                     continue
 
-                if not candidate_matches_visual_anchors(
+                strict_match = candidate_matches_visual_anchors(
                     hit, query, primary_query=scene.get("visual_query")
-                ):
-                    continue
+                )
+                if not strict_match:
+                    if not allow_relaxed or not candidate_matches_relaxed_metadata(
+                        hit, query, scene.get("narration", ""), min_score=0.10
+                    ):
+                        rejection_counts["metadata"] += 1
+                        continue
+                    relaxed_candidate_count += 1
+                else:
+                    strict_candidate_count += 1
 
                 width = int(hit.get("width") or 0)
                 height = int(hit.get("height") or 0)
                 duration = float(hit.get("duration") or 0)
                 if width and width < MIN_CLIP_WIDTH:
+                    rejection_counts["resolution"] += 1
                     continue
                 if width and height and not is_native_portrait_916(width, height):
+                    rejection_counts["aspect_ratio"] += 1
                     continue
                 if duration and duration < 4:
+                    rejection_counts["duration"] += 1
                     continue
 
                 score, matched, total = relevance_score(
                     hit, query, scene.get("narration", "")
                 )
-                if matched < 1 or score < 0.20:
+                minimum_score = 0.10 if not strict_match else 0.20
+                if matched < 1 or score < minimum_score:
+                    rejection_counts["relevance"] += 1
                     continue
 
                 metadata_tokens = set(normalize_words(
@@ -3416,6 +3556,7 @@ def fetch_footage(plan):
                     and not scene_context & conflict_terms
                     for conflict_terms in CONTEXT_CONFLICTS.values()
                 ):
+                    rejection_counts["context"] += 1
                     continue
 
                 tags = str(hit.get("tags") or hit.get("metadata") or "")
@@ -3423,6 +3564,7 @@ def fetch_footage(plan):
                     [tag_similarity(tags, old) for old in selected_tag_sets] or [0.0]
                 )
                 if similarity > 0.78:
+                    rejection_counts["duplicate"] += 1
                     continue
 
                 previous = candidates.get(identity)
@@ -3432,12 +3574,22 @@ def fetch_footage(plan):
         for query in queries:
             collect_query_candidates(query)
 
-        # Only genuinely sparse selectable pools pay for the larger fallback
-        # search wave. Measure the source-capped shortlist, not the raw metadata
-        # pool: dozens of hits can still collapse to a handful after tier caps.
+        # Only sparse strict pools pay for relaxed metadata matching and the
+        # larger fallback search wave. Relaxed candidates are never auto-accepted:
+        # they must pass the same downloaded-video visual verification below.
         ranked = rank_footage_candidates_by_source(candidates.values())
         targeted_search_threshold = min(12, VISION_CANDIDATE_LIMIT)
         if len(ranked) < targeted_search_threshold:
+            print(
+                f"Scene {i}: strict metadata produced {len(ranked)} candidates; "
+                "running a second, AI-gated discovery pass with softer metadata matching."
+            )
+            for query in list(queries):
+                collect_query_candidates(query, allow_relaxed=True)
+                ranked = rank_footage_candidates_by_source(candidates.values())
+                if len(ranked) >= VISION_CANDIDATE_LIMIT:
+                    break
+
             extra_queries = fallback_visual_queries(
                 raw_queries,
                 scene.get("narration", ""),
@@ -3445,20 +3597,27 @@ def fetch_footage(plan):
             existing = {query.lower() for query in queries}
             extra_queries = [q for q in extra_queries if q.lower() not in existing]
 
-            if extra_queries:
+            if extra_queries and len(ranked) < VISION_CANDIDATE_LIMIT:
                 print(
-                    f"Scene {i}: only {len(ranked)} selectable candidates "
-                    f"after source-tier limits (target: {targeted_search_threshold}); "
-                    f"trying {len(extra_queries)} "
-                    "targeted fallback searches."
+                    f"Scene {i}: trying {len(extra_queries)} additional "
+                    "subject-preserving fallback searches."
                 )
 
             for query in extra_queries:
                 queries.append(query)
-                collect_query_candidates(query)
+                collect_query_candidates(query, allow_relaxed=True)
                 ranked = rank_footage_candidates_by_source(candidates.values())
                 if len(ranked) >= VISION_CANDIDATE_LIMIT:
                     break
+
+        print(
+            f"Scene {i}: footage discovery summary — "
+            f"strict={strict_candidate_count}, relaxed={relaxed_candidate_count}, "
+            f"ranked={len(ranked)}, visual-check-limit={VISION_CANDIDATE_LIMIT}; "
+            "filtered=" + ", ".join(
+                f"{key}:{value}" for key, value in rejection_counts.items() if value
+            )
+        )
 
         # Never compare scores across different providers. Try the preferred
         # source tier first; lower tiers are reached only when earlier candidates
@@ -4770,6 +4929,39 @@ class _TeeStream:
         return False
 
 
+def cleanup_generated_markdown():
+    """Remove generated upgrade/validation Markdown anywhere in the repo.
+
+    Deliberately preserves README.md, SCRIPTWRITER_MASTER_PROMPT.md, and all
+    unrelated documentation. Runs from the actual project root, not cwd.
+    """
+    root = Path(__file__).resolve().parent
+    removed = []
+    for directory, dirnames, filenames in os.walk(root):
+        dirnames[:] = [name for name in dirnames if name not in {
+            ".git", ".venv", "venv", "node_modules", "__pycache__"
+        }]
+        for filename in filenames:
+            lower = filename.lower()
+            if not lower.endswith(".md"):
+                continue
+            is_upgrade_note = "upgrade" in lower
+            is_validation_report = "validation" in lower and "report" in lower
+            if not (is_upgrade_note or is_validation_report):
+                continue
+            path = Path(directory) / filename
+            try:
+                path.unlink()
+                removed.append(str(path.relative_to(root)))
+            except OSError as exc:
+                print(f"Markdown cleanup could not remove {path.name}: {exc}")
+    if removed:
+        print("Markdown cleanup removed: " + ", ".join(removed))
+    else:
+        print("Markdown cleanup: no generated upgrade/validation files found.")
+    return removed
+
+
 def validate_runtime_config():
     if not (GROQ_KEYS or OPENROUTER_KEYS or GEMINI_KEYS or CLOUDFLARE_CREDENTIALS):
         raise RuntimeError(
@@ -4781,6 +4973,7 @@ def validate_runtime_config():
 
 
 def main():
+    cleanup_generated_markdown()
     validate_runtime_config()
 
     start_pipeline_stage("documentary_plan_generation")
@@ -4827,6 +5020,10 @@ def run_with_diagnostics():
             traceback.print_exc()
             raise
         finally:
+            try:
+                cleanup_generated_markdown()
+            except Exception as cleanup_exc:
+                print(f"Markdown cleanup warning: {cleanup_exc}", file=original_stderr)
             sys.stdout = original_stdout
             sys.stderr = original_stderr
 
