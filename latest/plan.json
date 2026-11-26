@@ -1,0 +1,241 @@
+{
+  "title": "How Beavers Reshape Entire River Ecosystems",
+  "hook": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
+  "scenes": [
+    {
+      "narration": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
+      "visual_focus": "beaver in freshwater",
+      "visual_query": "beaver swimming in freshwater",
+      "visual_queries": [
+        "beaver swimming in freshwater",
+        "beaver in stream"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "beaver swimming in freshwater",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
+      "visual_type": "footage",
+      "sentence_start": 0,
+      "sentence_end": 0
+    },
+    {
+      "narration": "In Europe, beavers were reduced to fragmented populations with combined population numbers being estimated.",
+      "visual_focus": "beaver in europe",
+      "visual_query": "beaver in europe",
+      "visual_queries": [
+        "beaver in europe",
+        "european beaver in river"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "beaver in europe",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
+      "visual_type": "footage",
+      "sentence_start": 1,
+      "sentence_end": 1
+    },
+    {
+      "narration": "The concept became popular in conservation and was deployed in a range of contexts.",
+      "visual_focus": "context field work",
+      "visual_query": "context field work",
+      "visual_queries": [
+        "context field work",
+        "wildlife river area"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "context field work",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "visual_type": "footage",
+      "sentence_start": 2,
+      "sentence_end": 2
+    },
+    {
+      "narration": "The concept was mobilized to engender support for conservation especially where human activities had damaged ecosystems.",
+      "visual_focus": "damaged river bank",
+      "visual_query": "damaged river bank",
+      "visual_queries": [
+        "damaged river bank",
+        "restoring damaged nature"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "damaged river bank",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "visual_type": "footage",
+      "sentence_start": 3,
+      "sentence_end": 3
+    },
+    {
+      "narration": "In addition, wolves often kept animals from grazing in riparian areas which protected beavers.",
+      "visual_focus": "wolves in riparian areas",
+      "visual_query": "wolves in riparian areas",
+      "visual_queries": [
+        "wolves in riparian areas",
+        "wolf near river stream"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "wolves in riparian areas",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "visual_type": "footage",
+      "sentence_start": 4,
+      "sentence_end": 4
+    },
+    {
+      "narration": "Wolves protected beavers from having their food sources encroached upon by grazing animals.",
+      "visual_focus": "food sources encroached",
+      "visual_query": "food sources encroached by animals",
+      "visual_queries": [
+        "food sources encroached by animals",
+        "river vegetation and wildlife"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "food sources encroached by animals",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "visual_type": "footage",
+      "sentence_start": 5,
+      "sentence_end": 5
+    },
+    {
+      "narration": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role.",
+      "visual_focus": "connectivity of streams",
+      "visual_query": "connectivity of streams floodplain",
+      "visual_queries": [
+        "connectivity of streams floodplain",
+        "stream flowing into floodplain"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "connectivity of streams floodplain",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "visual_type": "footage",
+      "sentence_start": 6,
+      "sentence_end": 6
+    },
+    {
+      "narration": "Stream restoration or river restoration is a set of activities that aim to improve environmental health.",
+      "visual_focus": "stream river channel",
+      "visual_query": "stream river channel",
+      "visual_queries": [
+        "stream river channel",
+        "river field work"
+      ],
+      "visual_mode": "footage",
+      "reference_required": false,
+      "reference_query": "stream river channel",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "visual_type": "footage",
+      "sentence_start": 7,
+      "sentence_end": 7
+    }
+  ],
+  "fact_claims": [
+    {
+      "scene": 1,
+      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ]
+    },
+    {
+      "scene": 2,
+      "sentence": "In Europe, beavers were reduced to fragmented populations with combined population numbers being estimated.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ]
+    },
+    {
+      "scene": 3,
+      "sentence": "The concept became popular in conservation and was deployed in a range of contexts.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ]
+    },
+    {
+      "scene": 4,
+      "sentence": "The concept was mobilized to engender support for conservation especially where human activities had damaged ecosystems.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ]
+    },
+    {
+      "scene": 5,
+      "sentence": "In addition, wolves often kept animals from grazing in riparian areas which protected beavers.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ]
+    },
+    {
+      "scene": 6,
+      "sentence": "Wolves protected beavers from having their food sources encroached upon by grazing animals.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ]
+    },
+    {
+      "scene": 7,
+      "sentence": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ]
+    },
+    {
+      "scene": 8,
+      "sentence": "Stream restoration or river restoration is a set of activities that aim to improve environmental health.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ]
+    }
+  ],
+  "script": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. In Europe, beavers were reduced to fragmented populations with combined population numbers being estimated. The concept became popular in conservation and was deployed in a range of contexts. The concept was mobilized to engender support for conservation especially where human activities had damaged ecosystems. In addition, wolves often kept animals from grazing in riparian areas which protected beavers. Wolves protected beavers from having their food sources encroached upon by grazing animals. The connectivity of streams to their adjacent floodplain along their entire length plays an important role. Stream restoration or river restoration is a set of activities that aim to improve environmental health.",
+  "ai_provider": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
+  },
+  "opening_overlay": {
+    "path": "output/opening_overlay.png",
+    "adjustments": [],
+    "layout": {
+      "path": "output/opening_overlay.png",
+      "title_lines": [
+        "HOW BEAVERS RESHAPE ENTIRE RIVER ECOSYSTEMS"
+      ],
+      "hook_lines": [
+        "Beavers live in",
+        "freshwater ecosystems",
+        "such as rivers, streams,",
+        "lakes and ponds."
+      ],
+      "title_text": "How Beavers Reshape Entire River Ecosystems",
+      "hook_text": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
+      "title_font_size": 27,
+      "hook_font_size": 62,
+      "max_text_width": 880,
+      "card_bounds": [
+        48,
+        150,
+        1032,
+        538
+      ]
+    }
+  },
+  "fact_check": {
+    "status": "passed",
+    "method": "trusted-source fetch + independent evidence-grounded AI audit",
+    "claim_count": 8,
+    "fact_checker": {
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite"
+    }
+  }
+}

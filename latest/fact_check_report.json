@@ -1,0 +1,209 @@
+{
+  "status": "passed",
+  "method": "trusted-source fetch + independent evidence-grounded AI audit",
+  "fact_checker": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
+  },
+  "claim_count": 8,
+  "supported_claim_count": 8,
+  "failed_claims": [],
+  "uncited_factual_sentences": [],
+  "coverage_note": "All sentences in the script are covered by the provided claims, and every claim is fully supported by the corresponding source excerpts.",
+  "claims": [
+    {
+      "id": "C1",
+      "scene": 1,
+      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ],
+      "reason": "The fetched excerpt explicitly states: 'Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.'"
+    },
+    {
+      "id": "C2",
+      "scene": 2,
+      "sentence": "In Europe, beavers were reduced to fragmented populations with combined population numbers being estimated.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Beaver"
+      ],
+      "reason": "The fetched excerpt states: 'In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals...'"
+    },
+    {
+      "id": "C3",
+      "scene": 3,
+      "sentence": "The concept became popular in conservation and was deployed in a range of contexts.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "reason": "The fetched excerpt explicitly states: 'The concept became popular in conservation, and was deployed in a range of contexts...'"
+    },
+    {
+      "id": "C4",
+      "scene": 4,
+      "sentence": "The concept was mobilized to engender support for conservation especially where human activities had damaged ecosystems.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "reason": "The fetched excerpt explicitly states: '...and mobilized to engender support for conservation, especially where human activities had damaged ecosystems...'"
+    },
+    {
+      "id": "C5",
+      "scene": 5,
+      "sentence": "In addition, wolves often kept animals from grazing in riparian areas which protected beavers.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "reason": "The fetched excerpt explicitly states: 'In addition, wolves often kept animals from grazing in riparian areas, which protected beavers...'"
+    },
+    {
+      "id": "C6",
+      "scene": 6,
+      "sentence": "Wolves protected beavers from having their food sources encroached upon by grazing animals.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "reason": "The fetched excerpt states: '...which protected beavers from having their food sources encroached upon.'"
+    },
+    {
+      "id": "C7",
+      "scene": 7,
+      "sentence": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ],
+      "reason": "The fetched excerpt explicitly states: 'The connectivity of streams to their adjacent floodplain along their entire length plays an important role...'"
+    },
+    {
+      "id": "C8",
+      "scene": 8,
+      "sentence": "Stream restoration or river restoration is a set of activities that aim to improve environmental health.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ],
+      "status": "supported",
+      "verified_evidence_urls": [
+        "https://en.wikipedia.org/wiki/Stream_restoration"
+      ],
+      "reason": "The fetched excerpt explicitly states: 'Stream restoration or river restoration... is a set of activities that aim to improve the environmental health of a river or stream.'"
+    }
+  ],
+  "sources": [
+    {
+      "claim_id": "C1",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Beaver",
+      "excerpt": "== Ecology ==\n\nBeavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. When building dams, beavers alter the paths of streams and rivers, allowing for the creation of extensive wetland habitats. These ponds can increase the productivity of freshwater ecosystems by accumulating nitrogen in sediments. In a study of Wyoming streams and rivers, watercourses with beavers had 75 times as many ducks as those without. Beavers prefer slower moving streams, typically with a gradient (steepness) of one percent, though they have been recorded using streams with gradients as high as 15 percent. Beavers are found in wider streams more often than in narrower ones. === Infrastructure ===\n\nBeavers need trees and shrubs to use as building material for dams, which restrict flowing wate",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Beaver",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. In 2020, the total Eurasian beaver population in Europe was estimated at over one million. As of 2019, the introduced population of North American beavers in Finland has been moving closer to the habitat of the Eurasian beaver. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the originally estimated 60–400 million North American beavers before the fur trade. The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. Beaver populations now range across western, central, and easter",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Keystone species",
+      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. It became a popular concept in conservation biology, alongside flagship and umbrella species. Although the concept is valued as a descriptor for particularly strong inter-species interactions, and has allowed easier communication between ecologists and conservation policy-makers, it has been criticized for oversimplifying complex ecological systems. The keystone concept is defined by its ecological effects, and these in turn make it important for conservation. === Multiple meanings ===\nAlthough the concept of the keystone species has a value in describing particularly strong inter-species interactions, and for allowing easier communication between ecologists",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C4",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Keystone species",
+      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. It became a popular concept in conservation biology, alongside flagship and umbrella species. Although the concept is valued as a descriptor for particularly strong inter-species interactions, and has allowed easier communication between ecologists and conservation policy-makers, it has been criticized for oversimplifying complex ecological systems. The keystone concept is defined by its ecological effects, and these in turn make it important for conservation. In this it overlaps with several other species conservation concepts such as flagship species (attracting support), indicator species (showing the health of the environment), and umbrella species (indi",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Keystone species",
+      "excerpt": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon. Beavers affect the environment first altering the edges of riparian areas by cutting down older trees to use for their dams. It promotes the goals of carnivore recovery, protecting and restoring connectivity through Madrean woodland and riparian areas, and protecting and restoring riparian areas. The removal of wolves had a direct effect on beaver populations, as their habitat became grazing territory. When wolves were reintroduced, the beaver population and the whole riparian ecosystem recovered dramatically within a few years. Increased browsing on willows and conifers along Blacktail Creek due to a lack of predation caused channel incision because the beavers helped slow the water down, allowing soil to stay in place. Prairie dog burrows provid",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Keystone species",
+      "excerpt": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon. The removal of wolves had a direct effect on beaver populations, as their habitat became grazing territory. In his 1966 paper, Food Web Complexity and Species Diversity, Paine had described such a system in Makah Bay in Washington. The favourite food for these starfish is the mussel which is a dominant competitor for the space on the rocks. Increased browsing on willows and conifers along Blacktail Creek due to a lack of predation caused channel incision because the beavers helped slow the water down, allowing soil to stay in place. When wolves were reintroduced, the beaver population and the whole riparian ecosystem recovered dramatically within a few years. == Mutualists ==\nKeystone mutualists are organisms that participate in mutually beneficia",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Stream restoration",
+      "excerpt": "==== Improving connectivity ====\nThe connectivity of streams to their adjacent floodplain along their entire length plays an important role in the equilibrium of the river system. Process-based restoration includes restoring lateral connectivity (between the stream and its floodplain), longitudinal connectivity (along the stream) and water and/or sediment fluxes, which might be impacted by hydro-power dams, grade control structures, erosion control structures and flood protection structures. and process-based restoration, which advocates the restoration of hydrological and geomorphological processes (such as sediment transport or connectivity between the channel and the floodplain) to ensure a stream's resilience and ecological health. Whereas the former focuses on the restoration of structural features and/or patterns considered to be characteristic of the target stream system, the latt",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Stream restoration",
+      "excerpt": "== Definition, objectives and popularity ==\nStream restoration or river restoration, sometimes called river reclamation in the United Kingdom, is a set of activities that aim to improve the environmental health of a river or stream. Stream restoration or river restoration, also sometimes referred to as river reclamation, is work conducted to improve the environmental health of a river or stream, in support of biodiversity, recreation, flood management and/or landscape development. Stream restoration approaches can be divided into two broad categories: form-based restoration, which relies on physical interventions in a stream to improve its conditions; and process-based restoration, which advocates the restoration of hydrological and geomorphological processes (such as sediment transport or connectivity between the channel and the floodplain) to ensure a stream's resilience and ecological",
+      "source_kind": "planned",
+      "status": "usable"
+    }
+  ]
+}
