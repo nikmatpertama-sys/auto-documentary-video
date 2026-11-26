@@ -88,7 +88,10 @@ MAX_UNIQUE_SOURCE_PAGES = MAX_FACT_CLAIMS * (MAX_SOURCES_PER_CLAIM + MAX_RECOVER
 MAX_SOURCE_REDIRECTS = 5
 # A run may rewrite at most this many unsupported claims before failing closed.
 MAX_CLAIM_REPAIRS = 2
-MIN_SCRIPT_WORDS = 150
+# Matches the planner's 130-195 word / 45-90 second reel target: a repair that
+# left 138 words used to be rejected while the same script was accepted by the
+# planner gate, which blocked an otherwise valid documentary.
+MIN_SCRIPT_WORDS = 130
 MAX_SCRIPT_WORDS = 195
 
 # Hosts that answered 401/403 during this run are not asked again: an institution

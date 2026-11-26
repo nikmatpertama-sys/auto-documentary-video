@@ -29,7 +29,9 @@ from narration_timing import duration_correction
 from source_policy import source_failure_reason
 from fact_check import (
     FactCheckError,
+    claim_number_requirements,
     fetch_source_page,
+    number_requirement_present,
     select_relevant_excerpt,
     validate_planner_source_urls,
     verify_documentary_facts,
@@ -846,6 +848,27 @@ def gemini_plan(topic, source_pool=None, evidence=None):
                     }
                     shared_terms = sentence_terms & excerpt_terms
                     coverage = len(shared_terms) / max(1, len(sentence_terms))
+                    # A figure the cited passage does not state can never be
+                    # confirmed, and it forced the whole fact-check stage to
+                    # recover two independent sources. Reject it here so the
+                    # same provider rewrites the sentence in this pass.
+                    missing_numbers = [
+                        requirement
+                        for requirement in claim_number_requirements(
+                            quoted_sentence
+                        )
+                        if not number_requirement_present(excerpt, requirement)
+                    ]
+                    if missing_numbers:
+                        raise ValueError(
+                            f"Fact claim {claim_index} states a figure its cited "
+                            "passage does not contain: "
+                            + ", ".join(
+                                f"{item.get('value')} {item.get('unit', '')}".strip()
+                                for item in missing_numbers
+                            )
+                            + ". Remove the figure or quote the passage that states it."
+                        )
                     # Paraphrase is normal documentary writing: a faithful
                     # rewrite of a passage often shares only a fifth of its
                     # terms, so the floor only rejects claims that share almost
