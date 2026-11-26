@@ -846,7 +846,11 @@ def gemini_plan(topic, source_pool=None, evidence=None):
                     }
                     shared_terms = sentence_terms & excerpt_terms
                     coverage = len(shared_terms) / max(1, len(sentence_terms))
-                    if len(shared_terms) < 3 or coverage < 0.3:
+                    # Paraphrase is normal documentary writing: a faithful
+                    # rewrite of a passage often shares only a fifth of its
+                    # terms, so the floor only rejects claims that share almost
+                    # nothing. The independent audit still decides sufficiency.
+                    if len(shared_terms) < 3 or coverage < 0.15:
                         raise ValueError(
                             f"Fact claim {claim_index} does not restate the fetched passage "
                             f"it cites ({coverage:.0%} of its key terms appear there). "

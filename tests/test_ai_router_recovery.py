@@ -120,7 +120,7 @@ class ProviderStabilityTests(unittest.TestCase):
             ("text", "openrouter:openrouter/free"), ai_router._DISABLED_ROUTES
         )
 
-    def test_incomplete_json_retries_the_same_route_with_a_smaller_budget(self):
+    def test_incomplete_json_retries_the_same_route_with_a_larger_budget(self):
         def _partial_json():
             return FakeResponse(200, {
                 "choices": [{"message": {"content": '{"ready": tru'}}]
@@ -139,7 +139,9 @@ class ProviderStabilityTests(unittest.TestCase):
         self.assertEqual(value, {"ready": True})
         self.assertEqual((provider, model), ("openrouter", "openrouter/free"))
         self.assertEqual(post.call_count, 2)
-        self.assertLess(
+        # A half-written JSON answer was cut off by the budget, so the retry
+        # must offer more room; shrinking it reproduced the truncation.
+        self.assertGreater(
             post.call_args_list[1].kwargs["json"]["max_tokens"],
             post.call_args_list[0].kwargs["json"]["max_tokens"],
         )

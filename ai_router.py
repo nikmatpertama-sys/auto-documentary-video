@@ -1014,13 +1014,20 @@ def _route(
                         f"{route.provider}/{route.model}: truncated output ({exc})"
                     )
                     # An empty reply means the model thought the entire budget
-                    # away, so shrinking would only make it worse: give it more
-                    # room once. A half-written JSON reply is the opposite case
-                    # and still shrinks.
+                    # away, and a half-written JSON reply means the answer was
+                    # longer than the room it had: both need MORE room, and
+                    # shrinking turned a cut-off plan into a repeated failure.
+                    # Only an HTTP 413 token ceiling is fixed by shrinking.
+                    empty_content = "empty assistant content" in str(exc)
+                    truncated_json = "incomplete json" in str(exc).lower()
+                    # An empty reply gets one larger retry before the route is
+                    # set aside, so a provider that always answers empty still
+                    # fails over to the next model in the same run.
+                    grow_limit = 1 if empty_content else 2
                     if (
-                        grow_attempts < 1
+                        grow_attempts < grow_limit
                         and route.provider != "groq"
-                        and "empty assistant content" in str(exc)
+                        and (empty_content or truncated_json)
                     ):
                         grow_attempts += 1
                         scale = _grow_completion_budget(task, route)
@@ -1028,8 +1035,8 @@ def _route(
                             _health_key(task, stage, route.route_id), None
                         )
                         print(
-                            f"AI router: {route.route_id} returned no content "
-                            f"before its budget ran out; retrying with a "
+                            f"AI router: {route.route_id} was cut off before "
+                            f"finishing its answer; retrying with a "
                             f"{scale:.2f}x completion budget."
                         )
                         continue
