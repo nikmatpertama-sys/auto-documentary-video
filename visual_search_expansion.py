@@ -23,6 +23,10 @@ _STOP = {
     "many", "such", "like", "make", "made", "shot", "shots", "rising",
     "rise", "rises", "mist", "fog", "haze", "cloud", "clouds", "morning",
     "evening", "sunrise", "sunset", "dawn", "dusk", "golden",
+    # Demonyms are not the subject of a stock clip ("European beaver" returned
+    # an EU flag), so they never become the bare-subject query.
+    "european", "eurasian", "african", "asian", "american", "australian",
+    "siberian", "south", "north",
 }
 
 _GROUPS = {
@@ -162,6 +166,13 @@ def expand_visual_search_variants(raw_queries: tuple[str, ...] | list[str]) -> l
         (r"\bcanopy\b", "treetops"),
         (r"\bsunrise\b", "dawn"),
         (r"\baerial view\b", "drone view"),
+        # "European beaver" matched the EU flag, a robin and a bee-eater: stock
+        # indexes treat the demonym as the subject. Search the plain subject.
+        (
+            r"\b(?:European|Eurasian|African|Asian|American|Australian|Siberian|"
+            r"South American|North American)\b",
+            "",
+        ),
     )
     per_query: list[list[str]] = []
 
