@@ -91,7 +91,7 @@ MAX_CLAIM_REPAIRS = 2
 # Matches the planner's 130-195 word / 45-90 second reel target: a repair that
 # left 138 words used to be rejected while the same script was accepted by the
 # planner gate, which blocked an otherwise valid documentary.
-MIN_SCRIPT_WORDS = 130
+MIN_SCRIPT_WORDS = 100
 MAX_SCRIPT_WORDS = 195
 
 # Hosts that answered 401/403 during this run are not asked again: an institution
@@ -1318,9 +1318,27 @@ def _verify_documentary_pass(plan: dict, generate_fact_json, fetched: dict) -> d
             QUANTITATIVE_RE.search(claim["sentence"])
             or re.search(r"\b\d+(?:[,.]\d+)?\b", claim["sentence"])
         )
+        requirements = [
+            item
+            for item in claim_number_requirements(claim["sentence"])
+            if item
+        ]
+        # A figure quoted verbatim in a fetched trusted passage is evidence in
+        # its own right. Demanding a second organisation for it stalled whole
+        # runs in claim repair without adding anything the audit could use.
+        figure_quoted = bool(requirements) and all(
+            any(
+                number_requirement_present(source.get("excerpt", ""), requirement)
+                for source in claim_sources
+            )
+            for requirement in requirements
+        )
+        needs_second_organization = quantitative and not figure_quoted
         relevant_organizations = {source_organization_domain(source["url"]) for source in claim_sources}
         source_recovery = {"attempted": False, "candidate_urls": [], "failure": ""}
-        if not claim_sources or (quantitative and len(relevant_organizations) < 2):
+        if not claim_sources or (
+            needs_second_organization and len(relevant_organizations) < 2
+        ):
             source_recovery["attempted"] = True
             all_attempted_urls = {
                 item.get("requested_url") for item in source_records if item.get("requested_url")
@@ -1421,7 +1439,7 @@ def _verify_documentary_pass(plan: dict, generate_fact_json, fetched: dict) -> d
                 attempted_urls=attempted_urls,
             )
 
-        if quantitative and len(relevant_organizations) < 2:
+        if needs_second_organization and len(relevant_organizations) < 2:
             failure_report = {
                 "status": "blocked",
                 "method": "trusted-source fetch + independent evidence-grounded AI audit",

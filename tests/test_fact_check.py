@@ -252,7 +252,7 @@ class FactCheckTests(unittest.TestCase):
         self.assertEqual(failed_source["status"], "not_usable")
         self.assertIn("https://www.noaa.gov/relevant", report["claims"][0]["source_urls"])
 
-    def test_quantitative_claim_recovers_a_third_independent_source_before_blocking(self):
+    def test_quantitative_claim_quoted_in_a_trusted_page_needs_one_organization(self):
         import fact_check
         from unittest.mock import patch
 
@@ -313,8 +313,8 @@ class FactCheckTests(unittest.TestCase):
                 "overall_status": "pass",
                 "claim_verdicts": [
                     {"claim_id": "C1", "status": "supported",
-                     "evidence_urls": ["https://www.noaa.gov/quantitative", "https://www.fao.org/recovered"],
-                     "reason": "Both independent fetched excerpts directly support the numeric claim."},
+                     "evidence_urls": ["https://www.noaa.gov/quantitative"],
+                     "reason": "The fetched excerpt states the measured figure directly."},
                     {"claim_id": "C2", "status": "supported",
                      "evidence_urls": ["https://www.noaa.gov/example"],
                      "reason": "The excerpt directly supports the sentence."},
@@ -331,15 +331,12 @@ class FactCheckTests(unittest.TestCase):
             report = verify_documentary_facts(plan, fake_checker)
 
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(len(calls), 2)
-        recovered = next(
-            item for item in report["sources"]
-            if item.get("requested_url") == "https://www.fao.org/recovered"
-        )
-        self.assertEqual(recovered["source_kind"], "recovered")
+        # The figure appears verbatim in the NOAA excerpt, so no recovery pass
+        # runs and the audit cites the single fetched trusted page.
+        self.assertEqual(len(calls), 1)
         self.assertEqual(
             {fact_check.source_organization_domain(url) for url in report["claims"][0]["verified_evidence_urls"]},
-            {"noaa.gov", "fao.org"},
+            {"noaa.gov"},
         )
 
     def test_recovery_allows_a_different_page_on_an_already_tried_institution(self):
