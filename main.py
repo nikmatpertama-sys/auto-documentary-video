@@ -387,10 +387,11 @@ NARRATION AND EVIDENCE
   confidently, remove it or phrase a clearly non-factual question/transition.
 - Quantitative claims (numbers, percentages, measurements, ranges, significant
   dates) need TWO independent trusted hosts, never two pages from one site.
-- Use a specific number only when that exact figure appears in the EVIDENCE
-  PASSAGES above or on a page you cite. Never estimate, round from memory or
-  attribute a study result you cannot quote: a made-up percentage fails the
-  independent audit and blocks the whole script.
+- Do not put figures in the narration: no percentages, counts, dates or
+  measurements. Describe findings qualitatively ("far more", "roughly doubling")
+  even when a source states a number. A free-tier brief rarely lets two
+  independent organisations confirm one figure, and an unconfirmed figure
+  blocks the whole script.
 - Use restrained, precise wording: separate correlation from causation, regional
   from global facts, estimates from measurements, current from historical facts.
 - Never present a local or regional statistic as a global one. State units,
@@ -868,6 +869,19 @@ def gemini_plan(topic, source_pool=None, evidence=None):
                                 for item in missing_numbers
                             )
                             + ". Remove the figure or quote the passage that states it."
+                        )
+                    # A figure also needs two independent organisations, which a
+                    # short evidence brief rarely supplies; the run then stalls
+                    # in claim repair. Describe the finding qualitatively instead
+                    # so the reel keeps only claims the sources can settle.
+                    stated_numbers = claim_number_requirements(quoted_sentence)
+                    if stated_numbers:
+                        raise ValueError(
+                            f"Fact claim {claim_index} states a specific figure "
+                            f"({', '.join(str(item.get('value')) for item in stated_numbers)}); "
+                            "narration must not include numbers, percentages, dates "
+                            "or measurements. Rewrite the sentence qualitatively "
+                            "with the same meaning and no figures."
                         )
                     # Paraphrase is normal documentary writing: a faithful
                     # rewrite of a passage often shares only a fifth of its
