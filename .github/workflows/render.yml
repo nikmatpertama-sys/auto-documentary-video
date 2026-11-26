@@ -349,8 +349,8 @@ jobs:
             output/pipeline.log
           if-no-files-found: warn
           retention-days: 7
-          
-                - name: Persist generated Markdown cleanup to this branch
+
+      - name: Persist generated Markdown cleanup to this branch
         if: always()
         shell: bash
         run: |
