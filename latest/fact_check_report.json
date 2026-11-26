@@ -9,12 +9,12 @@
   "supported_claim_count": 8,
   "failed_claims": [],
   "uncited_factual_sentences": [],
-  "coverage_note": "All sentences in the script are covered by the supplied claims, and each claim is fully supported by its respective source excerpt.",
+  "coverage_note": "All sentences in the script correspond directly to the supplied claims, and every claim is fully supported by the respective source excerpts.",
   "claims": [
     {
       "id": "C1",
       "scene": 1,
-      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across various regions.",
+      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across various landscapes.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
@@ -22,12 +22,12 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
-      "reason": "The fetched excerpt states: 'Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.'"
+      "reason": "The excerpt explicitly states: 'Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.'"
     },
     {
       "id": "C2",
       "scene": 2,
-      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at various locations.",
+      "sentence": "In Europe, beavers were reduced to fragmented populations with combined population numbers being estimated.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
@@ -35,12 +35,12 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
-      "reason": "The fetched excerpt states: 'In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals...'"
+      "reason": "The excerpt confirms that in Europe, beavers were reduced to fragmented populations with combined population numbers being estimated."
     },
     {
       "id": "C3",
       "scene": 3,
-      "sentence": "These estimated groups survived in places like the Rhône of France, the Elbe in Germany, and southern Norway.",
+      "sentence": "These historical reductions affected populations within regions like the Rhône of France and the Elbe.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
@@ -48,12 +48,12 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
-      "reason": "The fetched excerpt mentions combined population numbers for 'the Rhône of France, the Elbe in Germany, southern Norway...'"
+      "reason": "The excerpt mentions historical reductions affecting populations within regions like the Rhône of France and the Elbe."
     },
     {
       "id": "C4",
       "scene": 4,
-      "sentence": "Additional survivors remained near the Neman river and Dnieper Basin in Belarus, along with the Voronezh river in Russia.",
+      "sentence": "Similar fragmented groups survived near southern Norway and the Neman river and Dnieper Basin.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
@@ -61,25 +61,25 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ],
-      "reason": "The fetched excerpt lists 'the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia.'"
+      "reason": "The excerpt confirms that fragmented groups survived near southern Norway and the Neman river and Dnieper Basin."
     },
     {
       "id": "C5",
       "scene": 5,
-      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts by wildlife protection groups.",
+      "sentence": "Additional survivors persisted along the Voronezh river in Russia within similar freshwater habitats.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Beaver"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Beaver"
       ],
-      "reason": "The fetched excerpt states: 'The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation...'"
+      "reason": "The excerpt states that survivors persisted along the Voronezh river in Russia within similar freshwater habitats."
     },
     {
       "id": "C6",
       "scene": 6,
-      "sentence": "This framework was mobilized to engender support for conservation, especially where human activities had damaged natural ecosystems significantly.",
+      "sentence": "The keystone species concept became popular in conservation and was deployed in various contexts.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ],
@@ -87,12 +87,12 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ],
-      "reason": "The fetched excerpt states: '...and mobilized to engender support for conservation, especially where human activities had damaged ecosystems...'"
+      "reason": "The excerpt explicitly states that the concept became popular in conservation and was deployed in a range of contexts."
     },
     {
       "id": "C7",
       "scene": 7,
-      "sentence": "Such conservation strategies were applied especially where human activities had damaged ecosystems, such as by removing keystone predators.",
+      "sentence": "This conservation framework was mobilized to engender support where human activities had damaged ecosystems.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ],
@@ -100,20 +100,20 @@
       "verified_evidence_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ],
-      "reason": "The fetched excerpt states: '...especially where human activities had damaged ecosystems, such as by removing keystone predators.'"
+      "reason": "The excerpt states the framework was mobilized to engender support where human activities had damaged ecosystems."
     },
     {
       "id": "C8",
       "scene": 8,
-      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.",
+      "sentence": "Stream restoration or river restoration activities aim to improve the environmental health of a system.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Stream_restoration"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Stream_restoration"
       ],
-      "reason": "The fetched excerpt states: 'In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.'"
+      "reason": "The excerpt states that stream restoration or river restoration activities aim to improve the environmental health of a river or stream."
     }
   ],
   "sources": [
@@ -124,7 +124,7 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Beaver",
-      "excerpt": "== Ecology ==\n\nBeavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. When building dams, beavers alter the paths of streams and rivers, allowing for the creation of extensive wetland habitats. These ponds can increase the productivity of freshwater ecosystems by accumulating nitrogen in sediments. In a study of Wyoming streams and rivers, watercourses with beavers had 75 times as many ducks as those without. Beavers prefer slower moving streams, typically with a gradient (steepness) of one percent, though they have been recorded using streams with gradients as high as 15 percent. Beavers are found in wider streams more often than in narrower ones. === Infrastructure ===\n\nBeavers need trees and shrubs to use as building material for dams, which restrict flowing wate",
+      "excerpt": "== Ecology ==\n\nBeavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. When building dams, beavers alter the paths of streams and rivers, allowing for the creation of extensive wetland habitats. These ponds can increase the productivity of freshwater ecosystems by accumulating nitrogen in sediments. In a study of Wyoming streams and rivers, watercourses with beavers had 75 times as many ducks as those without. Beavers prefer slower moving streams, typically with a gradient (steepness) of one percent, though they have been recorded using streams with gradients as high as 15 percent. Beavers are found in wider streams more often than in narrower ones. Beavers typically select flat landscapes with diverse vegetation close to the water. === Infrastructure ===\n\nBeavers ne",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -146,7 +146,7 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Beaver",
-      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. They have stout bodies with large heads, long chisel-like incisors, brown or gray fur, hand-like front feet, webbed back feet, and tails that are flat and scaly. Members of the subfamily Castoroidinae are considered to be a sister group to modern beavers, and included giants like Castoroides of North America and Trogontherium of Eurasia. Castoroides is estimated to have had a length of 1.9–2.2 m (6.2–7.2 ft) and a weight of 90–125 kg (198–276 lb). neglectus, found in Germany and dated 12–10 mya. Their bodies are streamlined like marine mammals and their robust build allows them to pull heavy loads. Protections have allow",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. They have stout bodies with large heads, long chisel-like incisors, brown or gray fur, hand-like front feet, webbed back feet, and tails that are flat and scaly. Their populations have since rebounded, and they are listed as species of least concern by the IUCN Red List of mammals. Members of the subfamily Castoroidinae are considered to be a sister group to modern beavers, and included giants like Castoroides of North America and Trogontherium of Eurasia. Their bodies are streamlined like marine mammals and their robust build allows them to pull heavy loads. Beaver populations now range across western, central, and east",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -157,18 +157,18 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Beaver",
-      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. === Evolution ===\n\nBeavers belong to the rodent suborder Castorimorpha, along with Heteromyidae (kangaroo rats and kangaroo mice), and the gophers. Fossils of one genus in Castoroidinae, Dipoides, have been found near piles of chewed wood, though Dipoides appears to have been an inferior woodcutter compared to Castor. The species was introduced to Finland in 1937 (and then spread to northwestern Russia) and to Tierra del Fuego, Patagonia, in 1946. Beaver populations now range across western, central, and eastern Europe, and western Russia and the Scandinavian Peninsula. Beavers have increasingly settled at or near human-",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. Fossils of one genus in Castoroidinae, Dipoides, have been found near piles of chewed wood, though Dipoides appears to have been an inferior woodcutter compared to Castor. californicus from the Early Pleistocene of North America was similar to but larger than the extant North American beaver. The cerebellum is large, allowing the animal to move within a three-dimensional space (such as underwater) similar to tree-climbing squirrels. Beavers have increasingly settled at or near human-made environments, including agricultural areas, suburbs, golf courses, and shopping malls. Beavers are protected from predators when in the",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C5",
-      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
-      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Keystone species",
-      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. It became a popular concept in conservation biology, alongside flagship and umbrella species. Although the concept is valued as a descriptor for particularly strong inter-species interactions, and has allowed easier communication between ecologists and conservation policy-makers, it has been criticized for oversimplifying complex ecological systems. The keystone concept is defined by its ecological effects, and these in turn make it important for conservation. === Multiple meanings ===\nAlthough the concept of the keystone species has a value in describing particularly strong inter-species interactions, and for allowing easier communication between ecologists",
+      "page_title": "Beaver",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. === Evolution ===\n\nBeavers belong to the rodent suborder Castorimorpha, along with Heteromyidae (kangaroo rats and kangaroo mice), and the gophers. californicus from the Early Pleistocene of North America was similar to but larger than the extant North American beaver. The cerebellum is large, allowing the animal to move within a three-dimensional space (such as underwater) similar to tree-climbing squirrels. The species was introduced to Finland in 1937 (and then spread to northwestern Russia) and to Tierra del Fuego, Pata",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -179,7 +179,7 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Keystone species",
-      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. In this it overlaps with several other species conservation concepts such as flagship species (attracting support), indicator species (showing the health of the environment), and umbrella species (indirectly protecting many other species). A keystone species is a species that has a disproportionately large effect on its natural environment relative to its abundance. It became a popular concept in conservation biology, alongside flagship and umbrella species. Although the concept is valued as a descriptor for particularly strong inter-species interactions, and has allowed easier communication between ecologists and conservation policy-makers, it has been crit",
+      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. It became a popular concept in conservation biology, alongside flagship and umbrella species. === Multiple meanings ===\nAlthough the concept of the keystone species has a value in describing particularly strong inter-species interactions, and for allowing easier communication between ecologists and conservation policy-makers, it has been criticized by L. Keystone species play a critical role in maintaining the structure of an ecological community, affecting many other organisms in an ecosystem and helping to determine the types and numbers of various other species in the community. Although the concept is valued as a descriptor for particularly strong inter-",
       "source_kind": "planned",
       "status": "usable"
     },
@@ -190,18 +190,18 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Keystone species",
-      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. The term has been applied widely in different ecosystems and to predators, prey, and plants (primary producers), inevitably with differing ecological meanings. Some keystone species, such as the wolf and lion, are also apex predators. If prey numbers are low, keystone predators can be even less abundant and still be effective. The keystone concept is defined by its ecological effects, and these in turn make it important for conservation. === The wolf, Yellowstone's apex predator ===\n\nKeystone predators may increase the biodiversity of communities by preventing a single species from becoming dominant. === Multiple meanings ===\nAlthough the concept of the keys",
+      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. In this it overlaps with several other species conservation concepts such as flagship species (attracting support), indicator species (showing the health of the environment), and umbrella species (indirectly protecting many other species). It became a popular concept in conservation biology, alongside flagship and umbrella species. Although the concept is valued as a descriptor for particularly strong inter-species interactions, and has allowed easier communication between ecologists and conservation policy-makers, it has been criticized for oversimplifying complex ecological systems. The keystone concept is defined by its ecological effects, and these in tu",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C8",
-      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
-      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "requested_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stream_restoration",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Keystone species",
-      "excerpt": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon. Beavers affect the environment first altering the edges of riparian areas by cutting down older trees to use for their dams. It promotes the goals of carnivore recovery, protecting and restoring connectivity through Madrean woodland and riparian areas, and protecting and restoring riparian areas. The removal of wolves had a direct effect on beaver populations, as their habitat became grazing territory. When wolves were reintroduced, the beaver population and the whole riparian ecosystem recovered dramatically within a few years. In his 1966 paper, Food Web Complexity and Species Diversity, Paine had described such a system in Makah Bay in Washington. The favourite food for these starfish is the mussel which is a dominant competitor for the space o",
+      "page_title": "Stream restoration",
+      "excerpt": "== Definition, objectives and popularity ==\nStream restoration or river restoration, sometimes called river reclamation in the United Kingdom, is a set of activities that aim to improve the environmental health of a river or stream. Stream restoration or river restoration, also sometimes referred to as river reclamation, is work conducted to improve the environmental health of a river or stream, in support of biodiversity, recreation, flood management and/or landscape development. Whereas the former focuses on the restoration of structural features and/or patterns considered to be characteristic of the target stream system, the latter is based on the restoration of hydrological and geomorphological processes (such as sediment transport or connectivity between the channel and the floodplain) to ensure a stream's resilience and ecological health. Stream restoration approaches can be divide",
       "source_kind": "planned",
       "status": "usable"
     }
