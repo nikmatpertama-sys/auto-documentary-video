@@ -2,9 +2,12 @@
 
 import math
 
-MIN_DURATION_SECONDS = 70.0
+# A short, dense reel is a legitimate deliverable: a 100-word script is about a
+# 45-second narration, which used to be force-stretched to 70s (an atempo below
+# 0.80) and failed the run after the voice-over had already been generated.
+MIN_DURATION_SECONDS = 40.0
 MAX_DURATION_SECONDS = 90.0
-LOW_TARGET_SECONDS = 71.0
+LOW_TARGET_SECONDS = 40.5
 HIGH_TARGET_SECONDS = 89.0
 # FFmpeg's atempo preserves pitch, so a slightly wider floor is safe and stops
 # a legitimate 150-160 word script (about 57-60s of speech) from failing the run

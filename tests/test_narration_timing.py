@@ -6,9 +6,9 @@ from narration_timing import duration_correction
 
 class NarrationTimingTests(unittest.TestCase):
     def test_short_narration_is_gently_slowed_to_safe_target(self):
-        result = duration_correction(66.92)
-        self.assertAlmostEqual(result["target_duration"], 71.0)
-        self.assertAlmostEqual(result["atempo"], 66.92 / 71.0)
+        result = duration_correction(36.0)
+        self.assertAlmostEqual(result["target_duration"], 40.5)
+        self.assertAlmostEqual(result["atempo"], 36.0 / 40.5)
         self.assertLess(result["atempo"], 1.0)
 
     def test_long_narration_is_gently_sped_up_to_safe_target(self):
@@ -18,7 +18,8 @@ class NarrationTimingTests(unittest.TestCase):
         self.assertGreater(result["atempo"], 1.0)
 
     def test_duration_inside_requested_range_is_unchanged(self):
-        self.assertIsNone(duration_correction(70.0))
+        self.assertIsNone(duration_correction(40.0))
+        self.assertIsNone(duration_correction(56.0))
         self.assertIsNone(duration_correction(80.0))
         self.assertIsNone(duration_correction(90.0))
 
@@ -29,17 +30,15 @@ class NarrationTimingTests(unittest.TestCase):
                     duration_correction(value)
 
     def test_extreme_duration_is_not_force_corrected(self):
-        for value in (20.0, 55.0, 110.0):
+        for value in (20.0, 110.0):
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     duration_correction(value)
 
-    def test_legitimate_short_script_is_stretched_instead_of_failing(self):
-        # 58s of speech still needs a pitch-preserving stretch to reach 70s; the
-        # floor must accept it rather than failing after TTS has been paid for.
-        result = duration_correction(58.0)
-        self.assertAlmostEqual(result["target_duration"], 71.0)
-        self.assertGreaterEqual(result["atempo"], 0.80)
+    def test_legitimate_short_script_is_not_stretched_into_failure(self):
+        # A 56s narration used to be stretched towards 71s, an atempo below the
+        # safe floor, which failed the run after the voice-over was generated.
+        self.assertIsNone(duration_correction(56.0))
 
 
 if __name__ == "__main__":
