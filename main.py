@@ -236,32 +236,69 @@ def _filmable_words(text):
     ]
 
 
-def sanitize_visual_focus(visual_focus, visual_query=""):
+# Words that only make sense as part of a sentence; a focus ending in one of
+# them is a stripped sentence fragment ("beavers reduced to"), not a subject.
+FOCUS_FRAGMENT_WORDS = {
+    "to", "in", "of", "and", "from", "with", "for", "on", "by", "as",
+    "reduced", "live", "lives", "living", "became", "popular", "remains",
+    "kept", "removing", "support", "applied", "survived", "estimated",
+    "deployed", "engender", "mobilized", "damaged", "added", "surviving",
+}
+
+
+def _focus_is_fragment(words):
+    if len(words) < 2:
+        return True
+    return words[-1] in FOCUS_FRAGMENT_WORDS or words[0] in FOCUS_FRAGMENT_WORDS
+
+
+def topic_subject(topic):
+    """The filmable subject of the documentary itself ("beavers")."""
+    words = [
+        word
+        for word in normalize_words(topic)
+        if word not in INVISIBLE_FOCUS_TERMS
+        and word not in FOCUS_FRAGMENT_WORDS
+        and word not in {"how", "why", "what", "entire", "whole", "across",
+                        "reshape", "reshapes", "change", "changes", "world"}
+    ]
+    return words[0] if words else ""
+
+
+def sanitize_visual_focus(visual_focus, visual_query="", subject=""):
     """Rewrite a scene focus into what a camera can film.
 
     Free-tier planners kept writing ideas like "fragmented populations", which
-    no clip can show, and rejecting the plan for that burned twenty minutes of
-    retries without changing the answer. The idea stays in the narration; the
-    picture is focused on the concrete subject named in the focus or, when the
-    focus was entirely abstract, in the search query.
+    no clip can show, and stripping those words left sentence fragments like
+    "beavers reduced to" that no stock search can match. The idea stays in the
+    narration; the picture is focused on a concrete subject from the focus, the
+    search query, or the documentary's own subject.
     """
     words = _filmable_words(visual_focus)
-    if len(words) < 2:
-        words = list(dict.fromkeys(words + _filmable_words(visual_query)))
+    if _focus_is_fragment(words):
+        query_words = _filmable_words(visual_query)
+        if not _focus_is_fragment(query_words):
+            words = query_words
+        elif subject:
+            words = [subject]
     return " ".join(dict.fromkeys(words))[:80] if words else ""
 
 
 def sanitize_visual_query(visual_query, limit=8):
     """Drop invisible idea words from a footage search phrase."""
-    words = _filmable_words(visual_query)
+    words = [
+        word
+        for word in _filmable_words(visual_query)
+        if word not in FOCUS_FRAGMENT_WORDS or word in {"in", "of", "on"}
+    ]
     return " ".join(words[:limit]) if len(words) >= 1 else ""
 
 
 def validate_visual_focus(visual_focus, index):
     """Require a scene focus a camera can actually film."""
     words = normalize_words(visual_focus)
-    if not 2 <= len(words) <= 6:
-        raise ValueError(f"Scene {index} needs a concrete 2-6 word visual_focus.")
+    if not 1 <= len(words) <= 6:
+        raise ValueError(f"Scene {index} needs a concrete 1-6 word visual_focus.")
 
 
 # ============================================================
@@ -482,14 +519,12 @@ SCENES AND VISUALS
   visual_query or visual_queries.
 - visual_queries holds two independent alternative real-footage shots that each
   carry the whole scene idea; no minor word variants of the main query.
-- Prefer real footage for rainfall, transpiration, evaporation, cooling, river
-  flow, clouds and ecosystem processes. Use a trusted published reference only
-  when the narration truly needs a specific measured value, mapped distribution
-  or internal scientific structure that footage cannot show faithfully.
+- Never name a specific river, region or country in visual_focus: no stock clip
+  can be verified as that exact place. Prefer footage for rain, evaporation and
+  river flow; use a trusted published reference only when the narration needs a
+  measured value, mapped distribution or internal structure footage cannot show.
 - Never fabricate scientific visuals. If an essential published visual cannot be
   found and verified, stop instead of drawing a substitute.
-- Keep geographic identity in source metadata unless the visible scene itself
-  establishes it; generic rainforest footage does not prove a location.
 - Each query is one practical shot with one dominant subject, optionally a camera
   angle or environment.
 - Give every scene a clear visual match; the story needs a hook, reveal and
@@ -661,7 +696,11 @@ def staged_plan(topic, source_pool, validate_plan, evidence=None):
             visual_focus = re.sub(r"\s+", " ", str(scene.get("visual_focus", ""))).strip()
             if not visual_query or not visual_focus:
                 raise ValueError(f"Scene {index} needs both visual_focus and visual_query.")
-            sanitized_focus = sanitize_visual_focus(visual_focus, visual_query)
+            sanitized_focus = sanitize_visual_focus(
+                visual_focus,
+                visual_query,
+                topic_subject(candidate.get("topic") or ""),
+            )
             if sanitized_focus != visual_focus.lower():
                 print(
                     f"Plan repair: scene {index} visual_focus rewritten to "
@@ -792,7 +831,11 @@ def gemini_plan(topic, source_pool=None, evidence=None):
             if not visual_query:
                 raise ValueError(f"Scene {scene_index} has no primary visual_query.")
             visual_focus = re.sub(r"\s+", " ", str(scene.get("visual_focus", ""))).strip()
-            sanitized_focus = sanitize_visual_focus(visual_focus, visual_query)
+            sanitized_focus = sanitize_visual_focus(
+                visual_focus,
+                visual_query,
+                topic_subject(candidate.get("topic") or ""),
+            )
             if sanitized_focus != visual_focus.lower():
                 print(
                     f"Plan repair: scene {scene_index} visual_focus rewritten to "
