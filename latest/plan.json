@@ -1,203 +1,203 @@
 {
-  "title": "The Amazon Rainforest",
-  "hook": "The forest trees release water vapor into the atmosphere.",
+  "title": "The Cosmic Cycle of Star Formation",
+  "hook": "Deep within cold clouds of gas, new stars slowly awaken to light",
   "scenes": [
     {
-      "narration": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities.",
-      "visual_focus": "forest trees release water",
-      "visual_query": "forest trees release water vapor",
+      "narration": "Deep within cold clouds of gas, new stars slowly awaken to light up the universe.",
+      "visual_focus": "interstellar gas cloud",
+      "visual_query": "interstellar gas cloud dust nebula",
       "visual_queries": [
-        "dense green forest canopy",
-        "tropical rainforest aerial view"
+        "dark interstellar dust cloud",
+        "vast cosmic gas nebula"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "forest trees release water vapor",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Flying_river",
+      "reference_query": "interstellar gas cloud dust nebula",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0,
       "voice_timing": {
         "start_seconds": 0.0,
-        "spoken_end_seconds": 8.43,
-        "visual_end_seconds": 9.13,
-        "duration_seconds": 9.13,
+        "spoken_end_seconds": 6.414,
+        "visual_end_seconds": 7.114,
+        "duration_seconds": 7.114,
         "first_sentence_index": 0,
         "last_sentence_index": 0
       }
     },
     {
-      "narration": "This moisture is deposited in other localities in the form of precipitation, forming a virtual river across the region.",
-      "visual_focus": "precipitation falling over forest",
-      "visual_query": "heavy precipitation falling over forest",
+      "narration": "Gravitational forces cause these vast molecular regions to collapse inward and gather substantial mass over time.",
+      "visual_focus": "collapsing gas cloud",
+      "visual_query": "collapsing gas cloud in space",
       "visual_queries": [
-        "tropical rain falling down",
-        "rainstorm over green trees"
+        "rotating nebula gas collapse",
+        "dense molecular cloud space"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "heavy precipitation falling over forest",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Flying_river",
+      "reference_query": "collapsing gas cloud in space",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1,
       "voice_timing": {
-        "start_seconds": 9.13,
-        "spoken_end_seconds": 16.786,
-        "visual_end_seconds": 17.086,
-        "duration_seconds": 7.956,
+        "start_seconds": 7.114,
+        "spoken_end_seconds": 14.386,
+        "visual_end_seconds": 14.686,
+        "duration_seconds": 7.572,
         "first_sentence_index": 1,
         "last_sentence_index": 1
       }
     },
     {
-      "narration": "With its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country.",
-      "visual_focus": "abundant rainfall over country",
-      "visual_query": "abundant rainfall over green landscape",
+      "narration": "As materials draw tightly together, the center heats up and forms a dense rotating protostellar core.",
+      "visual_focus": "protostellar core",
+      "visual_query": "protostellar core rotating space dust",
       "visual_queries": [
-        "widespread rain over trees",
-        "heavy rain in jungle"
+        "young star protostellar disc",
+        "glowing protostar formation space"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "abundant rainfall over green landscape",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Flying_river",
+      "reference_query": "protostellar core rotating space dust",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2,
       "voice_timing": {
-        "start_seconds": 17.086,
-        "spoken_end_seconds": 23.974,
-        "visual_end_seconds": 24.274,
-        "duration_seconds": 7.188,
+        "start_seconds": 14.686,
+        "spoken_end_seconds": 21.502,
+        "visual_end_seconds": 21.802,
+        "duration_seconds": 7.116,
         "first_sentence_index": 2,
         "last_sentence_index": 2
       }
     },
     {
-      "narration": "Researchers found that carbon stocks in the Amazon region were reduced following logging processes in the forest.",
-      "visual_focus": "logging in forest",
-      "visual_query": "logging in green forest",
+      "narration": "Surrounding debris flattens into a swirling disk where future planets can slowly accumulate from debris.",
+      "visual_focus": "swirling protoplanetary disk",
+      "visual_query": "swirling protoplanetary disk space view",
       "visual_queries": [
-        "deforested land aerial view",
-        "cut down tree trunks"
+        "planetary disk orbiting young star",
+        "circumstellar disk cosmic dust"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "logging in green forest",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "reference_query": "swirling protoplanetary disk space view",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3,
       "voice_timing": {
-        "start_seconds": 24.274,
-        "spoken_end_seconds": 31.21,
-        "visual_end_seconds": 31.51,
-        "duration_seconds": 7.236,
+        "start_seconds": 21.802,
+        "spoken_end_seconds": 28.522,
+        "visual_end_seconds": 28.822,
+        "duration_seconds": 7.02,
         "first_sentence_index": 3,
         "last_sentence_index": 3
       }
     },
     {
-      "narration": "This logging demonstrates the negative impact that logging has on the forest ability to store carbon emissions.",
-      "visual_focus": "of logging forest",
-      "visual_query": "of logging on forest",
+      "narration": "Extreme core temperatures eventually trigger nuclear fusion reactions that power the newly born star.",
+      "visual_focus": "nuclear fusion reaction",
+      "visual_query": "nuclear fusion reaction stellar core",
       "visual_queries": [
-        "trees after logging",
-        "cleared forest land ground"
+        "star glowing bright plasma",
+        "stellar surface plasma flare"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "of logging on forest",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "reference_query": "nuclear fusion reaction stellar core",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4,
       "voice_timing": {
-        "start_seconds": 31.51,
-        "spoken_end_seconds": 38.134,
-        "visual_end_seconds": 38.434,
-        "duration_seconds": 6.924,
+        "start_seconds": 28.822,
+        "spoken_end_seconds": 35.374,
+        "visual_end_seconds": 35.674,
+        "duration_seconds": 6.852,
         "first_sentence_index": 4,
         "last_sentence_index": 4
       }
     },
     {
-      "narration": "Climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest.",
-      "visual_focus": "droughts in the forest",
-      "visual_query": "droughts in the amazon forest",
+      "narration": "Stellar nucleosynthesis inside the burning core forges heavier chemical elements from simpler hydrogen atoms.",
+      "visual_focus": "stellar core elements",
+      "visual_query": "stellar core elements plasma space",
       "visual_queries": [
-        "dry cracked earth forest",
-        "dry withered green leaves"
+        "bright star plasma energy",
+        "burning star core space"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "droughts in the amazon forest",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "reference_query": "stellar core elements plasma space",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5,
       "voice_timing": {
-        "start_seconds": 38.434,
-        "spoken_end_seconds": 45.802,
-        "visual_end_seconds": 46.102,
-        "duration_seconds": 7.668,
+        "start_seconds": 35.674,
+        "spoken_end_seconds": 42.802,
+        "visual_end_seconds": 43.102,
+        "duration_seconds": 7.428,
         "first_sentence_index": 5,
         "last_sentence_index": 5
       }
     },
     {
-      "narration": "The combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.",
-      "visual_focus": "dead trees forest fires",
-      "visual_query": "dead trees fueling forest fires",
+      "narration": "Eventually, mature stellar systems stabilize and maintain a steady balance between gravity and internal pressure.",
+      "visual_focus": "stable star system",
+      "visual_query": "stable star system space view",
       "visual_queries": [
-        "smoke rising fire",
-        "burning dry forest trees"
+        "bright main sequence star",
+        "stellar system orbit space"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "dead trees fueling forest fires",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+      "reference_query": "stable star system space view",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6,
       "voice_timing": {
-        "start_seconds": 46.102,
-        "spoken_end_seconds": 53.326,
-        "visual_end_seconds": 53.626,
-        "duration_seconds": 7.524,
+        "start_seconds": 43.102,
+        "spoken_end_seconds": 50.422,
+        "visual_end_seconds": 50.722,
+        "duration_seconds": 7.62,
         "first_sentence_index": 6,
         "last_sentence_index": 6
       }
     },
     {
-      "narration": "Brazil protections of the Amazon rainforest were slashed, resulting in a severe loss of trees across the land.",
-      "visual_focus": "loss of trees land",
-      "visual_query": "loss of trees in forest",
+      "narration": "When aging stars finally scatter their enriched materials outward, they seed future stellar generations across space.",
+      "visual_focus": "stellar material scattering",
+      "visual_query": "stellar material scattering space nebula",
       "visual_queries": [
-        "deforestation area wide view",
-        "barren land without trees"
+        "supernova remnant expanding gas",
+        "expanding cosmic nebula cloud"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "loss of trees in forest",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+      "reference_query": "stellar material scattering space nebula",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7,
       "voice_timing": {
-        "start_seconds": 53.626,
-        "spoken_end_seconds": 60.922,
-        "visual_end_seconds": 62.172,
-        "duration_seconds": 8.546,
+        "start_seconds": 50.722,
+        "spoken_end_seconds": 58.09,
+        "visual_end_seconds": 59.34,
+        "duration_seconds": 8.618,
         "first_sentence_index": 7,
         "last_sentence_index": 7
       }
@@ -206,81 +206,91 @@
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities.",
+      "sentence": "Deep within cold clouds of gas, new stars slowly awaken to light up the universe.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Flying_river"
+        "https://en.wikipedia.org/wiki/Solar_System_formation",
+        "https://tigerprints.clemson.edu/physastro_pubs/312"
       ]
     },
     {
       "scene": 2,
-      "sentence": "This moisture is deposited in other localities in the form of precipitation, forming a virtual river across the region.",
+      "sentence": "Gravitational forces cause these vast molecular regions to collapse inward and gather substantial mass over time.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Flying_river"
+        "https://en.wikipedia.org/wiki/Solar_System_formation",
+        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs"
       ]
     },
     {
       "scene": 3,
-      "sentence": "With its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country.",
+      "sentence": "As materials draw tightly together, the center heats up and forms a dense rotating protostellar core.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Flying_river"
+        "https://en.wikipedia.org/wiki/Solar_System_formation",
+        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1393&context=physastro_pubs"
       ]
     },
     {
       "scene": 4,
-      "sentence": "Researchers found that carbon stocks in the Amazon region were reduced following logging processes in the forest.",
+      "sentence": "Surrounding debris flattens into a swirling disk where future planets can slowly accumulate from debris.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Planetary_formation",
+        "https://www.nature.com/articles/s41586-020-2934-0"
       ]
     },
     {
       "scene": 5,
-      "sentence": "This logging demonstrates the negative impact that logging has on the forest ability to store carbon emissions.",
+      "sentence": "Extreme core temperatures eventually trigger nuclear fusion reactions that power the newly born star.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+        "https://helios.gsfc.nasa.gov/nucleo.html"
       ]
     },
     {
       "scene": 6,
-      "sentence": "Climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest.",
+      "sentence": "Stellar nucleosynthesis inside the burning core forges heavier chemical elements from simpler hydrogen atoms.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+        "https://helios.gsfc.nasa.gov/nucleo.html"
       ]
     },
     {
       "scene": 7,
-      "sentence": "The combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.",
+      "sentence": "Eventually, mature stellar systems stabilize and maintain a steady balance between gravity and internal pressure.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Solar_System_formation",
+        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1305&context=physastro_pubs"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Brazil protections of the Amazon rainforest were slashed, resulting in a severe loss of trees across the land.",
+      "sentence": "When aging stars finally scatter their enriched materials outward, they seed future stellar generations across space.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+        "https://en.wikipedia.org/wiki/Solar_System_formation"
       ]
     }
   ],
-  "script": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities. This moisture is deposited in other localities in the form of precipitation, forming a virtual river across the region. With its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country. Researchers found that carbon stocks in the Amazon region were reduced following logging processes in the forest. This logging demonstrates the negative impact that logging has on the forest ability to store carbon emissions. Climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest. The combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires. Brazil protections of the Amazon rainforest were slashed, resulting in a severe loss of trees across the land.",
+  "script": "Deep within cold clouds of gas, new stars slowly awaken to light up the universe. Gravitational forces cause these vast molecular regions to collapse inward and gather substantial mass over time. As materials draw tightly together, the center heats up and forms a dense rotating protostellar core. Surrounding debris flattens into a swirling disk where future planets can slowly accumulate from debris. Extreme core temperatures eventually trigger nuclear fusion reactions that power the newly born star. Stellar nucleosynthesis inside the burning core forges heavier chemical elements from simpler hydrogen atoms. Eventually, mature stellar systems stabilize and maintain a steady balance between gravity and internal pressure. When aging stars finally scatter their enriched materials outward, they seed future stellar generations across space.",
   "ai_provider": {
     "provider": "gemini",
     "model": "gemini-3.5-flash-lite"
   },
   "opening_overlay": {
     "path": "output/opening_overlay.png",
-    "adjustments": [],
+    "adjustments": [
+      "hook shortened to 12 words"
+    ],
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "THE AMAZON RAINFOREST"
+        "THE COSMIC CYCLE OF STAR FORMATION"
       ],
       "hook_lines": [
-        "The forest trees release",
-        "water vapor into the",
-        "atmosphere."
+        "Deep within cold clouds",
+        "of gas, new stars slowly",
+        "awaken to light"
       ],
-      "title_text": "The Amazon Rainforest",
-      "hook_text": "The forest trees release water vapor into the atmosphere.",
+      "title_text": "The Cosmic Cycle of Star Formation",
+      "hook_text": "Deep within cold clouds of gas, new stars slowly awaken to light",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,

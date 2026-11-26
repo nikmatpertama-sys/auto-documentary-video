@@ -1,15 +1,15 @@
 {
   "path": "output/opening_overlay.png",
   "title_lines": [
-    "THE AMAZON RAINFOREST"
+    "THE COSMIC CYCLE OF STAR FORMATION"
   ],
   "hook_lines": [
-    "The forest trees release",
-    "water vapor into the",
-    "atmosphere."
+    "Deep within cold clouds",
+    "of gas, new stars slowly",
+    "awaken to light"
   ],
-  "title_text": "The Amazon Rainforest",
-  "hook_text": "The forest trees release water vapor into the atmosphere.",
+  "title_text": "The Cosmic Cycle of Star Formation",
+  "hook_text": "Deep within cold clouds of gas, new stars slowly awaken to light",
   "title_font_size": 27,
   "hook_font_size": 62,
   "max_text_width": 880,

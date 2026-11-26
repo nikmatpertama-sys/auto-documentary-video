@@ -9,213 +9,267 @@
   "supported_claim_count": 8,
   "failed_claims": [],
   "uncited_factual_sentences": [],
-  "coverage_note": "All sentences in the script are covered by the provided exact claims, and every claim is fully supported by the corresponding trusted excerpts.",
+  "coverage_note": "All sentences in the script correspond to a corresponding claim that is fully supported by the provided excerpts.",
   "claims": [
     {
       "id": "C1",
       "scene": 1,
-      "sentence": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities.",
+      "sentence": "Deep within cold clouds of gas, new stars slowly awaken to light up the universe.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Flying_river"
+        "https://en.wikipedia.org/wiki/Solar_System_formation",
+        "https://tigerprints.clemson.edu/physastro_pubs/312"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://www.usgs.gov/water-science-school/science/evapotranspiration-and-water-cycle"
+        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
       ],
-      "reason": "The USGS excerpt confirms that plant leaves release water vapor into the air through transpiration."
+      "reason": "The excerpt states that poor clusters are embedded deep within molecular clouds, supporting the premise."
     },
     {
       "id": "C2",
       "scene": 2,
-      "sentence": "This moisture is deposited in other localities in the form of precipitation, forming a virtual river across the region.",
+      "sentence": "Gravitational forces cause these vast molecular regions to collapse inward and gather substantial mass over time.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Flying_river"
+        "https://en.wikipedia.org/wiki/Solar_System_formation",
+        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Flying_river"
+        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
       ],
-      "reason": "The excerpt matches word-for-word that forest trees release water vapor deposited in other localities as precipitation, forming a virtual river."
+      "reason": "The excerpt explicitly mentions the gravitational collapse of parts of a giant molecular cloud."
     },
     {
       "id": "C3",
       "scene": 3,
-      "sentence": "With its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country.",
+      "sentence": "As materials draw tightly together, the center heats up and forms a dense rotating protostellar core.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Flying_river"
+        "https://en.wikipedia.org/wiki/Solar_System_formation",
+        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1393&context=physastro_pubs"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Flying_river"
+        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
       ],
-      "reason": "The text directly states that with its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country."
+      "reason": "The excerpt notes that collapsing mass collected in the center, forming the Sun, which aligns with forming a core."
     },
     {
       "id": "C4",
       "scene": 4,
-      "sentence": "Researchers found that carbon stocks in the Amazon region were reduced following logging processes in the forest.",
+      "sentence": "Surrounding debris flattens into a swirling disk where future planets can slowly accumulate from debris.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Planetary_formation",
+        "https://www.nature.com/articles/s41586-020-2934-0"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Nebular_hypothesis"
       ],
-      "reason": "The excerpt explicitly states that researchers found carbon stocks in the Amazon region were reduced following logging processes."
+      "reason": "The excerpt explains that gaseous clouds slowly rotate, gradually collapse and flatten due to gravity, forming stars and planets."
     },
     {
       "id": "C5",
       "scene": 5,
-      "sentence": "This logging demonstrates the negative impact that logging has on the forest ability to store carbon emissions.",
+      "sentence": "Extreme core temperatures eventually trigger nuclear fusion reactions that power the newly born star.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+        "https://helios.gsfc.nasa.gov/nucleo.html"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis"
       ],
-      "reason": "The excerpt matches the claim, noting that logging demonstrates the negative impact on the forest's ability to store carbon."
+      "reason": "The excerpt supports that energy released from nuclear fusion reactions accounts for stellar energy and luminosity."
     },
     {
       "id": "C6",
       "scene": 6,
-      "sentence": "Climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest.",
+      "sentence": "Stellar nucleosynthesis inside the burning core forges heavier chemical elements from simpler hydrogen atoms.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+        "https://helios.gsfc.nasa.gov/nucleo.html"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis"
       ],
-      "reason": "The source text directly states that climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest."
+      "reason": "The excerpt details hydrogen fusion (nuclear fusion of four protons to form a helium-4 nucleus) as a key reaction process."
     },
     {
       "id": "C7",
       "scene": 7,
-      "sentence": "The combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.",
+      "sentence": "Eventually, mature stellar systems stabilize and maintain a steady balance between gravity and internal pressure.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Solar_System_formation",
+        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1305&context=physastro_pubs"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
       ],
-      "reason": "The excerpt states that according to the WWF, the combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires."
+      "reason": "The excerpt mentions competing forces and how an internal source of energy countered gravitational contraction until hydrostatic equilibrium was achieved."
     },
     {
       "id": "C8",
       "scene": 8,
-      "sentence": "Brazil protections of the Amazon rainforest were slashed, resulting in a severe loss of trees across the land.",
+      "sentence": "When aging stars finally scatter their enriched materials outward, they seed future stellar generations across space.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+        "https://en.wikipedia.org/wiki/Solar_System_formation"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Amazon_rainforest"
+        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
       ],
-      "reason": "The excerpt confirms that in 2019 Brazil's protections of the Amazon rainforest were slashed, resulting in a severe loss of trees."
+      "reason": "The excerpt states that ejected material continues the enrichment of the interstellar medium with heavy elements for future generations of stars and planets."
     }
   ],
   "sources": [
     {
       "claim_id": "C1",
-      "requested_url": "https://en.wikipedia.org/wiki/Flying_river",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Flying_river: HTTPError (HTTP 429)"
-    },
-    {
-      "claim_id": "C1",
-      "requested_url": "https://www.usgs.gov/special-topics/water-science-school/science/evapotranspiration-and-water-cycle",
-      "resolved_url": "https://www.usgs.gov/water-science-school/science/evapotranspiration-and-water-cycle",
-      "host": "www.usgs.gov",
+      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
+      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
+      "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Evapotranspiration and the Water Cycle | U.S. Geological Survey",
-      "excerpt": "Transpiration occurs when plants take up liquid water from the soil and release water vapor into the air from their leaves. Transpiration has three main steps Roots uptake water from the soil Water moves through plant tissues, serving critical metabolic and physiologic functions in the plant Leaves release water vapor into the air through their stomata Media Sources/Usage: Public Domain. Transpiration occurs when plants take up liquid water from the soil and release water vapor into the air from their leaves. Transpiration has three main steps Roots uptake water from the soil Water moves through plant tissues, serving critical metabolic and physiologic functions in the plant Leaves release water vapor into the air through their stomata Media Sources/Usage: Public Domain. Evapotranspiration is the sum of all processes by which water moves from the land surface to the atmosphere via evapor",
-      "source_kind": "recovered",
+      "page_title": "Formation and evolution of the Solar System",
+      "excerpt": "Poor clusters are embedded deep within molecular clouds and contain no nearby massive stars. In a poor star cluster similar to the ones seen in the Ophiuchus cluster, the Sun is embedded deep inside the molecular cloud with massive stars being absent. Eventually, after about 800 million years, the gravitational disruption caused by galactic tides, passing stars and giant molecular clouds began to deplete the cloud, sending comets into the inner Solar System. Assuming that the Big Crunch or Big Rip scenarios for the end of the Universe do not occur, calculations suggest that the gravity of passing stars will have completely stripped the dead Sun of its remaining planets within 1 quadrillion (1015) years. In the distant future, the gravity of passing stars will gradually reduce the Sun's retinue of planets. However, since the early 1980s studies of young stars have shown them to be surroun",
+      "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C1",
-      "requested_url": "https://www.nasa.gov/missions/grace/nasa-satellites-help-quantify-how-amazon-trees-use-water/",
+      "requested_url": "https://tigerprints.clemson.edu/physastro_pubs/312",
       "status": "not_usable",
-      "source_kind": "recovered",
-      "reason": "Could not fetch evidence source https://www.nasa.gov/missions/grace/nasa-satellites-help-quantify-how-amazon-trees-use-water/: HTTPError (HTTP 404)"
+      "source_kind": "planned",
+      "reason": "Fetched page is about a different subject: it shares 0 of the claim's 8 content terms (needs 2)."
     },
     {
       "claim_id": "C2",
-      "requested_url": "https://en.wikipedia.org/wiki/Flying_river",
-      "resolved_url": "https://en.wikipedia.org/wiki/Flying_river",
+      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
+      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Flying river",
-      "excerpt": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities in the form of precipitation, forming a virtual river. The flying river is a movement of large quantities of water vapor transported in the atmosphere from the Amazon Basin to other parts of South America, and the world. == Climatic consequences of deforestation ==\n\nIn 2009 Antonio Nobre, a Brazilian climate scientist, stated that without the flying river, much of southern Brazil, which produces approximately 70% of the country's GNP, would be arid desert. Smoke from the fires set by some farmers to clear land sends particles into the atmosphere, resulting in diminished precipitation, which in turn leaves the trees, which have evolved in wet conditions, vulnerable to fire. The primary objective of the project is to \"try to ascertain the origin of the water vap",
+      "page_title": "Formation and evolution of the Solar System",
+      "excerpt": "The formation of the Solar System began about 4.6 billion years ago with the gravitational collapse of a small part of a giant molecular cloud. == Formation ==\n\n\n=== Presolar nebula ===\nThe nebular hypothesis says that the Solar System formed from the gravitational collapse of a fragment of a giant molecular cloud most likely at the edge of a Wolf-Rayet bubble. A shock wave from a supernova may have triggered the formation of the Sun by creating relatively dense regions within the cloud, causing these regions to collapse. === Late Heavy Bombardment and after ===\n\nGravitational disruption from the outer planets' migration would have sent large numbers of asteroids into the inner Solar System, severely depleting the original belt until it reached today's extremely low mass. Eventually, after about 800 million years, the gravitational disruption caused by galactic tides, passing stars and g",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs: HTTPError (HTTP 403)"
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
+      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Formation and evolution of the Solar System",
+      "excerpt": "Most of the collapsing mass collected in the center, forming the Sun, while the rest flattened into a protoplanetary disk out of which the planets, moons, asteroids, and other small Solar System bodies formed. In roughly five billion years, the Sun's surface will cool as the fusion of hydrogen to helium stops in the core of the Sun, becoming a subgiant, and over the next two and a half to three billion years thereafter, it will expand outward to many times its current diameter, becoming a red giant twice with an intermittent phase between the principal RGB and AGB phases, before casting off its outer layers as a planetary nebula and leaving behind a stellar remnant known as a white dwarf. Arthur Stanley Eddington's confirmation of Albert Einstein's theory of relativity led to his realisation that the Sun's energy comes from nuclear fusion reactions in its core, fusing hydrogen into heliu",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C3",
-      "requested_url": "https://en.wikipedia.org/wiki/Flying_river",
-      "resolved_url": "https://en.wikipedia.org/wiki/Flying_river",
+      "requested_url": "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1393&context=physastro_pubs",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again."
+    },
+    {
+      "claim_id": "C4",
+      "requested_url": "https://en.wikipedia.org/wiki/Planetary_formation",
+      "resolved_url": "https://en.wikipedia.org/wiki/Nebular_hypothesis",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Flying river",
-      "excerpt": "== Flying Rivers Project ==\nWith its large surface area and abundant rainfall, Brazil receives more rain in a year (estimated at 15,000 cubic kilometres (3,600 cu mi)) than any other country. It has been found that whereas every square metre of the surface of the sea evaporates one litre of water each day, the same area of forest evaporates about eight times as much because of the multiple layers of foliage in the crown of the trees. When this air mass reaches the Andes, the mountain range acts as a \"natural barrier\", redirecting huge volumes of humid air towards the Amazon regions of Colombia, Ecuador, north and south of Peru, central and southern Brazil as well as towards northern Argentina, Paraguay, and Uruguay, and rain falls in these areas. == Climatic consequences of deforestation ==\n\nIn 2009 Antonio Nobre, a Brazilian climate scientist, stated that without the flying river, much ",
+      "page_title": "Nebular hypothesis",
+      "excerpt": "Jupiter- and Saturn-like planets are thought to accumulate the bulk of their mass during only 10,000 years. Immanuel Kant, familiar with Swedenborg's work, developed the theory further in 1755, publishing his own Universal Natural History and Theory of the Heavens, wherein he argued that gaseous clouds (nebulae) slowly rotate, gradually collapse and flatten due to gravity, eventually forming stars and planets. Another possible process for shedding angular momentum is magnetic braking, where the spin of the star is transferred into the surrounding disk via that star's magnetic field. Old theories were unable to explain how their cores could form fast enough to accumulate significant amounts of gas from the quickly disappearing protoplanetary disk. Particles several centimeters in size or larger slowly settle near the middle plane of the disk, forming a very thin—less than 100 km—and dense",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C4",
-      "requested_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
-      "resolved_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "requested_url": "https://www.nature.com/articles/s41586-020-2934-0",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence URL redirected outside the trusted HTTPS allowlist; redirect was not followed."
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Deforestation of the Amazon rainforest",
-      "excerpt": "In a 2023 study, researchers found that carbon stocks in the Amazon region were reduced following logging processes, demonstrating the negative impact that logging has on the forest's ability to store carbon and regulate global carbon emissions. A 2013 paper found a correlation between rainforest logging in the Amazon and reduced precipitation in the area, resulting in lower yields per hectare. Additionally, the increased openness of the canopy due to logging has been found to increase herbivory rates in seedlings within the Amazon. Indigenous territories in the Amazon also serve as a bulwark against deforestation, logging, and wildfires, making logging in these territories detrimental to the region as a whole. According to other research, complete Amazon deforestation will render the region itself (including 7 million square kilometers, 9 states in Brazil and 8 other countries) more or ",
+      "page_title": "Stellar nucleosynthesis",
+      "excerpt": "A second stimulus to understanding the processes of stellar nucleosynthesis occurred later in the same century, when it was realized by Arthur Eddington and expanded on by George Gamow and then Hans Bethe that the energy released from nuclear fusion reactions accounted for the longevity of the Sun as a source of heat and light. In the following decade the Gamow factor was used by Robert d'Escourt Atkinson and Fritz Houtermans and later by Edward Teller and Gamow himself to derive the rate at which nuclear reactions would occur at the high temperatures believed to exist in stellar interiors. == Key reactions ==\n\nThe most important reactions in stellar nucleosynthesis:\n\nHydrogen fusion:\nDeuterium fusion\nThe proton–proton chain\nThe carbon–nitrogen–oxygen cycle\nHelium fusion:\nThe triple-alpha process\nThe alpha process\nFusion of heavier elements:\nLithium burning: a process found most commonly",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C5",
-      "requested_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
-      "resolved_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "requested_url": "https://helios.gsfc.nasa.gov/nucleo.html",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://helios.gsfc.nasa.gov/nucleo.html: ConnectionError"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Deforestation of the Amazon rainforest",
-      "excerpt": "In a 2023 study, researchers found that carbon stocks in the Amazon region were reduced following logging processes, demonstrating the negative impact that logging has on the forest's ability to store carbon and regulate global carbon emissions. The Brazilian government implemented the RED (reducing emissions from deforestation and forest degradation) program to combat deforestation, providing support to various African countries through education programs and financial contributions. The completion of these roads was followed by a significant influx of settlers, who also had a substantial impact on the forest. Logging often leads to the destruction of forest ecosystems, resulting in the loss of habitat for numerous plant and animal species. Loss of biodiversity also leads to negative effects in terms of forest resilience to global shifts, as well as the adaptability of ecosystems. While",
+      "page_title": "Stellar nucleosynthesis",
+      "excerpt": "== Key reactions ==\n\nThe most important reactions in stellar nucleosynthesis:\n\nHydrogen fusion:\nDeuterium fusion\nThe proton–proton chain\nThe carbon–nitrogen–oxygen cycle\nHelium fusion:\nThe triple-alpha process\nThe alpha process\nFusion of heavier elements:\nLithium burning: a process found most commonly in brown dwarfs\nCarbon-burning process\nNeon-burning process\nOxygen-burning process\nSilicon-burning process\nProduction of elements heavier than iron:\nNeutron capture:\nThe r-process\nThe s-process\nProton capture:\nThe rp-process\nThe p-process\nPhotodisintegration\n\n\n=== Hydrogen fusion ===\n\nHydrogen fusion (nuclear fusion of four protons to form a helium-4 nucleus) is the dominant process that generates energy in the cores of main-sequence stars. In astrophysics, stellar nucleosynthesis is the creation of chemical elements by nuclear reactions within stars. Stellar nucleosynthesis has occurred si",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C6",
-      "requested_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
-      "resolved_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "requested_url": "https://helios.gsfc.nasa.gov/nucleo.html",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://helios.gsfc.nasa.gov/nucleo.html: ConnectionError"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
+      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Deforestation of the Amazon rainforest",
-      "excerpt": "=== Climate change ===\n\nClimate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest. A study published in Nature Climate Change in 2022 provided empirical evidence that more than three-quarters of the Amazon rainforest has experienced a decline in resilience since the early 2000s, posing risks of dieback that would impact biodiversity, carbon storage, and climate change. Carlos Nobre, an expert on the Amazon and climate change, warned in September 2019 that if deforestation rates continued at their current pace, the Amazon forest could reach a tipping point within 20 to 30 years, potentially resulting in large portions of the forest transforming into a dry savanna, particularly in the southern and northern regions. World Weather Attribution found that climate change and increased global temperatures are the main reason for the re",
+      "page_title": "Formation and evolution of the Solar System",
+      "excerpt": "However it was not a direct collapse as the internal pressure of the cloud keeps it up. Over about 100,000 years, the competing forces of gravity, gas pressure, magnetic fields, and rotation caused the contracting nebula to flatten into a spinning protoplanetary disc with a diameter of about 200 AU and form a hot, dense protostar (a star in which hydrogen fusion has not yet begun) at the centre. Within 50 million years, the temperature and pressure at the core of the Sun became so great that its hydrogen began to fuse, creating an internal source of energy that countered gravitational contraction until hydrostatic equilibrium was achieved. As the early Solar System continued to evolve, it eventually drifted away from its siblings in the stellar nursery, and continued orbiting the Milky Way's center on its own. In roughly five billion years, the Sun's surface will cool as the fusion of hy",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C7",
-      "requested_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
-      "resolved_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+      "requested_url": "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1305&context=physastro_pubs",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again."
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Amazon rainforest",
-      "excerpt": "According to the World Wide Fund for Nature, the combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.In 2010, the Amazon rainforest experienced another severe drought, in some ways more extreme than the 2005 drought. Climate change impacts and human activities in the area – mainly wildfires, current land-use and deforestation – are causing a release of forcing agents that likely result in a net warming effect. Climate change, El Nino, deforestation increases the likelihood of drought condition in the Amazon. === Climate change ===\nEnvironmentalists are concerned about loss of biodiversity that will result from destruction of the forest, and also about the release of the carbon contained within the vegetation, which could accelerate global warming. However, simulations of Amazon basin climate change across many different models",
+      "page_title": "Stellar nucleosynthesis",
+      "excerpt": "In astrophysics, stellar nucleosynthesis is the creation of chemical elements by nuclear reactions within stars. This final burning in massive stars, called explosive nucleosynthesis or supernova nucleosynthesis, is the final epoch of stellar nucleosynthesis. == Key reactions ==\n\nThe most important reactions in stellar nucleosynthesis:\n\nHydrogen fusion:\nDeuterium fusion\nThe proton–proton chain\nThe carbon–nitrogen–oxygen cycle\nHelium fusion:\nThe triple-alpha process\nThe alpha process\nFusion of heavier elements:\nLithium burning: a process found most commonly in brown dwarfs\nCarbon-burning process\nNeon-burning process\nOxygen-burning process\nSilicon-burning process\nProduction of elements heavier than iron:\nNeutron capture:\nThe r-process\nThe s-process\nProton capture:\nThe rp-process\nThe p-process\nPhotodisintegration\n\n\n=== Hydrogen fusion ===\n\nHydrogen fusion (nuclear fusion of four protons to ",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C8",
-      "requested_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
-      "resolved_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
+      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Amazon rainforest",
-      "excerpt": "In 2019 Brazil's protections of the Amazon rainforest were slashed, resulting in a severe loss of trees. According to the World Wide Fund for Nature, the combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.In 2010, the Amazon rainforest experienced another severe drought, in some ways more extreme than the 2005 drought. One computer model of future climate change caused by greenhouse gas emissions shows that the Amazon rainforest could become unsustainable under conditions of severely reduced rainfall and increased temperatures, leading to an almost complete loss of rainforest cover in the basin by 2100., and severe economic, natural capital and ecosystem services impacts of not averting the tipping point. The Amazon represents over half of the total area of remaining rainforests on Earth, and comprises the largest and most bi",
+      "page_title": "Formation and evolution of the Solar System",
+      "excerpt": "The ejected material will contain the helium and carbon produced by the Sun's nuclear reactions, continuing the enrichment of the interstellar medium with heavy elements for future generations of stars and planets. In roughly five billion years, the Sun's surface will cool as the fusion of hydrogen to helium stops in the core of the Sun, becoming a subgiant, and over the next two and a half to three billion years thereafter, it will expand outward to many times its current diameter, becoming a red giant twice with an intermittent phase between the principal RGB and AGB phases, before casting off its outer layers as a planetary nebula and leaving behind a stellar remnant known as a white dwarf. In the distant future, the gravity of passing stars will gradually reduce the Sun's retinue of planets. The remaining 2% of the mass consisted of heavier elements that were created by nucleosynthes",
       "source_kind": "planned",
       "status": "usable"
     }
