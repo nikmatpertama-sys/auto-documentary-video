@@ -13,7 +13,7 @@ import json
 import re
 import time
 from html.parser import HTMLParser
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import quote, unquote, urljoin, urlparse
 
 import requests
 
@@ -496,6 +496,17 @@ def fetch_source_page(url: str, timeout=(10, 25), max_bytes=3_000_000, attempt: 
     """
     if not is_trusted_source_url(url):
         raise FactCheckError(f"Source URL is not on the trusted HTTPS allowlist: {url}")
+    # Wikipedia serves its HTML behind an aggressive CDN rate limit that answered
+    # HTTP 429 for the article this run had just read for its source pool. The
+    # same text is available through the API, which is not rate limited the same
+    # way, so the article is read there instead of from the blocked HTML page.
+    try:
+        encyclopedia = _wikipedia_article_text(url)
+    except Exception as exc:
+        print(f"Encyclopedia API unavailable for {url[:80]} ({type(exc).__name__}); using HTML.")
+        encyclopedia = None
+    if encyclopedia is not None:
+        return encyclopedia
     current_url = url
     try:
         for redirect_count in range(MAX_SOURCE_REDIRECTS + 1):
@@ -563,15 +574,16 @@ def fetch_source_page(url: str, timeout=(10, 25), max_bytes=3_000_000, attempt: 
     except FactCheckError:
         raise
     except requests.RequestException as exc:
+        status_code = getattr(getattr(exc, "response", None), "status_code", 0) or 0
         transient = isinstance(
             exc, (requests.exceptions.Timeout, requests.exceptions.ConnectionError)
-        ) or (getattr(getattr(exc, "response", None), "status_code", 0) or 0) >= 500
-        if attempt < 1 and transient:
+        ) or status_code >= 500 or status_code == 429
+        if attempt < 2 and transient:
             print(
-                f"Fact-check source temporarily unavailable ({type(exc).__name__}); "
-                "retrying once in 3s."
+                f"Fact-check source temporarily unavailable ({type(exc).__name__} "
+                f"HTTP {status_code or 'n/a'}); retrying in {4 + attempt * 3}s."
             )
-            time.sleep(3)
+            time.sleep(4 + attempt * 3)
             return fetch_source_page(url, timeout=timeout, max_bytes=max_bytes, attempt=attempt + 1)
         status = getattr(getattr(exc, "response", None), "status_code", None)
         status_note = f" (HTTP {status})" if status else ""
@@ -903,7 +915,45 @@ def _plain_text(fragment: str) -> str:
     return html.unescape(re.sub(r"<[^>]+>", " ", str(fragment or ""))).strip()
 
 
+def _wikipedia_article_text(url: str) -> dict | None:
+    """Read a Wikipedia article as plain text, or return None for other URLs."""
+    parsed = urlparse(str(url or ""))
+    host = (parsed.hostname or "").lower()
+    if not host.endswith("wikipedia.org") or not parsed.path.startswith("/wiki/"):
+        return None
+    title = unquote(parsed.path[len("/wiki/"):]).replace("_", " ").strip()
+    if not title:
+        return None
+    data = _wikipedia_get(
+        {
+            "action": "query",
+            "prop": "extracts",
+            "explaintext": 1,
+            "redirects": 1,
+            "titles": title,
+        }
+    )
+    for page in ((data.get("query") or {}).get("pages") or {}).values():
+        text = str((page or {}).get("extract") or "")
+        if len(text) < 1200:
+            continue
+        resolved = str(page.get("title") or title)
+        return {
+            "requested_url": url,
+            "url": "https://en.wikipedia.org/wiki/" + quote(resolved.replace(" ", "_"), safe="/()_-,"),
+            "host": "en.wikipedia.org",
+            "status_code": 200,
+            "content_type": "text/plain",
+            "title": resolved,
+            "text": text[:120_000],
+        }
+    return None
+
+
 def _wikipedia_get(params: dict) -> dict:
+    # Politeness pause: the source-pool stage and the per-claim article reads use
+    # the same API, and hammering it is what produced the HTTP 429 above.
+    time.sleep(0.25)
     response = requests.get(
         WIKIPEDIA_API,
         params={**params, "format": "json"},
@@ -943,7 +993,12 @@ def discover_trusted_source_urls(
         if word not in STOPWORDS and word not in QUESTION_WORDS
     ]
     distinctive = sorted(dict.fromkeys(keywords), key=len, reverse=True)[:1]
-    subject = context_words[:2]
+    # The topic is a sentence ("How beavers reshape entire river ecosystems"), so
+    # its leading words are often a verb phrase that Wikipedia cannot resolve.
+    # Prefer the topic word this claim actually mentions: the earlier query
+    # "beavers reshape" returned biodiversity pages instead of the beaver.
+    shared_words = [word for word in context_words if word in keywords]
+    subject = list(dict.fromkeys(shared_words or context_words))[:2]
     queries: list[str] = []
     for phrase in (
         " ".join(subject),
@@ -1002,6 +1057,18 @@ def discover_trusted_source_urls(
                 scored.get(cleaned, 0),
                 sum(1 for word in keywords if word in text),
             )
+
+    # The article itself is readable, free evidence about its subject, so it is
+    # a candidate whenever its subject shares a word with the claim. It is still
+    # fetched and gated per claim like every other page.
+    for title in titles[:6]:
+        title_words = set(re.findall(r"[a-z]{3,}", title.lower()))
+        if not title_words & set(keywords):
+            continue
+        article_url = "https://en.wikipedia.org/wiki/" + quote(
+            title.replace(" ", "_"), safe="/()_-,"
+        )
+        scored[article_url] = max(scored.get(article_url, 0), 1)
 
     # A .gov page is not automatically about this claim: rank the citations by
     # how many of the claim's own words appear in the link URL or its anchor
@@ -1081,6 +1148,49 @@ def wikipedia_source_pool(titles: list[str], limit: int = 24) -> list[str]:
             f"{', '.join(usable_titles)[:120]}."
         )
     return urls[:limit]
+
+
+_ENCYCLOPEDIA_URL_CACHE: dict[str, list[str]] = {}
+
+
+def encyclopedia_candidate_urls(sentence: str, context: str, limit: int = 2) -> list[str]:
+    """Article URLs about the topic itself, offered as readable evidence.
+
+    Planned institution pages are frequently paywalled abstracts that share one
+    word with a claim but never state it, which is why the audit kept answering
+    "insufficient". The encyclopedia article about the topic is free, is already
+    cited at the end of the script, and its full text can actually contain the
+    sentence the narration makes. It is a candidate only: the normal fetch and
+    lexical gate still decide whether it may serve as evidence.
+    """
+    claim_words = {
+        word
+        for word in re.findall(r"[a-z]{4,}", str(sentence or "").lower())
+        if word not in STOPWORDS
+    }
+    context_words = [
+        word
+        for word in re.findall(r"[a-z]{4,}", str(context or "").lower())
+        if word not in STOPWORDS and word not in QUESTION_WORDS
+    ]
+    subject = list(dict.fromkeys([w for w in context_words if w in claim_words]))[:1]
+    if not subject:
+        subject = context_words[:1]
+    if not subject:
+        return []
+    key = subject[0]
+    if key not in _ENCYCLOPEDIA_URL_CACHE:
+        urls: list[str] = []
+        try:
+            for title in wikipedia_search_titles(key, limit=2):
+                urls.append(
+                    "https://en.wikipedia.org/wiki/"
+                    + quote(title.replace(" ", "_"), safe="/()_-,")
+                )
+        except Exception as exc:
+            print(f"Encyclopedia article search unavailable: {type(exc).__name__}")
+        _ENCYCLOPEDIA_URL_CACHE[key] = urls
+    return _ENCYCLOPEDIA_URL_CACHE[key][:limit]
 
 
 class _UnverifiableClaimError(FactCheckError):
@@ -1163,6 +1273,43 @@ def _verify_documentary_pass(plan: dict, generate_fact_json, fetched: dict) -> d
 
         for url in attempted_urls:
             try_source(url)
+
+        # Paywalled abstracts pass the lexical gate on a shared word while saying
+        # nothing about the claim. When the planned pages are that thin, read the
+        # topic's own article before the expensive recovery routes.
+        def _best_overlap(sources) -> float:
+            words = _content_words(claim["sentence"])
+            if not sources or not words:
+                return 0.0
+            return max(
+                len(_content_words(source.get("excerpt", "")) & words) / len(words)
+                for source in sources
+            )
+
+        if _best_overlap(claim_sources) < 0.6:
+            used_pages = {
+                item.get("requested_url") for item in source_records
+                if item.get("requested_url")
+            } | set(attempted_urls)
+            for url in encyclopedia_candidate_urls(
+                claim["sentence"], str(plan.get("topic") or "")
+            ):
+                if url in attempted_urls:
+                    continue
+                if len(used_pages) >= MAX_UNIQUE_SOURCE_PAGES:
+                    break
+                used_pages.add(url)
+                attempted_urls.append(url)
+                try_source(url, source_kind="encyclopedia")
+
+        # The audit only reads the first sources listed for a claim, so order
+        # them by how much of the claim they actually contain.
+        claim_words_for_order = _content_words(claim["sentence"])
+        claim_sources.sort(
+            key=lambda source: -len(
+                _content_words(source.get("excerpt", "")) & claim_words_for_order
+            )
+        )
 
         quantitative = bool(
             QUANTITATIVE_RE.search(claim["sentence"])

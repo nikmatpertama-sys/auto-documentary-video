@@ -115,6 +115,14 @@ class EvidenceGroundingTests(unittest.TestCase):
         fact_check._HOST_UNAVAILABLE.clear()
         fact_check._DISCOVERY_CACHE.clear()
         fact_check._SCHOLARLY_CACHE.clear()
+        fact_check._ENCYCLOPEDIA_URL_CACHE.clear()
+        # These tests pin the source routes they exercise; the encyclopedia route
+        # has its own test below.
+        encyclopedia_patch = patch.object(
+            fact_check, "wikipedia_search_titles", return_value=[]
+        )
+        encyclopedia_patch.start()
+        self.addCleanup(encyclopedia_patch.stop)
 
     def test_claim_gate_rejects_a_page_about_another_subject(self):
         with self.assertRaisesRegex(FactCheckError, "different subject"):
@@ -122,6 +130,27 @@ class EvidenceGroundingTests(unittest.TestCase):
                 "A page about spacecraft engineering and orbital observations. " * 6,
                 "The Amazon basin contains extensive tropical rainforest habitat.",
             )
+
+    def test_encyclopedia_candidate_uses_the_topic_word_in_the_claim(self):
+        searched = []
+
+        def fake_titles(query, limit=3):
+            searched.append(query)
+            return ["Beaver", "Beaver dam"]
+
+        with patch.object(fact_check, "wikipedia_search_titles", side_effect=fake_titles):
+            urls = fact_check.encyclopedia_candidate_urls(
+                "Beavers build dams that slow fast-flowing streams.",
+                "How beavers reshape entire river ecosystems",
+                limit=1,
+            )
+
+        # "beavers reshape" resolved to biodiversity pages before this change.
+        self.assertEqual(searched, ["beavers"])
+        self.assertEqual(urls, ["https://en.wikipedia.org/wiki/Beaver"])
+
+    def test_wikipedia_article_reader_only_handles_wikipedia_urls(self):
+        self.assertIsNone(fact_check._wikipedia_article_text("https://www.usgs.gov/beaver"))
 
     def test_fetched_but_unrelated_page_is_not_evidence(self):
         plan = build_plan()
@@ -256,6 +285,14 @@ class ClaimRepairTests(unittest.TestCase):
         fact_check._HOST_UNAVAILABLE.clear()
         fact_check._DISCOVERY_CACHE.clear()
         fact_check._SCHOLARLY_CACHE.clear()
+        fact_check._ENCYCLOPEDIA_URL_CACHE.clear()
+        # These tests pin the source routes they exercise; the encyclopedia route
+        # has its own test below.
+        encyclopedia_patch = patch.object(
+            fact_check, "wikipedia_search_titles", return_value=[]
+        )
+        encyclopedia_patch.start()
+        self.addCleanup(encyclopedia_patch.stop)
 
     def test_unsupported_claim_is_rewritten_from_available_evidence(self):
         plan = build_plan()

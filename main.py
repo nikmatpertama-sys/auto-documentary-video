@@ -385,6 +385,10 @@ NARRATION AND EVIDENCE
   confidently, remove it or phrase a clearly non-factual question/transition.
 - Quantitative claims (numbers, percentages, measurements, ranges, significant
   dates) need TWO independent trusted hosts, never two pages from one site.
+- Use a specific number only when that exact figure appears in the EVIDENCE
+  PASSAGES above or on a page you cite. Never estimate, round from memory or
+  attribute a study result you cannot quote: a made-up percentage fails the
+  independent audit and blocks the whole script.
 - Use restrained, precise wording: separate correlation from causation, regional
   from global facts, estimates from measurements, current from historical facts.
 - Never present a local or regional statistic as a global one. State units,
