@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-25T22:25:49+00:00",
+  "generated_at": "2026-11-26T17:40:12+00:00",
   "environment": {
     "python": "3.11.18",
     "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
@@ -28,21 +28,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 3142.169,
-    "stage_count": 4,
-    "failed_stage": "script_generation",
+    "total_elapsed_seconds": 115.09,
+    "stage_count": 5,
+    "failed_stage": "fact_check",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-25T21:33:27+00:00",
+        "started_at": "2026-11-26T17:38:17+00:00",
         "details": {},
-        "duration_seconds": 0.001
+        "duration_seconds": 0.002
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-25T21:33:27+00:00",
+        "started_at": "2026-11-26T17:38:17+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -52,23 +52,33 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-25T21:33:27+00:00",
+        "started_at": "2026-11-26T17:38:17+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "urls": "24",
-          "excerpts": "5"
+          "excerpts": "0"
         },
-        "duration_seconds": 12.873
+        "duration_seconds": 29.378
       },
       {
         "stage": "script_generation",
-        "status": "failed",
-        "started_at": "2026-11-25T21:33:40+00:00",
+        "status": "completed",
+        "started_at": "2026-11-26T17:38:47+00:00",
         "details": {
-          "topic": "How beavers reshape entire river ecosystems"
+          "topic": "How beavers reshape entire river ecosystems",
+          "words": "166"
         },
-        "duration_seconds": 3129.113,
-        "error": "RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 135 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 35 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 134 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 36 wo | staged fallback: ProviderRoutingError: All text-generation providers are unavailable: groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429"
+        "duration_seconds": 22.716
+      },
+      {
+        "stage": "fact_check",
+        "status": "failed",
+        "started_at": "2026-11-26T17:39:09+00:00",
+        "details": {
+          "claims": "8"
+        },
+        "duration_seconds": 62.826,
+        "error": "RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C1=insufficient: The provided excerpts discuss biodiversity loss, health risks, and forest habitats, but do not mention beavers building dams or transforming fast-flowing streams into wetlands.; C2=insufficient: The provided excerpt discusses rodent phylogenetics and evolution, but does not mention water velocity, sediment, or floodplains created by beavers.; C3=insufficient: The provided excerpt discusses the phylogenetic lineage and retroposon reads of beavers, but contains no mention of groundwater tables, riparian tree growth, or drought resilience.; C4=insufficient: The excerpt mentions fossil remains of faunal communities at a beaver pond site and nitrogen sinks, but does not provide direct evidence that beaver ponds increase habitat complexity or attract birds and mammals as stated.; C5=insufficient: The excerpts discuss general biodiversity, forest statistics, and wetland loss percentages, but contain no data on beaver-created wetlands raising local biodiversity indices by thirty percent.; C6=insufficient: The provided sources are EPA air pollutant tables and emission standards, which are completely unrelated to wetlands filtering water.; C7=insufficient: While the sources discuss climate resilience and avian diversity related to beaver ponds, they do not sufficiently or directly substantiate the exact claim about mosaic lands"
       }
     ]
   }

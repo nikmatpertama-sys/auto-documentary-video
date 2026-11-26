@@ -1,5 +1,5 @@
 [stage] cache_prune: start
-API/thumbnail cache size: 2.7 MB
+API/thumbnail cache size: 5.5 MB
 [stage] cache_prune: completed in 0.0s
 [stage] preflight: start
 [stage] preflight: completed in 0.0s
@@ -9,17 +9,22 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, Stream restoration
-Source pool: 54 trusted page(s) cited by Beaver, Keystone species, Stream restoration.
+Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, River ecosystem
+Source pool: 71 trusted page(s) cited by Beaver, Keystone species, River ecosystem.
+Evidence brief: skipped https://en.wikipedia.org/wiki/Beaver (FactCheckError: Could not fetch evidence source https://en.wikipedia.org/wiki/Beaver: HTTPError (HTTP 429))
+Evidence brief: skipped https://en.wikipedia.org/wiki/Keystone_species (FactCheckError: Could not fetch evidence source https://en.wikipedia.org/wiki/Keystone_species: HTTPError (HTTP 429))
+Evidence brief: skipped https://en.wikipedia.org/wiki/River_ecosystem (FactCheckError: Could not fetch evidence source https://en.wikipedia.org/wiki/River_ecosystem: HTTPError (HTTP 429))
+Evidence brief: skipped https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165 (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
+Evidence brief: skipped https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212 (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
 Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/22697210 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/28256552 (FactCheckError: Evidence page contains too little readable text for verification.)
 Fact-check source temporarily unavailable (SSLError); retrying once in 3s.
 Evidence brief: skipped https://journals.iupui.edu/index.php/ias/article/download/7219/7239 (FactCheckError: Could not fetch evidence source https://journals.iupui.edu/index.php/ias/article/download/7219/7239: SSLError)
-Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/32753594 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/21307956 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/18777567 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/25678658 (FactCheckError: Evidence page contains too little readable text for verification.)
@@ -27,106 +32,80 @@ Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/9237306 (FactCheckError:
 Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5773300
 Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/29375773 (FactCheckError: Evidence page contains too little readable text for verification.)
 Evidence brief: skipped https://www.iucnredlist.org/species/4003/22187946 (FactCheckError: Could not fetch evidence source https://www.iucnredlist.org/species/4003/22187946: HTTPError (HTTP 403))
-Evidence brief: 5 source passages fetched for planning.
-[stage] source_pool: completed in 12.9s
+Evidence brief: 0 source passages fetched for planning.
+[stage] source_pool: completed in 29.4s
 [stage] script_generation: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
 AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-Plan repair: scene 2 visual_query rewritten to name its visual_focus ('Rhône of France').
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 135 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 35 words overall across the scenes.
+AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 126 words; expected 130-195 for a 50-85 second narration. Rewrite each scene to 17-23 words: add 44 words overall across the scenes.
 AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: groq rate limited (HTTP 429); provider paused for 541s and the next route is used now.
-AI router: trying openrouter / openrouter/free for text/script_generation...
-AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
-AI router: retry pass 2/4 for text/script_generation in 540.9s with 2 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: gemini/gemini-3.5-flash-lite returned invalid data after the bounded repair attempt; cooling it down and trying another provider. Scene narration totals 134 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 36 words overall across the scenes.
-AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq rate limited (HTTP 429); provider paused for 900s and the next route is used now.
-AI router: retry pass 3/4 for text/script_generation in 900.0s with 2 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
-Gemini model gemini-3.8-flash answered HTTP 429; trying gemini-3.5-flash.
-Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-2.5-flash.
-AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
-AI router: trying groq / openai/gpt-oss-120b for text/script_generation...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq rate limited (HTTP 429); provider paused for 900s and the next route is used now.
-AI router: groq:openai/gpt-oss-120b needs 900s before it can answer again; that exceeds the remaining wait budget, so this run will not block on it.
-AI router: the single-shot plan was rejected by every provider; retrying as two smaller, independently validated requests. First failure: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 135 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 35 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; openrouter/
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
-AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
-Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
-AI router: gemini:gemini-3.5-flash-lite exhausted its output budget; retrying with a 0.30x completion budget.
-Gemini model gemini-3.8-flash answered HTTP 429; trying gemini-3.5-flash.
-AI router: gemini:gemini-3.5-flash-lite still truncates its output after shrinking the budget; retrying later in this run.
-AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
-AI router: groq rate limited (HTTP 429); provider paused for 258s and the next route is used now.
-AI router: trying openrouter / openrouter/free for text/script_outline...
-AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
-AI router: retry pass 2/4 for text/script_outline in 257.7s with 2 route(s).
-AI router: trying gemini / gemini-3.5-flash-lite for text/script_outline...
-Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
-Gemini model gemini-3.8-flash answered HTTP 429; trying gemini-2.5-flash.
-AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
-AI router: trying groq / openai/gpt-oss-120b for text/script_outline...
 AI router: groq/openai/gpt-oss-120b returned a valid text response.
-AI router: trying gemini / gemini-3.5-flash-lite for text/claim_sourcing...
-Gemini model gemini-3.5-flash answered HTTP 429; trying gemini-3.8-flash.
-Gemini model gemini-3.8-flash answered HTTP 503; trying gemini-2.5-flash.
-AI router: route gemini:gemini-3.5-flash-lite rejected configuration/request (HTTP 404); trying another route. This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://aistudio.google.c
-AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
-AI router: groq rate limited (HTTP 429); provider paused for 900s and the next route is used now.
-AI router: trying openrouter / openrouter/free for text/claim_sourcing...
-AI router: openrouter reports an exhausted quota or billing limit (HTTP 429); provider skipped for this stage for the rest of this run.
-AI router: retry pass 2/4 for text/claim_sourcing in 899.8s with 1 route(s).
-AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
-AI router: groq/openai/gpt-oss-120b returned a valid text response.
-AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
-AI router: groq rate limited (HTTP 429); provider paused for 56s and the next route is used now.
-AI router: retry pass 2/4 for text/claim_sourcing in 56.0s with 1 route(s).
-AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
-AI router: groq rate limited (HTTP 429); provider paused for 15s and the next route is used now.
-AI router: retry pass 3/4 for text/claim_sourcing in 15.0s with 1 route(s).
-AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
-AI router: groq rate limited (HTTP 429); provider paused for 60s and the next route is used now.
-AI router: retry pass 4/4 for text/claim_sourcing in 60.0s with 1 route(s).
-AI router: trying groq / openai/gpt-oss-120b for text/claim_sourcing...
-AI router: waiting 60s for the Groq free-plan token window before the repair attempt.
-AI router: groq/openai/gpt-oss-120b returned invalid JSON/schema; retrying this provider once with a targeted correction.
-AI router: groq rate limited (HTTP 429); provider paused for 418s and the next route is used now.
-[stage] script_generation: FAILED after 3129.1s
+Documentary plan generated by groq/openai/gpt-oss-120b: 166 words, 8 scenes.
+Opening validated before TTS: title=5 word(s), hook=5 word(s).
+[stage] script_generation: completed in 22.7s
+2/7 Fetching trusted source pages and auditing every factual assertion...
+[stage] fact_check: start
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+Fact-check source discovery: 288 trusted candidate URL(s) cited by related Wikipedia articles.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+Fact-check source discovery: 207 trusted candidate URL(s) cited by related Wikipedia articles.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+Fact-check source discovery: 3 trusted candidate URL(s) cited by related Wikipedia articles.
+Fact-check scholarly discovery: 10 open-access article page(s) found for the claim terms.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+Fact-check source discovery unavailable: HTTPError
+Fact-check source discovery: 0 trusted candidate URL(s) cited by related Wikipedia articles.
+Fact-check scholarly discovery: 10 open-access article page(s) found for the claim terms.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_audit...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+AI router: trying gemini / gemini-3.5-flash-lite for text/fact_check_repair...
+AI router: gemini/gemini-3.5-flash-lite returned invalid JSON/schema; retrying this provider once with a targeted correction.
+AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
+Fact-check repair for C1 proposed by gemini/gemini-3.5-flash-lite: removal
+Fact-check blocked sentence: Beavers, nature's engineers, build dams that transform fast‑flowing streams into tranquil wetlands, boosting biodiversity and create new habitats for countless species.
+Fact-check source diagnostic: usable | https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml | Catchment structure and functioning mediates beaver activity in contrasting lowland agricultural landscapes
+Fact-check source diagnostic: usable | https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13357385&rettype=xml | Ecosystem Engineers at Work: How Beaver Ponds Reshape Avian Abundance and Diversity in a Mountainous Forest Ecosystem in Central Europe
+Fact-check source diagnostic: not_usable | https://en.wikipedia.org/wiki/Keystone_species | Could not fetch evidence source https://en.wikipedia.org/wiki/Keystone_species: HTTPError (HTTP 429)
+Fact-check source diagnostic: not_usable | https://www.iucnredlist.org/species/4003/22187946 | Could not fetch evidence source https://www.iucnredlist.org/species/4003/22187946: HTTPError (HTTP 403)
+Fact-check source diagnostic: not_usable | https://www.nps.gov/subjects/climatechange/beaversaskeystone.htm | Could not fetch evidence source https://www.nps.gov/subjects/climatechange/beaversaskeystone.htm: HTTPError (HTTP 404)
+Fact-check source diagnostic: not_usable | https://www.usgs.gov/news/featured-story/beavers-ecosystem-architects | Could not fetch evidence source https://www.usgs.gov/news/featured-story/beavers-ecosystem-architects: HTTPError (HTTP 404)
+Fact-check source diagnostic: usable | https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12658289&rettype=xml | Intergenerational justice, the impending sixth mass extinction, reproduction and advanced biotechnologies, and humanity’s future
+Fact-check source diagnostic: usable | https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13002726&rettype=xml | Rewilding: history, intervention and the quest for immanence
+[stage] fact_check: FAILED after 62.8s
 [diagnostics] Failure report written to failure_report.json
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 870, in gemini_plan
-    plan, provider, model = generate_json(
-                            ^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1244, in generate_json
-    return _route("text", prompt, validator=validator, stage=stage)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1228, in _route
-    raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 135 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 35 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 134 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 36 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: HTTP 429
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1538, in verify_documentary_facts
+    report = _verify_documentary_pass(plan, generate_fact_json, fetched)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1409, in _verify_documentary_pass
+    raise _UnverifiableClaimError(
+fact_check._UnverifiableClaimError: Narration did not pass evidence validation. C1=insufficient: The provided excerpts discuss biodiversity loss, health risks, and forest habitats, but do not mention beavers building dams or transforming fast-flowing streams into wetlands.; C2=insufficient: The provided excerpt discusses rodent phylogenetics and evolution, but does not mention water velocity, sediment, or floodplains created by beavers.; C3=insufficient: The provided excerpt discusses the phylogenetic lineage and retroposon reads of beavers, but contains no mention of groundwater tables, riparian tree growth, or drought resilience.; C4=insufficient: The excerpt mentions fossil remains of faunal communities at a beaver pond site and nitrogen sinks, but does not provide direct evidence that beaver ponds increase habitat complexity or attract birds and mammals as stated.; C5=insufficient: The excerpts discuss general biodiversity, forest statistics, and wetland loss percentages, but contain no data on beaver-created wetlands raising local biodiversity indices by thirty percent.; C6=insufficient: The provided sources are EPA air pollutant tables and emission standards, which are completely unrelated to wetlands filtering water.; C7=insufficient: While the sources discuss climate resilience and avian diversity related to beaver ponds, they do not sufficiently or directly substantiate the exact claim about mosaic landscapes, ecological resilience, and flood/drought recovery across varied climatic zones as phrased.; C8=insufficient: The provided excerpts discuss mass extinction and rewilding, but do not mention beavers being recognized as keystone species or their engineering reshaping river ecosystems worldwide.
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 883, in gemini_plan
-    plan, provider, model = staged_plan(
-                            ^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 665, in staged_plan
-    part, _provider, _model = generate_json(
-                              ^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1244, in generate_json
-    return _route("text", prompt, validator=validator, stage=stage)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/ai_router.py", line 1228, in _route
-    raise ProviderRoutingError(
-ai_router.ProviderRoutingError: All text-generation providers are unavailable: groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1554, in verify_documentary_facts
+    applied = _apply_claim_repair(plan, exc.claim, replacement, rejected)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1481, in _apply_claim_repair
+    raise ValueError("Removing this claim would leave its scene without narration.")
+ValueError: Removing this claim would leave its scene without narration.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3949, in _run_pipeline
+    fact_report = verify_documentary_facts(
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/fact_check.py", line 1559, in verify_documentary_facts
+    raise FactCheckError(
+fact_check.FactCheckError: Narration did not pass evidence validation. C1=insufficient: The provided excerpts discuss biodiversity loss, health risks, and forest habitats, but do not mention beavers building dams or transforming fast-flowing streams into wetlands.; C2=insufficient: The provided excerpt discusses rodent phylogenetics and evolution, but does not mention water velocity, sediment, or floodplains created by beavers.; C3=insufficient: The provided excerpt discusses the phylogenetic lineage and retroposon reads of beavers, but contains no mention of groundwater tables, riparian tree growth, or drought resilience.; C4=insufficient: The excerpt mentions fossil remains of faunal communities at a beaver pond site and nitrogen sinks, but does not provide direct evidence that beaver ponds increase habitat complexity or attract birds and mammals as stated.; C5=insufficient: The excerpts discuss general biodiversity, forest statistics, and wetland loss percentages, but contain no data on beaver-created wetlands raising local biodiversity indices by thirty percent.; C6=insufficient: The provided sources are EPA air pollutant tables and emission standards, which are completely unrelated to wetlands filtering water.; C7=insufficient: While the sources discuss climate resilience and avian diversity related to beaver ponds, they do not sufficiently or directly substantiate the exact claim about mosaic landscapes, ecological resilience, and flood/drought recovery across varied climatic zones as phrased.; C8=insufficient: The provided excerpts discuss mass extinction and rewilding, but do not mention beavers being recognized as keystone species or their engineering reshaping river ecosystems worldwide. Claim repair failed: ValueError: Removing this claim would leave its scene without narration.
 
 The above exception was the direct cause of the following exception:
 
@@ -135,9 +114,6 @@ Traceback (most recent call last):
     main()
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4192, in main
     _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3938, in _run_pipeline
-    plan = gemini_plan(TOPIC, source_pool, evidence)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 887, in gemini_plan
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3978, in _run_pipeline
     raise RuntimeError(
-RuntimeError: A source-backed documentary plan could not be generated. The generator will not substitute a generic, unaudited local script. Details: ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 135 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 35 words overall across the scenes.); groq/openai/gpt-oss-120b: HTTP 429; openrouter/openrouter/free: HTTP 429; gemini/gemini-3.5-flash-lite: invalid response (Scene narration totals 134 words; expected 140-195 for a 60-85 second narration. Rewrite each scene to 19-23 words: add 36 wo | staged fallback: ProviderRoutingError: All text-generation providers are unavailable: groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429; groq/openai/gpt-oss-120b: HTTP 429
+RuntimeError: The documentary script was blocked because its factual claims were not fully confirmed by fetched trusted sources. No voice-over or video was produced. Details: Narration did not pass evidence validation. C1=insufficient: The provided excerpts discuss biodiversity loss, health risks, and forest habitats, but do not mention beavers building dams or transforming fast-flowing streams into wetlands.; C2=insufficient: The provided excerpt discusses rodent phylogenetics and evolution, but does not mention water velocity, sediment, or floodplains created by beavers.; C3=insufficient: The provided excerpt discusses the phylogenetic lineage and retroposon reads of beavers, but contains no mention of groundwater tables, riparian tree growth, or drought resilience.; C4=insufficient: The excerpt mentions fossil remains of faunal communities at a beaver pond site and nitrogen sinks, but does not provide direct evidence that beaver ponds increase habitat complexity or attract birds and mammals as stated.; C5=insufficient: The excerpts discuss general biodiversity, forest statistics, and wetland loss percentages, but contain no data on beaver-created wetlands raising local biodiversity indices by thirty percent.; C6=insufficient: The provided sources are EPA air pollutant tables and emission standards, which are completely unrelated to wetlands filtering water.; C7=insufficient: While the sources discuss climate resilience and avian diversity related to beaver ponds, they do not sufficiently or directly substantiate the exact claim about mosaic lands

@@ -1,0 +1,578 @@
+{
+  "status": "blocked",
+  "method": "trusted-source fetch + independent evidence-grounded AI audit",
+  "fact_checker": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
+  },
+  "claim_count": 8,
+  "supported_claim_count": 0,
+  "failed_claims": [
+    {
+      "claim_id": "C1",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
+        "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru"
+      ],
+      "reason": "The provided excerpts discuss biodiversity loss, health risks, and forest habitats, but do not mention beavers building dams or transforming fast-flowing streams into wetlands."
+    },
+    {
+      "claim_id": "C2",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/"
+      ],
+      "reason": "The provided excerpt discusses rodent phylogenetics and evolution, but does not mention water velocity, sediment, or floodplains created by beavers."
+    },
+    {
+      "claim_id": "C3",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC5335264/"
+      ],
+      "reason": "The provided excerpt discusses the phylogenetic lineage and retroposon reads of beavers, but contains no mention of groundwater tables, riparian tree growth, or drought resilience."
+    },
+    {
+      "claim_id": "C4",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC7403313/"
+      ],
+      "reason": "The excerpt mentions fossil remains of faunal communities at a beaver pond site and nitrogen sinks, but does not provide direct evidence that beaver ponds increase habitat complexity or attract birds and mammals as stated."
+    },
+    {
+      "claim_id": "C5",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
+        "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru"
+      ],
+      "reason": "The excerpts discuss general biodiversity, forest statistics, and wetland loss percentages, but contain no data on beaver-created wetlands raising local biodiversity indices by thirty percent."
+    },
+    {
+      "claim_id": "C6",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://www.epa.gov/criteria-air-pollutants/naaqs-table",
+        "https://www.epa.gov/stationary-sources-air-pollution/national-emission-standards-hazardous-air-pollutants-neshap-9"
+      ],
+      "reason": "The provided sources are EPA air pollutant tables and emission standards, which are completely unrelated to wetlands filtering water."
+    },
+    {
+      "claim_id": "C7",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13357385&rettype=xml"
+      ],
+      "reason": "While the sources discuss climate resilience and avian diversity related to beaver ponds, they do not sufficiently or directly substantiate the exact claim about mosaic landscapes, ecological resilience, and flood/drought recovery across varied climatic zones as phrased."
+    },
+    {
+      "claim_id": "C8",
+      "status": "insufficient",
+      "evidence_urls": [
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12658289&rettype=xml",
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13002726&rettype=xml"
+      ],
+      "reason": "The provided excerpts discuss mass extinction and rewilding, but do not mention beavers being recognized as keystone species or their engineering reshaping river ecosystems worldwide."
+    }
+  ],
+  "uncited_factual_sentences": [],
+  "coverage_note": "All sentences in the script correspond to the 8 supplied claims, but every single claim is evaluated as insufficient because the provided source excerpts do not contain direct evidence supporting their specific factual assertions.",
+  "claims": [
+    {
+      "id": "C1",
+      "scene": 1,
+      "sentence": "Beavers, nature's engineers, build dams that transform fast‑flowing streams into tranquil wetlands, boosting biodiversity and create new habitats for countless species.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Beaver",
+        "https://en.wikipedia.org/wiki/Keystone_species"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
+        "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru"
+      ],
+      "reason": "The provided excerpts discuss biodiversity loss, health risks, and forest habitats, but do not mention beavers building dams or transforming fast-flowing streams into wetlands."
+    },
+    {
+      "id": "C2",
+      "scene": 2,
+      "sentence": "These structures slow water velocity, causing sediment to settle and forming nutrient‑rich floodplains that support diverse plant communities along the riverbanks.",
+      "source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383",
+        "https://pubmed.ncbi.nlm.nih.gov/22697210"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/"
+      ],
+      "reason": "The provided excerpt discusses rodent phylogenetics and evolution, but does not mention water velocity, sediment, or floodplains created by beavers."
+    },
+    {
+      "id": "C3",
+      "scene": 3,
+      "sentence": "Ponded water behind dams raises groundwater tables, enhancing riparian tree growth and providing drought resilience for surrounding ecosystems throughout the year.",
+      "source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264",
+        "https://pubmed.ncbi.nlm.nih.gov/28256552"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC5335264/"
+      ],
+      "reason": "The provided excerpt discusses the phylogenetic lineage and retroposon reads of beavers, but contains no mention of groundwater tables, riparian tree growth, or drought resilience."
+    },
+    {
+      "id": "C4",
+      "scene": 4,
+      "sentence": "Beaver ponds increase habitat complexity, offering shelter for fish, amphibians, and invertebrates, which in turn attract birds and mammals.",
+      "source_urls": [
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313",
+        "https://pubmed.ncbi.nlm.nih.gov/32753594"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC7403313/"
+      ],
+      "reason": "The excerpt mentions fossil remains of faunal communities at a beaver pond site and nitrogen sinks, but does not provide direct evidence that beaver ponds increase habitat complexity or attract birds and mammals as stated."
+    },
+    {
+      "id": "C5",
+      "scene": 5,
+      "sentence": "Studies show that beaver‑created wetlands can raise local biodiversity indices by up to thirty percent compared with unaltered streams within a decade.",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/21307956",
+        "https://pubmed.ncbi.nlm.nih.gov/18777567"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
+        "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru"
+      ],
+      "reason": "The excerpts discuss general biodiversity, forest statistics, and wetland loss percentages, but contain no data on beaver-created wetlands raising local biodiversity indices by thirty percent."
+    },
+    {
+      "id": "C6",
+      "scene": 6,
+      "sentence": "These wetlands also act as natural filters, trapping pollutants and reducing downstream nitrogen loads, improving water quality for human use and ecosystem.",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/25678658",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5773300"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://www.epa.gov/criteria-air-pollutants/naaqs-table",
+        "https://www.epa.gov/stationary-sources-air-pollution/national-emission-standards-hazardous-air-pollutants-neshap-9"
+      ],
+      "reason": "The provided sources are EPA air pollutant tables and emission standards, which are completely unrelated to wetlands filtering water."
+    },
+    {
+      "id": "C7",
+      "scene": 7,
+      "sentence": "By creating mosaic landscapes, beavers promote ecological resilience, helping rivers recover faster from floods and droughts across varied climatic zones.",
+      "source_urls": [
+        "https://pubmed.ncbi.nlm.nih.gov/29375773",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6175133"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13357385&rettype=xml"
+      ],
+      "reason": "While the sources discuss climate resilience and avian diversity related to beaver ponds, they do not sufficiently or directly substantiate the exact claim about mosaic landscapes, ecological resilience, and flood/drought recovery across varied climatic zones as phrased."
+    },
+    {
+      "id": "C8",
+      "scene": 8,
+      "sentence": "Consequently, beavers are recognized as keystone species whose engineering reshapes entire river ecosystems, sustaining life for generations through centuries worldwide.",
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Keystone_species",
+        "https://www.iucnredlist.org/species/4003/22187946"
+      ],
+      "status": "insufficient",
+      "verified_evidence_urls": [
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12658289&rettype=xml",
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13002726&rettype=xml"
+      ],
+      "reason": "The provided excerpts discuss mass extinction and rewilding, but do not mention beavers being recognized as keystone species or their engineering reshaping river ecosystems worldwide."
+    }
+  ],
+  "sources": [
+    {
+      "claim_id": "C1",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Beaver: HTTPError (HTTP 429)"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Keystone_species: HTTPError (HTTP 429)"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.fws.gov/story/how-beavers-build-wetlands-and-benefit-ecosystems",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.fws.gov/story/how-beavers-build-wetlands-and-benefit-ecosystems: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.nps.gov/subjects/climatechange/beavers.htm",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.nps.gov/subjects/climatechange/beavers.htm: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
+      "resolved_url": "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
+      "host": "www.who.int",
+      "http_status": 200,
+      "page_title": "Biodiversity",
+      "excerpt": "However, biodiversity loss is accelerating at an unprecedented rate, with approximately 1 million species at risk of extinction, threatening these vital services and exacerbating public health risks globally. Threats to biodiversity and health Biodiversity loss is occurring at an alarming rate, with recent estimates showing that species extinctions are currently 10 to 100 times higher than the natural baseline. Nutrition and biodiversity are interconnected at various levels, from ecosystems that provide food to the genetic diversity within species. Biodiversity offers a genetic pool for developing resilient and sustainable food crops, livestock and marine species. Habitat simplification (the selective removal of species, such as in monoculture) and species loss increases vulnerabilities, highlighting the need for biodiversity-friendly practices to support food security and public health.",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru",
+      "resolved_url": "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru",
+      "host": "reliefweb.int",
+      "http_status": 200,
+      "page_title": "The State of the World’s Forests 2020: Forests, biodiversity and people [EN/AR/RU] - World | ReliefWeb UN OCHA",
+      "excerpt": "Forest restoration, when implemented appropriately, helps restore habitats and ecosystems, create jobs and income and is an effective nature-based solution to climate change. Forests provide habitats for 80 percent of amphibian species, 75 percent of bird species and 68 percent of mammal species. Mangroves provide breeding grounds and nurseries for numerous species of fish and shellfish and help trap sediments that might otherwise adversely affect seagrass beds and coral reefs, which are habitats for many more marine species. Ironically, the resilience of human food systems and their capacity to adapt to future change depends on that very biodiversity – including dryland-adapted shrub and tree species that help combat desertification, forest-dwelling insects, bats and bird species that pollinate crops, trees with extensive root systems in mountain ecosystems that prevent soil erosion, an",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://news.cornell.edu/stories/2010/12/loss-species-bad-your-health",
+      "resolved_url": "https://news.cornell.edu/stories/2010/12/loss-species-bad-your-health",
+      "host": "news.cornell.edu",
+      "http_status": 200,
+      "page_title": "Study: Loss of species is bad for your health | Cornell Chronicle",
+      "excerpt": "As the number of species declines due to habitat loss, pollution and climate change, the risk of catching infectious diseases may rise for humans, animals and plants. 2, 2010) As the number of species declines due to habitat loss, pollution and climate change, the risk of catching infectious diseases may rise for humans, animals and plants. 2, 2010) As the number of species declines due to habitat loss, pollution and climate change, the risk of catching infectious diseases may rise for humans, animals and plants. 2, 2010) Study: Loss of species is bad for your health | Cornell Chronicle Skip to main content Toggle navigation Search Cornell University Cornell.edu Media Relations Search Cornell University Cornell Chronicle Topics Architecture & Design Artificial Intelligence Arts & Humanities Business, Economics & Entrepreneurship Computing & Information Sciences Energy, Environment & Sust",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.britannica.com/science/biodiversity-loss",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Could not fetch evidence source https://www.britannica.com/science/biodiversity-loss: HTTPError (HTTP 403)"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC3532383/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "A glimpse on the pattern of rodent diversification: a phylogenetic approach - PMC A glimpse on the pattern of rodent diversification: a phylogenetic approach Lock",
+      "excerpt": "Background A fundamental question in evolutionary biology is understanding why some clades are highly diverse. Relationships and support within the muroids agree with those identified in the previous molecular phylogenies of [ 41 , 43 ], [ 46 ] and [ 47 ]. Our results also support the paraphyly of Heteromyidae with respect to the Geomyidae [ 28 , 30 ]. Our study (Figure 3 ), as well as recent phylogenetic works on Eumuroidea clades strongly support the role of colonization processes in SDR. Within Sciuridae, two significant SDR (P < 0.05) occurred at the origin of the family, and along the branch leading to the Sciurillini tribe and the rest of the Sciuridae, two within the Callosciurinae subfamily, one within the Pteromyini tribe, and then one significant SDR within the Xerinae subfamily. Simultaneously, most of the relatives of extant species played a major role in rodent communities d",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/22697210",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC5335264/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "The Beaver’s Phylogenetic Lineage Illuminated by Retroposon Reads - PMC The Beaver’s Phylogenetic Lineage Illuminated by Retroposon Reads Lock",
+      "excerpt": "For the Castorimorpha clade we tested the following alternative tree topologies. This sciuromorphous zygomasseteric structure as well as the sciurognathous type of mandible 20 were responsible for a more than 50-year-long phylogenetic association of Castoridae and Sciuridae 17 , 21 (see Fig. Additional multi-directional screenings To perform 2-way genome screenings for testing potential alternative tree topologies we used a combination of computational screenings to check for potential support of different tree topologies using the following 2-way alignments: mouse/kangaroo rat ( http://hgdownload.soe.ucsc.edu/goldenPath/mm10/vsDipOrd1/axtNet/ ); All possible phylogenetic tree topologies are tested and processes such as incomplete lineage sorting and ancestral hybridization can be differentiated. We thank Francois Catzeflis, Université de Montpellier II, France, for providing specimens o",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/28256552",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C4",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313",
+      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC7403313/",
+      "host": "pmc.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants Lock",
+      "excerpt": "This peat unit is characterized by an abundance of beaver-cut sticks 10 , 11 and has yielded a wide array of beautifully preserved plant macrofossils, invertebrates, and vertebrate fossil remains (Fig. The remains of a complex faunal community were discovered at the Beaver Pond site, including beaver ( Dipoides sp., see below), three-toed horse, bear, badger, “deerlet”, water fowl, fish and a rabbit relative 10 , 22 . Today, beaver ponds are considered to be N sinks, with elevated rates of bacterially mediated denitrification 69 . Beaver ponds: resurgent nitrogen sinks for rural watersheds in the northeastern United States. The importance of aquatic vegetation in beaver diets and the seasonal and habitat specificity of aquatic-terrestrial ecosystem linkages in a subarctic environment. Evolution of woodcutting behaviour in Early Pliocene beaver driven by consumption of woody plants - PMC ",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C4",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/32753594",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/21307956",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/18777567",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
+      "resolved_url": "https://www.who.int/news-room/fact-sheets/detail/biodiversity",
+      "host": "www.who.int",
+      "http_status": 200,
+      "page_title": "Biodiversity",
+      "excerpt": "Biodiversity WHO fact sheet on biodiversity as it relates to health, including key facts, threats to biodiversity, impact, climate change, health research and WHO response. WHO fact sheet on biodiversity as it relates to health, including key facts, threats to biodiversity, impact, climate change, health research and WHO response. Forests store 80% of terrestrial biodiversity, absorbing approximately 2.6 billion tonnes of carbon dioxide annually, helping mitigate climate change. Healthy ecosystems provide 75% of global freshwater resources, with wetlands playing a key role in water purification. However, since 1970, 35% of wetlands have been lost. Indigenous Peoples, representing an estimated 6% of the global population, are crucial stakeholders and rights holders in the conservation and sustainable management of biodiversity. Overview Biodiversity, the variability among living organisms",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru",
+      "resolved_url": "https://reliefweb.int/report/world/state-world-s-forests-2020-forests-biodiversity-and-people-enarru",
+      "host": "reliefweb.int",
+      "http_status": 200,
+      "page_title": "The State of the World’s Forests 2020: Forests, biodiversity and people [EN/AR/RU] - World | ReliefWeb UN OCHA",
+      "excerpt": "published on 7 Aug 2020 by FAO The State of the World’s Forests 2020: Forests, biodiversity and people [EN/AR/RU] - World | ReliefWeb Skip to main content Help Log in ReliefWeb Content Search Updates Countries Disasters Organizations Topics Jobs Training Informing humanitarians worldwide 24/7 — a service provided by UN OCHA World The State of the World’s Forests 2020: Forests, biodiversity and people [EN/AR/RU] Format Analysis Source FAO Posted 1 Sep 2020 Originally published 7 Aug 2020 Origin View original Attachments Download Report (PDF | 14.66 MB | English version) Download Report (PDF | 11.48 MB | Arabic version) Download Report (PDF | 20.62 MB | Russian version) EXECUTIVE SUMMARY As the United Nations Decade on Biodiversity 2011–2020 comes to a close and countries prepare to adopt a post-2020 global biodiversity framework, this edition of The State of the World’s Forests ( SOFO ) t",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://news.cornell.edu/stories/2010/12/loss-species-bad-your-health",
+      "resolved_url": "https://news.cornell.edu/stories/2010/12/loss-species-bad-your-health",
+      "host": "news.cornell.edu",
+      "http_status": 200,
+      "page_title": "Study: Loss of species is bad for your health | Cornell Chronicle",
+      "excerpt": "2, 2010) Study: Loss of species is bad for your health | Cornell Chronicle Skip to main content Toggle navigation Search Cornell University Cornell.edu Media Relations Search Cornell University Cornell Chronicle Topics Architecture & Design Artificial Intelligence Arts & Humanities Business, Economics & Entrepreneurship Computing & Information Sciences Energy, Environment & Sustainability Food & Agriculture Global Reach Health, Nutrition & Medicine Law, Government & Public Policy Life Sciences & Veterinary Medicine Physical Sciences & Engineering Social & Behavioral Sciences Research Matters Campus & Community News & Events Local Impact NYS Impact New York City Public Engagement Features Photos of the Week Student Life Staff News Big Red Sports Inclusion and Belonging University Statements In Memory Around Cornell All Stories Podcast Media Relations Cornellians Study: Loss of species is ",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://www.britannica.com/science/biodiversity-loss",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again."
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/25678658",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5773300",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://www.epa.gov/wetlands/wetlands-protection-and-restoration",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.epa.gov/wetlands/wetlands-protection-and-restoration: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://www.usgs.gov/mission-areas/water-resources/science/wetlands-and-water-quality",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.usgs.gov/mission-areas/water-resources/science/wetlands-and-water-quality: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://www.epa.gov/criteria-air-pollutants/naaqs-table",
+      "resolved_url": "https://www.epa.gov/criteria-air-pollutants/naaqs-table",
+      "host": "www.epa.gov",
+      "http_status": 200,
+      "page_title": "NAAQS Table | US EPA Lock Primary navigation Open Sidenav Menu Close Sidenav Menu",
+      "excerpt": "Menu Environmental Topics Environmental Topics Air Bed Bugs Chemicals, Toxics, and Pesticide Emergency Response Environmental Information by Location Health Land, Waste, and Cleanup Lead Mold Radon Research Science Topics Water Topics A-Z Topic Index Laws & Regulations Laws & Regulations By Business Sector By Topic Compliance Enforcement Guidance Laws and Executive Orders Regulations Report a Violation Report a Violation Environmental Violations Fraud, Waste or Abuse About EPA About EPA Our Mission and What We Do Headquarters Offices Regional Offices Labs and Research Centers Newsroom Planning, Budget, and Results Organization Chart EPA History Breadcrumb Home Criteria Air Pollutants NAAQS Table The Clean Air Act , which was last amended in 1990, requires EPA to set National Ambient Air Quality Standards (40 CFR part 50) for six principal pollutants ( \"criteria\" air pollutants ) which ca",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://www.epa.gov/stationary-sources-air-pollution/national-emission-standards-hazardous-air-pollutants-neshap-9",
+      "resolved_url": "https://www.epa.gov/stationary-sources-air-pollution/national-emission-standards-hazardous-air-pollutants-neshap-9",
+      "host": "www.epa.gov",
+      "http_status": 200,
+      "page_title": "National Emission Standards for Hazardous Air Pollutants (NESHAP): Plywood and Composite Wood Products Compliance Requirements & Timeline | US EPA Lock Primary navigation Open Sidenav Menu Close Sidenav Menu expand or collapse the child men",
+      "excerpt": "Menu Environmental Topics Environmental Topics Air Bed Bugs Chemicals, Toxics, and Pesticide Emergency Response Environmental Information by Location Health Land, Waste, and Cleanup Lead Mold Radon Research Science Topics Water Topics A-Z Topic Index Laws & Regulations Laws & Regulations By Business Sector By Topic Compliance Enforcement Guidance Laws and Executive Orders Regulations Report a Violation Report a Violation Environmental Violations Fraud, Waste or Abuse About EPA About EPA Our Mission and What We Do Headquarters Offices Regional Offices Labs and Research Centers Newsroom Planning, Budget, and Results Organization Chart EPA History Breadcrumb Home Stationary Sources of Air Pollution National Emission Standards for Hazardous Air Pollutants (NESHAP): Plywood and Composite Wood Products Compliance Requirements & Timeline These 2006 documents provide an overview of requirements ",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://www.epa.gov/standards-water-body-health",
+      "resolved_url": "https://www.epa.gov/wqs-tech",
+      "host": "www.epa.gov",
+      "http_status": 200,
+      "page_title": "Water Quality Standards: Regulations and Resources | US EPA Lock Primary navigation",
+      "excerpt": "Water Quality Standards are an important tool for restoring and maintaining healthy water quality for lakes, rivers and streams, estuaries, and other waters nationally and where you live. Water Quality Standards are an important tool for restoring and maintaining healthy water quality for lakes, rivers and streams, estuaries, and other waters nationally and where you live. Water Quality Standards are an important tool for restoring and maintaining healthy water quality for lakes, rivers and streams, estuaries, and other waters nationally and where you live. Water Quality Standards: Regulations and Resources | US EPA Skip to main content An official website of the United States government Here’s how you know Here’s how you know Official websites use .gov A .gov website belongs to an official government organization in the United States. Menu Environmental Topics Environmental Topics Air B",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://ww2.arb.ca.gov/resources/documents/combustion-pollutants-your-home-guidelines",
+      "resolved_url": "https://ww2.arb.ca.gov/resources/documents/combustion-pollutants-your-home-guidelines",
+      "host": "ww2.arb.ca.gov",
+      "http_status": 200,
+      "page_title": "Combustion Pollutants in Your Home - Guidelines | California Air Resources Board",
+      "excerpt": "Combustion Pollutants in Your Home - Guidelines | California Air Resources Board Skip to main content × Display Settings Default High Contrast Reset Increase Font Size Font Decrease Font Size Font twitter facebook youtube linkedin email Calendar FAQs Contact Careers Subscribe Display Settings English Español California Air Resources Board Main navigation About Our Work Resources Services Rulemaking Newsroom Equity Combustion Pollutants in Your Home - Guidelines What you can do to reduce combustion pollutants in your home Categories Topics Indoor Air Quality & Exposure , Simple Solutions to Improve Air Quality , Consumer Products Programs Exposure , Consumer Products Program , Residential Woodsmoke Reduction Type Information Contact Research Division Email [email protected] Phone (916) 445-0753 Identify Sources of Combustion Pollutants : Unvented combustion appliances , which include most",
+      "source_kind": "discovered",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/29375773",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6175133",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://www.usgs.gov/news/national-news-release/beavers-build-climate-resilience-western-watersheds",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.usgs.gov/news/national-news-release/beavers-build-climate-resilience-western-watersheds: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://www.nps.gov/articles/beaver-ecosystem-engineer.htm",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.nps.gov/articles/beaver-ecosystem-engineer.htm: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://id.loc.gov/authorities/sh85074392",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Could not fetch evidence source https://id.loc.gov/authorities/sh85074392: HTTPError (HTTP 403)"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://catalog.archives.gov/id/10640349",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Evidence page contains too little readable text for verification."
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://lux.collections.yale.edu/view/concept/4a6cf4fd-dc6a-45f2-a033-c46237d0293c",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Could not fetch evidence source https://lux.collections.yale.edu/view/concept/4a6cf4fd-dc6a-45f2-a033-c46237d0293c: HTTPError (HTTP 403)"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
+      "resolved_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
+      "host": "eutils.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Catchment structure and functioning mediates beaver activity in contrasting lowland agricultural landscapes",
+      "excerpt": "Considering the projected increased likelihood and severity of extreme floods and droughts, there is a need to develop more sustainable land and water management practices that enhance climate resilience and natural ecosystem functioning (Gutzler et al., 2015 ; pmc Ecol Appl Ecol Appl 379 blackwellopen 9889808 EAP Ecological Applications 1051-0761 pmc-is-collection-domain yes pmc-collection-title Wiley Open Access Collection PMC13710877 PMC13710877.1 13710877 13710877 42935086 10.1002/eap.70335 EAP70335 1 Article Article Catchment structure and functioning mediates beaver activity in contrasting lowland agricultural landscapes Catchment structure and functioning mediates beaver activity in contrasting lowland agricultural landscapes Warter et al. Abstract The reintroduction of beavers in Germany and across Europe has revived interest in their function as ecosystem engineers and their ass",
+      "source_kind": "scholarly",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13357385&rettype=xml",
+      "resolved_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13357385&rettype=xml",
+      "host": "eutils.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Ecosystem Engineers at Work: How Beaver Ponds Reshape Avian Abundance and Diversity in a Mountainous Forest Ecosystem in Central Europe",
+      "excerpt": "Eurasian beavers significantly enhance bird diversity and abundance by creating wetland habitats, with 23% higher bird numbers and more unique species at beaver ponds compared to unaffected streams. Beavers impound ponds and pools, creating wetlands. The beaver habitats with wild rivers, streams, gravel pit birds, waterfowl generalists and waterfowl of standing water, banks and siltation zones formed the wetland guild. While wetland size is not equivalent to pond size, beavers generate flood zones and wet meadows when impounding a large pond (Jones et al. This underlines the importance of beaver ponds for species that depend on the ecological conditions of standing water with increased shallow water zones, reedy vegetation along the banks and abundant food sources (Longcore et al. Species diversity, abundance, and community heterogeneity increased with pond size, indicating that pond siz",
+      "source_kind": "scholarly",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Keystone_species: HTTPError (HTTP 429)"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "status": "not_usable",
+      "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://www.iucnredlist.org/species/4003/22187946: HTTPError (HTTP 403)"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://www.nps.gov/subjects/climatechange/beaversaskeystone.htm",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.nps.gov/subjects/climatechange/beaversaskeystone.htm: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://www.usgs.gov/news/featured-story/beavers-ecosystem-architects",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.usgs.gov/news/featured-story/beavers-ecosystem-architects: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12658289&rettype=xml",
+      "resolved_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12658289&rettype=xml",
+      "host": "eutils.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Intergenerational justice, the impending sixth mass extinction, reproduction and advanced biotechnologies, and humanity’s future",
+      "excerpt": "Consequently, unless emphatic and realistic actions are undertaken, an imminent sixth mass extinction, defined by 75% species/genera extinction over 2 million years beginning with the extinction of a high percentage of Critically Endangered species, and many now Endangered species, is predicted over the next decades and centuries (Barnowsky et al., 2011 ), irrespective of the protection of their populations, habitats and ecosystems (Fletcher et al., 2023 ; Global heating, ecosystem modification and species loss Global heating and regional climate shifts threaten the biosphere, species and ecosystems, and provide an existential threat to humanity, as formally recognized as early as the 1970s by world governments (Wang and Mei, 2024 ). Rewilded keystone browsing species provide habitat engineers including beavers ( Castor fiber ) and bison ( Bison spp.). Intergenerational justice is the co",
+      "source_kind": "scholarly",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13002726&rettype=xml",
+      "resolved_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13002726&rettype=xml",
+      "host": "eutils.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Rewilding: history, intervention and the quest for immanence",
+      "excerpt": "or producing self-sustaining ecosystems (Schulte to Bühne et al., 2022 ), which are in some respect at odds with each other, mainly regarding levels of commitment towards environmental restoration (Klop‐Toker et al., 2020 ; Lorimer and colleagues ( 2015 ) considered that it was based on maintaining “or even increase biodiversity and reduce or reverse past and present human impacts by restoring more functional ecosystems.” To the extent that rewilding supports the creation of novel ecosystems, a broader consideration of this ethos foundation would be based in reorganizing biota and ecosystem processes “to set an identified social–ecological system on a preferred trajectory, leading to the self-sustaining provision of ecosystem services with minimal ongoing management” (Pettorelli et al., 2018 ). Schweiger & Svenning, 2020 ), it is because damage is essentially linked to dissolving or hind",
+      "source_kind": "scholarly",
+      "status": "usable"
+    }
+  ],
+  "blocked_at_claim": "C1",
+  "blocked_claim_sentence": "Beavers, nature's engineers, build dams that transform fast‑flowing streams into tranquil wetlands, boosting biodiversity and create new habitats for countless species.",
+  "failure_reason": "C1=insufficient: The provided excerpts discuss biodiversity loss, health risks, and forest habitats, but do not mention beavers building dams or transforming fast-flowing streams into wetlands.",
+  "claim_repairs": [],
+  "repair_failure": "ValueError: Removing this claim would leave its scene without narration."
+}
