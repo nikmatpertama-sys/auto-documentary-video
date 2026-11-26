@@ -1,11 +1,10 @@
-
 name: Hybrid Documentary Generator
 
 on:
   workflow_dispatch:
     inputs:
       topic:
-        description: "Documentary idea / topic (English or Indonesian)"
+        description: "Documentary topic / idea (English or Indonesian)"
         required: true
         type: string
 
@@ -13,440 +12,327 @@ permissions:
   contents: write
 
 concurrency:
-  group: documentary-${{ github.ref }}
+  group: documentary-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
+
+    env:
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      TOKENIZERS_PARALLELISM: "false"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_HOME: ${{ github.workspace }}/.hf-cache
+      HF_HUB_DOWNLOAD_TIMEOUT: "60"
+      HF_HUB_ETAG_TIMEOUT: "20"
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          persist-credentials: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-
-      # Extract the newest root ZIP, remove stale ZIPs,
-      # commit the extracted project, and push to current branch.
-      - name: Apply and permanently commit newest project ZIP
+      - name: Find and extract newest valid project ZIP (filename-independent)
         shell: bash
-        env:
-          TARGET_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-
           python - <<'PYZIP'
-          from __future__ import annotations
-
-          import shutil
+          import json
+          import os
           import stat
           import subprocess
-          import tempfile
           import zipfile
           from pathlib import Path, PurePosixPath
 
           ROOT = Path.cwd().resolve()
-
-          MAX_ARCHIVE_BYTES = 1024 * 1024 * 1024
-          MAX_ENTRIES = 12000
-          MAX_TOTAL_UNCOMPRESSED = 3 * 1024 * 1024 * 1024
-          MAX_SINGLE_FILE = 1024 * 1024 * 1024
-          MAX_COMPRESSION_RATIO = 1000
-
-          IGNORED = {"__MACOSX", ".DS_Store"}
-
-          # Preserve the active workflow so an older ZIP
-          # cannot overwrite the bootstrap/commit mechanism.
-          PROTECTED_FILES = {
-              ".github/workflows/render.yml"
+          MARKERS = {
+              "quota_router.py",
+              "ai_router.py",
+              "visual_matcher.py",
+              "visual_fallback.py",
+              "footage.py",
           }
 
-          def fail(message):
-              raise SystemExit(f"Project ZIP error: {message}")
+          def safe_parts(filename):
+              normalized = filename.replace("\\", "/")
+              path = PurePosixPath(normalized)
+              if path.is_absolute() or not path.parts or ".." in path.parts:
+                  return None
+              if any(part in ("", ".") for part in path.parts):
+                  return None
+              return path.parts
 
-          def committed_at(path):
-              try:
-                  result = subprocess.run(
-                      [
-                          "git",
-                          "log",
-                          "-1",
-                          "--format=%ct",
-                          "--",
-                          path.name
-                      ],
-                      cwd=ROOT,
-                      capture_output=True,
-                      text=True,
-                      check=False
-                  )
+          def project_prefix(zf):
+              regular_files = set()
+              entries = []
+              for info in zf.infolist():
+                  if info.is_dir():
+                      continue
+                  parts = safe_parts(info.filename)
+                  if parts is None:
+                      continue
+                  regular_files.add(parts)
+                  entries.append((info, parts))
 
-                  if result.returncode == 0 and result.stdout.strip():
-                      return int(result.stdout.strip())
+              prefixes = []
+              for parts in regular_files:
+                  if parts[-1] != "main.py":
+                      continue
+                  prefix = parts[:-1]
+                  if prefix + ("requirements.txt",) not in regular_files:
+                      continue
+                  if not any(prefix + (marker,) in regular_files for marker in MARKERS):
+                      continue
+                  # The 10.15 project has this exact test module. Requiring it
+                  # prevents log/media ZIPs from being mistaken for project ZIPs.
+                  if prefix + ("quota_router.py",) in regular_files:
+                      if prefix + ("test_quota_router.py",) not in regular_files:
+                          continue
+                  prefixes.append(prefix)
 
-              except (OSError, ValueError):
-                  pass
+              if not prefixes:
+                  return None
+              return min(prefixes, key=lambda value: (len(value), value))
 
-              return int(path.stat().st_mtime)
-
-          archives = [
-              p for p in ROOT.iterdir()
-              if p.is_file() and p.suffix.lower() == ".zip"
-          ]
-
-          if not archives:
-              print(
-                  "No root-level project ZIP found; "
-                  "using checked-out files."
+          def last_commit_timestamp(path):
+              result = subprocess.run(
+                  ["git", "log", "-1", "--format=%ct", "--", str(path)],
+                  capture_output=True,
+                  text=True,
+                  check=False,
               )
+              try:
+                  return int(result.stdout.strip())
+              except (TypeError, ValueError):
+                  return int(path.stat().st_mtime)
+
+          candidates = []
+          for archive in ROOT.iterdir():
+              if not archive.is_file() or archive.suffix.lower() != ".zip":
+                  continue
+              try:
+                  with zipfile.ZipFile(archive) as zf:
+                      prefix = project_prefix(zf)
+                      if prefix is not None:
+                          candidates.append((last_commit_timestamp(archive), archive.stat().st_mtime_ns, archive.name, prefix))
+              except (zipfile.BadZipFile, OSError, RuntimeError):
+                  continue
+
+          if not candidates:
+              print("No valid project ZIP found. Existing repository project files will be used.")
+              Path(".upgrade_zip_to_remove").unlink(missing_ok=True)
               raise SystemExit(0)
 
-          archives.sort(
-              key=lambda p: (
-                  committed_at(p),
-                  p.stat().st_mtime_ns,
-                  p.name.casefold()
-              ),
-              reverse=True
+          candidates.sort(reverse=True)
+          _, _, archive_name, prefix = candidates[0]
+          archive = ROOT / archive_name
+          print(f"Selected newest valid project archive: {archive_name}")
+
+          copied = 0
+          with zipfile.ZipFile(archive) as zf:
+              for info in zf.infolist():
+                  if info.is_dir():
+                      continue
+                  parts = safe_parts(info.filename)
+                  if parts is None or parts[:len(prefix)] != prefix:
+                      continue
+                  relative_parts = parts[len(prefix):]
+                  if not relative_parts:
+                      continue
+
+                  # Keep the workflow permanently stored in the repository.
+                  if relative_parts[0] in (".github", ".git"):
+                      continue
+
+                  # Reject symlinks instead of writing them into the workspace.
+                  unix_mode = (info.external_attr >> 16) & 0o170000
+                  if unix_mode == stat.S_IFLNK:
+                      raise RuntimeError(f"Project ZIP contains a symlink: {info.filename}")
+
+                  target = ROOT.joinpath(*relative_parts).resolve()
+                  target.relative_to(ROOT)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(zf.read(info))
+                  copied += 1
+
+          required = (
+              "main.py",
+              "quota_router.py",
+              "render.py",
+              "footage.py",
+              "requirements.txt",
+              "test_quota_router.py",
           )
-
-          archive = archives[0]
-
-          print(f"Selected project ZIP: {archive.name}")
-          print(f"Total root ZIP files: {len(archives)}")
-
-          if archive.stat().st_size > MAX_ARCHIVE_BYTES:
-              fail("ZIP exceeds the 1 GiB compressed size limit.")
-
-          def safe_parts(member_name):
-              if not member_name or "\x00" in member_name:
-                  fail("ZIP contains an empty or invalid member path.")
-
-              normalized = member_name.replace("\\", "/")
-              path = PurePosixPath(normalized)
-
-              if path.is_absolute() or ".." in path.parts:
-                  fail(f"Unsafe ZIP path: {member_name!r}")
-
-              if path.parts and ":" in path.parts[0]:
-                  fail(
-                      f"Drive-qualified ZIP path is not allowed: "
-                      f"{member_name!r}"
-                  )
-
-              parts = tuple(
-                  part for part in path.parts
-                  if part not in (".", "")
-              )
-
-              if not parts:
-                  return None
-
-              if any(part in IGNORED for part in parts):
-                  return None
-
-              return parts
-
-          def is_regular_or_directory(info):
-              mode = info.external_attr >> 16
-              kind = stat.S_IFMT(mode)
-
-              return kind in (
-                  0,
-                  stat.S_IFREG,
-                  stat.S_IFDIR
-              )
-
-          def extract_safely(source_zip, destination):
-              total_size = 0
-              seen = set()
-
-              with zipfile.ZipFile(source_zip) as zf:
-                  infos = zf.infolist()
-
-                  if len(infos) > MAX_ENTRIES:
-                      fail(
-                          f"ZIP contains too many entries "
-                          f"({len(infos)})."
-                      )
-
-                  checked = []
-
-                  for info in infos:
-                      parts = safe_parts(info.filename)
-
-                      if parts is None:
-                          continue
-
-                      if parts in seen:
-                          fail(
-                              "Duplicate ZIP target path: "
-                              + "/".join(parts)
-                          )
-
-                      seen.add(parts)
-
-                      if info.flag_bits & 0x1:
-                          fail(
-                              "Encrypted ZIP members are not supported: "
-                              f"{info.filename!r}"
-                          )
-
-                      if not is_regular_or_directory(info):
-                          fail(
-                              "ZIP symlinks/special files are not allowed: "
-                              f"{info.filename!r}"
-                          )
-
-                      if info.file_size > MAX_SINGLE_FILE:
-                          fail(
-                              f"ZIP member exceeds 1 GiB: "
-                              f"{info.filename!r}"
-                          )
-
-                      total_size += info.file_size
-
-                      if total_size > MAX_TOTAL_UNCOMPRESSED:
-                          fail(
-                              "ZIP expands beyond the 3 GiB total limit."
-                          )
-
-                      if info.file_size > 10 * 1024 * 1024:
-                          if (
-                              info.compress_size == 0
-                              or info.file_size / info.compress_size
-                              > MAX_COMPRESSION_RATIO
-                          ):
-                              fail(
-                                  "Suspicious ZIP compression ratio: "
-                                  f"{info.filename!r}"
-                              )
-
-                      checked.append((info, parts))
-
-                  destination.mkdir(
-                      parents=True,
-                      exist_ok=True
-                  )
-
-                  for info, parts in checked:
-                      target = destination.joinpath(*parts)
-
-                      if not target.resolve().is_relative_to(
-                          destination.resolve()
-                      ):
-                          fail(
-                              "ZIP member escapes staging directory: "
-                              f"{info.filename!r}"
-                          )
-
-                      if (
-                          info.is_dir()
-                          or info.filename.endswith(("/", "\\"))
-                      ):
-                          target.mkdir(
-                              parents=True,
-                              exist_ok=True
-                          )
-                          continue
-
-                      target.parent.mkdir(
-                          parents=True,
-                          exist_ok=True
-                      )
-
-                      copied_bytes = 0
-
-                      with zf.open(info, "r") as src:
-                          with target.open("wb") as dst:
-                              while True:
-                                  chunk = src.read(1024 * 1024)
-
-                                  if not chunk:
-                                      break
-
-                                  copied_bytes += len(chunk)
-
-                                  if copied_bytes > MAX_SINGLE_FILE:
-                                      fail(
-                                          "ZIP member exceeded its size "
-                                          f"limit: {info.filename!r}"
-                                      )
-
-                                  dst.write(chunk)
-
-          with tempfile.TemporaryDirectory(
-              prefix="documentary-project-zip-"
-          ) as temp:
-
-              staging = Path(temp) / "staged"
-
-              extract_safely(archive, staging)
-
-              meaningful = [
-                  p for p in staging.iterdir()
-                  if p.name not in IGNORED
-              ]
-
-              if (staging / "main.py").is_file():
-                  project_root = staging
-
-              else:
-                  project_dirs = [
-                      p for p in meaningful
-                      if p.is_dir() and (p / "main.py").is_file()
-                  ]
-
-                  if (
-                      len(meaningful) == 1
-                      and meaningful[0].is_dir()
-                  ):
-                      project_root = meaningful[0]
-
-                  elif len(project_dirs) == 1:
-                      project_root = project_dirs[0]
-
-                  else:
-                      fail(
-                          "ZIP does not contain main.py at its root "
-                          "or inside one wrapper folder."
-                      )
-
-              if not (project_root / "main.py").is_file():
-                  fail(
-                      "The detected ZIP folder does not contain main.py."
-                  )
-
-              copied = 0
-              skipped_protected = 0
-
-              for item in project_root.rglob("*"):
-                  relative = item.relative_to(project_root)
-
-                  relative_posix = relative.as_posix()
-
-                  if (
-                      ".git" in relative.parts
-                      or any(part in IGNORED for part in relative.parts)
-                  ):
-                      continue
-
-                  if relative_posix in PROTECTED_FILES:
-                      print(
-                          "Preserving active workflow: "
-                          f"{relative_posix}"
-                      )
-                      skipped_protected += 1
-                      continue
-
-                  target = ROOT / relative
-
-                  if not target.resolve().is_relative_to(ROOT):
-                      fail(
-                          "Refusing to write outside workspace: "
-                          f"{relative}"
-                      )
-
-                  if item.is_dir():
-                      target.mkdir(
-                          parents=True,
-                          exist_ok=True
-                      )
-
-                  elif item.is_file():
-                      target.parent.mkdir(
-                          parents=True,
-                          exist_ok=True
-                      )
-
-                      shutil.copy2(item, target)
-                      copied += 1
-
-          # Only delete ZIPs after successful extraction.
-          removed_archives = []
-
-          for candidate in archives:
-              if candidate.exists():
-                  candidate.unlink()
-                  removed_archives.append(candidate.name)
-
-          print("")
-          print("PROJECT ZIP EXTRACTION SUCCESSFUL")
-          print(f"Selected ZIP: {archive.name}")
-          print(f"Project files overlaid: {copied}")
-          print(f"Protected files skipped: {skipped_protected}")
-          print(f"ZIP archives removed: {len(removed_archives)}")
-
-          for name in removed_archives:
-              print(f"Removed: {name}")
-
-          print("Ready for permanent Git commit.")
+          missing = [name for name in required if not (ROOT / name).is_file()]
+          if missing:
+              raise RuntimeError("Extracted ZIP is missing required 10.15 files: " + ", ".join(missing))
+
+          # The next step deletes only the selected source ZIP, after extraction.
+          Path(".upgrade_zip_to_remove").write_text(archive_name, encoding="utf-8")
+          print(f"Extracted {copied} project files. ZIP source will be deleted after extraction is installed.")
           PYZIP
 
-          # Commit all extracted project changes and ZIP deletions.
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Remove source ZIP and commit extracted project files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f .upgrade_zip_to_remove ]]; then
+            python - <<'PYREMOVE'
+          from pathlib import Path
+          import zipfile
 
-          git add -A
+          marker = Path(".upgrade_zip_to_remove")
+          name = marker.read_text(encoding="utf-8").strip()
+          archive = Path(name)
+          if archive.parent != Path(".") or archive.suffix.lower() != ".zip":
+              raise RuntimeError("Refusing to delete an unexpected ZIP path.")
+          if not archive.is_file():
+              raise RuntimeError(f"Selected project ZIP no longer exists: {name}")
+          with zipfile.ZipFile(archive) as zf:
+              if zf.testzip() is not None:
+                  raise RuntimeError("Selected ZIP failed its integrity check before deletion.")
+          archive.unlink()
+          marker.unlink()
+          print(f"Deleted source ZIP after successful extraction: {name}")
+          PYREMOVE
 
-          if git diff --cached --quiet; then
-            echo "No project changes to commit."
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            # Do not allow a ZIP update to overwrite this permanent workflow.
+            git restore --source=HEAD -- .github/workflows/render.yml
+            git add -A
+            if git diff --cached --quiet; then
+              echo "No extracted project changes to commit."
+            else
+              git commit -m "Install newest documentary generator project ZIP"
+              git push origin "HEAD:${GITHUB_REF_NAME}"
+            fi
           else
-            git commit -m "Apply latest project ZIP upgrade"
-
-            git push origin "HEAD:${TARGET_BRANCH}"
-
-            echo "Project upgrade permanently pushed to ${TARGET_BRANCH}."
+            echo "No project ZIP was extracted; no ZIP deletion or project commit is needed."
           fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
 
       - name: Install FFmpeg and fonts
         run: |
-          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
 
-      - name: Install Python dependencies
+      - name: Install CPU-only PyTorch
         run: |
-          set -euo pipefail
           python -m pip install --upgrade pip
-          python -m pip install --no-input -r requirements.txt
-          python -m pip check
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.2,<3"
 
-      - name: Restore footage source search cache
-        uses: actions/cache@v4
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Restore SigLIP model cache
+        uses: actions/cache@v6
+        with:
+          path: .hf-cache
+          key: siglip-${{ runner.os }}-python311-siglip-sentencepiece-v3
+          restore-keys: |
+            siglip-${{ runner.os }}-python311-
+
+      - name: Restore footage and thumbnail cache
+        uses: actions/cache@v6
         with:
           path: .api-cache
           key: footage-api-${{ runner.os }}-${{ github.run_id }}
           restore-keys: |
             footage-api-${{ runner.os }}-
 
+      - name: Verify runtime and quota router
+        run: |
+          python -m py_compile main.py quota_router.py render.py footage.py test_quota_router.py
+          python -m unittest -v test_quota_router
+
       - name: Generate documentary
         env:
           INPUT_TOPIC: ${{ inputs.topic }}
+
+          # Existing provider credentials retained from the old workflow.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+          # Optional numbered provider API keys. Empty secrets are ignored by the project.
+          GROQ_API_KEY_1: ${{ secrets.GROQ_API_KEY_1 }}
+          GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
+          GROQ_API_KEY_3: ${{ secrets.GROQ_API_KEY_3 }}
+          GROQ_API_KEY_4: ${{ secrets.GROQ_API_KEY_4 }}
+          GROQ_API_KEY_5: ${{ secrets.GROQ_API_KEY_5 }}
+          OPENROUTER_API_KEY_1: ${{ secrets.OPENROUTER_API_KEY_1 }}
+          OPENROUTER_API_KEY_2: ${{ secrets.OPENROUTER_API_KEY_2 }}
+          OPENROUTER_API_KEY_3: ${{ secrets.OPENROUTER_API_KEY_3 }}
+          OPENROUTER_API_KEY_4: ${{ secrets.OPENROUTER_API_KEY_4 }}
+          OPENROUTER_API_KEY_5: ${{ secrets.OPENROUTER_API_KEY_5 }}
+          GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+          GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+          GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
+          GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
+
+          # Cloudflare: primary account credentials and the additional key/account pair.
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_API_TK1: ${{ secrets.CF_API_TK1 }}
+          CF_ID1: ${{ secrets.CF_ID1 }}
+
+          # Speechify is the primary voice-over provider.
+          SPVO_API: ${{ secrets.SPVO_API }}
+          SPVO_API_1: ${{ secrets.SPVO_API_1 }}
+          SPVO_API_2: ${{ secrets.SPVO_API_2 }}
+          SPVO_API_3: ${{ secrets.SPVO_API_3 }}
+          SPEECHIFY_API_KEY: ${{ secrets.SPEECHIFY_API_KEY }}
+          SPEECHIFY_MODEL: simba-3.5
+          SPEECHIFY_VOICE_ID: ${{ secrets.SPEECHIFY_VOICE_ID }}
+
+          # Existing footage API credentials retained.
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+
+          # Optional quota-scope labels/IDs. Leave defaults when keys share one account/project.
+          GROQ_QUOTA_GROUP: shared-organization
+          OPENROUTER_QUOTA_GROUP: shared-account
+          GEMINI_PROJECT_ID: ${{ secrets.GEMINI_PROJECT_ID }}
+          SPEECHIFY_QUOTA_GROUP: shared-account
+
+          # Quota-aware router chooses eligible providers dynamically; no fixed key order is set.
           GROQ_MODEL: openai/gpt-oss-120b
-          OPENROUTER_MODEL: openrouter/free
-          TTS_VOICE: en-US-GuyNeural
-          TTS_RATE: "-5%"
-          TTS_PITCH: "-4Hz"
           GEMINI_MODEL: gemini-3.8-flash
+          GEMINI_VISION_MODEL: gemini-3.8-flash
+          OPENROUTER_MODEL: openrouter/free
+          OPENROUTER_VISION_MODEL: nvidia/nemotron-3.5-super-vl:free
+          OPENROUTER_VISION_FALLBACK_MODEL: inclusionai/ling-3.2-flash:free
+          CLOUDFLARE_CHAT_MODEL: "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+          CLOUDFLARE_VISION_MODEL: "@cf/meta/llama-3.2-11b-vision-instruct"
+
+          # Visual verification remains enabled.
+          FOOTAGE_VISION_REQUIRED: "true"
+          FOOTAGE_VISION_MIN_CONFIDENCE: "0.72"
+          FOOTAGE_VISION_CANDIDATE_LIMIT: "26"
+
+          # Edge TTS is only the narration fallback when Speechify cannot complete VO.
+          TTS_VOICE: en-US-GuyNeural
+          TTS_RATE: "-4%"
+          TTS_PITCH: "-3Hz"
+          X264_PRESET: medium
         run: python main.py
 
-      - name: Upload documentary and production notes
-        if: success()
-        uses: actions/upload-artifact@v4
+      - name: Upload final video and diagnostic files
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: hybrid-documentary-${{ github.run_number }}
           path: |
@@ -454,19 +340,12 @@ jobs:
             plan.json
             credits.txt
             timing.json
-            output/voiceover.mp3
-            output/captions.ass
-          if-no-files-found: error
-          retention-days: 7
-
-      - name: Upload failure diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: documentary-diagnostics-${{ github.run_number }}
-          path: |
-            failure_report.json
             stage_report.json
+            failure_report.json
+            production_report.json
+            output/voiceover.mp3
+            output/voiceover.wav
+            output/captions.ass
             output/pipeline.log
-          if-no-files-found: ignore
-          retention-days: 14
+          if-no-files-found: warn
+          retention-days: 7
