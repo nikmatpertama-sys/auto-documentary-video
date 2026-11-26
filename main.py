@@ -187,6 +187,8 @@ OPENROUTER_KEY = OPENROUTER_KEYS[0] if OPENROUTER_KEYS else ""
 GEMINI_KEY = GEMINI_KEYS[0] if GEMINI_KEYS else ""
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
 PEXELS_KEY = os.getenv("PEXELS_API_KEY", "").strip()
+COVERR_API_KEY = os.getenv("COVERR_API_KEY", "").strip()
+ENABLE_COVERR_SOURCE = bool(COVERR_API_KEY)
 TOPIC = os.getenv("INPUT_TOPIC", "").strip()
 
 GROQ_MODEL = os.getenv(
@@ -212,8 +214,15 @@ MAX_VIDEO_DURATION = None  # Intentionally unlimited; final duration follows the
 
 W, H, FPS = 1080, 1920, 30
 TARGET_SOURCE_ASPECT = 9 / 16
-SOURCE_ASPECT_TOLERANCE = 0.003  # native portrait 9:16 only; no landscape/4:5 crop
+SOURCE_ASPECT_TOLERANCE = 0.003  # Native 9:16 is preferred; verified landscape reframing is allowed.
 MIN_CLIP_SHORT_SIDE = 640
+MIN_REFRAME_SOURCE_HEIGHT = 640
+MAX_REFRAME_SOURCE_ASPECT = 2.40
+MIN_REFRAME_SOURCE_ASPECT = 1.18
+SMART_CROP_FRAME_COUNT = 6
+SMART_CROP_MIN_BOX_CONFIDENCE = 0.55
+SMART_CROP_BOX_MARGIN_FRACTION = 0.045
+SMART_CROP_MAX_PAN_RATE_PER_SECOND = 0.55
 CAPTION_MAX_WORDS = 5
 CAPTION_MAX_CHARS = 32
 X264_PRESET = os.getenv("X264_PRESET", "ultrafast").strip() or "ultrafast"
@@ -224,7 +233,13 @@ HOOK_GAP = 0.70
 ENDING_HOLD = 1.25
 
 MIN_CLIP_WIDTH = 640
+# Ordinary candidates keep the original 180 MB budget. Highly relevant footage
+# may use a larger bounded allowance when disk space is available.
 MAX_CLIP_BYTES = 180 * 1024 * 1024
+MAX_ADAPTIVE_CLIP_BYTES = 650 * 1024 * 1024
+MAX_EXCEPTIONAL_CLIP_BYTES = 900 * 1024 * 1024
+DOWNLOAD_DISK_RESERVE_BYTES = 1536 * 1024 * 1024
+DOWNLOAD_MAX_SECONDS = 15 * 60
 
 # Visual verification is deliberately fail-closed by default. Set this to
 # false only if you explicitly accept metadata-only footage selection.
@@ -237,6 +252,8 @@ VISION_CANDIDATE_LIMIT = max(
     1, min(50, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "36")))
 )
 
+# MM4: official Coverr API search for free, authentic native 9:16 vertical stock footage.
+# MM5: adaptive large-footage downloads and AI-verified dynamic 9:16 reframing.
 # MM3: persistent provider cooldowns, independent source caches, request governor and NASA manifest cache.
 # MM2: defer orientation rejection until ffprobe can read display-rotation metadata.
 # MM1: intent-aware footage ranking, rejection-guided search retry, and source resilience.
@@ -254,6 +271,7 @@ VISION_CANDIDATE_LIMIT = max(
 ENABLE_PEXELS_FALLBACK = os.getenv("ENABLE_PEXELS_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 ENABLE_PIXABAY_FALLBACK = os.getenv("ENABLE_PIXABAY_FALLBACK", "false").strip().lower() in ("1", "true", "yes", "on")
 FOOTAGE_SOURCE_PRIORITY = (
+    "Coverr",
     "Internet Archive",
     "Wikimedia Commons",
     "NASA",
@@ -262,6 +280,7 @@ FOOTAGE_SOURCE_PRIORITY = (
     "Pixabay",
 )
 FOOTAGE_SOURCE_CANDIDATE_LIMITS = {
+    "Coverr": 12,
     "Internet Archive": 20,
     "Wikimedia Commons": 16,
     "NASA": 12,
@@ -322,6 +341,7 @@ FOOTAGE_SOURCE_COOLDOWN_UNTIL = {}
 # are deliberately generous ceilings, not targets; source-specific cache hits
 # should make most repeat queries avoid the network entirely.
 FOOTAGE_SOURCE_MIN_INTERVAL = {
+    "Coverr": 1.5,
     "Internet Archive": 1.0,
     "Wikimedia Commons": 3.0,
     "NASA": 1.0,
@@ -330,6 +350,9 @@ FOOTAGE_SOURCE_MIN_INTERVAL = {
     "Pixabay": 1.0,
 }
 FOOTAGE_SOURCE_MAX_REQUESTS_PER_RUN = {
+    # Coverr Demo keys have a documented 50 requests/hour ceiling. The pipeline
+    # makes at most two targeted Coverr searches per scene, capped conservatively.
+    "Coverr": 18,
     "Internet Archive": 240,
     "Wikimedia Commons": 48,
     "NASA": 240,
@@ -341,6 +364,7 @@ FOOTAGE_SOURCE_REQUEST_COUNTS = {}
 FOOTAGE_SOURCE_LAST_REQUEST_AT = {}
 FOOTAGE_SOURCE_REQUEST_LOCK = threading.Lock()
 FOOTAGE_SOURCE_CACHE_TTL = {
+    "Coverr": 6 * 3600,
     "Internet Archive": 6 * 3600,
     "Wikimedia Commons": 6 * 3600,
     "NASA": 12 * 3600,
@@ -871,6 +895,50 @@ def has_native_portrait_metadata_hint(hit):
     return bool(width and height and is_native_portrait_916(width, height))
 
 
+def is_smart_reframe_eligible(width, height, aspect_ratio=None):
+    """Allow sufficiently large landscape sources for verified 9:16 reframing only."""
+    try:
+        width = int(width)
+        height = int(height)
+        aspect = float(aspect_ratio) if aspect_ratio is not None else width / max(1, height)
+    except (TypeError, ValueError, ZeroDivisionError):
+        return False
+    return bool(
+        width > height
+        and height >= MIN_REFRAME_SOURCE_HEIGHT
+        and MIN_REFRAME_SOURCE_ASPECT <= aspect <= MAX_REFRAME_SOURCE_ASPECT
+    )
+
+
+def candidate_download_limit(score, hit=None):
+    """Return a bounded byte budget based on relevance and known file size."""
+    try:
+        relevance = float(score)
+    except (TypeError, ValueError):
+        relevance = 0.0
+    limit = MAX_CLIP_BYTES
+    if relevance >= 0.86:
+        limit = MAX_EXCEPTIONAL_CLIP_BYTES
+    elif relevance >= 0.72:
+        limit = MAX_ADAPTIVE_CLIP_BYTES
+
+    hit = hit if isinstance(hit, dict) else {}
+    known_size = 0
+    for field in ("file_size", "filesize", "size_bytes", "size"):
+        try:
+            known_size = int(float(hit.get(field) or 0))
+        except (TypeError, ValueError):
+            continue
+        if known_size > 0:
+            break
+    if known_size > limit:
+        raise RuntimeError(
+            f"Candidate file is {known_size / 1024 / 1024:.1f} MB, above its "
+            f"relevance-based {limit / 1024 / 1024:.0f} MB download budget."
+        )
+    return limit
+
+
 def split_sentences(text):
     return [
         x.strip()
@@ -1359,81 +1427,123 @@ def assign_scene_sentence_ranges(plan):
 # FOOTAGE SEARCH AND RELEVANCE
 # ============================================================
 
-def download_stream(url, dest, source=None):
-    """Download with bounded transient retries and immediate 429 source cooldown."""
+def download_stream(url, dest, source=None, max_bytes=None):
+    """Stream a candidate to disk with adaptive byte limits and HTTP Range resume."""
     dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.unlink(missing_ok=True)
+    part = dest.with_name(dest.name + ".part")
+    byte_limit = int(max_bytes or MAX_CLIP_BYTES)
+    if byte_limit <= 0 or byte_limit > MAX_EXCEPTIONAL_CLIP_BYTES:
+        raise ValueError("Download byte limit is outside the configured safety range.")
 
     is_commons = is_wikimedia_url(url)
-    source = "Wikimedia Commons" if is_commons else source
+    source = "Wikimedia Commons" if is_commons else (source or "Internet Archive")
     max_attempts = 3
+    started_at = time.monotonic()
+    dest.unlink(missing_ok=True)
 
     for attempt in range(1, max_attempts + 1):
-        dest.unlink(missing_ok=True)
+        offset = part.stat().st_size if part.is_file() else 0
+        headers = {
+            "User-Agent": WIKIMEDIA_USER_AGENT if is_commons else (
+                "AutoDocumentaryVideo/5.0 (+https://github.com/nikmatpertama-sys/auto-documentary-video)"
+            )
+        }
+        if offset > 0:
+            headers["Range"] = f"bytes={offset}-"
+
         try:
             with _footage_source_get(
-                source or "Internet Archive",
+                source,
                 url,
                 stream=True,
                 timeout=(25, 180),
-                headers={
-                    "User-Agent": WIKIMEDIA_USER_AGENT if is_commons else (
-                        "AutoDocumentaryVideo/3.0 (+https://github.com/nikmatpertama-sys/auto-documentary-video)"
-                    )
-                },
+                headers=headers,
             ) as response:
                 status = int(getattr(response, "status_code", 0) or 0)
                 if status == 429:
-                    # Let the single exception handler apply one source cooldown.
                     response.raise_for_status()
 
-                if status in (408, 425) or 500 <= status <= 599:
-                    if footage_source_cooldown_remaining(source) > 0:
-                        response.raise_for_status()
+                if status == 416 and offset > 0:
+                    part.unlink(missing_ok=True)
                     if attempt < max_attempts:
-                        delay = response_retry_after_seconds(
-                            response, default_seconds=5 * attempt
-                        )
+                        continue
+                    raise RuntimeError("Server rejected the resume range; restart budget exhausted.")
+
+                if status in (408, 425) or 500 <= status <= 599:
+                    if attempt < max_attempts:
+                        delay = response_retry_after_seconds(response, default_seconds=5 * attempt)
                         delay = min(30.0, max(3.0, delay))
                         print(
-                            f"{source or 'Footage source'} returned HTTP {status}; "
-                            f"retrying download in {delay:.0f}s "
-                            f"({attempt}/{max_attempts - 1})."
+                            f"{source} returned HTTP {status}; retrying download in "
+                            f"{delay:.0f}s ({attempt}/{max_attempts - 1})."
                         )
                         time.sleep(delay)
                         continue
 
                 response.raise_for_status()
-                declared = int(response.headers.get("Content-Length") or 0)
-                if declared > MAX_CLIP_BYTES:
+                if status == 206 and offset > 0:
+                    content_range = str(response.headers.get("Content-Range") or "")
+                    match = re.match(r"bytes\s+(\d+)-(\d+)/(\d+|\*)", content_range, re.I)
+                    if not match or int(match.group(1)) != offset:
+                        part.unlink(missing_ok=True)
+                        raise RuntimeError("Server returned an invalid Content-Range for resume.")
+                    mode = "ab"
+                    declared = int(match.group(3)) if match.group(3).isdigit() else 0
+                else:
+                    # A server that ignores Range returns 200; safely restart the partial file.
+                    mode = "wb"
+                    offset = 0
+                    declared_length = int(response.headers.get("Content-Length") or 0)
+                    declared = declared_length
+
+                if declared and declared > byte_limit:
+                    part.unlink(missing_ok=True)
                     raise RuntimeError(
-                        f"Clip is {declared / 1024 / 1024:.1f} MB, "
-                        f"above the {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB limit."
+                        f"Clip is {declared / 1024 / 1024:.1f} MB, above the "
+                        f"{byte_limit / 1024 / 1024:.0f} MB relevance-based limit."
                     )
 
-                total = 0
-                with open(dest, "wb") as handle:
+                disk_free = shutil.disk_usage(dest.parent).free
+                if disk_free < DOWNLOAD_DISK_RESERVE_BYTES + min(byte_limit, declared or byte_limit):
+                    raise RuntimeError(
+                        "Insufficient safe disk headroom for this footage download; "
+                        "the generator is preserving space for models, audio and rendering."
+                    )
+
+                total = offset
+                with open(part, mode) as handle:
                     for chunk in response.iter_content(1024 * 1024):
                         if not chunk:
                             continue
-                        total += len(chunk)
-                        if total > MAX_CLIP_BYTES:
+                        if time.monotonic() - started_at > DOWNLOAD_MAX_SECONDS:
                             raise RuntimeError(
-                                f"Clip exceeded {MAX_CLIP_BYTES / 1024 / 1024:.0f} MB safety limit."
+                                f"Footage download exceeded the {DOWNLOAD_MAX_SECONDS // 60}-minute time budget."
+                            )
+                        total += len(chunk)
+                        if total > byte_limit:
+                            part.unlink(missing_ok=True)
+                            raise RuntimeError(
+                                f"Clip exceeded its {byte_limit / 1024 / 1024:.0f} MB download budget."
+                            )
+                        if shutil.disk_usage(dest.parent).free < DOWNLOAD_DISK_RESERVE_BYTES:
+                            raise RuntimeError(
+                                "Download stopped to preserve the configured free-disk reserve."
                             )
                         handle.write(chunk)
+                    handle.flush()
+                    os.fsync(handle.fileno())
 
-            if not dest.is_file() or dest.stat().st_size < 50000:
+            if not part.is_file() or part.stat().st_size < 50000:
                 raise RuntimeError("Downloaded clip is unexpectedly small.")
+            part.replace(dest)
             return
 
         except requests.RequestException as exc:
             response = getattr(exc, "response", None)
             status = getattr(response, "status_code", None)
             if status == 429:
-                # _footage_source_get persisted Retry-After before raising.
-                dest.unlink(missing_ok=True)
+                # Keep a valid partial file for a later Range resume after cooldown.
                 raise
             transient = status in (None, 408, 425) or (
                 isinstance(status, int) and 500 <= status <= 599
@@ -1441,21 +1551,23 @@ def download_stream(url, dest, source=None):
             if transient and attempt < max_attempts:
                 delay = min(20.0, 3.0 * (2 ** (attempt - 1)))
                 print(
-                    f"Temporary download error from {source or 'footage source'}: "
-                    f"{exc}; retrying in {delay:.0f}s "
-                    f"({attempt}/{max_attempts - 1})."
+                    f"Temporary download error from {source}: {exc}; "
+                    f"retrying/resuming in {delay:.0f}s ({attempt}/{max_attempts - 1})."
                 )
                 time.sleep(delay)
                 continue
             if transient:
                 mark_footage_source_temporarily_unavailable(source, 45.0)
-            dest.unlink(missing_ok=True)
             raise
         except Exception:
-            dest.unlink(missing_ok=True)
+            # A connection interruption retains .part for the bounded retry; policy
+            # and validation errors remove it so partial content cannot be mistaken for media.
+            if isinstance(__import__("sys").exc_info()[1], (RuntimeError, ValueError)):
+                message = str(__import__("sys").exc_info()[1]).lower()
+                if any(token in message for token in ("above", "exceeded", "insufficient", "invalid content-range", "unexpectedly small")):
+                    part.unlink(missing_ok=True)
             raise
 
-    dest.unlink(missing_ok=True)
     raise RuntimeError("Footage download exhausted its retry budget.")
 
 
@@ -2132,7 +2244,7 @@ def internet_archive_search(query):
                 file_size = int(archive_file.get("size") or 0)
             except (TypeError, ValueError):
                 continue
-            if file_size <= 50000 or file_size > MAX_CLIP_BYTES:
+            if file_size <= 50000 or file_size > MAX_EXCEPTIONAL_CLIP_BYTES:
                 continue
             video_files.append((archive_file, file_size))
 
@@ -2205,6 +2317,7 @@ def internet_archive_search(query):
             "url": file_url,
             "width": width,
             "height": int(selected_file.get("height") or 0),
+            "file_size": file_size,
             "duration": parse_runtime(item.get("runtime") or metadata.get("runtime")),
             "metadata": combined_metadata,
             "tags": subject_text or combined_metadata,
@@ -2231,7 +2344,215 @@ def _deduplicate_footage_results(items):
     return deduplicated
 
 
-def search_all_footage_sources(query):
+
+def coverr_search(query):
+    """Search Coverr for free, authentic native-vertical stock clips.
+
+    Coverr's API supports is_vertical, is_premium, and is_ai_generated filters.
+    We request only non-premium, non-AI vertical results, then require the exact
+    9:16 ratio from catalog metadata when available and always verify the file
+    itself with ffprobe after download.
+    """
+    if not COVERR_API_KEY:
+        return []
+
+    query = clean_query(query)
+    if not query:
+        return []
+
+    response = _footage_source_get(
+        "Coverr",
+        "https://api.coverr.co/videos",
+        params={
+            "query": query,
+            "page": 0,
+            "page_size": 20,
+            "sort": "popular",
+            "filter": "is_vertical:true,is_premium:false,is_ai_generated:false",
+            "urls": "true",
+        },
+        headers={
+            "x-api-key": COVERR_API_KEY,
+            "Accept": "application/json",
+            "User-Agent": "AutoDocumentaryVideo/4.0 (+https://github.com/nikmatpertama-sys/auto-documentary-video)",
+        },
+        timeout=30,
+    )
+
+    try:
+        response.raise_for_status()
+        payload = response.json()
+    except requests.HTTPError as exc:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        if status in (401, 403):
+            print(
+                "  Coverr API authentication/permission failed "
+                f"(HTTP {status}); check the COVERR_API_KEY secret and API access."
+            )
+            return []
+        raise
+    except (ValueError, TypeError) as exc:
+        print(f"  Coverr API returned invalid JSON: {exc}")
+        return []
+
+    if isinstance(payload, dict):
+        hits = payload.get("hits", payload.get("videos", []))
+        if isinstance(hits, dict):
+            hits = hits.get("hits", [])
+    else:
+        hits = []
+
+    if not isinstance(hits, list):
+        return []
+
+    def parse_ratio(value):
+        text_value = str(value or "").strip().lower()
+        if not text_value:
+            return None
+        if ":" in text_value:
+            left, right = text_value.split(":", 1)
+            try:
+                return float(left) / float(right)
+            except (TypeError, ValueError, ZeroDivisionError):
+                return None
+        try:
+            return float(text_value)
+        except (TypeError, ValueError):
+            return None
+
+    def safe_coverr_media_url(value):
+        value = str(value or "").strip()
+        if not value:
+            return ""
+        parsed = urlparse(value)
+        host = (parsed.hostname or "").lower()
+        if parsed.scheme != "https" or not (
+            host == "coverr.co" or host.endswith(".coverr.co")
+        ):
+            return ""
+        return value
+
+    results = []
+    for video in hits[:20]:
+        if not isinstance(video, dict):
+            continue
+        if video.get("is_vertical") is not True:
+            continue
+        if video.get("is_premium") is True:
+            continue
+        if video.get("is_ai_generated") is True:
+            continue
+
+        ratio = parse_ratio(video.get("aspect_ratio"))
+        if ratio is not None and abs(ratio - TARGET_SOURCE_ASPECT) > SOURCE_ASPECT_TOLERANCE:
+            # is_vertical also includes ratios such as 4:5 and 2:3. The generator
+            # requires real 9:16 and must not silently crop a different format.
+            continue
+
+        urls = video.get("urls") or {}
+        if not isinstance(urls, dict):
+            urls = {}
+        media_url = safe_coverr_media_url(
+            urls.get("mp4_download") or urls.get("mp4")
+        )
+        if not media_url:
+            continue
+
+        video_id = str(video.get("id") or video.get("slug") or "").strip()
+        if not video_id:
+            continue
+
+        title = str(video.get("title") or video.get("name") or video_id).strip()
+        description = str(video.get("description") or "").strip()
+        raw_tags = video.get("tags") or []
+        if isinstance(raw_tags, str):
+            tags = raw_tags
+        elif isinstance(raw_tags, list):
+            tags = " ".join(
+                str(tag.get("name") or tag.get("title") or "")
+                if isinstance(tag, dict) else str(tag)
+                for tag in raw_tags
+            )
+        else:
+            tags = ""
+
+        creator_value = video.get("creator") or video.get("author") or {}
+        if isinstance(creator_value, dict):
+            creator = str(
+                creator_value.get("name")
+                or creator_value.get("display_name")
+                or creator_value.get("username")
+                or "Coverr creator"
+            )
+            creator_url = str(
+                creator_value.get("profile_url")
+                or creator_value.get("url")
+                or ""
+            )
+        else:
+            creator = str(creator_value or "Coverr creator")
+            creator_url = str(video.get("creator_url") or "")
+
+        page_url = str(video.get("page_url") or video.get("url") or "").strip()
+        if not page_url.startswith("https://coverr.co/"):
+            page_url = "https://coverr.co/videos/" + quote(
+                str(video.get("slug") or video_id), safe=""
+            )
+
+        def positive_dimension(*values):
+            for value in values:
+                try:
+                    parsed = int(float(value or 0))
+                except (TypeError, ValueError):
+                    continue
+                if parsed > 0:
+                    return parsed
+            return 0
+
+        width = positive_dimension(video.get("width"), video.get("max_width"))
+        height = positive_dimension(video.get("height"), video.get("max_height"))
+
+        try:
+            duration = float(video.get("duration") or 0)
+        except (TypeError, ValueError):
+            duration = 0.0
+
+        metadata = " ".join(
+            part for part in (
+                title,
+                description,
+                tags,
+                "native vertical portrait stock video",
+                str(video.get("scene") or ""),
+            ) if part
+        )
+
+        results.append({
+            "source": "Coverr",
+            "id": video_id,
+            "title": title,
+            "url": media_url,
+            "width": width,
+            "height": height,
+            "duration": duration,
+            "metadata": metadata,
+            "tags": tags or metadata,
+            "creator": creator,
+            "creator_url": creator_url,
+            "page_url": page_url,
+            "license": (
+                "Coverr stock library; commercial use permitted under Coverr License "
+                "(updated 2026-11-04); free Demo API attribution required"
+            ),
+            "is_vertical": True,
+            "is_ai_generated": False,
+            "aspect_ratio": video.get("aspect_ratio") or "9:16",
+        })
+
+    return results
+
+
+def search_all_footage_sources(query, include_coverr=False):
     """Search sources independently so one 429 cannot discard successful providers."""
     searches = [
         ("Internet Archive", internet_archive_search),
@@ -2239,6 +2560,11 @@ def search_all_footage_sources(query):
         ("NASA", nasa_search),
         ("Google Search", google_open_web_video_search),
     ]
+    # Coverr is queried only for the primary scene query and one targeted retry.
+    # Its Demo API has a finite request/hour allowance; this avoids spending
+    # requests on every synonym generated by the general search expansion.
+    if include_coverr and ENABLE_COVERR_SOURCE:
+        searches.insert(0, ("Coverr", coverr_search))
     if ENABLE_PEXELS_FALLBACK and PEXELS_KEY:
         searches.append(("Pexels", pexels_search))
     if ENABLE_PIXABAY_FALLBACK and PIXABAY_KEY:
@@ -3121,28 +3447,23 @@ def extract_vision_frames(video_path, frame_count=3):
     return frame_paths
 
 
-def _parse_visual_verdict(provider, raw_text):
-    """Parse and validate a strict visual-verification JSON response."""
+def _parse_visual_json(provider, raw_text):
+    """Parse one strict JSON object from a vision provider."""
     try:
         verdict = extract_json_object(raw_text)
-
     except Exception as exc:
-        preview = re.sub(
-            r"\s+",
-            " ",
-            str(raw_text or "")
-        ).strip()[:350]
-
+        preview = re.sub(r"\s+", " ", str(raw_text or "")).strip()[:350]
         raise VisionResponseError(
-            f"{provider} did not return valid JSON: {exc}; "
-            f"response preview={preview!r}"
+            f"{provider} did not return valid JSON: {exc}; response preview={preview!r}"
         ) from exc
-
     if not isinstance(verdict, dict):
-        raise VisionResponseError(
-            f"{provider} returned JSON, but it was not an object."
-        )
+        raise VisionResponseError(f"{provider} returned JSON, but it was not an object.")
+    return verdict
 
+
+def _parse_visual_verdict(provider, raw_text):
+    """Parse and validate a strict visual-verification JSON response."""
+    verdict = _parse_visual_json(provider, raw_text)
     relevant_value = verdict.get("relevant")
 
     if not isinstance(relevant_value, bool):
@@ -3184,10 +3505,10 @@ def _parse_visual_verdict(provider, raw_text):
     return relevant_value, confidence, reason
 
 
-def _verify_with_gemini(frames, prompt, api_key=None):
+def _verify_with_gemini(frames, prompt, api_key=None, return_json=False):
     parts = [{"text": prompt}]
 
-    for frame in frames[:2]:
+    for frame in (frames if return_json else frames[:2]):
         parts.append({
             "inline_data": {
                 "mime_type": "image/jpeg",
@@ -3207,7 +3528,7 @@ def _verify_with_gemini(frames, prompt, api_key=None):
         "generationConfig": {
             "responseMimeType": "application/json",
             "temperature": 0.1,
-            "maxOutputTokens": 512,
+            "maxOutputTokens": 1200 if return_json else 512,
         },
     }
 
@@ -3245,9 +3566,9 @@ def _verify_with_gemini(frames, prompt, api_key=None):
             f"{exc}; body={response.text[:500]}"
         ) from exc
 
-    return _parse_visual_verdict(
-        "Gemini",
-        raw_text
+    return (
+        _parse_visual_json("Gemini", raw_text)
+        if return_json else _parse_visual_verdict("Gemini", raw_text)
     )
 
 
@@ -3322,7 +3643,8 @@ def _verify_with_openai_compatible_vision(
     api_key,
     model,
     frames,
-    prompt
+    prompt,
+    return_json=False,
 ):
     if provider == "Groq":
         url = (
@@ -3391,10 +3713,10 @@ def _verify_with_openai_compatible_vision(
     }
 
     if provider == "Groq":
-        payload["max_completion_tokens"] = 384
+        payload["max_completion_tokens"] = 1200 if return_json else 384
 
     else:
-        payload["max_tokens"] = 768
+        payload["max_tokens"] = 1400 if return_json else 768
         payload["reasoning"] = {
             "enabled": False
         }
@@ -3464,9 +3786,9 @@ def _verify_with_openai_compatible_vision(
             f"{exc}; body={response.text[:500]}"
         ) from exc
 
-    return _parse_visual_verdict(
-        provider,
-        raw_text
+    return (
+        _parse_visual_json(provider, raw_text)
+        if return_json else _parse_visual_verdict(provider, raw_text)
     )
 
 
@@ -3508,17 +3830,358 @@ def _provider_cooldown_remaining(provider_id):
     )
 
 
+
+def extract_crop_analysis_frames(video_path, frame_count=SMART_CROP_FRAME_COUNT):
+    """Extract timestamped frames for AI subject-box tracking."""
+    duration = ffprobe_duration(video_path)
+    if duration < 1.0:
+        raise RuntimeError("Landscape candidate is too short for safe subject tracking.")
+    count = max(4, min(8, int(frame_count)))
+    fractions = [0.10 + (0.80 * index / (count - 1)) for index in range(count)]
+    frames = []
+    for fraction in fractions:
+        timestamp = min(max(0.05, duration * fraction), max(0.05, duration - 0.05))
+        frame_path = None
+        with tempfile.TemporaryDirectory(prefix="smart_crop_frame_") as temp_dir:
+            frame_path = Path(temp_dir) / "frame.jpg"
+            result = subprocess.run(
+                [
+                    "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                    "-ss", f"{timestamp:.3f}", "-i", str(video_path),
+                    "-frames:v", "1", "-vf", "scale=768:-2:flags=lanczos",
+                    "-q:v", "4", str(frame_path),
+                ],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            )
+            if result.returncode != 0 or not frame_path.is_file():
+                raise RuntimeError(
+                    "Could not extract smart-crop analysis frame: "
+                    + (result.stderr or "FFmpeg produced no frame.")[-500:]
+                )
+            frames.append({"t": round(timestamp, 4), "image": frame_path.read_bytes()})
+    if len(frames) < 4:
+        raise RuntimeError("Not enough frames were available for dynamic subject tracking.")
+    return frames
+
+
+def _crop_vision_prompt(scene, query, metadata, frame_times, source_info):
+    times = ", ".join(f"{value:.3f}" for value in frame_times)
+    return f"""You are a precise video reframing analyst. The attached images are chronological frames from one landscape video.
+
+DOCUMENTARY SCENE PRIMARY VISUAL: {scene.get('visual_query') or query}
+SEARCH VARIANT: {query}
+NARRATION CONTEXT: {scene.get('narration', '')}
+SOURCE METADATA: {str(metadata or 'Not supplied')[:900]}
+SOURCE DISPLAY DIMENSIONS: {source_info.get('width')}x{source_info.get('height')} (aspect {source_info.get('aspect_ratio')})
+TARGET FRAME: portrait 9:16, using a horizontal window that spans the full source height.
+FRAME TIMESTAMPS IN ATTACHMENT ORDER (seconds): [{times}]
+
+TASK:
+1. Identify the main visual subject AND all scene-critical elements needed to preserve the requested meaning. For a group, include the whole group; for a broad aerial canopy or landscape, include the area that makes the shot type recognizable.
+2. For every attached frame, return one normalized bounding box [x1,y1,x2,y2] from 0 to 1 around that entire required visual content in the ORIGINAL frame. Coordinates are normalized to the full image: origin top-left. Do not return a box for a tiny arbitrary detail while ignoring other required scene elements.
+3. Decide whether a single 9:16 crop window at each time can contain the full required bounding box with safe margin. If any required subject is too wide, clipped by the source edge, not visible, or cannot be kept in one vertical window, set composition_fits=false.
+4. Track the same subject/composition across time. Bounding boxes must follow movement frame by frame, not stay fixed at image center.
+5. Be conservative. If you cannot identify the requested content reliably, set subject_visible=false or composition_fits=false. Never invent off-frame positions.
+
+Return ONLY JSON with exactly this structure:
+{{"subject":"short subject description","subject_visible":true,"composition_fits":true,"reason":"brief reason","frames":[{{"bbox":[0.20,0.10,0.42,0.80],"confidence":0.90}}]}}
+
+The frames array MUST contain exactly {len(frame_times)} boxes, in the same order as the attached images. Every bbox coordinate must be numeric from 0 to 1 and satisfy x1<x2 and y1<y2. Confidence must be 0 to 1. Do not include markdown."""
+
+
+def validate_smart_crop_plan(payload, source_info, frame_times):
+    """Validate AI boxes and derive a smooth, safe 9:16 tracking path."""
+    if not isinstance(payload, dict):
+        raise RuntimeError("Crop planner returned a non-object response.")
+    if payload.get("subject_visible") is not True or payload.get("composition_fits") is not True:
+        raise RuntimeError(
+            "Required scene content cannot be kept inside one vertical crop: "
+            + str(payload.get("reason", "AI crop-fit check rejected the composition"))[:240]
+        )
+    raw_frames = payload.get("frames")
+    if not isinstance(raw_frames, list) or len(raw_frames) != len(frame_times):
+        raise RuntimeError("Crop planner did not return one bounding box for every sampled frame.")
+
+    width = int(source_info.get("width") or 0)
+    height = int(source_info.get("height") or 0)
+    aspect = float(source_info.get("aspect_ratio") or (width / max(1, height)))
+    if not is_smart_reframe_eligible(width, height, aspect):
+        raise RuntimeError("Downloaded source is outside the supported landscape reframing dimensions.")
+
+    crop_fraction = TARGET_SOURCE_ASPECT / aspect
+    if crop_fraction <= 0 or crop_fraction >= 1:
+        raise RuntimeError("Invalid 9:16 crop window for this source aspect ratio.")
+    margin = crop_fraction * SMART_CROP_BOX_MARGIN_FRACTION
+    points = []
+    desired_starts = []
+    feasible_ranges = []
+
+    for index, (frame, timestamp) in enumerate(zip(raw_frames, frame_times)):
+        if not isinstance(frame, dict):
+            raise RuntimeError(f"Crop planner frame {index + 1} is malformed.")
+        bbox = frame.get("bbox")
+        if not isinstance(bbox, list) or len(bbox) != 4:
+            raise RuntimeError(f"Crop planner frame {index + 1} has no four-value bbox.")
+        try:
+            x1, y1, x2, y2 = [float(value) for value in bbox]
+            confidence = float(frame.get("confidence", 0.0))
+        except (TypeError, ValueError):
+            raise RuntimeError(f"Crop planner frame {index + 1} contains non-numeric coordinates.")
+        if not (0 <= x1 < x2 <= 1 and 0 <= y1 < y2 <= 1):
+            raise RuntimeError(f"Crop planner frame {index + 1} has out-of-range bounding coordinates.")
+        if not SMART_CROP_MIN_BOX_CONFIDENCE <= confidence <= 1:
+            raise RuntimeError(f"Crop planner frame {index + 1} confidence is too low ({confidence:.2f}).")
+        if (x2 - x1) + 2 * margin > crop_fraction:
+            raise RuntimeError(
+                f"Required visual content is too wide for 9:16 at sample {index + 1}; "
+                "the generator will not cut off scene-critical subjects."
+            )
+
+        # Feasible crop-left interval that keeps the full bbox plus safety margin.
+        low = max(0.0, x2 + margin - crop_fraction)
+        high = min(1.0 - crop_fraction, x1 - margin)
+        if low > high:
+            raise RuntimeError(
+                f"Required visual content touches an unsafe edge at sample {index + 1}."
+            )
+        center = (x1 + x2) / 2.0
+        preferred = center - crop_fraction / 2.0
+        preferred = max(low, min(high, preferred))
+        desired_starts.append(preferred)
+        feasible_ranges.append((low, high))
+        points.append({
+            "t": float(timestamp),
+            "bbox": [round(x1, 5), round(y1, 5), round(x2, 5), round(y2, 5)],
+            "confidence": round(confidence, 4),
+        })
+
+    # A short moving average smooths jitter; each result is clamped back into
+    # the frame-specific interval that guarantees full subject containment.
+    smoothed = []
+    for index, value in enumerate(desired_starts):
+        neighborhood = desired_starts[max(0, index - 1):min(len(desired_starts), index + 2)]
+        average = sum(neighborhood) / len(neighborhood)
+        low, high = feasible_ranges[index]
+        smoothed.append(max(low, min(high, average)))
+
+    for index, value in enumerate(smoothed):
+        points[index]["x"] = round(value, 6)
+        if index:
+            dt = max(0.001, points[index]["t"] - points[index - 1]["t"])
+            pan_rate = abs(value - smoothed[index - 1]) / dt
+            if pan_rate > SMART_CROP_MAX_PAN_RATE_PER_SECOND:
+                raise RuntimeError(
+                    "The required subject moves too abruptly for a safe, smooth vertical crop."
+                )
+
+    return {
+        "mode": "ai_content_aware_dynamic_crop",
+        "target_aspect": "9:16",
+        "source_width": width,
+        "source_height": height,
+        "source_aspect_ratio": round(aspect, 6),
+        "crop_width_fraction": round(crop_fraction, 6),
+        "subject": re.sub(r"\s+", " ", str(payload.get("subject", "scene subject"))).strip()[:120],
+        "reason": re.sub(r"\s+", " ", str(payload.get("reason", ""))).strip()[:300],
+        "points": points,
+    }
+
+
+def crop_x_at_time(crop_plan, timestamp):
+    points = crop_plan.get("points") if isinstance(crop_plan, dict) else None
+    if not isinstance(points, list) or len(points) < 2:
+        raise RuntimeError("Smart crop plan has insufficient tracking points.")
+    t = float(timestamp)
+    if t <= float(points[0]["t"]):
+        return float(points[0]["x"])
+    if t >= float(points[-1]["t"]):
+        return float(points[-1]["x"])
+    for left, right in zip(points, points[1:]):
+        t0, t1 = float(left["t"]), float(right["t"])
+        if t0 <= t <= t1:
+            ratio = (t - t0) / max(0.001, t1 - t0)
+            return float(left["x"]) + (float(right["x"]) - float(left["x"])) * ratio
+    return float(points[-1]["x"])
+
+
+def smart_crop_geometry(source_info, crop_plan):
+    """Return even crop dimensions and a safe FFmpeg x expression."""
+    width = int(source_info.get("width") or 0)
+    height = int(source_info.get("height") or 0)
+    if width <= height or height < MIN_REFRAME_SOURCE_HEIGHT:
+        raise RuntimeError("Smart crop requires a supported landscape source.")
+    if int(crop_plan.get("source_width") or 0) != width or int(crop_plan.get("source_height") or 0) != height:
+        raise RuntimeError("Smart crop plan dimensions do not match the downloaded source.")
+    crop_width = int(round((height * TARGET_SOURCE_ASPECT) / 2.0)) * 2
+    crop_height = height - (height % 2)
+    if crop_width < 2 or crop_width > width:
+        raise RuntimeError("Smart crop geometry is invalid for the downloaded source.")
+    if not isinstance(crop_plan.get("points"), list) or len(crop_plan["points"]) < 2:
+        raise RuntimeError("Smart crop plan is missing tracking points.")
+
+    xs = [max(0.0, min(1.0 - crop_width / width, float(p["x"]))) * width for p in crop_plan["points"]]
+    times = [float(p["t"]) for p in crop_plan["points"]]
+    source_duration = float(crop_plan.get("source_duration") or 0.0)
+    time_expr = f"mod(t,{source_duration:.4f})" if source_duration > 0 else "t"
+    expression = f"{xs[-1]:.3f}"
+    for index in range(len(xs) - 2, -1, -1):
+        dt = max(0.001, times[index + 1] - times[index])
+        interpolation = (
+            f"{xs[index]:.3f}+({xs[index + 1]:.3f}-{xs[index]:.3f})"
+            f"*({time_expr}-{times[index]:.4f})/{dt:.4f}"
+        )
+        expression = f"if(lt({time_expr},{times[index + 1]:.4f}),{interpolation},{expression})"
+    expression = f"if(lt({time_expr},{times[0]:.4f}),{xs[0]:.3f},{expression})"
+    return crop_width, crop_height, expression
+
+
+def smart_crop_filter(source_info, crop_plan, output_width=768):
+    crop_width, crop_height, x_expression = smart_crop_geometry(source_info, crop_plan)
+    return (
+        f"crop={crop_width}:{crop_height}:x='{x_expression}':y=0:exact=1,"
+        f"scale={output_width}:-2:flags=lanczos,setsar=1"
+    )
+
+
+def extract_smart_crop_verification_frames(video_path, source_info, crop_plan):
+    """Extract three frames through the proposed moving crop for post-crop AI review."""
+    duration = ffprobe_duration(video_path)
+    fractions = (0.20, 0.50, 0.80)
+    crop_width, crop_height, _expression = smart_crop_geometry(source_info, crop_plan)
+    frames = []
+    for fraction in fractions:
+        timestamp = min(max(0.1, duration * fraction), max(0.1, duration - 0.1))
+        x_fraction = crop_x_at_time(crop_plan, timestamp)
+        x_pixels = int(round(x_fraction * int(source_info["width"])))
+        x_pixels = max(0, min(int(source_info["width"]) - crop_width, x_pixels))
+        crop_filter = (
+            f"crop={crop_width}:{crop_height}:{x_pixels}:0:exact=1,"
+            "scale=768:-2:flags=lanczos,setsar=1"
+        )
+        with tempfile.TemporaryDirectory(prefix="smart_crop_verify_") as temp_dir:
+            frame_path = Path(temp_dir) / "crop.jpg"
+            result = subprocess.run(
+                [
+                    "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                    "-ss", f"{timestamp:.3f}", "-i", str(video_path),
+                    "-frames:v", "1", "-vf", crop_filter,
+                    "-q:v", "4", str(frame_path),
+                ],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            )
+            if result.returncode != 0 or not frame_path.is_file():
+                raise RuntimeError(
+                    "Could not extract post-crop verification frame: "
+                    + (result.stderr or "FFmpeg produced no frame.")[-500:]
+                )
+            frames.append(frame_path.read_bytes())
+    return frames
+
+
+def analyze_smart_crop(video_path, scene, query, candidate_metadata, source_info):
+    """Ask available quota-aware vision models for conservative subject boxes."""
+    sampled = extract_crop_analysis_frames(video_path)
+    frame_times = [item["t"] for item in sampled]
+    frames = [item["image"] for item in sampled]
+    prompt = _crop_vision_prompt(scene, query, candidate_metadata, frame_times, source_info)
+    routes = []
+
+    if GROQ_KEYS:
+        for key_index, api_key in enumerate(GROQ_KEYS, 1):
+            key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:10]
+            routes.append(_quota_route(
+                "Groq", f"Groq crop tracker key {key_index} ({GROQ_VISION_MODEL})", api_key,
+                lambda api_key=api_key: _verify_with_openai_compatible_vision(
+                    "Groq", api_key, GROQ_VISION_MODEL, frames, prompt, return_json=True
+                ),
+                route_id=f"GroqCrop::{key_hash}",
+            ))
+
+    if OPENROUTER_KEYS:
+        models = []
+        for model_name in (OPENROUTER_VISION_MODEL, OPENROUTER_VISION_FALLBACK_MODEL):
+            if model_name and model_name not in models:
+                models.append(model_name)
+        for key_index, api_key in enumerate(OPENROUTER_KEYS, 1):
+            key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:10]
+            for model_name in models:
+                routes.append(_quota_route(
+                    "OpenRouter", f"OpenRouter crop tracker key {key_index} ({model_name})", api_key,
+                    lambda api_key=api_key, model_name=model_name: _verify_with_openai_compatible_vision(
+                        "OpenRouter", api_key, model_name, frames, prompt, return_json=True
+                    ),
+                    route_id=f"OpenRouterCrop::{key_hash}::{model_name}",
+                    model=model_name,
+                ))
+
+    for key_index, api_key in enumerate(GEMINI_KEYS, 1):
+        key_hash = hashlib.sha256(api_key.encode()).hexdigest()[:10]
+        routes.append(_quota_route(
+            "Gemini", f"Gemini crop tracker key {key_index} ({VISION_MODEL})", api_key,
+            lambda api_key=api_key: _verify_with_gemini(
+                frames, prompt, api_key=api_key, return_json=True
+            ),
+            route_id=f"GeminiCrop::{key_hash}",
+        ))
+
+    if not routes:
+        raise RuntimeError("No multi-frame vision provider is available for safe landscape reframing.")
+
+    errors = []
+    pending = list(routes)
+    while pending:
+        ranked = QUOTA_ROUTER.rank_routes(pending)
+        if not ranked:
+            break
+        route = ranked[0]
+        pending.remove(route)
+        QUOTA_ROUTER.mark_selected(route)
+        try:
+            payload = route["run"]()
+            plan = validate_smart_crop_plan(payload, source_info, frame_times)
+            plan["source_duration"] = round(ffprobe_duration(video_path), 4)
+            plan["vision_provider"] = route["name"]
+            print(
+                f"Smart crop planner: {route['name']} tracked {len(plan['points'])} frames "
+                f"for {plan['subject']!r}; all boxes fit inside 9:16."
+            )
+            return plan
+        except VisionProviderError as exc:
+            detail = redact_provider_error(str(exc), GROQ_KEYS + OPENROUTER_KEYS + GEMINI_KEYS, max_chars=500)
+            errors.append(detail)
+            if exc.status_code in (408, 425, 429, 500, 502, 503, 504):
+                VISION_PROVIDER_COOLDOWN_UNTIL[route["id"]] = time.monotonic() + _provider_retry_delay(detail)
+            else:
+                VISION_DISABLED_PROVIDERS.add(route["id"])
+        except VisionResponseError as exc:
+            errors.append(str(exc)[:350])
+        except RuntimeError:
+            # A valid AI decision that the subject does not fit is a candidate rejection,
+            # not a provider failure and must not be bypassed with a different model.
+            raise
+        except Exception as exc:
+            errors.append(str(exc)[:350])
+
+    raise RuntimeError(
+        "No vision provider produced a safe dynamic crop plan. "
+        + " | ".join(errors[:3])
+    )
+
 def verify_footage_visually(
     video_path,
     scene,
     query,
-    candidate_metadata=""
+    candidate_metadata="",
+    frames_override=None,
 ):
     """Verify visible shot content, using catalog metadata for provenance."""
-    frames = extract_vision_frames(
-        video_path,
-        frame_count=3
+    frames = (
+        list(frames_override)
+        if frames_override is not None
+        else extract_vision_frames(video_path, frame_count=3)
     )
+    if len(frames) < 2:
+        raise VisionResponseError("Visual verification needs at least two usable frames.")
 
     metadata_context = re.sub(
         r"\s+",
@@ -4007,11 +4670,20 @@ def fetch_footage(plan):
             "GitHub Settings > Secrets and variables > Actions."
         )
 
+    discovery_priority = (
+        "Coverr native-vertical API -> " if ENABLE_COVERR_SOURCE else ""
+    ) + (
+        "Internet Archive -> Wikimedia Commons -> NASA -> "
+        "Google Search direct reusable-video files"
+    )
     print(
-        "Footage discovery priority: Internet Archive -> Wikimedia Commons -> "
-        "NASA -> Google Search direct reusable-video files. "
-        "Pexels/Pixabay are disabled unless explicitly enabled with "
-        "ENABLE_PEXELS_FALLBACK / ENABLE_PIXABAY_FALLBACK."
+        "Footage discovery priority: " + discovery_priority + ". "
+        + (
+            "Coverr vertical/free/non-AI search is enabled via COVERR_API_KEY. "
+            if ENABLE_COVERR_SOURCE else
+            "Coverr is skipped because COVERR_API_KEY is not configured. "
+        )
+        + "Pexels/Pixabay remain disabled unless explicitly enabled."
     )
 
     if not visual_provider_names:
@@ -4060,9 +4732,19 @@ def fetch_footage(plan):
         visual_rejection_feedback = []
         rejected_context_groups = set()
 
-        def collect_query_candidates(query, allow_relaxed=False):
+        def collect_query_candidates(
+            query, allow_relaxed=False, include_coverr=False
+        ):
             nonlocal strict_candidate_count, relaxed_candidate_count
-            for hit in search_all_footage_sources(query):
+            if include_coverr and ENABLE_COVERR_SOURCE:
+                source_hits = search_all_footage_sources(
+                    query, include_coverr=True
+                )
+            else:
+                # Keep compatibility with the pre-MM4 search function signature
+                # used by downstream test harnesses and local extensions.
+                source_hits = search_all_footage_sources(query)
+            for hit in source_hits:
                 identity = f"{hit.get('source')}:{hit.get('id')}"
 
                 if not hit.get("url") or identity in used_ids:
@@ -4140,8 +4822,11 @@ def fetch_footage(plan):
                 if previous is None or score > previous[0]:
                     candidates[identity] = (score, hit, query, matched, total)
 
-        for query in queries:
-            collect_query_candidates(query)
+        for query_index, query in enumerate(queries):
+            collect_query_candidates(
+                query,
+                include_coverr=(query_index == 0),
+            )
 
         # Only sparse strict pools pay for relaxed metadata matching and the
         # larger fallback search wave. Relaxed candidates are never auto-accepted:
@@ -4264,10 +4949,14 @@ def fetch_footage(plan):
                             f"one rejection-guided search retry with "
                             f"{len(retry_queries)} targeted query variant(s)."
                         )
-                    for retry_query in retry_queries:
+                    for retry_index, retry_query in enumerate(retry_queries):
                         queries.append(retry_query)
                         adaptive_retry_queries_used.append(retry_query)
-                        collect_query_candidates(retry_query, allow_relaxed=True)
+                        collect_query_candidates(
+                            retry_query,
+                            allow_relaxed=True,
+                            include_coverr=(retry_index == 0),
+                        )
 
                     if retry_queries:
                         ranked = rank_footage_candidates_by_source(candidates.values())
@@ -4308,23 +4997,34 @@ def fetch_footage(plan):
             checked += 1
 
             try:
+                download_limit = candidate_download_limit(score, hit)
+                print(
+                    f"Scene {i}: candidate download budget="
+                    f"{download_limit / 1024 / 1024:.0f} MB "
+                    f"(metadata relevance {score:.2f})."
+                )
                 download_stream(
                     hit["url"],
                     destination,
                     source=candidate_source,
+                    max_bytes=download_limit,
                 )
 
                 source_video_info = ffprobe_video_info(destination)
-                if not is_native_portrait_916(
+                native_portrait = is_native_portrait_916(
                     source_video_info["width"], source_video_info["height"],
                     aspect_ratio=source_video_info["aspect_ratio"],
+                )
+                requires_smart_crop = not native_portrait
+                if requires_smart_crop and not is_smart_reframe_eligible(
+                    source_video_info["width"], source_video_info["height"],
+                    source_video_info["aspect_ratio"],
                 ):
                     raise RuntimeError(
-                        "Source footage rejected: native 9:16 portrait is required; "
-                        f"downloaded source is {source_video_info['width']}x"
-                        f"{source_video_info['height']} "
-                        f"(aspect {source_video_info['aspect_ratio']:.4f}). "
-                        "The generator will not crop landscape, square, or 4:5 footage."
+                        "Downloaded source is neither native 9:16 nor a supported landscape "
+                        "source for content-aware reframing: "
+                        f"{source_video_info['width']}x{source_video_info['height']} "
+                        f"(aspect {source_video_info['aspect_ratio']:.4f})."
                     )
                 hit["_source_video_info"] = source_video_info
 
@@ -4379,6 +5079,59 @@ def fetch_footage(plan):
                         "Metadata-only fallback explicitly enabled."
                     )
 
+                if requires_smart_crop:
+                    if not visual_provider_names:
+                        raise RuntimeError(
+                            "Landscape footage cannot be reframed without AI crop tracking; "
+                            "native 9:16 footage is still required in metadata-only mode."
+                        )
+                    crop_plan = analyze_smart_crop(
+                        destination,
+                        scene,
+                        query,
+                        candidate_metadata,
+                        source_video_info,
+                    )
+                    cropped_frames = extract_smart_crop_verification_frames(
+                        destination,
+                        source_video_info,
+                        crop_plan,
+                    )
+                    (
+                        crop_relevant,
+                        crop_confidence,
+                        crop_reason,
+                        crop_provider,
+                    ) = verify_footage_visually(
+                        destination,
+                        scene,
+                        query,
+                        candidate_metadata + " | Proposed dynamic crop: " + crop_plan.get("subject", ""),
+                        frames_override=cropped_frames,
+                    )
+                    print(
+                        f"Scene {i}: post-crop verification via {crop_provider} — "
+                        f"{'PASS' if crop_relevant else 'REJECT'} "
+                        f"({crop_confidence:.2f}): {crop_reason[:200]}"
+                    )
+                    if not crop_relevant:
+                        visual_rejection_feedback.append({
+                            "reason": "Post-crop verification: " + crop_reason,
+                            "query": query,
+                            "metadata": candidate_metadata[:900],
+                        })
+                        destination.unlink(missing_ok=True)
+                        continue
+                    hit["_smart_crop_plan"] = crop_plan
+                    visual_reason += (
+                        f" | Smart 9:16 crop verified via {crop_provider} "
+                        f"({crop_confidence:.2f}): {crop_reason[:180]}"
+                    )
+                    vision_provider = f"{vision_provider} + crop tracker {crop_plan.get('vision_provider', '')}"
+                    confidence = min(
+                        value for value in (confidence, crop_confidence) if value is not None
+                    )
+
                 selected = (
                     score,
                     hit,
@@ -4405,9 +5158,8 @@ def fetch_footage(plan):
                     f"({hit.get('source')}): {message[:350]}"
                 )
 
-                destination.unlink(
-                    missing_ok=True
-                )
+                destination.unlink(missing_ok=True)
+                destination.with_name(destination.name + ".part").unlink(missing_ok=True)
 
                 if isinstance(exc, VisionVerificationError):
                     raise RuntimeError(
@@ -4586,7 +5338,12 @@ def fetch_footage(plan):
             ""
         )
         scene["source_video_dimensions"] = hit.get("_source_video_info", {})
-        scene["source_native_aspect_ratio_required"] = "9:16"
+        scene["output_aspect_ratio"] = "9:16"
+        smart_crop_plan = hit.get("_smart_crop_plan")
+        if smart_crop_plan:
+            scene["smart_vertical_reframe"] = smart_crop_plan
+        else:
+            scene["smart_vertical_reframe"] = {"enabled": False, "reason": "Native 9:16 source."}
 
         scene["footage_search_retry_count"] = len(adaptive_retry_queries_used)
         scene["footage_search_retry_queries"] = list(adaptive_retry_queries_used)
@@ -4613,6 +5370,20 @@ def fetch_footage(plan):
             )
         )
 
+        coverr_attribution = ""
+        if str(hit.get("source") or "") == "Coverr":
+            coverr_creator_url = str(hit.get("creator_url") or "").strip()
+            coverr_attribution = (
+                " | Coverr API Demo attribution: "
+                f"Video by {hit.get('creator', 'Coverr creator')} on Coverr; "
+                "Coverr https://coverr.co"
+                + (
+                    f" | Creator profile: {coverr_creator_url}"
+                    if coverr_creator_url.startswith("https://")
+                    else f" | Creator/video source: {hit.get('page_url', '')}"
+                )
+            )
+
         credits.append(
             f"Scene {i} | {hit.get('source')} | "
             f"Creator: {hit.get('creator', 'Unknown')} | "
@@ -4621,6 +5392,7 @@ def fetch_footage(plan):
             f"({matched}/{total} query concepts)"
             f"{vision_credit} | "
             f"License: {hit.get('license', 'Check source page')}"
+            f"{coverr_attribution}"
             + (
                 f" | Last-resort reuse of previously verified Scene {reused_from_scene}"
                 if reused_from_scene is not None
@@ -5279,48 +6051,41 @@ def render_footage_scene(
     source,
     duration,
     output,
-    hook_text=None
+    hook_text=None,
+    smart_crop_plan=None,
 ):
     source_info = ffprobe_video_info(source)
-    if not is_native_portrait_916(
+    native_portrait = is_native_portrait_916(
         source_info["width"], source_info["height"],
         aspect_ratio=source_info["aspect_ratio"],
-    ):
-        raise RuntimeError(
-            "Render refused non-native-9:16 footage: "
-            f"{source_info['width']}x{source_info['height']} "
-            f"(aspect {source_info['aspect_ratio']:.4f})."
+    )
+
+    if native_portrait:
+        vf = (
+            f"scale={W}:{H}:force_original_aspect_ratio=decrease:flags=lanczos,"
+            f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black,"
+            f"fps={FPS},setsar=1,format=yuv420p"
+        )
+    else:
+        if not isinstance(smart_crop_plan, dict):
+            raise RuntimeError(
+                "Render refused non-native-9:16 footage without a verified AI smart-crop plan."
+            )
+        crop_width, crop_height, x_expression = smart_crop_geometry(source_info, smart_crop_plan)
+        vf = (
+            f"crop={crop_width}:{crop_height}:x='{x_expression}':y=0:exact=1,"
+            f"scale={W}:{H}:flags=lanczos,fps={FPS},setsar=1,format=yuv420p"
         )
 
     source_duration = ffprobe_duration(source)
-
-    loop_args = (
-        ["-stream_loop", "-1"]
-        if source_duration < duration + 0.1
-        else []
-    )
-
-    # The downloaded source has been checked as native 9:16. Fit the complete
-    # frame into the canvas; never enlarge-and-crop or apply artificial panning.
-    vf = (
-        f"scale={W}:{H}:force_original_aspect_ratio=decrease:flags=lanczos,"
-        f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black,"
-        f"fps={FPS},setsar=1,format=yuv420p"
-    )
+    loop_args = ["-stream_loop", "-1"] if source_duration < duration + 0.1 else []
 
     if hook_text:
         hook_file = OUT / "hook.txt"
         wrapped_hook = wrap_overlay_text(hook_text, width=24, max_lines=5)
         hook_file.write_text(wrapped_hook, encoding="utf-8")
-        longest_hook_line = max(
-            (len(line) for line in wrapped_hook.splitlines()),
-            default=1,
-        )
-        hook_font_size = max(
-            32,
-            min(54, int((W - 180) / max(1, longest_hook_line * 0.62))),
-        )
-
+        longest_hook_line = max((len(line) for line in wrapped_hook.splitlines()), default=1)
+        hook_font_size = max(32, min(54, int((W - 180) / max(1, longest_hook_line * 0.62))))
         vf += (
             f",drawtext=fontfile=/usr/share/fonts/truetype/dejavu/"
             f"DejaVuSans-Bold.ttf:textfile={hook_file}:"
@@ -5328,27 +6093,17 @@ def render_footage_scene(
             "borderw=2:bordercolor=black@0.70:"
             "box=1:boxcolor=black@0.42:boxborderw=30:"
             "x=(w-text_w)/2:y=160:"
-            "alpha='if(lt(t,1.0),(t-0.6)/0.4,"
-            "if(gt(t,4.1),(4.5-t)/0.4,1))':"
+            "alpha='if(lt(t,1.0),(t-0.6)/0.4,if(gt(t,4.1),(4.5-t)/0.4,1))':"
             "enable='between(t,0.6,4.5)'"
         )
 
     cmd = [
-        "ffmpeg", "-y",
-        *loop_args,
-        "-i", str(source),
-        "-t", f"{duration:.3f}",
-        "-vf", vf,
-        "-an",
-        "-c:v", "libx264",
-        "-preset", X264_PRESET,
-        "-crf", "20",
-        "-r", str(FPS),
-        "-pix_fmt", "yuv420p",
-        "-movflags", "+faststart",
-        str(output)
+        "ffmpeg", "-y", *loop_args, "-i", str(source),
+        "-t", f"{duration:.3f}", "-vf", vf, "-an",
+        "-c:v", "libx264", "-preset", X264_PRESET, "-crf", "20",
+        "-r", str(FPS), "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+        str(output),
     ]
-
     run(cmd)
 
 
@@ -5389,7 +6144,11 @@ def render(plan, sentence_events, total_duration):
                 source,
                 duration,
                 output,
-                hook
+                hook,
+                smart_crop_plan=scene.get("smart_vertical_reframe")
+                if isinstance(scene.get("smart_vertical_reframe"), dict)
+                and scene.get("smart_vertical_reframe", {}).get("mode") == "ai_content_aware_dynamic_crop"
+                else None,
             )
 
         else:
@@ -5539,6 +6298,7 @@ def write_failure_diagnostics(exc):
             "speechify_keys_configured": len(SPEECHIFY_KEYS),
             "pixabay_key_configured": bool(PIXABAY_KEY),
             "pexels_key_configured": bool(PEXELS_KEY),
+            "release": "MM5",
             "source_priority": list(FOOTAGE_SOURCE_PRIORITY),
             "footage_source_requests": dict(FOOTAGE_SOURCE_REQUEST_COUNTS),
             "footage_source_cooldowns_seconds": {

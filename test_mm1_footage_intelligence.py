@@ -263,7 +263,7 @@ class MM1AdaptiveRetryIntegrationTests(unittest.TestCase):
                     return [dict(good)]
                 return [dict(bad)]
 
-            def fake_download(url, dest, source=None):
+            def fake_download(url, dest, source=None, max_bytes=None):
                 Path(dest).parent.mkdir(parents=True, exist_ok=True)
                 Path(dest).write_bytes(b"x" * 60000)
 
