@@ -2,61 +2,7 @@
   "status": "blocked",
   "method": "trusted-source fetch + independent evidence-grounded AI audit",
   "claim_count": 8,
-  "blocked_at_claim": "C1",
-  "blocked_claim_sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals.",
-  "failure_reason": "quantitative claim lacked a second independent organisation",
-  "source_fetch_failures": [
-    {
-      "requested_url": "https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html",
-      "reason": "Could not fetch evidence source https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html: HTTPError (HTTP 404)",
-      "source_kind": "discovered"
-    },
-    {
-      "requested_url": "https://en.wikipedia.org/wiki/Population",
-      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Population: HTTPError (HTTP 429)",
-      "source_kind": "discovered"
-    },
-    {
-      "requested_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
-      "source_kind": "discovered"
-    },
-    {
-      "requested_url": "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_population",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
-      "source_kind": "discovered"
-    },
-    {
-      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
-      "source_kind": "scholarly"
-    },
-    {
-      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
-      "source_kind": "scholarly"
-    }
-  ],
-  "usable_source_organizations": [
-    "wikipedia.org"
-  ],
-  "source_recovery": {
-    "attempted": true,
-    "candidate_urls": [],
-    "failure": "",
-    "provider": "gemini",
-    "model": "gemini-3.5-flash-lite",
-    "discovered_urls": [
-      "https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html",
-      "https://en.wikipedia.org/wiki/Population",
-      "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
-      "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_population"
-    ],
-    "scholarly_urls": [
-      "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
-      "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml"
-    ]
-  },
+  "fact_checker_failure": "ProviderRoutingError: All text-generation providers are unavailable: gemini/gemini-3.5-flash-lite: HTTP 404; groq/openai/gpt-oss-120b: invalid response (Quantitative claim C2 was not confirmed by two distinct source organizations.); openrouter/openrouter/free: HTTP 429; groq/openai/gpt-oss-120b: invalid response (Quantitative claim C2 was not confirmed by two distinct source organizations.); groq/openai/gpt-oss-120b: invalid response (Quantitative claim C2 was not confirmed by two distinct source organizations.); groq/openai/gpt-oss-120b: invalid response (Quantitative claim C2 was not confirmed by two distinct source organizations.)",
   "sources": [
     {
       "claim_id": "C1",
@@ -65,53 +11,140 @@
       "host": "en.wikipedia.org",
       "http_status": 200,
       "page_title": "Beaver",
-      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. In 2020, the total Eurasian beaver population in Europe was estimated at over one million. Beavers have a good sense of smell, which they use for detecting land predators and for inspecting scent marks, food, and other individuals. As of 2019, the introduced population of North American beavers in Finland has been moving closer to the habitat of the Eurasian beaver. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the orig",
+      "excerpt": "== Ecology ==\n\nBeavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. When building dams, beavers alter the paths of streams and rivers, allowing for the creation of extensive wetland habitats. These ponds can increase the productivity of freshwater ecosystems by accumulating nitrogen in sediments. In a study of Wyoming streams and rivers, watercourses with beavers had 75 times as many ducks as those without. Beavers prefer slower moving streams, typically with a gradient (steepness) of one percent, though they have been recorded using streams with gradients as high as 15 percent. Beavers are found in wider streams more often than in narrower ones. === Infrastructure ===\n\nBeavers need trees and shrubs to use as building material for dams, which restrict flowing wate",
       "source_kind": "planned",
       "status": "usable"
     },
     {
-      "claim_id": "C1",
+      "claim_id": "C2",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Beaver",
+      "excerpt": "In 2020, the total Eurasian beaver population in Europe was estimated at over one million. In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. As of 2019, the introduced population of North American beavers in Finland has been moving closer to the habitat of the Eurasian beaver. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the originally estimated 60–400 million North American beavers before the fur trade. Beaver populations now range across western, central, and eastern Europe, and western Russia and the Scandinavian Peninsula. Many populations of Eurasian beaver do ",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C2",
       "requested_url": "https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html",
       "status": "not_usable",
       "source_kind": "discovered",
       "reason": "Could not fetch evidence source https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html: HTTPError (HTTP 404)"
     },
     {
-      "claim_id": "C1",
+      "claim_id": "C2",
       "requested_url": "https://en.wikipedia.org/wiki/Population",
       "status": "not_usable",
       "source_kind": "discovered",
       "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Population: HTTPError (HTTP 429)"
     },
     {
-      "claim_id": "C1",
-      "requested_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
-      "status": "not_usable",
+      "claim_id": "C2",
+      "requested_url": "https://en.wikipedia.org/wiki/Population_of_Canada",
+      "resolved_url": "https://en.wikipedia.org/wiki/Population_of_Canada",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Population of Canada",
+      "excerpt": "In October 2020, the Trudeau government announced its plans to bring in more than 1.2 million immigrants over the subsequent three years, to catch up to the high-growth scenario. Canada ranks 37th by population among countries of the world, comprising about 0.5% of the world's total, with about 41.5 million Canadians as of Q1 2026. The 2016 Canadian census counted a total population of 35.1 million, or 1.5 million under the 2006 projection. Despite being the second-largest country by total area (fourth-largest by land area), the vast majority of the country is sparsely inhabited, with most of its population south of the 55th parallel north. Canada has six population centres with more than one million people: Toronto, Montreal, Vancouver, Calgary, Edmonton and Ottawa. The historical growth of Canada's population is complex and has been influenced in many different ways, such as Indigenous",
       "source_kind": "discovered",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+      "status": "usable"
     },
     {
-      "claim_id": "C1",
+      "claim_id": "C2",
       "requested_url": "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_population",
-      "status": "not_usable",
+      "resolved_url": "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_population",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "List of U.S. states and territories by population",
+      "excerpt": "states contain slightly more than half of the total population. The 25 least populous states contain less than one-sixth of the total population. The states and territories included in the United States Census Bureau's statistics for the United States population, ethnicity, and most other categories include the 50 states and Washington, D.C. As of April 1, 2020, the date of the 2020 United States census, the nine most populous U.S. California, the most populous state, contains more people than the 21 least populous states combined, and Wyoming, the least populous state, has a population less than any of the 31 most populous U.S. The population of Wyoming currently as of 2025 is 588,753. For example, for the 2020 decennial census, 14 states had significant miscounts ranging from 1.5% to 6.6%. The allocation is based on each state's proportion of the combined population of the fifty states",
       "source_kind": "discovered",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+      "status": "usable"
     },
     {
-      "claim_id": "C1",
+      "claim_id": "C2",
       "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
-      "status": "not_usable",
+      "resolved_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
+      "host": "eutils.ncbi.nlm.nih.gov",
+      "http_status": 200,
+      "page_title": "Catchment structure and functioning mediates beaver activity in contrasting lowland agricultural landscapes",
+      "excerpt": "Current beaver activity After the near extinction of beavers at the beginning of the 20th century throughout Europe, only a few isolated populations remained. In intensively managed environments, reintroduction and re‐establishment of beavers often generate increased beaver‐human conflicts, while opening up questions about habitat suitability, restoration goals, and timelines, as well as impacts on infrastructure and land use (Auster et al., 2020 ; Implications for beaver reintroduction in agricultural catchments Based on previous research in the DMC catchment on the role of beavers (Smith et al., 2020 ; In this way, the continued presence of beavers in the rehabilitated wetland (including side channels) did increase local surface water leakage to groundwater, as well as residence times downstream of beaver dams, even though dams were occasionally removed in the main channel (Smith et al",
       "source_kind": "scholarly",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+      "status": "usable"
     },
     {
-      "claim_id": "C1",
+      "claim_id": "C2",
       "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml",
       "status": "not_usable",
       "source_kind": "scholarly",
-      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+      "reason": "Fetched page does not state the claimed value(s) 2020; a numeric claim needs a passage containing that number."
+    },
+    {
+      "claim_id": "C3",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Beaver",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. Their populations have since rebounded, and they are listed as species of least concern by the IUCN Red List of mammals. Castoroides is estimated to have had a length of 1.9–2.2 m (6.2–7.2 ft) and a weight of 90–125 kg (198–276 lb). neglectus, found in Germany and dated 12–10 mya. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the originally estimated 60–400 million North American beavers before the fur trade. The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. Beaver pop",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C4",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Beaver",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. Beaver populations now range across western, central, and eastern Europe, and western Russia and the Scandinavian Peninsula. Their populations have since rebounded, and they are listed as species of least concern by the IUCN Red List of mammals. Castoroides is estimated to have had a length of 1.9–2.2 m (6.2–7.2 ft) and a weight of 90–125 kg (198–276 lb). The species was introduced to Finland in 1937 (and then spread to northwestern Russia) and to Tierra del Fuego, Patagonia, in 1946. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still fa",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C5",
+      "requested_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "resolved_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "River ecosystem",
+      "excerpt": "River ecosystems are flowing waters that drain the landscape, and include the biotic (living) interactions amongst plants, animals and micro-organisms, as well as abiotic (nonliving) physical and chemical interactions of its many parts. The fungi and bacteria in river ecosystems live mostly on decaying organic matter from animals and plants. River ecosystems are part of larger watershed networks or catchments, where smaller headwater streams drain into mid-size streams, which progressively drain into larger river networks. However, the main body of the fungi, the mycelium, live freely in sediments, on decaying organic material, as parasites on or in other organisms (such as on animals, or algae), as endophytes, in plants, or as mutualists in the guts of insects. The common orders of insects that are found in river ecosystems include Ephemeroptera (also known as a mayfly), Trichoptera (al",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C6",
+      "requested_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "resolved_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "River ecosystem",
+      "excerpt": "River ecosystems are flowing waters that drain the landscape, and include the biotic (living) interactions amongst plants, animals and micro-organisms, as well as abiotic (nonliving) physical and chemical interactions of its many parts. The following unifying characteristics make the ecology of running waters unique among aquatic habitats: the flow is unidirectional, there is a state of continuous physical change, and there is a high degree of spatial and temporal heterogeneity at all scales (microhabitats), the variability between lotic systems is quite high and the biota is specialized to live with flow conditions. While water flow is strongly determined by slope, flowing waters can alter the general shape or direction of the stream bed, a characteristic also known as geomorphology. Additional invertebrate taxa common to flowing waters include mollusks such as snails, limpets, clams, m",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C7",
+      "requested_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "resolved_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "River ecosystem",
+      "excerpt": "The major zones in river ecosystems are determined by the river bed's gradient or by the velocity of the current. River ecosystems are flowing waters that drain the landscape, and include the biotic (living) interactions amongst plants, animals and micro-organisms, as well as abiotic (nonliving) physical and chemical interactions of its many parts. River ecosystems are part of larger watershed networks or catchments, where smaller headwater streams drain into mid-size streams, which progressively drain into larger river networks. River ecosystems are prime examples of lotic ecosystems. === Chemistry ===\nWater chemistry in river ecosystems varies depending on which dissolved solutes and gases are present in the water column of the stream. Specifically river water can include, apart from the water itself,\n\ndissolved inorganic matter and major ions (calcium, sodium, magnesium, potassium, bi",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C8",
+      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Keystone species",
+      "excerpt": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon. Beavers affect the environment first altering the edges of riparian areas by cutting down older trees to use for their dams. It promotes the goals of carnivore recovery, protecting and restoring connectivity through Madrean woodland and riparian areas, and protecting and restoring riparian areas. The removal of wolves had a direct effect on beaver populations, as their habitat became grazing territory. When wolves were reintroduced, the beaver population and the whole riparian ecosystem recovered dramatically within a few years. In his 1966 paper, Food Web Complexity and Species Diversity, Paine had described such a system in Makah Bay in Washington. The favourite food for these starfish is the mussel which is a dominant competitor for the space o",
+      "source_kind": "planned",
+      "status": "usable"
     }
-  ],
-  "claim_repairs": [],
-  "repair_failure": "ValueError: Claim repair would leave 138 words; the production target is 150-195."
+  ]
 }

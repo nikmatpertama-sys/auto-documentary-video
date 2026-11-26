@@ -1,139 +1,139 @@
 {
-  "title": "How Beavers Reshape Entire River Ecosystems",
-  "hook": "Beavers transform rivers and shape freshwater environments.",
+  "title": "Beavers and River Ecosystems",
+  "hook": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
   "scenes": [
     {
-      "narration": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals.",
-      "visual_focus": "European beavers",
-      "visual_query": "European beavers in river",
+      "narration": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
+      "visual_focus": "beaver in pond",
+      "visual_query": "beaver in pond",
       "visual_queries": [
-        "wild European beaver swimming",
-        "beaver in freshwater stream"
+        "beaver in pond",
+        "beaver in lake"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "European beavers in river",
-      "source_label": "Wikipedia",
+      "reference_query": "beaver in pond",
+      "source_label": "Wikipedia Beaver",
       "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "These remaining groups survived in the Rhône of France, the Elbe in Germany, southern Norway, and Belarus.",
-      "visual_focus": "beaver habitat",
-      "visual_query": "European river habitat",
+      "narration": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals.",
+      "visual_focus": "beaver in river",
+      "visual_query": "beaver in river",
       "visual_queries": [
-        "river stream in Germany",
-        "freshwater stream in France"
+        "beaver in river",
+        "beaver in streams"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "European river habitat",
-      "source_label": "Wikipedia",
+      "reference_query": "beaver in river",
+      "source_label": "Wikipedia Beaver",
       "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across these regions.",
-      "visual_focus": "beaver pond",
-      "visual_query": "beaver pond freshwater",
+      "narration": "These populations were estimated for the Rhone of France, the Elbe in Germany, and southern Norway.",
+      "visual_focus": "rhone of france",
+      "visual_query": "rhone of france",
       "visual_queries": [
-        "lake and pond landscape",
-        "freshwater stream ecosystem"
+        "rhone of france",
+        "elbe in germany"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver pond freshwater",
-      "source_label": "Wikipedia",
+      "reference_query": "rhone of france",
+      "source_label": "Wikipedia Beaver",
       "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2
     },
     {
-      "narration": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
-      "visual_focus": "conservation concept",
-      "visual_query": "conservation nature project",
+      "narration": "Populations were also estimated for the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia.",
+      "visual_focus": "neman river",
+      "visual_query": "neman river",
       "visual_queries": [
-        "wildlife conservation field",
-        "ecosystem protection area"
+        "neman river",
+        "voronezh river in russia"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "conservation nature project",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "reference_query": "neman river",
+      "source_label": "Wikipedia Beaver",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "This framework was mobilized where human activities had damaged ecosystems, such as by removing keystone predators.",
-      "visual_focus": "damaged ecosystem",
-      "visual_query": "damaged river ecosystem",
+      "narration": "River ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants, animals, and micro-organisms.",
+      "visual_focus": "flowing waters",
+      "visual_query": "flowing waters",
       "visual_queries": [
-        "human activity river bank",
-        "degraded natural habitat"
+        "flowing waters",
+        "river ecosystems"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "damaged river ecosystem",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "reference_query": "flowing waters",
+      "source_label": "Wikipedia River ecosystem",
+      "source_url": "https://en.wikipedia.org/wiki/River_ecosystem",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from food encroachment.",
-      "visual_focus": "wolves in riparian areas",
-      "visual_query": "wolves riparian areas",
+      "narration": "Abiotic physical and chemical interactions of its many parts also occur within these flowing waters that drain the landscape.",
+      "visual_focus": "flowing waters",
+      "visual_query": "flowing waters",
       "visual_queries": [
-        "gray wolf near river",
-        "wolves in natural habitat"
+        "flowing waters",
+        "river landscape"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "wolves riparian areas",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "reference_query": "flowing waters",
+      "source_label": "Wikipedia River ecosystem",
+      "source_url": "https://en.wikipedia.org/wiki/River_ecosystem",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5
     },
     {
-      "narration": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role.",
-      "visual_focus": "stream connectivity",
-      "visual_query": "stream floodplain connectivity",
+      "narration": "The major zones in river ecosystems are determined by the river bed's gradient or by the velocity of the current.",
+      "visual_focus": "river bed gradient",
+      "visual_query": "river bed gradient",
       "visual_queries": [
-        "river connected to floodplain",
-        "stream flowing through valley"
+        "river bed gradient",
+        "velocity of the current"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "stream floodplain connectivity",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "reference_query": "river bed gradient",
+      "source_label": "Wikipedia River ecosystem",
+      "source_url": "https://en.wikipedia.org/wiki/River_ecosystem",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6
     },
     {
-      "narration": "Stream restoration or river restoration is a set of activities that aim to improve the environmental health.",
-      "visual_focus": "stream restoration",
-      "visual_query": "stream restoration activities",
+      "narration": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.",
+      "visual_focus": "wolves in riparian areas",
+      "visual_query": "wolves in riparian areas",
       "visual_queries": [
-        "river restoration project",
-        "environmental health stream"
+        "wolves in riparian areas",
+        "wolves grazing"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "stream restoration activities",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Stream_restoration",
+      "reference_query": "wolves in riparian areas",
+      "source_label": "Wikipedia Keystone species",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7
@@ -142,62 +142,62 @@
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals.",
+      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 2,
-      "sentence": "These remaining groups survived in the Rhône of France, the Elbe in Germany, southern Norway, and Belarus.",
+      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 3,
-      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across these regions.",
+      "sentence": "These populations were estimated for the Rhone of France, the Elbe in Germany, and southern Norway.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 4,
-      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
+      "sentence": "Populations were also estimated for the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 5,
-      "sentence": "This framework was mobilized where human activities had damaged ecosystems, such as by removing keystone predators.",
+      "sentence": "River ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants, animals, and micro-organisms.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/River_ecosystem"
       ]
     },
     {
       "scene": 6,
-      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from food encroachment.",
+      "sentence": "Abiotic physical and chemical interactions of its many parts also occur within these flowing waters that drain the landscape.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/River_ecosystem"
       ]
     },
     {
       "scene": 7,
-      "sentence": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role.",
+      "sentence": "The major zones in river ecosystems are determined by the river bed's gradient or by the velocity of the current.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stream_restoration"
+        "https://en.wikipedia.org/wiki/River_ecosystem"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Stream restoration or river restoration is a set of activities that aim to improve the environmental health.",
+      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stream_restoration"
+        "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     }
   ],
-  "script": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals. These remaining groups survived in the Rhône of France, the Elbe in Germany, southern Norway, and Belarus. Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across these regions. The concept became popular in conservation, and was deployed in a range of contexts to engender support. This framework was mobilized where human activities had damaged ecosystems, such as by removing keystone predators. In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from food encroachment. The connectivity of streams to their adjacent floodplain along their entire length plays an important role. Stream restoration or river restoration is a set of activities that aim to improve the environmental health.",
+  "script": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals. These populations were estimated for the Rhone of France, the Elbe in Germany, and southern Norway. Populations were also estimated for the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. River ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants, animals, and micro-organisms. Abiotic physical and chemical interactions of its many parts also occur within these flowing waters that drain the landscape. The major zones in river ecosystems are determined by the river bed's gradient or by the velocity of the current. In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon.",
   "ai_provider": {
     "provider": "gemini",
     "model": "gemini-3.5-flash-lite"
@@ -208,15 +208,16 @@
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "HOW BEAVERS RESHAPE ENTIRE RIVER ECOSYSTEMS"
+        "BEAVERS AND RIVER ECOSYSTEMS"
       ],
       "hook_lines": [
-        "Beavers transform rivers",
-        "and shape freshwater",
-        "environments."
+        "Beavers live in",
+        "freshwater ecosystems",
+        "such as rivers, streams,",
+        "lakes and ponds."
       ],
-      "title_text": "How Beavers Reshape Entire River Ecosystems",
-      "hook_text": "Beavers transform rivers and shape freshwater environments.",
+      "title_text": "Beavers and River Ecosystems",
+      "hook_text": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,
@@ -224,7 +225,7 @@
         48,
         150,
         1032,
-        470
+        538
       ]
     }
   }

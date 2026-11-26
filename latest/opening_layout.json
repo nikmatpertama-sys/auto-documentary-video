@@ -1,15 +1,16 @@
 {
   "path": "output/opening_overlay.png",
   "title_lines": [
-    "HOW BEAVERS RESHAPE ENTIRE RIVER ECOSYSTEMS"
+    "BEAVERS AND RIVER ECOSYSTEMS"
   ],
   "hook_lines": [
-    "Beavers transform rivers",
-    "and shape freshwater",
-    "environments."
+    "Beavers live in",
+    "freshwater ecosystems",
+    "such as rivers, streams,",
+    "lakes and ponds."
   ],
-  "title_text": "How Beavers Reshape Entire River Ecosystems",
-  "hook_text": "Beavers transform rivers and shape freshwater environments.",
+  "title_text": "Beavers and River Ecosystems",
+  "hook_text": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
   "title_font_size": 27,
   "hook_font_size": 62,
   "max_text_width": 880,
@@ -17,6 +18,6 @@
     48,
     150,
     1032,
-    470
+    538
   ]
 }
