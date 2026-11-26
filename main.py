@@ -22,6 +22,7 @@ import requests
 import edge_tts
 
 from quota_router import QuotaAwareRouter
+from visual_retry import visual_retry_policy, redact_provider_error
 
 # ============================================================
 # CONFIG
@@ -3024,27 +3025,97 @@ Set relevant=true only when the visual composition genuinely matches the SCENE P
     errors = []
     attempted = 0
     pending = list(providers)
+    route_attempts = {}
+    max_route_attempts = max(1, min(4, int(os.getenv("VISION_MAX_ROUTE_ATTEMPTS", "3"))))
+    recovery_wait_budget = max(
+        0.0,
+        min(600.0, float(os.getenv("VISION_FAILOVER_WAIT_BUDGET_SECONDS", "180"))),
+    )
+    recovery_wait_used = 0.0
+
+    def route_cooldown_remaining(candidate_route):
+        """Include both local verifier and quota-router cooldown clocks."""
+        candidate_id = candidate_route["id"]
+        now = time.monotonic()
+        remaining = _provider_cooldown_remaining(candidate_id)
+        for scope_name in (
+            candidate_route.get("scope"),
+            candidate_route.get("shared_scope"),
+            candidate_route.get("model_scope"),
+        ):
+            if not scope_name:
+                continue
+            pool_state = QUOTA_ROUTER.pools.get(str(scope_name), {})
+            remaining = max(
+                remaining,
+                float(pool_state.get("cooldown_until", 0.0)) - now,
+            )
+        return max(0.0, remaining)
+
+    def safe_error(exc):
+        known_secrets = list(GROQ_KEYS) + list(OPENROUTER_KEYS) + list(GEMINI_KEYS)
+        for item in CLOUDFLARE_CREDENTIALS:
+            known_secrets.extend((item.get("token", ""), item.get("account_id", "")))
+        known_secrets.extend(SPEECHIFY_KEYS)
+        return redact_provider_error(str(exc), known_secrets, max_chars=700)
 
     while pending:
         eligible = []
-        for candidate_route in pending:
+        for candidate_route in list(pending):
             candidate_id = candidate_route["id"]
             if candidate_id in VISION_DISABLED_PROVIDERS:
+                pending.remove(candidate_route)
                 continue
-            if _provider_cooldown_remaining(candidate_id) > 0:
+            if route_attempts.get(candidate_id, 0) >= max_route_attempts:
+                pending.remove(candidate_route)
+                continue
+            if route_cooldown_remaining(candidate_route) > 0:
                 continue
             eligible.append(candidate_route)
+
         ranked = QUOTA_ROUTER.rank_routes(eligible)
         if not ranked:
+            # Temporary 429/5xx routes are re-queued. Wait for the earliest
+            # advertised/reset cooldown instead of aborting immediately.
+            waiting_routes = [
+                candidate_route
+                for candidate_route in pending
+                if candidate_route["id"] not in VISION_DISABLED_PROVIDERS
+                and route_attempts.get(candidate_route["id"], 0) < max_route_attempts
+                and route_cooldown_remaining(candidate_route) > 0
+            ]
+            if waiting_routes:
+                wait_seconds = min(route_cooldown_remaining(item) for item in waiting_routes)
+                budget_left = recovery_wait_budget - recovery_wait_used
+                if wait_seconds <= budget_left:
+                    actual_wait = wait_seconds + 0.25
+                    print(
+                        "All remaining visual routes are temporarily cooling down; "
+                        f"waiting {actual_wait:.1f}s for quota/service recovery "
+                        f"(budget remaining {budget_left:.1f}s)."
+                    )
+                    time.sleep(actual_wait)
+                    recovery_wait_used += actual_wait
+                    continue
+                errors.append(
+                    f"Visual failover recovery wait budget exhausted; "
+                    f"next provider reset is in {wait_seconds:.1f}s."
+                )
             break
+
         route = ranked[0]
         pending.remove(route)
         provider_id = route["id"]
         provider_name = route["name"]
         verify = route["run"]
+        route_attempts[provider_id] = route_attempts.get(provider_id, 0) + 1
+        attempt_number = route_attempts[provider_id]
         QUOTA_ROUTER.mark_selected(route)
         attempted += 1
-        print(f"Visual verifier: quota-aware selection -> {provider_name}...")
+        print(
+            f"Visual verifier: quota-aware selection -> {provider_name} "
+            f"(attempt {attempt_number}/{max_route_attempts})..."
+        )
 
         try:
             relevant, confidence, reason = verify()
@@ -3068,96 +3139,94 @@ Set relevant=true only when the visual composition genuinely matches the SCENE P
             )
 
         except VisionProviderError as exc:
-            errors.append(str(exc))
+            detail = safe_error(exc)
+            errors.append(detail)
+            should_retry, delay, retry_reason = visual_retry_policy(
+                provider_name,
+                exc.status_code,
+                detail,
+                attempt_number=attempt_number,
+                max_attempts=max_route_attempts,
+            )
 
-            if exc.status_code == 429:
-                # A provider that repeatedly returns 429 should not be pinged
-                # again on every candidate. Honor longer provider hints, but
-                # enforce a 30s minimum in-run cooldown to reduce retry churn.
-                delay = max(
-                    30.0,
-                    _provider_retry_delay(str(exc)),
-                )
-
+            if should_retry:
                 now = time.monotonic()
                 VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = now + delay
-                # OpenRouter can expose several models on one exhausted key.
-                # Cool down all sibling models for that same credential so the
-                # pipeline advances to the next key/provider instead of wasting calls.
+                # Cool down model siblings for the same OpenRouter key so an
+                # exhausted model route does not cause pointless sibling calls.
                 route_parts = provider_id.split("::")
-                if len(route_parts) >= 2:
+                if provider_name.startswith("OpenRouter") and len(route_parts) >= 2:
                     route_group = "::".join(route_parts[:2])
                     for sibling_route in providers:
                         sibling_id = sibling_route["id"]
                         if sibling_id.startswith(route_group + "::"):
                             VISION_PROVIDER_COOLDOWN_UNTIL[sibling_id] = now + delay
-
+                pending.append(route)
                 print(
-                    f"Visual verifier {provider_name} rate-limited; "
-                    f"cooling this route for {delay:.0f}s and switching backup."
+                    f"Visual verifier {provider_name} returned HTTP {exc.status_code}; "
+                    f"{retry_reason}. It will be reconsidered after {delay:.0f}s. "
+                    f"Detail: {detail[:500]}"
                 )
-
-            elif exc.status_code in (
-                400, 401, 402, 403, 404, 413, 415, 422
-            ):
-                VISION_DISABLED_PROVIDERS.add(
-                    provider_id
-                )
-
-                print(
-                    f"Visual verifier {provider_name} has a hard "
-                    f"configuration error (HTTP {exc.status_code}); "
-                    "disabling this route."
-                )
-
             else:
-                VISION_PROVIDER_COOLDOWN_UNTIL[
-                    provider_id
-                ] = time.monotonic() + 20
-
-                print(
-                    f"Visual verifier {provider_name} unavailable: "
-                    f"{str(exc)[:450]}"
-                )
+                if exc.status_code in (400, 401, 402, 403, 404, 413, 415, 422):
+                    VISION_DISABLED_PROVIDERS.add(provider_id)
+                    print(
+                        f"Visual verifier {provider_name} has a non-retryable "
+                        f"configuration/auth error (HTTP {exc.status_code}); "
+                        f"disabling this route. Detail: {detail[:650]}"
+                    )
+                else:
+                    print(
+                        f"Visual verifier {provider_name} will not be retried "
+                        f"(HTTP {exc.status_code}; {retry_reason}). "
+                        f"Detail: {detail[:500]}"
+                    )
 
         except VisionResponseError as exc:
-            errors.append(str(exc))
-
-            VISION_DISABLED_PROVIDERS.add(
-                provider_id
-            )
-
+            detail = safe_error(exc)
+            errors.append(detail)
+            VISION_DISABLED_PROVIDERS.add(provider_id)
             print(
-                f"Visual verifier {provider_name} returned unusable output: "
-                f"{str(exc)[:450]}. Disabling this route."
+                f"Visual verifier {provider_name} returned unusable output; "
+                f"disabling this route. Detail: {detail[:500]}"
             )
 
         except requests.exceptions.Timeout as exc:
-            errors.append(
-                f"{provider_name}: timeout: {exc}"
+            detail = safe_error(exc)
+            errors.append(f"{provider_name}: timeout: {detail}")
+            should_retry, delay, retry_reason = visual_retry_policy(
+                provider_name,
+                408,
+                detail,
+                attempt_number=attempt_number,
+                max_attempts=max_route_attempts,
             )
-
-            VISION_PROVIDER_COOLDOWN_UNTIL[
-                provider_id
-            ] = time.monotonic() + 30
-
+            if should_retry:
+                VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = time.monotonic() + delay
+                pending.append(route)
             print(
                 f"Visual verifier {provider_name} timed out; "
-                "switching backup."
+                f"{retry_reason}; wait {delay:.0f}s before retry."
+                if should_retry else
+                f"Visual verifier {provider_name} timed out and exhausted its retry budget."
             )
 
         except Exception as exc:
-            errors.append(
-                f"{provider_name}: {exc}"
+            detail = safe_error(exc)
+            errors.append(f"{provider_name}: {detail}")
+            should_retry, delay, retry_reason = visual_retry_policy(
+                provider_name,
+                503,
+                detail,
+                attempt_number=attempt_number,
+                max_attempts=max_route_attempts,
             )
-
-            VISION_PROVIDER_COOLDOWN_UNTIL[
-                provider_id
-            ] = time.monotonic() + 20
-
+            if should_retry:
+                VISION_PROVIDER_COOLDOWN_UNTIL[provider_id] = time.monotonic() + delay
+                pending.append(route)
             print(
-                f"Visual verifier {provider_name} failed: "
-                f"{str(exc)[:450]}"
+                f"Visual verifier {provider_name} failed; "
+                f"{retry_reason}. Detail: {detail[:500]}"
             )
 
     if not providers:

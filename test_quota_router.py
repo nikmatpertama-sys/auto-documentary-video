@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 from quota_router import QuotaAwareRouter
+from visual_retry import visual_retry_policy, redact_provider_error
 
 
 class FakeResponse:
@@ -226,6 +227,67 @@ class QuotaRouterTests(unittest.TestCase):
         second = make_route("Groq", "Groq key 2", "g2", "Groq::org", "groq::key2")
         self.assertFalse(router.route_available(first))
         self.assertFalse(router.route_available(second))
+
+
+class VisualRetryPolicyTests(unittest.TestCase):
+    def test_groq_token_minute_limit_retries_after_provider_hint(self):
+        retry, delay, reason = visual_retry_policy(
+            "Groq key 1", 429,
+            "Rate limit reached. Please try again in 22.097142857s.",
+            attempt_number=1,
+            max_attempts=3,
+        )
+        self.assertTrue(retry)
+        self.assertGreaterEqual(delay, 30.0)
+        self.assertIn("rate limit", reason)
+
+    def test_openrouter_daily_free_cap_is_not_retried(self):
+        retry, delay, reason = visual_retry_policy(
+            "OpenRouter key 1", 429,
+            "free-models-per-day; limit_source=openrouter_free_tier_daily",
+            attempt_number=1,
+            max_attempts=3,
+        )
+        self.assertFalse(retry)
+        self.assertEqual(delay, 0.0)
+        self.assertIn("daily", reason)
+
+    def test_gemini_503_is_retried(self):
+        retry, delay, reason = visual_retry_policy(
+            "Gemini key 1", 503, "UNAVAILABLE: high demand",
+            attempt_number=1,
+            max_attempts=3,
+        )
+        self.assertTrue(retry)
+        self.assertEqual(delay, 20.0)
+        self.assertIn("503", reason)
+
+    def test_cloudflare_403_is_not_retried(self):
+        retry, delay, reason = visual_retry_policy(
+            "Cloudflare Vision", 403, "Forbidden: missing Workers AI permission",
+            attempt_number=1,
+            max_attempts=3,
+        )
+        self.assertFalse(retry)
+        self.assertEqual(delay, 0.0)
+        self.assertIn("non-retryable", reason)
+
+    def test_provider_retry_budget_is_bounded(self):
+        retry, delay, reason = visual_retry_policy(
+            "Groq", 429, "try again in 90s",
+            attempt_number=3,
+            max_attempts=3,
+        )
+        self.assertFalse(retry)
+        self.assertEqual(delay, 0.0)
+        self.assertIn("exhausted", reason)
+
+    def test_error_redaction_removes_known_secret(self):
+        cleaned = redact_provider_error(
+            "Request failed with Bearer secret-token-value", ["secret-token-value"]
+        )
+        self.assertNotIn("secret-token-value", cleaned)
+        self.assertIn("[REDACTED]", cleaned)
 
 
 if __name__ == "__main__":
