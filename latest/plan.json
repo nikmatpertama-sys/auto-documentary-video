@@ -1,214 +1,270 @@
 {
-  "title": "How Beavers Reshape River Ecosystems",
-  "hook": "Watch nature's engineers transform rivers.",
+  "title": "How Beavers Reshape Entire River Ecosystems",
+  "hook": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
   "scenes": [
     {
-      "narration": "Beavers, nature's engineers, build dams that transform fast‑flowing streams into tranquil wetlands, boosting biodiversity and create new habitats for countless species.",
-      "visual_focus": "beaver building dam",
-      "visual_query": "beaver building dam",
+      "narration": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across the landscape.",
+      "visual_focus": "beavers in freshwater ecosystems",
+      "visual_query": "beavers in freshwater ecosystems",
       "visual_queries": [
-        "beaver constructing dam",
-        "beaver dam construction"
+        "beaver swimming in river",
+        "beavers in freshwater stream"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver building dam",
+      "reference_query": "beavers in freshwater ecosystems",
       "source_label": "Wikipedia",
       "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 0,
-      "sentence_end": 0
+      "sentence_end": 0,
+      "voice_timing": {
+        "start_seconds": 0.0,
+        "spoken_end_seconds": 8.42,
+        "visual_end_seconds": 9.209,
+        "duration_seconds": 9.209,
+        "first_sentence_index": 0,
+        "last_sentence_index": 0
+      }
     },
     {
-      "narration": "These structures slow water velocity, causing sediment to settle and forming nutrient‑rich floodplains that support diverse plant communities along the riverbanks.",
-      "visual_focus": "sediment settling floodplain",
-      "visual_query": "sediment settling floodplain",
+      "narration": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at small totals.",
+      "visual_focus": "fragmented populations of beavers",
+      "visual_query": "fragmented populations of beavers",
       "visual_queries": [
-        "river sediment deposition",
-        "floodplain sediment accumulation"
+        "beaver near river bank",
+        "European beaver in habitat"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "sediment settling floodplain",
-      "source_label": "NCBI",
-      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383",
+      "reference_query": "fragmented populations of beavers",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 1,
-      "sentence_end": 1
+      "sentence_end": 1,
+      "voice_timing": {
+        "start_seconds": 9.209,
+        "spoken_end_seconds": 18.326,
+        "visual_end_seconds": 18.664,
+        "duration_seconds": 9.455,
+        "first_sentence_index": 1,
+        "last_sentence_index": 1
+      }
     },
     {
-      "narration": "Ponded water behind dams raises groundwater tables, enhancing riparian tree growth and providing drought resilience for surrounding ecosystems throughout the year.",
-      "visual_focus": "riparian trees near pond",
-      "visual_query": "riparian trees near pond",
+      "narration": "Combined population numbers were estimated at twelve hundred individuals for the Rhone of France and other regions.",
+      "visual_focus": "Rhone of France river",
+      "visual_query": "Rhone of France river",
       "visual_queries": [
-        "trees beside beaver pond",
-        "riparian vegetation water edge"
+        "river in France landscape",
+        "Rhone river flowing water"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "riparian trees near pond",
-      "source_label": "NCBI",
-      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264",
+      "reference_query": "Rhone of France river",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 2,
-      "sentence_end": 2
+      "sentence_end": 2,
+      "voice_timing": {
+        "start_seconds": 18.664,
+        "spoken_end_seconds": 26.374,
+        "visual_end_seconds": 26.713,
+        "duration_seconds": 8.048,
+        "first_sentence_index": 2,
+        "last_sentence_index": 2
+      }
     },
     {
-      "narration": "Beaver ponds increase habitat complexity, offering shelter for fish, amphibians, and invertebrates, which in turn attract birds and mammals.",
-      "visual_focus": "fish in beaver pond",
-      "visual_query": "fish in beaver pond",
+      "narration": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
+      "visual_focus": "conservation concept in nature",
+      "visual_query": "conservation concept in nature",
       "visual_queries": [
-        "amphibians in beaver pond",
-        "invertebrates in beaver pond"
+        "wildlife conservation forest area",
+        "nature reserve river stream"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "fish in beaver pond",
-      "source_label": "NCBI",
-      "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313",
+      "reference_query": "conservation concept in nature",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 3,
-      "sentence_end": 3
+      "sentence_end": 3,
+      "voice_timing": {
+        "start_seconds": 26.713,
+        "spoken_end_seconds": 34.612,
+        "visual_end_seconds": 34.95,
+        "duration_seconds": 8.238,
+        "first_sentence_index": 3,
+        "last_sentence_index": 3
+      }
     },
     {
-      "narration": "Studies show that beaver‑created wetlands can raise local biodiversity indices by up to thirty percent compared with unaltered streams within a decade.",
-      "visual_focus": "diverse wildlife near pond",
-      "visual_query": "diverse wildlife near pond",
+      "narration": "This framework was mobilized to engender support for conservation, especially where human activities had damaged ecosystems.",
+      "visual_focus": "ecosystems damaged by humans",
+      "visual_query": "ecosystems damaged by humans",
       "visual_queries": [
-        "multiple species beaver habitat",
-        "biodiversity around beaver pond"
+        "damaged river bank landscape",
+        "eroded stream channel nature"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "diverse wildlife near pond",
-      "source_label": "PubMed",
-      "source_url": "https://pubmed.ncbi.nlm.nih.gov/21307956",
+      "reference_query": "ecosystems damaged by humans",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 4,
-      "sentence_end": 4
+      "sentence_end": 4,
+      "voice_timing": {
+        "start_seconds": 34.95,
+        "spoken_end_seconds": 44.013,
+        "visual_end_seconds": 44.351,
+        "duration_seconds": 9.401,
+        "first_sentence_index": 4,
+        "last_sentence_index": 4
+      }
     },
     {
-      "narration": "These wetlands also act as natural filters, trapping pollutants and reducing downstream nitrogen loads, improving water quality for human use and ecosystem.",
-      "visual_focus": "clear water downstream",
-      "visual_query": "clear water downstream",
+      "narration": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from food encroachment.",
+      "visual_focus": "wolves in riparian areas",
+      "visual_query": "wolves in riparian areas",
       "visual_queries": [
-        "clean river after beaver dam",
-        "filtered water downstream beaver"
+        "wolf near river bank",
+        "gray wolf in riparian habitat"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "clear water downstream",
-      "source_label": "PubMed",
-      "source_url": "https://pubmed.ncbi.nlm.nih.gov/25678658",
+      "reference_query": "wolves in riparian areas",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 5,
-      "sentence_end": 5
+      "sentence_end": 5,
+      "voice_timing": {
+        "start_seconds": 44.351,
+        "spoken_end_seconds": 52.954,
+        "visual_end_seconds": 53.292,
+        "duration_seconds": 8.941,
+        "first_sentence_index": 5,
+        "last_sentence_index": 5
+      }
     },
     {
-      "narration": "By creating mosaic landscapes, beavers promote ecological resilience, helping rivers recover faster from floods and droughts across varied climatic zones.",
-      "visual_focus": "river after flood",
-      "visual_query": "river after flood",
+      "narration": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role in equilibrium.",
+      "visual_focus": "connectivity of streams floodplain",
+      "visual_query": "connectivity of streams floodplain",
       "visual_queries": [
-        "river recovery beaver influence",
-        "post‑flood river beaver"
+        "river floodplain aerial view",
+        "winding stream and floodplain"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "river after flood",
-      "source_label": "PubMed",
-      "source_url": "https://pubmed.ncbi.nlm.nih.gov/29375773",
+      "reference_query": "connectivity of streams floodplain",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Stream_restoration",
       "visual_type": "footage",
       "sentence_start": 6,
-      "sentence_end": 6
+      "sentence_end": 6,
+      "voice_timing": {
+        "start_seconds": 53.292,
+        "spoken_end_seconds": 61.489,
+        "visual_end_seconds": 61.827,
+        "duration_seconds": 8.535,
+        "first_sentence_index": 6,
+        "last_sentence_index": 6
+      }
     },
     {
-      "narration": "Consequently, beavers are recognized as keystone species whose engineering reshapes entire river ecosystems, sustaining life for generations through centuries worldwide.",
-      "visual_focus": "beaver family near dam",
-      "visual_query": "beaver family near dam",
+      "narration": "Stream restoration or river restoration is a set of activities that aim to improve the environmental health.",
+      "visual_focus": "stream restoration activities",
+      "visual_query": "stream restoration activities",
       "visual_queries": [
-        "beaver colony dam",
-        "beaver family dam habitat"
+        "river restoration project site",
+        "stream channel restoration work"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver family near dam",
-      "source_label": "IUCN",
-      "source_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "reference_query": "stream restoration activities",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Stream_restoration",
       "visual_type": "footage",
       "sentence_start": 7,
-      "sentence_end": 7
+      "sentence_end": 7,
+      "voice_timing": {
+        "start_seconds": 61.827,
+        "spoken_end_seconds": 69.565,
+        "visual_end_seconds": 70.974,
+        "duration_seconds": 9.146,
+        "first_sentence_index": 7,
+        "last_sentence_index": 7
+      }
     }
   ],
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "Beavers, nature's engineers, build dams that transform fast‑flowing streams into tranquil wetlands, boosting biodiversity and create new habitats for countless species.",
+      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across the landscape.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver",
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 2,
-      "sentence": "These structures slow water velocity, causing sediment to settle and forming nutrient‑rich floodplains that support diverse plant communities along the riverbanks.",
+      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at small totals.",
       "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383",
-        "https://pubmed.ncbi.nlm.nih.gov/22697210"
+        "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 3,
-      "sentence": "Ponded water behind dams raises groundwater tables, enhancing riparian tree growth and providing drought resilience for surrounding ecosystems throughout the year.",
+      "sentence": "Combined population numbers were estimated at twelve hundred individuals for the Rhone of France and other regions.",
       "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264",
-        "https://pubmed.ncbi.nlm.nih.gov/28256552"
+        "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 4,
-      "sentence": "Beaver ponds increase habitat complexity, offering shelter for fish, amphibians, and invertebrates, which in turn attract birds and mammals.",
+      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
       "source_urls": [
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313",
-        "https://pubmed.ncbi.nlm.nih.gov/32753594"
+        "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 5,
-      "sentence": "Studies show that beaver‑created wetlands can raise local biodiversity indices by up to thirty percent compared with unaltered streams within a decade.",
+      "sentence": "This framework was mobilized to engender support for conservation, especially where human activities had damaged ecosystems.",
       "source_urls": [
-        "https://pubmed.ncbi.nlm.nih.gov/21307956",
-        "https://pubmed.ncbi.nlm.nih.gov/18777567"
+        "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 6,
-      "sentence": "These wetlands also act as natural filters, trapping pollutants and reducing downstream nitrogen loads, improving water quality for human use and ecosystem.",
+      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from food encroachment.",
       "source_urls": [
-        "https://pubmed.ncbi.nlm.nih.gov/25678658",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5773300"
+        "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 7,
-      "sentence": "By creating mosaic landscapes, beavers promote ecological resilience, helping rivers recover faster from floods and droughts across varied climatic zones.",
+      "sentence": "The connectivity of streams to their adjacent floodplain along their entire length plays an important role in equilibrium.",
       "source_urls": [
-        "https://pubmed.ncbi.nlm.nih.gov/29375773",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6175133"
+        "https://en.wikipedia.org/wiki/Stream_restoration"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Consequently, beavers are recognized as keystone species whose engineering reshapes entire river ecosystems, sustaining life for generations through centuries worldwide.",
+      "sentence": "Stream restoration or river restoration is a set of activities that aim to improve the environmental health.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species",
-        "https://www.iucnredlist.org/species/4003/22187946"
+        "https://en.wikipedia.org/wiki/Stream_restoration"
       ]
     }
   ],
-  "script": "Beavers, nature's engineers, build dams that transform fast‑flowing streams into tranquil wetlands, boosting biodiversity and create new habitats for countless species. These structures slow water velocity, causing sediment to settle and forming nutrient‑rich floodplains that support diverse plant communities along the riverbanks. Ponded water behind dams raises groundwater tables, enhancing riparian tree growth and providing drought resilience for surrounding ecosystems throughout the year. Beaver ponds increase habitat complexity, offering shelter for fish, amphibians, and invertebrates, which in turn attract birds and mammals. Studies show that beaver‑created wetlands can raise local biodiversity indices by up to thirty percent compared with unaltered streams within a decade. These wetlands also act as natural filters, trapping pollutants and reducing downstream nitrogen loads, improving water quality for human use and ecosystem. By creating mosaic landscapes, beavers promote ecological resilience, helping rivers recover faster from floods and droughts across varied climatic zones. Consequently, beavers are recognized as keystone species whose engineering reshapes entire river ecosystems, sustaining life for generations through centuries worldwide.",
+  "script": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across the landscape. In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at small totals. Combined population numbers were estimated at twelve hundred individuals for the Rhone of France and other regions. The concept became popular in conservation, and was deployed in a range of contexts to engender support. This framework was mobilized to engender support for conservation, especially where human activities had damaged ecosystems. In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from food encroachment. The connectivity of streams to their adjacent floodplain along their entire length plays an important role in equilibrium. Stream restoration or river restoration is a set of activities that aim to improve the environmental health.",
   "ai_provider": {
-    "provider": "groq",
-    "model": "openai/gpt-oss-120b"
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite"
   },
   "opening_overlay": {
     "path": "output/opening_overlay.png",
@@ -216,15 +272,16 @@
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "HOW BEAVERS RESHAPE RIVER ECOSYSTEMS"
+        "HOW BEAVERS RESHAPE ENTIRE RIVER ECOSYSTEMS"
       ],
       "hook_lines": [
-        "Watch nature's",
-        "engineers transform",
-        "rivers."
+        "Beavers live in",
+        "freshwater ecosystems",
+        "such as rivers, streams,",
+        "lakes and ponds."
       ],
-      "title_text": "How Beavers Reshape River Ecosystems",
-      "hook_text": "Watch nature's engineers transform rivers.",
+      "title_text": "How Beavers Reshape Entire River Ecosystems",
+      "hook_text": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,
@@ -232,8 +289,17 @@
         48,
         150,
         1032,
-        470
+        538
       ]
+    }
+  },
+  "fact_check": {
+    "status": "passed",
+    "method": "trusted-source fetch + independent evidence-grounded AI audit",
+    "claim_count": 8,
+    "fact_checker": {
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite"
     }
   }
 }
