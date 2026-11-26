@@ -1,3 +1,4 @@
+
 name: Hybrid Documentary Generator
 
 on:
@@ -9,7 +10,11 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: documentary-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -21,6 +26,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,14 +34,18 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      # This bootstrap is self-contained: it does not require
-      # apply_project_zip.py to already exist in the checked-out branch.
-      - name: Apply newest root-level project ZIP (any filename)
+      # Extract the newest root ZIP, remove stale ZIPs,
+      # commit the extracted project, and push to current branch.
+      - name: Apply and permanently commit newest project ZIP
         shell: bash
+        env:
+          TARGET_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
+
           python - <<'PYZIP'
           from __future__ import annotations
+
           import shutil
           import stat
           import subprocess
@@ -44,12 +54,20 @@ jobs:
           from pathlib import Path, PurePosixPath
 
           ROOT = Path.cwd().resolve()
+
           MAX_ARCHIVE_BYTES = 1024 * 1024 * 1024
           MAX_ENTRIES = 12000
           MAX_TOTAL_UNCOMPRESSED = 3 * 1024 * 1024 * 1024
           MAX_SINGLE_FILE = 1024 * 1024 * 1024
           MAX_COMPRESSION_RATIO = 1000
+
           IGNORED = {"__MACOSX", ".DS_Store"}
+
+          # Preserve the active workflow so an older ZIP
+          # cannot overwrite the bootstrap/commit mechanism.
+          PROTECTED_FILES = {
+              ".github/workflows/render.yml"
+          }
 
           def fail(message):
               raise SystemExit(f"Project ZIP error: {message}")
@@ -57,32 +75,53 @@ jobs:
           def committed_at(path):
               try:
                   result = subprocess.run(
-                      ["git", "log", "-1", "--format=%ct", "--", path.name],
-                      cwd=ROOT, capture_output=True, text=True, check=False
+                      [
+                          "git",
+                          "log",
+                          "-1",
+                          "--format=%ct",
+                          "--",
+                          path.name
+                      ],
+                      cwd=ROOT,
+                      capture_output=True,
+                      text=True,
+                      check=False
                   )
+
                   if result.returncode == 0 and result.stdout.strip():
                       return int(result.stdout.strip())
+
               except (OSError, ValueError):
                   pass
+
               return int(path.stat().st_mtime)
 
           archives = [
               p for p in ROOT.iterdir()
               if p.is_file() and p.suffix.lower() == ".zip"
           ]
+
           if not archives:
-              print("No root-level project ZIP found; using checked-out files.")
+              print(
+                  "No root-level project ZIP found; "
+                  "using checked-out files."
+              )
               raise SystemExit(0)
 
           archives.sort(
-              key=lambda p: (committed_at(p), p.stat().st_mtime_ns, p.name.casefold()),
+              key=lambda p: (
+                  committed_at(p),
+                  p.stat().st_mtime_ns,
+                  p.name.casefold()
+              ),
               reverse=True
           )
+
           archive = archives[0]
-          if len(archives) > 1:
-              print(f"Found {len(archives)} ZIP files; newest commit selected: {archive.name}")
-          else:
-              print(f"Project ZIP found: {archive.name}")
+
+          print(f"Selected project ZIP: {archive.name}")
+          print(f"Total root ZIP files: {len(archives)}")
 
           if archive.stat().st_size > MAX_ARCHIVE_BYTES:
               fail("ZIP exceeds the 1 GiB compressed size limit.")
@@ -90,112 +129,287 @@ jobs:
           def safe_parts(member_name):
               if not member_name or "\x00" in member_name:
                   fail("ZIP contains an empty or invalid member path.")
+
               normalized = member_name.replace("\\", "/")
               path = PurePosixPath(normalized)
-              if path.is_absolute() or any(part == ".." for part in path.parts):
+
+              if path.is_absolute() or ".." in path.parts:
                   fail(f"Unsafe ZIP path: {member_name!r}")
+
               if path.parts and ":" in path.parts[0]:
-                  fail(f"Drive-qualified ZIP path is not allowed: {member_name!r}")
-              parts = tuple(part for part in path.parts if part not in (".", ""))
-              if not parts or any(part in IGNORED for part in parts):
+                  fail(
+                      f"Drive-qualified ZIP path is not allowed: "
+                      f"{member_name!r}"
+                  )
+
+              parts = tuple(
+                  part for part in path.parts
+                  if part not in (".", "")
+              )
+
+              if not parts:
                   return None
+
+              if any(part in IGNORED for part in parts):
+                  return None
+
               return parts
 
           def is_regular_or_directory(info):
               mode = info.external_attr >> 16
               kind = stat.S_IFMT(mode)
-              return kind in (0, stat.S_IFREG, stat.S_IFDIR)
+
+              return kind in (
+                  0,
+                  stat.S_IFREG,
+                  stat.S_IFDIR
+              )
 
           def extract_safely(source_zip, destination):
               total_size = 0
               seen = set()
+
               with zipfile.ZipFile(source_zip) as zf:
                   infos = zf.infolist()
+
                   if len(infos) > MAX_ENTRIES:
-                      fail(f"ZIP contains too many entries ({len(infos)}).")
+                      fail(
+                          f"ZIP contains too many entries "
+                          f"({len(infos)})."
+                      )
+
                   checked = []
+
                   for info in infos:
                       parts = safe_parts(info.filename)
+
                       if parts is None:
                           continue
+
                       if parts in seen:
-                          fail(f"Duplicate ZIP target path: {'/'.join(parts)}")
+                          fail(
+                              "Duplicate ZIP target path: "
+                              + "/".join(parts)
+                          )
+
                       seen.add(parts)
+
                       if info.flag_bits & 0x1:
-                          fail(f"Encrypted ZIP members are not supported: {info.filename!r}")
+                          fail(
+                              "Encrypted ZIP members are not supported: "
+                              f"{info.filename!r}"
+                          )
+
                       if not is_regular_or_directory(info):
-                          fail(f"ZIP symlinks/special files are not allowed: {info.filename!r}")
+                          fail(
+                              "ZIP symlinks/special files are not allowed: "
+                              f"{info.filename!r}"
+                          )
+
                       if info.file_size > MAX_SINGLE_FILE:
-                          fail(f"ZIP member exceeds the 1 GiB limit: {info.filename!r}")
+                          fail(
+                              f"ZIP member exceeds 1 GiB: "
+                              f"{info.filename!r}"
+                          )
+
                       total_size += info.file_size
+
                       if total_size > MAX_TOTAL_UNCOMPRESSED:
-                          fail("ZIP expands beyond the 3 GiB total limit.")
+                          fail(
+                              "ZIP expands beyond the 3 GiB total limit."
+                          )
+
                       if info.file_size > 10 * 1024 * 1024:
-                          if info.compress_size == 0 or info.file_size / info.compress_size > MAX_COMPRESSION_RATIO:
-                              fail(f"Suspicious ZIP compression ratio: {info.filename!r}")
+                          if (
+                              info.compress_size == 0
+                              or info.file_size / info.compress_size
+                              > MAX_COMPRESSION_RATIO
+                          ):
+                              fail(
+                                  "Suspicious ZIP compression ratio: "
+                                  f"{info.filename!r}"
+                              )
+
                       checked.append((info, parts))
 
-                  destination.mkdir(parents=True, exist_ok=True)
+                  destination.mkdir(
+                      parents=True,
+                      exist_ok=True
+                  )
+
                   for info, parts in checked:
                       target = destination.joinpath(*parts)
-                      if not target.resolve().is_relative_to(destination.resolve()):
-                          fail(f"ZIP member escapes staging directory: {info.filename!r}")
-                      if info.is_dir() or info.filename.endswith(("/", "\\")):
-                          target.mkdir(parents=True, exist_ok=True)
-                          continue
-                      target.parent.mkdir(parents=True, exist_ok=True)
-                      copied = 0
-                      with zf.open(info, "r") as src, target.open("wb") as dst:
-                          while True:
-                              chunk = src.read(1024 * 1024)
-                              if not chunk:
-                                  break
-                              copied += len(chunk)
-                              if copied > MAX_SINGLE_FILE:
-                                  fail(f"ZIP member exceeded its size limit: {info.filename!r}")
-                              dst.write(chunk)
 
-          with tempfile.TemporaryDirectory(prefix="documentary-project-zip-") as temp:
+                      if not target.resolve().is_relative_to(
+                          destination.resolve()
+                      ):
+                          fail(
+                              "ZIP member escapes staging directory: "
+                              f"{info.filename!r}"
+                          )
+
+                      if (
+                          info.is_dir()
+                          or info.filename.endswith(("/", "\\"))
+                      ):
+                          target.mkdir(
+                              parents=True,
+                              exist_ok=True
+                          )
+                          continue
+
+                      target.parent.mkdir(
+                          parents=True,
+                          exist_ok=True
+                      )
+
+                      copied_bytes = 0
+
+                      with zf.open(info, "r") as src:
+                          with target.open("wb") as dst:
+                              while True:
+                                  chunk = src.read(1024 * 1024)
+
+                                  if not chunk:
+                                      break
+
+                                  copied_bytes += len(chunk)
+
+                                  if copied_bytes > MAX_SINGLE_FILE:
+                                      fail(
+                                          "ZIP member exceeded its size "
+                                          f"limit: {info.filename!r}"
+                                      )
+
+                                  dst.write(chunk)
+
+          with tempfile.TemporaryDirectory(
+              prefix="documentary-project-zip-"
+          ) as temp:
+
               staging = Path(temp) / "staged"
+
               extract_safely(archive, staging)
-              meaningful = [p for p in staging.iterdir() if p.name not in IGNORED]
+
+              meaningful = [
+                  p for p in staging.iterdir()
+                  if p.name not in IGNORED
+              ]
 
               if (staging / "main.py").is_file():
                   project_root = staging
+
               else:
-                  project_dirs = [p for p in meaningful if p.is_dir() and (p / "main.py").is_file()]
-                  if len(meaningful) == 1 and meaningful[0].is_dir():
+                  project_dirs = [
+                      p for p in meaningful
+                      if p.is_dir() and (p / "main.py").is_file()
+                  ]
+
+                  if (
+                      len(meaningful) == 1
+                      and meaningful[0].is_dir()
+                  ):
                       project_root = meaningful[0]
+
                   elif len(project_dirs) == 1:
                       project_root = project_dirs[0]
+
                   else:
-                      fail("ZIP does not contain main.py at its root or inside one wrapper folder.")
+                      fail(
+                          "ZIP does not contain main.py at its root "
+                          "or inside one wrapper folder."
+                      )
 
               if not (project_root / "main.py").is_file():
-                  fail("The detected ZIP folder does not contain main.py.")
+                  fail(
+                      "The detected ZIP folder does not contain main.py."
+                  )
 
               copied = 0
+              skipped_protected = 0
+
               for item in project_root.rglob("*"):
                   relative = item.relative_to(project_root)
-                  if ".git" in relative.parts or any(part in IGNORED for part in relative.parts):
+
+                  relative_posix = relative.as_posix()
+
+                  if (
+                      ".git" in relative.parts
+                      or any(part in IGNORED for part in relative.parts)
+                  ):
                       continue
+
+                  if relative_posix in PROTECTED_FILES:
+                      print(
+                          "Preserving active workflow: "
+                          f"{relative_posix}"
+                      )
+                      skipped_protected += 1
+                      continue
+
                   target = ROOT / relative
+
                   if not target.resolve().is_relative_to(ROOT):
-                      fail(f"Refusing to write outside the workspace: {relative}")
+                      fail(
+                          "Refusing to write outside workspace: "
+                          f"{relative}"
+                      )
+
                   if item.is_dir():
-                      target.mkdir(parents=True, exist_ok=True)
+                      target.mkdir(
+                          parents=True,
+                          exist_ok=True
+                      )
+
                   elif item.is_file():
-                      target.parent.mkdir(parents=True, exist_ok=True)
+                      target.parent.mkdir(
+                          parents=True,
+                          exist_ok=True
+                      )
+
                       shutil.copy2(item, target)
                       copied += 1
 
-          archive.unlink()
-          print(f"Applied {archive.name}: overlaid {copied} project file(s) for this run only.")
-          print("No branch commit or push was performed.")
+          # Only delete ZIPs after successful extraction.
+          removed_archives = []
+
+          for candidate in archives:
+              if candidate.exists():
+                  candidate.unlink()
+                  removed_archives.append(candidate.name)
+
+          print("")
+          print("PROJECT ZIP EXTRACTION SUCCESSFUL")
+          print(f"Selected ZIP: {archive.name}")
+          print(f"Project files overlaid: {copied}")
+          print(f"Protected files skipped: {skipped_protected}")
+          print(f"ZIP archives removed: {len(removed_archives)}")
+
+          for name in removed_archives:
+              print(f"Removed: {name}")
+
+          print("Ready for permanent Git commit.")
           PYZIP
+
+          # Commit all extracted project changes and ZIP deletions.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No project changes to commit."
+          else
+            git commit -m "Apply latest project ZIP upgrade"
+
+            git push origin "HEAD:${TARGET_BRANCH}"
+
+            echo "Project upgrade permanently pushed to ${TARGET_BRANCH}."
+          fi
 
       - name: Install FFmpeg and fonts
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
 
