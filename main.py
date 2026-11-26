@@ -213,6 +213,36 @@ def align_visual_query_to_focus(visual_query, visual_focus):
     return " ".join(rebuilt[:8])
 
 
+# Words that name an idea, not a picture. A scene focused on one of these can
+# never be matched by real footage: the last run searched "fragmented beaver
+# populations in a river", every clip showed a river, and the Vision check
+# rejected all thirteen because no animal population can be filmed as a phrase.
+INVISIBLE_FOCUS_TERMS = {
+    "population", "populations", "biodiversity", "ecosystem", "ecosystems",
+    "fragmentation", "fragmented", "resilience", "conservation", "habitat",
+    "habitats", "process", "processes", "impact", "impacts", "importance",
+    "role", "roles", "relationship", "relationships", "decline", "declining",
+    "extinction", "extinct", "climate", "warming", "restoration",
+    "management", "balance", "network", "networks", "cycle", "cycles",
+    "dynamics", "sustainability", "diversity", "adaptation", "migration",
+}
+
+
+def validate_visual_focus(visual_focus, index):
+    """Reject a scene focus a camera cannot actually film."""
+    words = normalize_words(visual_focus)
+    if not 2 <= len(words) <= 6:
+        raise ValueError(f"Scene {index} needs a concrete 2-6 word visual_focus.")
+    invisible = [word for word in words if word in INVISIBLE_FOCUS_TERMS]
+    if invisible:
+        raise ValueError(
+            f"Scene {index} visual_focus names an invisible idea "
+            f"({', '.join(invisible)}). Name only what a camera can film - a "
+            "named animal, plant, object, place or simple action, such as "
+            "\"beaver swimming in a pond\" - and move the idea into the narration."
+        )
+
+
 # ============================================================
 # AI DOCUMENTARY PLANNER
 # ============================================================
@@ -416,6 +446,10 @@ SCENES AND VISUALS
   animal, plant, object, place or simple action (for example "beaver in pond").
   Never make an abstract stage or invisible process the focus ("dam
   construction process", "moisture transport"); describe the visible subject.
+  Words such as population, biodiversity, habitat, fragmentation, resilience,
+  conservation, process or impact are rejected as focus terms because no clip
+  can show them; keep those ideas in the narration and focus the picture on the
+  concrete thing it is about.
 - Any named organism, object or specific action in a scene must be the visual
   focus or be removed from that narration.
 - Scene 1 is real moving footage, not a diagram; its first sentence is a
@@ -595,15 +629,14 @@ def staged_plan(topic, source_pool, validate_plan, evidence=None):
                 change = "add" if words < 15 else "remove"
                 raise ValueError(
                     f"Scene {index} narration is {words} words; {change} words to "
-                    "reach 19-23 words for this scene."
+                    "reach 17-23 words for this scene."
                 )
             scene["narration"] = narration
             visual_query = re.sub(r"\s+", " ", str(scene.get("visual_query", ""))).strip()
             visual_focus = re.sub(r"\s+", " ", str(scene.get("visual_focus", ""))).strip()
             if not visual_query or not visual_focus:
                 raise ValueError(f"Scene {index} needs both visual_focus and visual_query.")
-            if len(normalize_words(visual_focus)) < 2:
-                raise ValueError(f"Scene {index} needs a concrete 2-6 word visual_focus.")
+            validate_visual_focus(visual_focus, index)
             alternatives = scene.get("visual_queries")
             if not isinstance(alternatives, list) or len(
                 [item for item in alternatives if str(item).strip()]
@@ -728,8 +761,7 @@ def gemini_plan(topic, source_pool=None, evidence=None):
             visual_focus = re.sub(r"\s+", " ", str(scene.get("visual_focus", ""))).strip()
             focus_tokens = set(normalize_words(visual_focus))
             query_tokens_for_focus = set(normalize_words(visual_query))
-            if not 2 <= len(focus_tokens) <= 6:
-                raise ValueError(f"Scene {scene_index} needs a concrete 2-6 word visual_focus.")
+            validate_visual_focus(visual_focus, scene_index)
             focus_overlap = len(focus_tokens & query_tokens_for_focus) / max(1, len(focus_tokens))
             if focus_overlap < 0.5:
                 # A near miss here is a search-phrase problem, not a factual
