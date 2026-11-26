@@ -1,4 +1,4 @@
-# Auto Documentary Video — Version 10.10
+# Auto Documentary Video — Version 10.11
 
 Automated vertical documentary generator. It builds a scene plan, searches for relevant real-world footage, performs visual verification, generates narration and captions, and renders the final video with FFmpeg.
 
@@ -6,7 +6,7 @@ Automated vertical documentary generator. It builds a scene plan, searches for r
 
 `SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, an eight-scene structure, a 145–165-word narration target, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
 
-## Footage source selection — version 10.10
+## Footage source selection — version 10.11
 
 The active pipeline (`render.py` → `main.py`) enforces this **selection** priority:
 
@@ -34,7 +34,7 @@ Add at least one AI provider key: `GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUT
 
 ## Output
 
-The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.json`, and the voice-over/caption files.
+The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.json`, voice-over/caption files, and diagnostic files (`failure_report.json`, `stage_report.json`, `output/pipeline.log`) when a run fails.
 
 ## Version 10.10 — source-priority enforcement
 
@@ -45,3 +45,12 @@ The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.jso
 - Keeps the 10.9 single-role scriptwriter master prompt unchanged and loaded at runtime.
 - Does not add a second LLM/API request for fact-checking.
 - Omits the outdated bundled `render.yml` so the target repository's updated permanent workflow is preserved.
+
+## Version 10.11 — resilient footage recovery and diagnostics
+
+- Adds dedicated alternative searches for field researchers, scientists, humidity measurements, weather stations, and environmental sensors.
+- Applies stronger metadata anchors to prevent off-topic NASA Shuttle footage or generic cloud footage from entering field-research verification.
+- Retries Wikimedia Commons HTTP 429 responses politely, uses a timed source cooldown, and avoids caching incomplete multi-source searches.
+- Applies a minimum 30-second cooldown to rate-limited visual-verification providers before trying that provider again.
+- Creates the failure and stage reports expected by the existing workflow, plus a live `output/pipeline.log` capture.
+- Does not add Wikipedia as a footage provider because its videos are already found through Wikimedia Commons.

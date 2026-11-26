@@ -10,6 +10,8 @@ import tempfile
 import shutil
 import subprocess
 import textwrap
+import sys
+import traceback
 from pathlib import Path
 from urllib.parse import quote
 
@@ -66,7 +68,7 @@ VISION_CANDIDATE_LIMIT = max(
     1, min(30, int(os.getenv("FOOTAGE_VISION_CANDIDATE_LIMIT", "26")))
 )
 
-# Version 10.10: selection is tiered by source, not globally by relevance.
+# Version 10.11: source-tier selection plus resilient field-research footage recovery.
 # Internet Archive receives the largest candidate budget; the other sources
 # are fallback tiers, ordered from open archives to stock-footage providers.
 FOOTAGE_SOURCE_PRIORITY = (
@@ -130,7 +132,17 @@ if OPENROUTER_VISION_MODEL.lower() == "openrouter/free":
 # use cooldowns, so a provider may recover later during the same workflow run.
 VISION_DISABLED_PROVIDERS = set()
 VISION_PROVIDER_COOLDOWN_UNTIL = {}
-FOOTAGE_SOURCE_DISABLED = set()
+FOOTAGE_SOURCE_DISABLED = set()  # retained for compatibility with cached runs
+FOOTAGE_SOURCE_COOLDOWN_UNTIL = {}
+WIKIMEDIA_LAST_REQUEST_AT = 0.0
+WIKIMEDIA_MIN_REQUEST_INTERVAL = 1.2
+WIKIMEDIA_MAX_RETRIES = 2
+
+PIPELINE_STATE = {
+    "status": "not_started",
+    "current_stage": "startup",
+    "stages": [],
+}
 
 
 class VisionProviderError(RuntimeError):
@@ -151,15 +163,6 @@ class VisionResponseError(RuntimeError):
 
     pass
 
-
-if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
-    raise RuntimeError(
-        "Missing AI provider key. Add GROQ_API_KEY, "
-        "OPENROUTER_API_KEY, or GEMINI_API_KEY GitHub Secret."
-    )
-
-if not TOPIC:
-    raise RuntimeError("Enter a topic in the Run workflow form.")
 
 
 def run(cmd):
@@ -1013,70 +1016,82 @@ def nasa_search(query):
 
 
 def commons_search(query):
-    """Search Commons video files and keep only files with reusable licenses."""
-    response = requests.get(
-        "https://commons.wikimedia.org/w/api.php",
-        params={
-            "action": "query",
-            "format": "json",
-            "generator": "search",
-            "gsrsearch": f"filetype:video {query}",
-            "gsrnamespace": 6,
-            "gsrlimit": 10,
-            "prop": "imageinfo",
-            "iiprop": "url|size|mime|extmetadata"
-        },
-        headers={
-            "User-Agent": "AutoDocumentaryVideo/3.0 (video research)"
-        },
-        timeout=35
-    )
+    """Search Commons videos with a polite request interval and 429 recovery."""
+    global WIKIMEDIA_LAST_REQUEST_AT
 
-    response.raise_for_status()
+    params = {
+        "action": "query",
+        "format": "json",
+        "generator": "search",
+        "gsrsearch": f"filetype:video {clean_query(query)}",
+        "gsrnamespace": 6,
+        "gsrlimit": 10,
+        "prop": "imageinfo",
+        "iiprop": "url|size|mime|extmetadata",
+    }
+    headers = {
+        "User-Agent": "AutoDocumentaryVideo/3.1 (video research; Wikimedia Commons API client)"
+    }
 
-    pages = response.json().get(
-        "query", {}
-    ).get("pages", {})
+    response = None
+    for attempt in range(WIKIMEDIA_MAX_RETRIES + 1):
+        elapsed = time.monotonic() - WIKIMEDIA_LAST_REQUEST_AT
+        wait_for_interval = WIKIMEDIA_MIN_REQUEST_INTERVAL - elapsed
+        if wait_for_interval > 0:
+            time.sleep(wait_for_interval)
 
+        response = requests.get(
+            "https://commons.wikimedia.org/w/api.php",
+            params=params,
+            headers=headers,
+            timeout=35,
+        )
+        WIKIMEDIA_LAST_REQUEST_AT = time.monotonic()
+
+        if response.status_code != 429:
+            response.raise_for_status()
+            break
+
+        if attempt >= WIKIMEDIA_MAX_RETRIES:
+            response.raise_for_status()
+
+        retry_after = response.headers.get("Retry-After", "")
+        try:
+            delay = float(retry_after)
+        except (TypeError, ValueError):
+            delay = 3.0 * (attempt + 1)
+        delay = max(2.0, min(15.0, delay))
+        print(
+            f"Wikimedia Commons returned HTTP 429; "
+            f"waiting {delay:.1f}s before retry {attempt + 1}/"
+            f"{WIKIMEDIA_MAX_RETRIES}."
+        )
+        time.sleep(delay)
+
+    pages = response.json().get("query", {}).get("pages", {})
     results = []
 
     for page in pages.values():
         info = (page.get("imageinfo") or [{}])[0]
         mime = str(info.get("mime", ""))
-
         if not mime.startswith("video/"):
             continue
 
         ext = info.get("extmetadata") or {}
-
         license_name = re.sub(
-            r"<[^>]+>",
-            "",
-            str(
-                (ext.get("LicenseShortName") or {}).get("value", "")
-            )
+            r"<[^>]+>", "",
+            str((ext.get("LicenseShortName") or {}).get("value", "")),
         )
-
         license_normalized = (
-            license_name.lower()
-            .replace(" ", "")
-            .replace("_", "-")
+            license_name.lower().replace(" ", "").replace("_", "-")
         )
-
         restricted = any(
             term in license_normalized
             for term in (
-                "noncommercial",
-                "non-commercial",
-                "cc-by-nc",
-                "ccby-nc",
-                "noderivatives",
-                "no-derivatives",
-                "cc-by-nd",
-                "ccby-nd",
+                "noncommercial", "non-commercial", "cc-by-nc", "ccby-nc",
+                "noderivatives", "no-derivatives", "cc-by-nd", "ccby-nd",
             )
         )
-
         reusable = (
             "cc0" in license_normalized
             or "publicdomain" in license_normalized
@@ -1084,35 +1099,22 @@ def commons_search(query):
             or "ccby" in license_normalized
             or "creativecommonsattribution" in license_normalized
         )
-
         if restricted or not reusable:
             continue
 
         url = info.get("url", "")
-
         if not url:
             continue
 
         artist = re.sub(
-            r"<[^>]+>",
-            "",
-            str(
-                (ext.get("Artist") or {}).get("value", "Unknown")
-            )
+            r"<[^>]+>", "",
+            str((ext.get("Artist") or {}).get("value", "Unknown")),
         )
-
         description = re.sub(
-            r"<[^>]+>",
-            " ",
-            str(
-                (ext.get("ImageDescription") or {}).get("value", "")
-            )
+            r"<[^>]+>", " ",
+            str((ext.get("ImageDescription") or {}).get("value", "")),
         )
-
-        metadata = (
-            f"{page.get('title', '')} {description}"
-        )
-
+        metadata = f"{page.get('title', '')} {description}"
         results.append({
             "source": "Wikimedia Commons",
             "id": str(page.get("pageid")),
@@ -1124,16 +1126,13 @@ def commons_search(query):
             "creator": artist,
             "page_url": (
                 page.get("canonicalurl")
-                or (
-                    "https://commons.wikimedia.org/wiki/"
-                    + str(page.get("title", "")).replace(" ", "_")
-                )
+                or "https://commons.wikimedia.org/wiki/"
+                + str(page.get("title", "")).replace(" ", "_")
             ),
             "license": license_name or "See file page",
         })
 
     return results
-
 
 
 def internet_archive_search(query):
@@ -1404,19 +1403,16 @@ def internet_archive_search(query):
     return results
 
 def search_all_footage_sources(query):
-    """Query each configured/open source independently; disable throttled sources."""
+    """Search configured sources; avoid caching partial results after throttling."""
     cache_sources = (
-        "internet-archive-v1|"
+        "footage-sources-v2|internet-archive-v1|"
         + ("pixabay" if PIXABAY_KEY else "")
         + ("|pexels" if PEXELS_KEY else "")
         + "|nasa|commons"
     )
-
     cache_file = CACHE / (
         hashlib.sha256(
-            (
-                cache_sources + "|" + query.lower()
-            ).encode()
+            (cache_sources + "|" + query.lower()).encode()
         ).hexdigest() + ".sources.json"
     )
 
@@ -1425,9 +1421,7 @@ def search_all_footage_sources(query):
         and time.time() - cache_file.stat().st_mtime < 21600
     ):
         try:
-            return json.loads(
-                cache_file.read_text(encoding="utf-8")
-            )
+            return json.loads(cache_file.read_text(encoding="utf-8"))
         except Exception:
             pass
 
@@ -1438,48 +1432,60 @@ def search_all_footage_sources(query):
         ("Pexels", pexels_search),
         ("Pixabay", pixabay_search),
     ]
-
     combined = []
+    complete_search = True
 
     for source, search_fn in searches:
-        if source in FOOTAGE_SOURCE_DISABLED:
+        cooldown_until = FOOTAGE_SOURCE_COOLDOWN_UNTIL.get(source, 0.0)
+        if time.monotonic() < cooldown_until:
+            complete_search = False
+            remaining = max(1, int(cooldown_until - time.monotonic()))
+            print(
+                f"  {source} is cooling down after rate limiting; "
+                f"retry eligible in about {remaining}s."
+            )
             continue
+        FOOTAGE_SOURCE_COOLDOWN_UNTIL.pop(source, None)
+
+        # Backward compatibility: an old disabled marker is cleared once its
+        # cooldown has elapsed, rather than making the source unavailable forever.
+        FOOTAGE_SOURCE_DISABLED.discard(source)
 
         try:
             found = search_fn(query)
             combined.extend(found)
-
             if found:
-                print(
-                    f"  {source}: {len(found)} candidate(s)"
-                )
+                print(f"  {source}: {len(found)} candidate(s)")
 
         except Exception as exc:
             status_code = getattr(
-                getattr(exc, "response", None),
-                "status_code",
-                None
+                getattr(exc, "response", None), "status_code", None
             )
-
             if status_code == 429:
-                FOOTAGE_SOURCE_DISABLED.add(source)
-
+                cooldown = 90.0 if source == "Wikimedia Commons" else 60.0
+                FOOTAGE_SOURCE_COOLDOWN_UNTIL[source] = (
+                    time.monotonic() + cooldown
+                )
+                complete_search = False
                 print(
-                    f"  {source} rate-limited (HTTP 429); disabling this source "
-                    "for the remainder of this run."
+                    f"  {source} rate-limited (HTTP 429); "
+                    f"cooling for {cooldown:.0f}s, then it can recover."
                 )
             else:
+                complete_search = False
                 print(
                     f"  {source} search unavailable for '{query}': {exc}"
                 )
 
-    try:
-        cache_file.write_text(
-            json.dumps(combined),
-            encoding="utf-8"
-        )
-    except Exception:
-        pass
+    # Partial results must not be cached: otherwise a transient 429 can hide
+    # Commons/other sources for the full six-hour cache lifetime.
+    if complete_search:
+        try:
+            cache_file.write_text(
+                json.dumps(combined), encoding="utf-8"
+            )
+        except Exception:
+            pass
 
     return combined
 
@@ -1563,6 +1569,21 @@ CONCEPT_GROUPS = {
     "desert": {
         "desert", "arid", "dunes", "sand"
     },
+    # 10.11: distinguish field research and measuring equipment from generic
+    # NASA/space-program metadata that can coincidentally mention a crew/team.
+    "research_activity": {
+        "researcher", "researchers", "scientist", "scientists",
+        "research", "researching", "fieldwork", "field", "fieldstudy",
+        "investigator", "technician", "biologist", "ecologist",
+        "team", "crew", "expedition", "sampling", "sample",
+    },
+    "field_instrument": {
+        "sensor", "sensors", "humidity", "humidimeter", "hygrometer",
+        "thermometer", "barometer", "anemometer", "weather", "station",
+        "weatherstation", "meteorological", "temperature", "measurement",
+        "measuring", "instrument", "instruments", "equipment", "datalogger",
+        "monitoring", "monitor", "logger",
+    },
 }
 
 
@@ -1584,6 +1605,10 @@ CONTEXT_CONFLICTS = {
     },
     "desert": {
         "desert", "dunes", "arid", "sandstorm"
+    },
+    "spaceflight": {
+        "shuttle", "spacecraft", "astronaut", "astronauts", "rocket",
+        "launchpad", "liftoff", "orbiter", "kennedy", "columbiaaccident",
     },
 }
 
@@ -1687,8 +1712,15 @@ def expand_visual_queries(raw_queries):
     return expanded[:12]
 
 
-def fallback_visual_queries(raw_queries):
-    """Broaden a sparse search with independent, subject-preserving query variants."""
+def fallback_visual_queries(raw_queries, narration=""):
+    """Broaden sparse searches with independent, subject-preserving variants.
+
+    10.11 adds a branch for documentary fieldwork: people, research activity,
+    and environmental instruments. The variants deliberately separate wide
+    shots of researchers from close-ups of sensors so a scene can be covered
+    by a truthful, visually verified relevant shot without demanding every
+    object appear in the same frame.
+    """
     primary = next(
         (str(value).strip() for value in raw_queries if str(value).strip()),
         "",
@@ -1696,90 +1728,141 @@ def fallback_visual_queries(raw_queries):
     if not primary:
         return []
 
-    _, groups = query_concepts(primary)
+    context_text = " ".join(
+        [str(value or "") for value in raw_queries]
+        + [str(narration or "")]
+    ).lower()
+    context_tokens = set(normalize_words(context_text))
+    _, groups = query_concepts(context_text)
     names = set(groups)
     candidates = []
 
+    research_terms = {
+        "researcher", "researchers", "scientist", "scientists", "fieldwork",
+        "research", "researching", "investigator", "technician", "team",
+        "measuring", "measurement", "monitoring", "sample", "sampling",
+        "humidity", "sensor", "sensors", "weather", "meteorological",
+        "station", "temperature", "climate",
+    }
+    has_research_context = bool(context_tokens & research_terms)
+    has_forest_context = bool(context_tokens & {
+        "forest", "rainforest", "amazon", "tropical", "jungle", "woodland"
+    })
+    has_weather_context = bool(context_tokens & {
+        "humidity", "sensor", "sensors", "weather", "meteorological",
+        "station", "temperature", "climate", "measurement", "measuring",
+    })
+
+    if has_research_context:
+        if has_forest_context:
+            candidates.extend([
+                "scientist conducting field research in tropical rainforest",
+                "field researcher measuring humidity in tropical forest",
+                "environmental scientist recording forest data",
+                "research team conducting rainforest fieldwork",
+                "forest weather station sensors and monitoring equipment",
+                "climate monitoring instruments in tropical forest",
+                "researcher using handheld humidity sensor outdoors",
+                "scientist collecting leaf samples in rainforest",
+            ])
+        else:
+            candidates.extend([
+                "scientist conducting outdoor field research",
+                "field researcher recording environmental measurements",
+                "research team monitoring scientific instruments outdoors",
+                "researcher using handheld environmental sensor",
+                "weather station sensors and monitoring equipment",
+                "temperature humidity data logger field equipment",
+                "meteorological instruments at research station",
+                "scientist collecting environmental samples outdoors",
+            ])
+
+    if has_weather_context:
+        candidates.extend([
+            "weather station instruments and sensors outdoors",
+            "meteorological station temperature humidity sensors",
+            "handheld digital humidity meter field measurement",
+        ])
+
     if "rainforest" in names and "canopy" in names:
-        candidates = [
+        candidates.extend([
             "tropical rainforest canopy aerial",
             "rainforest treetops drone",
             "jungle canopy overhead",
             "tropical forest canopy aerial",
             "jungle treetops aerial",
             "Amazon basin forest canopy",
-        ]
+        ])
     elif "rainforest" in names and "river" in names:
-        candidates = [
+        candidates.extend([
             "tropical rainforest river aerial",
             "jungle river winding",
             "river through tropical forest",
             "Amazon river forest aerial",
-        ]
+        ])
     elif "rainforest" in names:
-        candidates = [
+        candidates.extend([
             "tropical rainforest aerial",
             "jungle forest wildlife",
             "tropical forest trees",
             "rainforest landscape aerial",
-        ]
+        ])
     elif "canopy" in names:
-        candidates = [
+        candidates.extend([
             "forest canopy aerial",
             "tree canopy drone",
             "forest treetops aerial",
-        ]
+        ])
     elif "waterfall" in names:
-        candidates = [
+        candidates.extend([
             "waterfall flowing water",
             "forest waterfall aerial",
             "waterfall nature landscape",
-        ]
+        ])
     elif "river" in names:
-        candidates = [
+        candidates.extend([
             "river flowing aerial",
             "river winding through forest",
             "river landscape drone",
-        ]
+        ])
     elif "insect" in names:
-        candidates = [
+        candidates.extend([
             "insect macro nature",
             "insect on leaf closeup",
             "insect crawling plant",
-        ]
+        ])
     elif "orchid" in names:
-        candidates = [
+        candidates.extend([
             "orchid flower closeup",
             "orchid tropical plant",
             "orchid growing tree",
-        ]
+        ])
     elif "jaguar" in names:
-        candidates = [
+        candidates.extend([
             "jaguar walking forest",
             "jaguar wildlife habitat",
             "jaguar resting jungle",
-        ]
+        ])
     elif "bird" in names:
-        candidates = [
+        candidates.extend([
             "tropical bird perched tree",
             "bird flying forest",
             "parrot wildlife closeup",
-        ]
+        ])
 
     unique = []
     seen = set()
-    primary_tokens = set(normalize_words(primary))
     for item in candidates:
         cleaned = clean_query(item)
-        tokens = normalize_words(cleaned)
-        # Avoid fallback queries that add no meaningful search distinction.
-        key = " ".join(dict.fromkeys(tokens)).lower()
+        key = " ".join(dict.fromkeys(normalize_words(cleaned))).lower()
         if not key or key in seen:
             continue
         seen.add(key)
         unique.append(cleaned)
 
-    return unique
+    # Bound the additional API work per scene; the candidate pool itself has
+    # an independent cap and still undergoes the same visual verification.
+    return unique[:8]
 
 
 def relevance_score(hit, query, narration):
@@ -1929,6 +2012,19 @@ def candidate_matches_visual_anchors(hit, query):
             "rain", "rainstorm", "rainstorms", "rainfall",
             "raining", "downpour", "monsoon", "raindrop", "raindrops"
         },
+        "research_activity": {
+            "researcher", "researchers", "scientist", "scientists",
+            "research", "researching", "fieldwork", "field", "fieldstudy",
+            "investigator", "technician", "biologist", "ecologist",
+            "team", "crew", "expedition", "sampling", "sample",
+        },
+        "field_instrument": {
+            "sensor", "sensors", "humidity", "humidimeter", "hygrometer",
+            "thermometer", "barometer", "anemometer", "station",
+            "weatherstation", "meteorological", "temperature", "measurement",
+            "measuring", "instrument", "instruments", "equipment", "datalogger",
+            "logger",
+        },
     }
 
     matched = set()
@@ -1963,10 +2059,14 @@ def candidate_matches_visual_anchors(hit, query):
         anchors.keys()
     )
 
-    # Specific organisms/plants named in a query are mandatory. A generic
-    # forest-floor tag must not let an ant clip pass an orchid or jaguar query.
+    # Specific organisms/plants and technical subject anchors named in a query
+    # are mandatory. A generic metadata overlap must not admit unrelated clips.
     if requested_specific and not requested_specific.issubset(matched):
         return False
+
+    for mandatory_anchor in ("research_activity", "field_instrument"):
+        if mandatory_anchor in anchors and mandatory_anchor not in matched:
+            return False
 
     # For broader landscape queries, at least one requested subject/shot group
     # must be present in the source metadata.
@@ -2586,8 +2686,12 @@ Set relevant=true only when the visual composition is a genuine match and source
             errors.append(str(exc))
 
             if exc.status_code == 429:
-                delay = _provider_retry_delay(
-                    str(exc)
+                # A provider that repeatedly returns 429 should not be pinged
+                # again on every candidate. Honor longer provider hints, but
+                # enforce a 30s minimum in-run cooldown to reduce retry churn.
+                delay = max(
+                    30.0,
+                    _provider_retry_delay(str(exc)),
                 )
 
                 VISION_PROVIDER_COOLDOWN_UNTIL[
@@ -2848,6 +2952,11 @@ def fetch_footage(plan):
                     and not scene_context & CONTEXT_CONFLICTS["underwater"]
                 ):
                     continue
+                if (
+                    metadata_tokens & CONTEXT_CONFLICTS["spaceflight"]
+                    and not scene_context & CONTEXT_CONFLICTS["spaceflight"]
+                ):
+                    continue
 
                 tags = str(hit.get("tags") or hit.get("metadata") or "")
                 similarity = max(
@@ -2865,9 +2974,12 @@ def fetch_footage(plan):
 
         # Only sparse scenes pay for additional searches. This keeps normal runs
         # close to the previous cost while giving difficult scenes a wider pool.
-        fallback_threshold = min(20, VISION_CANDIDATE_LIMIT)
+        fallback_threshold = VISION_CANDIDATE_LIMIT
         if len(candidates) < fallback_threshold:
-            extra_queries = fallback_visual_queries(raw_queries)
+            extra_queries = fallback_visual_queries(
+                raw_queries,
+                scene.get("narration", ""),
+            )
             existing = {query.lower() for query in queries}
             extra_queries = [q for q in extra_queries if q.lower() not in existing]
 
@@ -3751,30 +3863,154 @@ def render(plan, sentence_events, total_duration):
 # MAIN
 # ============================================================
 
+def _write_json_report(path, payload):
+    try:
+        Path(path).write_text(
+            json.dumps(payload, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+    except Exception as report_error:
+        print(f"Could not write diagnostic report {path}: {report_error}")
+
+
+def start_pipeline_stage(name):
+    PIPELINE_STATE["status"] = "running"
+    PIPELINE_STATE["current_stage"] = name
+    PIPELINE_STATE["stages"].append({
+        "name": name,
+        "status": "running",
+        "started_at_epoch": time.time(),
+    })
+    _write_json_report("stage_report.json", PIPELINE_STATE)
+    print(f"Pipeline stage started: {name}")
+
+
+def finish_pipeline_stage():
+    if PIPELINE_STATE["stages"]:
+        stage = PIPELINE_STATE["stages"][-1]
+        stage["status"] = "completed"
+        stage["finished_at_epoch"] = time.time()
+        stage["duration_seconds"] = round(
+            stage["finished_at_epoch"] - stage["started_at_epoch"], 2
+        )
+    _write_json_report("stage_report.json", PIPELINE_STATE)
+
+
+def write_failure_diagnostics(exc):
+    PIPELINE_STATE["status"] = "failed"
+    if PIPELINE_STATE.get("stages"):
+        active_stage = PIPELINE_STATE["stages"][-1]
+        if active_stage.get("status") == "running":
+            active_stage["status"] = "failed"
+            active_stage["finished_at_epoch"] = time.time()
+            active_stage["failure_type"] = type(exc).__name__
+            active_stage["failure_message"] = str(exc)
+    failure = {
+        "status": "failed",
+        "current_stage": PIPELINE_STATE.get("current_stage", "unknown"),
+        "error_type": type(exc).__name__,
+        "error_message": str(exc),
+        "traceback": traceback.format_exc(),
+        "finished_at_epoch": time.time(),
+        "configuration": {
+            "visual_verification_required": VISION_REQUIRED,
+            "groq_key_configured": bool(GROQ_KEY),
+            "openrouter_key_configured": bool(OPENROUTER_KEY),
+            "gemini_key_configured": bool(GEMINI_KEY),
+            "pixabay_key_configured": bool(PIXABAY_KEY),
+            "pexels_key_configured": bool(PEXELS_KEY),
+            "source_priority": list(FOOTAGE_SOURCE_PRIORITY),
+        },
+    }
+    PIPELINE_STATE["failure"] = {
+        "error_type": type(exc).__name__,
+        "error_message": str(exc),
+        "finished_at_epoch": failure["finished_at_epoch"],
+    }
+    _write_json_report("failure_report.json", failure)
+    _write_json_report("stage_report.json", PIPELINE_STATE)
+
+
+class _TeeStream:
+    """Write console output to both the Actions log and output/pipeline.log."""
+    def __init__(self, *streams):
+        self.streams = streams
+
+    def write(self, value):
+        for stream in self.streams:
+            stream.write(value)
+            stream.flush()
+        return len(value)
+
+    def flush(self):
+        for stream in self.streams:
+            stream.flush()
+
+    def isatty(self):
+        return False
+
+
+def validate_runtime_config():
+    if not (GROQ_KEY or OPENROUTER_KEY or GEMINI_KEY):
+        raise RuntimeError(
+            "Missing AI provider key. Add GROQ_API_KEY, "
+            "OPENROUTER_API_KEY, or GEMINI_API_KEY GitHub Secret."
+        )
+    if not TOPIC:
+        raise RuntimeError("Enter a topic in the Run workflow form.")
+
+
 def main():
+    validate_runtime_config()
+
+    start_pipeline_stage("documentary_plan_generation")
     print("1/5 Generating documentary plan...")
     plan = gemini_plan(TOPIC)
+    finish_pipeline_stage()
 
+    start_pipeline_stage("footage_search_download_and_visual_verification")
     print("2/5 Searching and ranking relevant footage...")
     fetch_footage(plan)
+    finish_pipeline_stage()
 
+    start_pipeline_stage("voiceover_and_subtitle_generation")
     print("3/5 Generating paced voice-over and subtitles...")
-    sentence_events, total_duration = (
-        build_voice_and_subs(plan["script"])
-    )
+    sentence_events, total_duration = build_voice_and_subs(plan["script"])
+    finish_pipeline_stage()
 
+    start_pipeline_stage("video_rendering")
     print("4/5 Rendering scenes to actual narration timing...")
-    render(
-        plan,
-        sentence_events,
-        total_duration
-    )
+    render(plan, sentence_events, total_duration)
+    finish_pipeline_stage()
 
+    PIPELINE_STATE["status"] = "completed"
+    PIPELINE_STATE["current_stage"] = "complete"
+    _write_json_report("stage_report.json", PIPELINE_STATE)
     print(
         "5/5 Production complete: "
         "documentary.mp4, plan.json, credits.txt, timing.json"
     )
 
 
+def run_with_diagnostics():
+    log_path = OUT / "pipeline.log"
+    original_stdout = sys.stdout
+    original_stderr = sys.stderr
+
+    with log_path.open("w", encoding="utf-8", buffering=1) as log_file:
+        sys.stdout = _TeeStream(original_stdout, log_file)
+        sys.stderr = _TeeStream(original_stderr, log_file)
+        try:
+            main()
+        except BaseException as exc:
+            write_failure_diagnostics(exc)
+            traceback.print_exc()
+            raise
+        finally:
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
+
+
 if __name__ == "__main__":
-    main()
+    run_with_diagnostics()
+
