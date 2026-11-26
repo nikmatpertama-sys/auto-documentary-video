@@ -1,0 +1,75 @@
+name: Accept Meta Llama Vision License
+
+"on":
+  workflow_dispatch:
+    inputs:
+      credential_pair:
+        description: "Pilih pasangan secret Cloudflare yang tokennya sudah lu periksa permission-nya"
+        required: true
+        type: choice
+        options:
+          - primary
+          - backup
+      confirm_license:
+        description: "Gue sudah membaca dan setuju dengan Meta License serta Acceptable Use Policy untuk Llama 3.2 Vision"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  accept-meta-license:
+    if: ${{ inputs.confirm_license == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send one-time Meta license acceptance request
+        shell: bash
+        env:
+          CREDENTIAL_PAIR: ${{ inputs.credential_pair }}
+          CF_PRIMARY_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_PRIMARY_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_BACKUP_TOKEN: ${{ secrets.CF_API_TK1 }}
+          CF_BACKUP_ACCOUNT_ID: ${{ secrets.CF_ID1 }}
+        run: |
+          set -euo pipefail
+          set +x
+
+          if [[ "$CREDENTIAL_PAIR" == "primary" ]]; then
+            CF_API_TOKEN="$CF_PRIMARY_TOKEN"
+            CF_ACCOUNT_ID="$CF_PRIMARY_ACCOUNT_ID"
+          else
+            CF_API_TOKEN="$CF_BACKUP_TOKEN"
+            CF_ACCOUNT_ID="$CF_BACKUP_ACCOUNT_ID"
+          fi
+
+          if [[ -z "$CF_API_TOKEN" || -z "$CF_ACCOUNT_ID" ]]; then
+            echo "ERROR: Pasangan secret yang dipilih belum lengkap di GitHub repository Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+          RESPONSE_FILE="$(mktemp)"
+          trap 'rm -f "$RESPONSE_FILE"' EXIT
+
+          HTTP_STATUS="$(curl --silent --show-error \
+            --request POST \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct" \
+            --header "Authorization: Bearer ${CF_API_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data '{"prompt":"agree"}' \
+            --output "$RESPONSE_FILE" \
+            --write-out '%{http_code}')"
+
+          echo "Cloudflare HTTP status: ${HTTP_STATUS}"
+
+          if jq -e '.success == true' "$RESPONSE_FILE" >/dev/null 2>&1; then
+            echo "SUCCESS: Cloudflare accepted the initial request for Meta Llama 3.2 11B Vision. The license consent step is complete for this Cloudflare account."
+            jq -c '{success, messages}' "$RESPONSE_FILE"
+          else
+            echo "FAILED: Cloudflare did not confirm the license request. Safe diagnostic response:"
+            jq -c '{success, errors, messages}' "$RESPONSE_FILE" 2>/dev/null || echo "Cloudflare returned a non-JSON response."
+            exit 1
+          fi
+
