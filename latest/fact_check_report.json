@@ -1,0 +1,117 @@
+{
+  "status": "blocked",
+  "method": "trusted-source fetch + independent evidence-grounded AI audit",
+  "claim_count": 8,
+  "blocked_at_claim": "C1",
+  "blocked_claim_sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals.",
+  "failure_reason": "quantitative claim lacked a second independent organisation",
+  "source_fetch_failures": [
+    {
+      "requested_url": "https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html",
+      "reason": "Could not fetch evidence source https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html: HTTPError (HTTP 404)",
+      "source_kind": "discovered"
+    },
+    {
+      "requested_url": "https://en.wikipedia.org/wiki/Population",
+      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Population: HTTPError (HTTP 429)",
+      "source_kind": "discovered"
+    },
+    {
+      "requested_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
+      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
+      "source_kind": "discovered"
+    },
+    {
+      "requested_url": "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_population",
+      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
+      "source_kind": "discovered"
+    },
+    {
+      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
+      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
+      "source_kind": "scholarly"
+    },
+    {
+      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml",
+      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number.",
+      "source_kind": "scholarly"
+    }
+  ],
+  "usable_source_organizations": [
+    "wikipedia.org"
+  ],
+  "source_recovery": {
+    "attempted": true,
+    "candidate_urls": [],
+    "failure": "",
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite",
+    "discovered_urls": [
+      "https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html",
+      "https://en.wikipedia.org/wiki/Population",
+      "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
+      "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_population"
+    ],
+    "scholarly_urls": [
+      "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
+      "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml"
+    ]
+  },
+  "sources": [
+    {
+      "claim_id": "C1",
+      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
+      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "host": "en.wikipedia.org",
+      "http_status": 200,
+      "page_title": "Beaver",
+      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. In 2020, the total Eurasian beaver population in Europe was estimated at over one million. Beavers have a good sense of smell, which they use for detecting land predators and for inspecting scent marks, food, and other individuals. As of 2019, the introduced population of North American beavers in Finland has been moving closer to the habitat of the Eurasian beaver. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the orig",
+      "source_kind": "planned",
+      "status": "usable"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Could not fetch evidence source https://www.census.gov/newsroom/press-kits/2025national-state-population-estimates.html: HTTPError (HTTP 404)"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://en.wikipedia.org/wiki/Population",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Population: HTTPError (HTTP 429)"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_population",
+      "status": "not_usable",
+      "source_kind": "discovered",
+      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC13710877&rettype=xml",
+      "status": "not_usable",
+      "source_kind": "scholarly",
+      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=PMC12660698&rettype=xml",
+      "status": "not_usable",
+      "source_kind": "scholarly",
+      "reason": "Fetched page does not state the claimed value(s) 1200; a numeric claim needs a passage containing that number."
+    }
+  ],
+  "claim_repairs": [],
+  "repair_failure": "ValueError: Claim repair would leave 138 words; the production target is 150-195."
+}
