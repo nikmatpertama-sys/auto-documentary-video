@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-11-26T21:28:33+00:00",
+  "generated_at": "2026-11-26T21:42:45+00:00",
   "status": "failed",
   "failed_stage": "footage",
   "error_type": "RuntimeError",
-  "error_message": "Scene 3 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 14 attempted candidates could be downloaded and accepted under the visual verification policy.",
+  "error_message": "Scene 1 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 14 attempted candidates could be downloaded and accepted under the visual verification policy.",
   "context": {
     "topic": "How beavers reshape entire river ecosystems",
     "vision_required": "True"
   },
-  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4316, in main\n    _run_pipeline()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4154, in _run_pipeline\n    fetch_footage(plan)\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 2999, in fetch_footage\n    raise RuntimeError(\nRuntimeError: Scene 3 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 14 attempted candidates could be downloaded and accepted under the visual verification policy.\n",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4316, in main\n    _run_pipeline()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 4154, in _run_pipeline\n    fetch_footage(plan)\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 2999, in fetch_footage\n    raise RuntimeError(\nRuntimeError: Scene 1 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 14 attempted candidates could be downloaded and accepted under the visual verification policy.\n",
   "environment": {
     "python": "3.11.18",
     "platform": "Linux-7.0.0-1020-azure-x86_64-with-glibc2.43",
@@ -37,21 +37,21 @@
     ]
   },
   "run": {
-    "total_elapsed_seconds": 344.315,
+    "total_elapsed_seconds": 204.49,
     "stage_count": 9,
     "failed_stage": "footage",
     "stages": [
       {
         "stage": "cache_prune",
         "status": "completed",
-        "started_at": "2026-11-26T21:22:48+00:00",
+        "started_at": "2026-11-26T21:39:20+00:00",
         "details": {},
-        "duration_seconds": 0.005
+        "duration_seconds": 0.003
       },
       {
         "stage": "preflight",
         "status": "completed",
-        "started_at": "2026-11-26T21:22:48+00:00",
+        "started_at": "2026-11-26T21:39:20+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "provider_keys": "4"
@@ -61,67 +61,67 @@
       {
         "stage": "source_pool",
         "status": "completed",
-        "started_at": "2026-11-26T21:22:48+00:00",
+        "started_at": "2026-11-26T21:39:20+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
           "urls": "24",
           "excerpts": "3"
         },
-        "duration_seconds": 36.596
+        "duration_seconds": 33.517
       },
       {
         "stage": "script_generation",
         "status": "completed",
-        "started_at": "2026-11-26T21:23:25+00:00",
+        "started_at": "2026-11-26T21:39:54+00:00",
         "details": {
           "topic": "How beavers reshape entire river ecosystems",
-          "words": "137"
+          "words": "131"
         },
-        "duration_seconds": 6.92
+        "duration_seconds": 7.494
       },
       {
         "stage": "fact_check",
         "status": "completed",
-        "started_at": "2026-11-26T21:23:32+00:00",
+        "started_at": "2026-11-26T21:40:01+00:00",
         "details": {
           "claims": "8",
           "status": "passed"
         },
-        "duration_seconds": 2.77
+        "duration_seconds": 2.65
       },
       {
         "stage": "voiceover",
         "status": "completed",
-        "started_at": "2026-11-26T21:23:35+00:00",
+        "started_at": "2026-11-26T21:40:04+00:00",
         "details": {
-          "sentences": "137",
-          "duration_seconds": "65.892"
+          "sentences": "131",
+          "duration_seconds": "62.172"
         },
-        "duration_seconds": 8.331
+        "duration_seconds": 7.255
       },
       {
         "stage": "timeline_lock",
         "status": "completed",
-        "started_at": "2026-11-26T21:23:43+00:00",
+        "started_at": "2026-11-26T21:40:11+00:00",
         "details": {},
         "duration_seconds": 0.001
       },
       {
         "stage": "subtitles",
         "status": "completed",
-        "started_at": "2026-11-26T21:23:43+00:00",
+        "started_at": "2026-11-26T21:40:11+00:00",
         "details": {
-          "caption_groups": "27"
+          "caption_groups": "25"
         },
-        "duration_seconds": 0.005
+        "duration_seconds": 0.004
       },
       {
         "stage": "footage",
         "status": "failed",
-        "started_at": "2026-11-26T21:23:43+00:00",
+        "started_at": "2026-11-26T21:40:11+00:00",
         "details": {},
-        "duration_seconds": 289.575,
-        "error": "RuntimeError: Scene 3 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 14 attempted candidates could be downloaded and accepted under the visual verification policy."
+        "duration_seconds": 153.464,
+        "error": "RuntimeError: Scene 1 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 14 attempted candidates could be downloaded and accepted under the visual verification policy."
       }
     ]
   }
