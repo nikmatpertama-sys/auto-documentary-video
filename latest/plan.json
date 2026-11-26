@@ -1,347 +1,267 @@
 {
-  "title": "How Beavers Reshape Rivers",
-  "hook": "Beavers live in freshwater ecosystems such as rivers.",
+  "title": "The Amazon Rainforest",
+  "hook": "The forest trees release water vapor into the atmosphere.",
   "scenes": [
     {
-      "narration": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
-      "visual_focus": "beaver in river",
-      "visual_query": "beaver swimming in river water",
+      "narration": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities.",
+      "visual_focus": "forest trees release water",
+      "visual_query": "forest trees release water vapor",
       "visual_queries": [
-        "beaver swimming in river water",
-        "beaver in freshwater stream"
+        "dense green forest canopy",
+        "tropical rainforest aerial view"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver swimming in river water",
-      "source_label": "Wikipedia Beaver",
-      "source_url": "https://en.wikipedia.org/wiki/Beaver",
+      "reference_query": "forest trees release water vapor",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Flying_river",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0,
       "voice_timing": {
         "start_seconds": 0.0,
-        "spoken_end_seconds": 6.462,
-        "visual_end_seconds": 7.162,
-        "duration_seconds": 7.162,
+        "spoken_end_seconds": 8.43,
+        "visual_end_seconds": 9.13,
+        "duration_seconds": 9.13,
         "first_sentence_index": 0,
         "last_sentence_index": 0
-      },
-      "media_file": "output/footage/scene_01.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "rodent, muskrat, nutria, animal, nature, rat, wool, wet, lake, pond, forest, water, river, beaver",
-      "selected_footage_url": "https://pixabay.com/videos/id-248239/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show a beaver in a river or stream next to a grassy, snow-covered bank, directly matching the required focus.",
-        "query": "beaver"
       }
     },
     {
-      "narration": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated.",
-      "visual_focus": "european beaver",
-      "visual_query": "european beaver in habitat",
+      "narration": "This moisture is deposited in other localities in the form of precipitation, forming a virtual river across the region.",
+      "visual_focus": "precipitation falling over forest",
+      "visual_query": "heavy precipitation falling over forest",
       "visual_queries": [
-        "european beaver in",
-        "european beaver swimming"
+        "tropical rain falling down",
+        "rainstorm over green trees"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "european beaver in habitat",
-      "source_label": "Wikipedia Beaver",
-      "source_url": "https://en.wikipedia.org/wiki/Beaver",
+      "reference_query": "heavy precipitation falling over forest",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Flying_river",
       "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1,
       "voice_timing": {
-        "start_seconds": 7.162,
-        "spoken_end_seconds": 14.41,
-        "visual_end_seconds": 14.71,
-        "duration_seconds": 7.548,
+        "start_seconds": 9.13,
+        "spoken_end_seconds": 16.786,
+        "visual_end_seconds": 17.086,
+        "duration_seconds": 7.956,
         "first_sentence_index": 1,
         "last_sentence_index": 1
-      },
-      "media_file": "output/footage/scene_02.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "beaver, beaver family, animals, wildlife, nature, canada, alberta",
-      "selected_footage_url": "https://pixabay.com/videos/id-3346/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.9,
-        "reason": "The frames clearly show a beaver swimming in the water while towing a leafy branch, directly illustrating beaver activity in a natural water habitat.",
-        "query": "beaver"
       }
     },
     {
-      "narration": "River ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants.",
-      "visual_focus": "river flowing water",
-      "visual_query": "river flowing water",
+      "narration": "With its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country.",
+      "visual_focus": "abundant rainfall over country",
+      "visual_query": "abundant rainfall over green landscape",
       "visual_queries": [
-        "river flowing water",
-        "river flowing through landscape"
+        "widespread rain over trees",
+        "heavy rain in jungle"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "river flowing water",
-      "source_label": "Wikipedia River ecosystem",
-      "source_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "reference_query": "abundant rainfall over green landscape",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Flying_river",
       "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2,
       "voice_timing": {
-        "start_seconds": 14.71,
-        "spoken_end_seconds": 21.814,
-        "visual_end_seconds": 22.114,
-        "duration_seconds": 7.404,
+        "start_seconds": 17.086,
+        "spoken_end_seconds": 23.974,
+        "visual_end_seconds": 24.274,
+        "duration_seconds": 7.188,
         "first_sentence_index": 2,
         "last_sentence_index": 2
-      },
-      "media_file": "output/footage/scene_03.mp4",
-      "selected_footage_source": "Coverr",
-      "selected_footage_tags": "River in the Gerês National Park Still shot of the river in the Gerês National Park. river rocks water clear crystal clear rainy raindrops river flow portugal national park gerês ecology environment flowing outdoors outside fresh air natural beauty beautiful place landscape scenery nature static shot",
-      "selected_footage_url": "https://coverr.co/videos/mCI0x9fsDD",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly show a shallow river with flowing water over rocky riverbeds and stone structures, directly matching the required visible focus of river flowing water.",
-        "query": "river flowing water"
       }
     },
     {
-      "narration": "The major zones in river ecosystems are determined by the river bed gradient or current velocity.",
-      "visual_focus": "river current",
-      "visual_query": "river current velocity water",
+      "narration": "Researchers found that carbon stocks in the Amazon region were reduced following logging processes in the forest.",
+      "visual_focus": "logging in forest",
+      "visual_query": "logging in green forest",
       "visual_queries": [
-        "river current velocity water",
-        "flowing river bed gradient"
+        "deforested land aerial view",
+        "cut down tree trunks"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "river current velocity water",
-      "source_label": "Wikipedia River ecosystem",
-      "source_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "reference_query": "logging in green forest",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3,
       "voice_timing": {
-        "start_seconds": 22.114,
-        "spoken_end_seconds": 28.642,
-        "visual_end_seconds": 28.942,
-        "duration_seconds": 6.828,
+        "start_seconds": 24.274,
+        "spoken_end_seconds": 31.21,
+        "visual_end_seconds": 31.51,
+        "duration_seconds": 7.236,
         "first_sentence_index": 3,
         "last_sentence_index": 3
-      },
-      "media_file": "output/footage/scene_04.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "current, river, park, forest, trees, sunshine, nature",
-      "selected_footage_url": "https://pixabay.com/videos/id-268478/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show a river current flowing rapidly over rocks, directly matching the required visible focus.",
-        "query": "river current"
       }
     },
     {
-      "narration": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
-      "visual_focus": "area nature",
-      "visual_query": "area nature",
+      "narration": "This logging demonstrates the negative impact that logging has on the forest ability to store carbon emissions.",
+      "visual_focus": "of logging forest",
+      "visual_query": "of logging on forest",
       "visual_queries": [
-        "area nature",
-        "wildlife landscape"
+        "trees after logging",
+        "cleared forest land ground"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "area nature",
-      "source_label": "Wikipedia Keystone species",
-      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "reference_query": "of logging on forest",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4,
       "voice_timing": {
-        "start_seconds": 28.942,
-        "spoken_end_seconds": 35.95,
-        "visual_end_seconds": 36.25,
-        "duration_seconds": 7.308,
+        "start_seconds": 31.51,
+        "spoken_end_seconds": 38.134,
+        "visual_end_seconds": 38.434,
+        "duration_seconds": 6.924,
         "first_sentence_index": 4,
         "last_sentence_index": 4
-      },
-      "media_file": "output/footage/scene_05.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "river, forest, water, flowing, nature, mountain, environment, outdoors, summer, freshness, tree, valley, wilderness, stream - body of water, flowing water, landscape - scenery, green color, lush foliage, rapids - river, scenics - nature, uncultivated, wilderness area",
-      "selected_footage_url": "https://pixabay.com/videos/id-375831/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly show a natural landscape with a river, green trees, and mountains under a cloudy sky, directly matching the required visible focus of area nature.",
-        "query": "area nature"
       }
     },
     {
-      "narration": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from encroachment.",
-      "visual_focus": "wolf in nature",
-      "visual_query": "wolf in nature habitat",
+      "narration": "Climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest.",
+      "visual_focus": "droughts in the forest",
+      "visual_query": "droughts in the amazon forest",
       "visual_queries": [
-        "wolf in nature",
-        "gray wolf walking"
+        "dry cracked earth forest",
+        "dry withered green leaves"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "wolf in nature habitat",
-      "source_label": "Wikipedia Keystone species",
-      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "reference_query": "droughts in the amazon forest",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5,
       "voice_timing": {
-        "start_seconds": 36.25,
-        "spoken_end_seconds": 43.738,
-        "visual_end_seconds": 44.038,
-        "duration_seconds": 7.788,
+        "start_seconds": 38.434,
+        "spoken_end_seconds": 45.802,
+        "visual_end_seconds": 46.102,
+        "duration_seconds": 7.668,
         "first_sentence_index": 5,
         "last_sentence_index": 5
-      },
-      "media_file": "output/footage/scene_06.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "wolf, animal, mammal, nature wild, predator, wolves, nature, wild, wildlife, atmospheric, hunter, atmosphere, carnivores, fur, canine",
-      "selected_footage_url": "https://pixabay.com/videos/id-27400/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show a wolf in a natural forest environment, directly matching the required focus and supporting the narration about wolves in nature.",
-        "query": "wolf"
       }
     },
     {
-      "narration": "However, it is important to note that these groups do not cover the entire range known.",
-      "visual_focus": "north american beaver",
-      "visual_query": "north american beaver swimming",
+      "narration": "The combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.",
+      "visual_focus": "dead trees forest fires",
+      "visual_query": "dead trees fueling forest fires",
       "visual_queries": [
-        "north american beaver swimming",
-        "north american beaver in pond"
+        "smoke rising fire",
+        "burning dry forest trees"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "north american beaver swimming",
-      "source_label": "IUCN Red List Castor canadensis",
-      "source_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "reference_query": "dead trees fueling forest fires",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6,
       "voice_timing": {
-        "start_seconds": 44.038,
-        "spoken_end_seconds": 49.606,
-        "visual_end_seconds": 49.906,
-        "duration_seconds": 5.868,
+        "start_seconds": 46.102,
+        "spoken_end_seconds": 53.326,
+        "visual_end_seconds": 53.626,
+        "duration_seconds": 7.524,
         "first_sentence_index": 6,
         "last_sentence_index": 6
-      },
-      "media_file": "output/footage/scene_07.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "beaver, animal, nature, mammal, wool, water, cute, brown",
-      "selected_footage_url": "https://pixabay.com/videos/id-140101/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly show a North American beaver in a natural aquatic environment, directly matching the required visible focus.",
-        "query": "beaver"
       }
     },
     {
-      "narration": "Therefore, we divided spatial units by clusters of states to understand the range occupied by subspecies.",
-      "visual_focus": "beaver in forest",
-      "visual_query": "beaver in forest",
+      "narration": "Brazil protections of the Amazon rainforest were slashed, resulting in a severe loss of trees across the land.",
+      "visual_focus": "loss of trees land",
+      "visual_query": "loss of trees in forest",
       "visual_queries": [
-        "beaver in forest",
-        "beaver pond landscape"
+        "deforestation area wide view",
+        "barren land without trees"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver in forest",
-      "source_label": "IUCN Red List Castor canadensis",
-      "source_url": "https://www.iucnredlist.org/species/4003/22187946",
+      "reference_query": "loss of trees in forest",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7,
       "voice_timing": {
-        "start_seconds": 49.906,
-        "spoken_end_seconds": 56.986,
-        "visual_end_seconds": 58.236,
-        "duration_seconds": 8.33,
+        "start_seconds": 53.626,
+        "spoken_end_seconds": 60.922,
+        "visual_end_seconds": 62.172,
+        "duration_seconds": 8.546,
         "first_sentence_index": 7,
         "last_sentence_index": 7
-      },
-      "media_file": "output/footage/scene_08.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "beaver, animal, nature, water, wildlife",
-      "selected_footage_url": "https://pixabay.com/videos/id-47602/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly show a beaver swimming in a river or stream within a natural woodland environment, fulfilling the required visible focus of a beaver in a forest.",
-        "query": "beaver"
       }
     }
   ],
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
+      "sentence": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/Flying_river"
       ]
     },
     {
       "scene": 2,
-      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated.",
+      "sentence": "This moisture is deposited in other localities in the form of precipitation, forming a virtual river across the region.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/Flying_river"
       ]
     },
     {
       "scene": 3,
-      "sentence": "River ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants.",
+      "sentence": "With its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/River_ecosystem"
+        "https://en.wikipedia.org/wiki/Flying_river"
       ]
     },
     {
       "scene": 4,
-      "sentence": "The major zones in river ecosystems are determined by the river bed gradient or current velocity.",
+      "sentence": "Researchers found that carbon stocks in the Amazon region were reduced following logging processes in the forest.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/River_ecosystem"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ]
     },
     {
       "scene": 5,
-      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
+      "sentence": "This logging demonstrates the negative impact that logging has on the forest ability to store carbon emissions.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ]
     },
     {
       "scene": 6,
-      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from encroachment.",
+      "sentence": "Climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ]
     },
     {
       "scene": 7,
-      "sentence": "However, it is important to note that these groups do not cover the entire range known.",
+      "sentence": "The combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.",
       "source_urls": [
-        "https://www.iucnredlist.org/species/4003/22187946"
+        "https://en.wikipedia.org/wiki/Amazon_rainforest"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Therefore, we divided spatial units by clusters of states to understand the range occupied by subspecies.",
+      "sentence": "Brazil protections of the Amazon rainforest were slashed, resulting in a severe loss of trees across the land.",
       "source_urls": [
-        "https://www.iucnredlist.org/species/4003/22187946"
+        "https://en.wikipedia.org/wiki/Amazon_rainforest"
       ]
     }
   ],
-  "script": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated. River ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants. The major zones in river ecosystems are determined by the river bed gradient or current velocity. The concept became popular in conservation, and was deployed in a range of contexts to engender support. In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from encroachment. However, it is important to note that these groups do not cover the entire range known. Therefore, we divided spatial units by clusters of states to understand the range occupied by subspecies.",
+  "script": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities. This moisture is deposited in other localities in the form of precipitation, forming a virtual river across the region. With its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country. Researchers found that carbon stocks in the Amazon region were reduced following logging processes in the forest. This logging demonstrates the negative impact that logging has on the forest ability to store carbon emissions. Climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest. The combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires. Brazil protections of the Amazon rainforest were slashed, resulting in a severe loss of trees across the land.",
   "ai_provider": {
     "provider": "gemini",
     "model": "gemini-3.5-flash-lite"
@@ -352,15 +272,15 @@
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "HOW BEAVERS RESHAPE RIVERS"
+        "THE AMAZON RAINFOREST"
       ],
       "hook_lines": [
-        "Beavers live in",
-        "freshwater ecosystems",
-        "such as rivers."
+        "The forest trees release",
+        "water vapor into the",
+        "atmosphere."
       ],
-      "title_text": "How Beavers Reshape Rivers",
-      "hook_text": "Beavers live in freshwater ecosystems such as rivers.",
+      "title_text": "The Amazon Rainforest",
+      "hook_text": "The forest trees release water vapor into the atmosphere.",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,

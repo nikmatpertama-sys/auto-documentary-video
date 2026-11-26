@@ -1,5 +1,5 @@
 [stage] cache_prune: start
-API/thumbnail cache size: 119.6 MB
+API/thumbnail cache size: 128.8 MB
 [stage] cache_prune: completed in 0.0s
 [stage] preflight: start
 [stage] preflight: completed in 0.0s
@@ -9,220 +9,229 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Source pool articles suggested by gemini/gemini-3.5-flash-lite: Beaver, Keystone species, River ecosystem
-Source pool: 71 trusted page(s) cited by Beaver, Keystone species, River ecosystem.
-Evidence brief: skipped https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=573165 (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
-Evidence brief: skipped https://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=180212 (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3532383
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/22697210 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5335264
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/28256552 (FactCheckError: Evidence page contains too little readable text for verification.)
-Fact-check source temporarily unavailable (SSLError HTTP n/a); retrying in 4s.
-Fact-check source temporarily unavailable (SSLError HTTP n/a); retrying in 7s.
-Evidence brief: skipped https://journals.iupui.edu/index.php/ias/article/download/7219/7239 (FactCheckError: Could not fetch evidence source https://journals.iupui.edu/index.php/ias/article/download/7219/7239: SSLError)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7403313
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/32753594 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3030560
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/21307956 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/18777567 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/25678658 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/9237306 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5773300
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/29375773 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: 4 source passages fetched for planning.
-[stage] source_pool: completed in 32.9s
+Source pool articles suggested by gemini/gemini-3.5-flash-lite: Amazon rainforest, Flying river, Deforestation of the Amazon rainforest
+Source pool: 71 trusted page(s) cited by Amazon rainforest, Flying river, Deforestation of the Amazon rainforest.
+Evidence brief: skipped https://www.britannica.com/place/Amazon-River (FactCheckError: Could not fetch evidence source https://www.britannica.com/place/Amazon-River: HTTPError (HTTP 403))
+Evidence brief: skipped https://www.britannica.com/place/Amazon-Rainforest (FactCheckError: Could not fetch evidence source https://www.britannica.com/place/Amazon-Rainforest: HTTPError (HTTP 403))
+Evidence brief: skipped https://www.britannica.com/topic/Yanomami (FactCheckError: Could not fetch evidence source https://www.britannica.com/topic/Yanomami: HTTPError (HTTP 403))
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6327247
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/30415837 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6878948
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/31350885 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11774006
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/37990807 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6756188
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/31328768 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7192477
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/32353035 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/14500979 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/14684803 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped off-topic paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4528512
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/26202998 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: 3 source passages fetched for planning.
+[stage] source_pool: completed in 4.4s
 [stage] script_generation: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
-Plan repair: scene 3 visual_focus rewritten to 'river flowing water' (invisible idea kept in narration).
-Plan repair: scene 5 visual_focus rewritten to 'area nature' (invisible idea kept in narration).
-Plan repair: scene 8 visual_focus rewritten to 'beaver in forest' (invisible idea kept in narration).
+Plan repair: scene 4 visual_focus rewritten to 'logging in forest' (invisible idea kept in narration).
+Plan repair: scene 5 visual_focus rewritten to 'of logging forest' (invisible idea kept in narration).
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Documentary plan generated by gemini/gemini-3.5-flash-lite: 122 words, 8 scenes.
-Opening validated before TTS: title=4 word(s), hook=8 word(s).
-[stage] script_generation: completed in 3.8s
+Documentary plan generated by gemini/gemini-3.5-flash-lite: 144 words, 8 scenes.
+Opening validated before TTS: title=3 word(s), hook=9 word(s).
+[stage] script_generation: completed in 3.7s
 2/7 Fetching trusted source pages and auditing every factual assertion...
 [stage] fact_check: start
+Encyclopedia API unavailable for https://en.wikipedia.org/wiki/Flying_river (HTTPError); using HTML.
+Fact-check source temporarily unavailable (HTTPError HTTP 429); retrying in 4s.
+Encyclopedia API unavailable for https://en.wikipedia.org/wiki/Flying_river (HTTPError); using HTML.
+Fact-check source temporarily unavailable (HTTPError HTTP 429); retrying in 7s.
+Encyclopedia API unavailable for https://en.wikipedia.org/wiki/Flying_river (HTTPError); using HTML.
+AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_source_recovery...
+AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
+Fact-check source temporarily unavailable (ReadTimeout HTTP n/a); retrying in 4s.
+Fact-check source temporarily unavailable (ReadTimeout HTTP n/a); retrying in 7s.
 AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_audit...
 AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
-[stage] fact_check: completed in 2.9s
+[stage] fact_check: completed in 108.2s
 3/7 Generating the complete voice-over (no subtitle/visual work yet)...
 [stage] voiceover: start
-VO duration is within target: 58.24s.
-VO quality gate passed: 58.24s, 48000 Hz, mean -23.4 dB, peak -4.5 dB.
-[stage] voiceover: completed in 5.3s
+VO duration is within target: 62.17s.
+VO quality gate passed: 62.17s, 48000 Hz, mean -23.3 dB, peak -4.4 dB.
+[stage] voiceover: completed in 9.6s
 4/7 Locking the final VO timeline as the master production reference...
 [stage] timeline_lock: start
 [stage] timeline_lock: completed in 0.0s
 5/7 Building phrase subtitles from the validated VO timing...
 [stage] subtitles: start
-Subtitles created from final VO: 122 words; 122 measured by Edge TTS, 0 estimated; 23 natural phrase groups.
+Subtitles created from final VO: 144 words; 144 measured by Edge TTS, 0 estimated; 25 natural phrase groups.
 [stage] subtitles: completed in 0.0s
 6/7 Searching for footage and trusted published visuals against the VO scene map...
 [stage] footage: start
 Footage source: Pexels disabled because PEXELS_API_KEY is not configured.
 Visual verification enabled with automatic failover: Gemini (gemini-3.5-flash-lite) -> Groq (qwen/qwen3.8-27b) -> OpenRouter (nvidia/nemotron-3.5-super-vl:free) -> OpenRouter (inclusionai/ling-3.2-flash:free). Minimum confidence=0.72.
-Scene 1: applying metadata anchors independently to each of 3 search variants.
+Scene 1: applying metadata anchors independently to each of 5 search variants.
   Pixabay: 25 candidate(s)
-  Pixabay: 25 candidate(s)
-  Coverr: 2 candidate(s)
-  Wikimedia Commons: 10 candidate(s)
-Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
-Scene 1: SigLIP thumbnail reranking applied to 11 candidate(s).
-Scene 1: 46 metadata-qualified candidate(s) across 3 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=248239 score=0.79 match=1/1 query='beaver' metadata=rodent, muskrat, nutria, animal, nature, rat, wool, wet, lake, pond, forest, water, river, beaver https://pixabay.com/videos/id-248239/
-  Candidate rank 2: Pixabay ID=247387 score=0.79 match=1/1 query='beaver' metadata=beaver, animal, rodent, wildlife, mammal, fur, water, cute, pond, wild, aquatic, gnaw, muskrat, herbivores, river, forest, transparent, wood, nature https://pix
-  Candidate rank 3: Pixabay ID=3346 score=0.76 match=1/1 query='beaver' metadata=beaver, beaver family, animals, wildlife, nature, canada, alberta https://pixabay.com/videos/id-3346/
-  Candidate rank 4: Pixabay ID=140101 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, nature, mammal, wool, water, cute, brown https://pixabay.com/videos/id-140101/
-  Candidate rank 5: Pixabay ID=47602 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, nature, water, wildlife https://pixabay.com/videos/id-47602/
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
-Scene 1: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show a beaver in a river or stream next to a grassy, snow-covered bank, directly matching the required focus.
-Scene 1: accepted Pixabay metadata=0.79, visual confidence=1.0 — rodent, muskrat, nutria, animal, nature, rat, wool, wet, lake, pond, forest, water, river, beaver https://pixabay.com/videos/id-248239/
-Scene 2: applying metadata anchors independently to each of 6 search variants.
-  Pixabay: 25 candidate(s)
-  Pixabay: 25 candidate(s)
-  Wikimedia Commons: 4 candidate(s)
-  Pixabay: 25 candidate(s)
-  Wikimedia Commons: 4 candidate(s)
-  Pixabay: 25 candidate(s)
-  Wikimedia Commons: 4 candidate(s)
-  Pixabay: 25 candidate(s)
-  Coverr: 2 candidate(s)
-  NASA: 2 candidate(s)
-  Wikimedia Commons: 8 candidate(s)
-Scene 2: SigLIP thumbnail reranking applied to 15 candidate(s).
-Scene 2: 45 metadata-qualified candidate(s) across 6 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=3346 score=0.76 match=1/1 query='beaver' metadata=beaver, beaver family, animals, wildlife, nature, canada, alberta https://pixabay.com/videos/id-3346/
-  Candidate rank 2: Pixabay ID=140101 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, nature, mammal, wool, water, cute, brown https://pixabay.com/videos/id-140101/
-  Candidate rank 3: Pixabay ID=47602 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, nature, water, wildlife https://pixabay.com/videos/id-47602/
-  Candidate rank 4: Pixabay ID=247387 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, rodent, wildlife, mammal, fur, water, cute, pond, wild, aquatic, gnaw, muskrat, herbivores, river, forest, transparent, wood, nature https://pix
-  Candidate rank 5: Pixabay ID=85677 score=0.76 match=1/1 query='beaver' metadata=beaver, swim, mammal, nature, water, flow, lake, natural reserve, nature reserve, wild, wet https://pixabay.com/videos/id-85677/
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (0.90).
-Scene 2: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (0.90): The frames clearly show a beaver swimming in the water while towing a leafy branch, directly illustrating beaver activity in a natural water habitat.
-Scene 2: accepted Pixabay metadata=0.76, visual confidence=0.9 — beaver, beaver family, animals, wildlife, nature, canada, alberta https://pixabay.com/videos/id-3346/
-Scene 3: applying metadata anchors independently to each of 1 search variants.
-  Pixabay: 25 candidate(s)
-  Coverr: 19 candidate(s)
-  NASA: 6 candidate(s)
-  Wikimedia Commons: 9 candidate(s)
-Scene 3: SigLIP thumbnail reranking applied to 13 candidate(s).
-Scene 3: 52 metadata-qualified candidate(s) across 1 search variants; checking up to 14 candidates.
-  Candidate rank 1: Coverr ID=mCI0x9fsDD score=0.85 match=3/3 query='river flowing water' metadata=River in the Gerês National Park Still shot of the river in the Gerês National Park. river rocks water clear crystal clear rainy raindrops river flow portugal n
-  Candidate rank 2: Pixabay ID=215055 score=0.85 match=3/3 query='river flowing water' metadata=wilderness, mountain river, stream, mountain, nature, flowing, water, landscape https://pixabay.com/videos/id-215055/
-  Candidate rank 3: Pixabay ID=167469 score=0.82 match=3/3 query='river flowing water' metadata=flow, river course, water, nature, flowing water, slow motion https://pixabay.com/videos/id-167469/
-  Candidate rank 4: Coverr ID=ihgpy08UQ6 score=0.85 match=3/3 query='river flowing water' metadata=Rocky river Aerial shot of a rocky river in the Gerês National Park. river rocks water clear crystal clear river flow flowing ecology environment gerês national
-  Candidate rank 5: Coverr ID=WRUoEG6GAR score=0.85 match=3/3 query='river flowing water' metadata=River under the bridge  Still shot of a river under a bridge, surrounded by trees and plants.  river water nature beautiful greenery bridge secluded peaceful tr
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (0.95).
-Scene 3: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (0.95): The frames clearly show a shallow river with flowing water over rocky riverbeds and stone structures, directly matching the required visible focus of river flowing water.
-Scene 3: accepted Coverr metadata=0.85, visual confidence=0.95 — River in the Gerês National Park Still shot of the river in the Gerês National Park. river rocks water clear crystal clear rainy raindrops r
-Scene 4: applying metadata anchors independently to each of 2 search variants.
-  Pixabay: 25 candidate(s)
-  Pixabay: 25 candidate(s)
-  NASA: 4 candidate(s)
-  Wikimedia Commons: 8 candidate(s)
-Scene 4: SigLIP thumbnail reranking applied to 20 candidate(s).
-Scene 4: 47 metadata-qualified candidate(s) across 2 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=268478 score=0.82 match=2/2 query='river current' metadata=current, river, park, forest, trees, sunshine, nature https://pixabay.com/videos/id-268478/
-  Candidate rank 2: Pixabay ID=5006 score=0.82 match=2/2 query='river current' metadata=river, water courses, current https://pixabay.com/videos/id-5006/
-  Candidate rank 3: Pixabay ID=361548 score=0.82 match=2/2 query='river current' metadata=water, river, mountains, stream, current forest, vegetation, travel https://pixabay.com/videos/id-361548/
-  Candidate rank 4: Pixabay ID=377807 score=0.82 match=2/2 query='river current' metadata=mountains, river, water, flow, current, stones, banks, nature https://pixabay.com/videos/id-377807/
-  Candidate rank 5: Pixabay ID=120472 score=0.82 match=2/2 query='river current' metadata=torrent, river, mountain, rocks, wild environment, canyon, water, counter-current, illusion, absurd, animated background, joke https://pixabay.com/videos/id-120
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
-Scene 4: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show a river current flowing rapidly over rocks, directly matching the required visible focus.
-Scene 4: accepted Pixabay metadata=0.82, visual confidence=1.0 — current, river, park, forest, trees, sunshine, nature https://pixabay.com/videos/id-268478/
-Scene 5: applying metadata anchors independently to each of 2 search variants.
-  Pixabay: 25 candidate(s)
-  Coverr: 25 candidate(s)
-  NASA: 6 candidate(s)
-  Wikimedia Commons: 9 candidate(s)
-  Pixabay: 25 candidate(s)
-  Coverr: 25 candidate(s)
-  NASA: 6 candidate(s)
-  Wikimedia Commons: 2 candidate(s)
-Scene 5: SigLIP thumbnail reranking applied to 22 candidate(s).
-Scene 5: 73 metadata-qualified candidate(s) across 2 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=375831 score=0.76 match=1/1 query='area nature' metadata=river, forest, water, flowing, nature, mountain, environment, outdoors, summer, freshness, tree, valley, wilderness, stream - body of water, flowing water, land
-  Candidate rank 2: Coverr ID=Sba35d7n1P score=0.76 match=1/1 query='area nature' metadata=Off-road area Still shot of an off-road area near the mountains. mountains terrain sea coastline ocean seashore seaside landscape greenery green screen settleme
-  Candidate rank 3: Coverr ID=Nd5nEvaz7m score=0.76 match=1/1 query='area nature' metadata=Unique, outdoor seat  Drone flies through a unique, outdoor seat, exposing a beautiful forest view. aerial drone forest philippines mountains landscape travel s
-  Candidate rank 4: Coverr ID=ZoXAv88tir score=0.76 match=1/1 query='area nature' metadata=Young Woman Showing Off her Forest Outing via Video Call A happy female camper is sitting in a sunlit forest clearing. Next to her, a vacuum flask is standing o
-  Candidate rank 5: Pixabay ID=33696 score=0.76 match=1/1 query='area nature' metadata=water, plant, fog, dolomiti, rain, italy, alpi, nature, atmosphere, landscape, countryside, rural area https://pixabay.com/videos/id-33696/
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (0.95).
-Scene 5: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (0.95): The frames clearly show a natural landscape with a river, green trees, and mountains under a cloudy sky, directly matching the required visible focus of area nature.
-Scene 5: accepted Pixabay metadata=0.76, visual confidence=0.95 — river, forest, water, flowing, nature, mountain, environment, outdoors, summer, freshness, tree, valley, wilderness, stream - body of water,
-Scene 6: applying metadata anchors independently to each of 5 search variants.
-  Pixabay: 25 candidate(s)
-  Wikimedia Commons: 1 candidate(s)
-  Pixabay: 25 candidate(s)
-  Coverr: 1 candidate(s)
-  Wikimedia Commons: 4 candidate(s)
   Pixabay: 25 candidate(s)
   Wikimedia Commons: 2 candidate(s)
-  Pixabay: 25 candidate(s)
-  Coverr: 3 candidate(s)
-  NASA: 3 candidate(s)
-  Wikimedia Commons: 7 candidate(s)
-Scene 6: SigLIP thumbnail reranking applied to 23 candidate(s).
-Scene 6: 37 metadata-qualified candidate(s) across 5 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=27400 score=0.82 match=1/1 query='wolf' metadata=wolf, animal, mammal, nature wild, predator, wolves, nature, wild, wildlife, atmospheric, hunter, atmosphere, carnivores, fur, canine https://pixabay.com/videos
-  Candidate rank 2: Pixabay ID=138688 score=0.79 match=1/1 query='wolf' metadata=wolf, predator, dangerous, european wolf, carnivores, furry, wildlife, slow motion https://pixabay.com/videos/id-138688/
-  Candidate rank 3: Pixabay ID=216196 score=0.79 match=1/1 query='wolf' metadata=wolf, predator, dangerous, mammal, carnivores, wildlife https://pixabay.com/videos/id-216196/
-  Candidate rank 4: Pixabay ID=146345 score=0.79 match=1/1 query='wolf' metadata=wolf, predator, teeth, dangerous, carnivores, wildlife, slow motion https://pixabay.com/videos/id-146345/
-  Candidate rank 5: Pixabay ID=92848 score=0.79 match=1/1 query='wolf' metadata=wolf, predator, dangerous, animal, running, wildlife, eurasian wolf, european wolf, zoo hague, slow motion https://pixabay.com/videos/id-92848/
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
-Scene 6: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show a wolf in a natural forest environment, directly matching the required focus and supporting the narration about wolves in nature.
-Scene 6: accepted Pixabay metadata=0.82, visual confidence=1.0 — wolf, animal, mammal, nature wild, predator, wolves, nature, wild, wildlife, atmospheric, hunter, atmosphere, carnivores, fur, canine https:
-Scene 7: applying metadata anchors independently to each of 4 search variants.
   Pixabay: 25 candidate(s)
   Wikimedia Commons: 3 candidate(s)
   Pixabay: 25 candidate(s)
-  Wikimedia Commons: 10 candidate(s)
   Pixabay: 25 candidate(s)
+  Coverr: 25 candidate(s)
+  NASA: 6 candidate(s)
   Wikimedia Commons: 5 candidate(s)
-Scene 7: SigLIP thumbnail reranking applied to 14 candidate(s).
-Scene 7: 61 metadata-qualified candidate(s) across 4 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=140101 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, nature, mammal, wool, water, cute, brown https://pixabay.com/videos/id-140101/
-  Candidate rank 2: Pixabay ID=47602 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, nature, water, wildlife https://pixabay.com/videos/id-47602/
-  Candidate rank 3: Pixabay ID=247387 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, rodent, wildlife, mammal, fur, water, cute, pond, wild, aquatic, gnaw, muskrat, herbivores, river, forest, transparent, wood, nature https://pix
-  Candidate rank 4: Pixabay ID=85677 score=0.76 match=1/1 query='beaver' metadata=beaver, swim, mammal, nature, water, flow, lake, natural reserve, nature reserve, wild, wet https://pixabay.com/videos/id-85677/
-  Candidate rank 5: Pixabay ID=180657 score=0.76 match=1/1 query='beaver' metadata=nutria, coypu, beaver rat, rodent, animal, river, water, nature https://pixabay.com/videos/id-180657/
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Scene 1: SigLIP thumbnail reranking applied to 21 candidate(s).
+Scene 1: 54 metadata-qualified candidate(s) across 5 search variants; checking up to 14 candidates.
+  Candidate rank 1: Pixabay ID=111261 score=0.79 match=1/1 query='dense' metadata=forest, dark forest in stavropol, mountain strizhament, deer, summer forest, dense forest, green forest, ecological trail, ferns https://pixabay.com/videos/id-1
+  Candidate rank 2: Coverr ID=FwSi5lx2oe score=0.79 match=1/1 query='dense' metadata=Majestic Waterfall Cascade in Dense Lush Forest Aerial view of a powerful forest waterfall flowing into a serene river below. It's nested in a beautiful, dense 
+  Candidate rank 3: Pixabay ID=111272 score=0.79 match=1/1 query='dense' metadata=forest, dark forest in stavropol, mountain strizhament, deer, summer forest, dense forest, green forest, ecological trail, ferns https://pixabay.com/videos/id-1
+  Candidate rank 4: Coverr ID=QOsi3b73Sz score=0.85 match=1/1 query='dense' metadata=Picturesque Waterfall Flowing in Lush Green Forest A captivating view of a tranquil waterfall nestled within a dense, vibrant green forest. Perfect for themes o
+  Candidate rank 5: Pixabay ID=111139 score=0.79 match=1/1 query='dense' metadata=forest, dark forest in stavropol, mountain strizhament, deer, summer forest, dense forest, green forest, ecological trail, ferns https://pixabay.com/videos/id-1
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (0.95).
-Scene 7: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (0.95): The frames clearly show a North American beaver in a natural aquatic environment, directly matching the required visible focus.
-Scene 7: accepted Pixabay metadata=0.76, visual confidence=0.95 — beaver, animal, nature, mammal, wool, water, cute, brown https://pixabay.com/videos/id-140101/
-Scene 8: applying metadata anchors independently to each of 2 search variants.
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.10).
+Scene 1: visual check 1/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.10): The frames show a dense forest floor with ferns and trees, but transpiration (trees releasing water vapor) is an invisible biological process that cannot be observed visually in this generic nature footage.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 1: visual check 2/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a waterfall in a forest rather than trees releasing water vapor through transpiration.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (0.85).
+Scene 1: visual check 3/14 via gemini (gemini-3.5-flash-lite) — PASS (0.85): The frames show a dense green forest with trees and foliage, directly matching the required subject of forest trees involved in transpiration and water release.
+Scene 1: accepted Pixabay metadata=0.79, visual confidence=0.85 — forest, dark forest in stavropol, mountain strizhament, deer, summer forest, dense forest, green forest, ecological trail, ferns https://pix
+Scene 2: applying metadata anchors independently to each of 8 search variants.
+  Pixabay: 25 candidate(s)
+  Pixabay: 25 candidate(s)
+  Pixabay: 25 candidate(s)
+  Pixabay: 25 candidate(s)
+  Pixabay: 25 candidate(s)
+  NASA: 1 candidate(s)
+  Pixabay: 25 candidate(s)
   Pixabay: 25 candidate(s)
   Coverr: 2 candidate(s)
-  Wikimedia Commons: 10 candidate(s)
-Scene 8: SigLIP thumbnail reranking applied to 14 candidate(s).
-Scene 8: 35 metadata-qualified candidate(s) across 2 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=47602 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, nature, water, wildlife https://pixabay.com/videos/id-47602/
-  Candidate rank 2: Pixabay ID=247387 score=0.76 match=1/1 query='beaver' metadata=beaver, animal, rodent, wildlife, mammal, fur, water, cute, pond, wild, aquatic, gnaw, muskrat, herbivores, river, forest, transparent, wood, nature https://pix
-  Candidate rank 3: Pixabay ID=85677 score=0.76 match=1/1 query='beaver' metadata=beaver, swim, mammal, nature, water, flow, lake, natural reserve, nature reserve, wild, wet https://pixabay.com/videos/id-85677/
-  Candidate rank 4: Pixabay ID=94443 score=0.76 match=1/1 query='beaver' metadata=swamp fever, beaver, gnaw, wolf down, water, riverbank, nab, teeth https://pixabay.com/videos/id-94443/
-  Candidate rank 5: Pixabay ID=180657 score=0.76 match=1/1 query='beaver' metadata=nutria, coypu, beaver rat, rodent, animal, river, water, nature https://pixabay.com/videos/id-180657/
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 9 candidate(s)
+  Pixabay: 25 candidate(s)
+Scene 2: SigLIP thumbnail reranking applied to 20 candidate(s).
+Scene 2: 73 metadata-qualified candidate(s) across 8 search variants; checking up to 14 candidates.
+  Candidate rank 1: Pixabay ID=212725 score=0.76 match=1/1 query='heavy' metadata=sky, rain, heavy rain, clouds, atmospheric, rain clouds, storm, weather, drone, aerial, nature, landscape https://pixabay.com/videos/id-212725/
+  Candidate rank 2: Pixabay ID=223788 score=0.76 match=1/1 query='heavy' metadata=atmospheric, heavy rain, rain, clouds, sky, nature, drone, aerial, landscape https://pixabay.com/videos/id-223788/
+  Candidate rank 3: Pixabay ID=220133 score=0.76 match=1/1 query='heavy' metadata=sky, storm, atmospheric, heavy rain, rain, clouds, nature, drone, aerial, landscape https://pixabay.com/videos/id-220133/
+  Candidate rank 4: Pixabay ID=220131 score=0.76 match=1/1 query='heavy' metadata=sky, clouds, rain, storm, atmospheric, nature, drone, aerial, heavy rain, landscape https://pixabay.com/videos/id-220131/
+  Candidate rank 5: Pixabay ID=45551 score=0.76 match=1/1 query='heavy' metadata=apple, rain, water, wind, noisy, heavy rain, wet, raindrop, fruit, vitamins, food https://pixabay.com/videos/id-45551/
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 2: visual check 1/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show heavy rain and storm clouds over a distant landscape and horizon, but do not show precipitation falling specifically over a forest as required.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 2: visual check 2/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a distant view of storm clouds and rain over a landscape/hills, but do not show precipitation falling specifically over a forest as required by the scene focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.10).
+Scene 2: visual check 3/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.10): The frames show an aerial view of a landscape with storm clouds and distant hills, but they do not show precipitation falling over a forest as required.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.10).
+Scene 2: visual check 4/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.10): The frames show a cloudy sky and distant landscape, but do not clearly depict precipitation falling over a forest as required by the visual focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 2: visual check 5/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show an apple sitting on a metal railing in the rain, not precipitation falling over a forest.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 2: visual check 6/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show rain falling over a distant horizon and city/flat landscape, not over a forest as required by the visual focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.10).
+Scene 2: visual check 7/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.10): The frames show a person standing in heavy rain outdoors with some blurred foliage in the background, but do not clearly depict precipitation falling over a forest as required by the scene focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 2: visual check 8/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a lighthouse and a man inside a building with a lantern, not precipitation falling over a forest.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.10).
+Scene 2: visual check 9/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.10): The frames show heavy rain falling onto a flat horizontal surface (likely a ledge or railing) with a blurred green background, but there is no visible forest setting as required by the focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 2: visual check 10/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a heavy-lift rocket launching from a pad with smoke and steam, not precipitation falling over a forest.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 2: visual check 11/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show orange and dark clouds in the sky at sunset, but do not show precipitation falling over a forest as required by the visual focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 2: visual check 12/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show heavy rain falling on a puddle on the ground/pavement, but there is no forest visible, failing the required visible focus of precipitation falling over forest.
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
 AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (0.95).
-Scene 8: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (0.95): The frames clearly show a beaver swimming in a river or stream within a natural woodland environment, fulfilling the required visible focus of a beaver in a forest.
-Scene 8: accepted Pixabay metadata=0.76, visual confidence=0.95 — beaver, animal, nature, water, wildlife https://pixabay.com/videos/id-47602/
-[stage] footage: completed in 133.7s
-7/7 Rendering every scene to the locked VO timeline...
-[stage] render: start
-Scene 1/8 rendered: 7.16s
-Scene 2/8 rendered: 7.55s
-Scene 3/8 rendered: 7.40s
-Scene 4/8 rendered: 6.83s
-Scene 5/8 rendered: 7.31s
-Scene 6/8 rendered: 7.79s
-Scene 7/8 rendered: 5.87s
-Scene 8/8 rendered: 8.33s
-Final output validated: 85.9 MB, 58.27s, 1080x1920, video+audio streams present.
-Final video ready and validated: documentary.mp4; duration 58.27s
-[stage] render: completed in 180.1s
-[stage] production_report: start
-[stage] production_report: completed in 0.0s
-7/7 Production files validated: documentary.mp4, plan.json, fact_check_report.json, voiceover_manifest.json, credits.txt, timing.json, production_report.json. GitHub Actions will upload artifacts next.
+Scene 2: visual check 13/14 via gemini (gemini-3.5-flash-lite) — PASS (0.95): The frames clearly show heavy precipitation (rain) falling over a forest/vegetation viewed through a wet window pane, matching the required visible focus.
+Scene 2: accepted Pixabay metadata=0.76, visual confidence=0.95 — heavy rain, rain, storm https://pixabay.com/videos/id-30224/
+Scene 3: applying metadata anchors independently to each of 8 search variants.
+  Pixabay: 25 candidate(s)
+  Pixabay: 25 candidate(s)
+  Wikimedia Commons: 8 candidate(s)
+  Pixabay: 25 candidate(s)
+  Wikimedia Commons: 1 candidate(s)
+  Pixabay: 25 candidate(s)
+  Pixabay: 25 candidate(s)
+  Wikimedia Commons: 8 candidate(s)
+  Pixabay: 25 candidate(s)
+  Wikimedia Commons: 1 candidate(s)
+  Pixabay: 4 candidate(s)
+  Coverr: 7 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 10 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 10 candidate(s)
+Scene 3: SigLIP thumbnail reranking applied to 6 candidate(s).
+Scene 3: 62 metadata-qualified candidate(s) across 8 search variants; checking up to 14 candidates.
+  Candidate rank 1: Pixabay ID=171443 score=0.58 match=3/4 query='widespread rain over trees' metadata=trees, foliage, forest, rain, woodland, wilderness, green, outdoors, flora, scenic, ecology, nature https://pixabay.com/videos/id-171443/
+  Candidate rank 2: Pixabay ID=6847 score=0.55 match=3/4 query='abundant rainfall over green landscape' metadata=rain, field, wind, blow, storm, precipitate, landscape, summer, nature, weather, green, fresh, clouds, thunderstorm, live wallpaper https://pixabay.com/videos/i
+  Candidate rank 3: Pixabay ID=204307 score=0.58 match=3/4 query='widespread rain over trees' metadata=trees, leaves, foliage, rain, drops, water, green, nature https://pixabay.com/videos/id-204307/
+  Candidate rank 4: Pixabay ID=144779 score=0.58 match=3/4 query='widespread rain over trees' metadata=leaves, plants, rain, trees, woods, soothing, nature https://pixabay.com/videos/id-144779/
+  Candidate rank 5: Wikimedia Commons ID=176293245 score=0.88 match=1/1 query='widespread' metadata=File:Widespread Smoke from Canadian Fires (154641).webm Smoke from hundreds of wildland fires burning in Canada created hazy skies and poor air quality across m
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.20).
+Scene 3: visual check 1/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.20): The frames show generic evergreen tree branches in the rain, but there is no visual evidence connecting this footage specifically to Brazil as required by the narration.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.20).
+Scene 3: visual check 2/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.20): The frames show generic tall grass or reeds in rainfall against a generic background, but there is no specific visual evidence linking this footage to Brazil as required by the narration context.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.20).
+Scene 3: visual check 3/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.20): The frames show generic rainfall over green leaves on a tree branch, which is too generic to visually substantiate a specific documentary claim about abundant rainfall in Brazil.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.20).
+Scene 3: visual check 4/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.20): The frames show close-up shots of garden leaves and bushes under rainfall, which is too generic and localized to visually support a specific documentary claim about country-wide abundant rainfall in Brazil.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 3: visual check 5/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a map tracking black carbon concentration from Canadian wildfires over North America, which does not depict abundant rainfall over Brazil as required by the scene.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 3: visual check 6/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show an airplane on the tarmac and an aerial view of a landscape, but do not show abundant rainfall over a country as required.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 3: visual check 7/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show satellite rainfall maps related to Hurricane Matthew and North Carolina, which does not match the required focus of abundant rainfall over Brazil.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 3: visual check 8/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show satellite comparison images of flooding in southeastern India, which does not depict Brazil or the required abundant rainfall over the country described in the narration.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.10).
+Scene 3: visual check 9/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.10): The frames show satellite imagery of lightning and cloud cover over South America, but do not visually depict abundant rainfall over a country as required.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.10).
+Scene 3: visual check 10/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.10): The frames show satellite imagery of lightning activity over South America, but do not visually demonstrate abundant rainfall or precipitation across the country as required by the scene focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.10).
+Scene 3: visual check 11/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.10): The frames show a satellite view of South America with smoke and cloud cover, but rainfall cannot be directly observed from these satellite images.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 3: visual check 12/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a satellite view of South America with smoke and cloud cover, but they do not visibly show abundant rainfall over the country as required by the scene focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 3: visual check 13/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show satellite imagery of South America with smoke haze and fires across Brazil, which does not depict abundant rainfall as required by the scene focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 3: visual check 14/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show satellite imagery of a hurricane eye with lightning flashes, not abundant rainfall over Brazil.
+[stage] footage: FAILED after 221.9s
+[diagnostics] Failure report written to failure_report.json
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4379, in <module>
+    main()
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4359, in main
+    _run_pipeline()
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4197, in _run_pipeline
+    fetch_footage(plan)
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3042, in fetch_footage
+    raise RuntimeError(
+RuntimeError: Scene 3 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 14 attempted candidates could be downloaded and accepted under the visual verification policy.

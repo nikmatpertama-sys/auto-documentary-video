@@ -9,199 +9,213 @@
   "supported_claim_count": 8,
   "failed_claims": [],
   "uncited_factual_sentences": [],
-  "coverage_note": "All sentences in the script correspond directly to the supplied claims, and every claim is fully supported by the provided evidence excerpts.",
+  "coverage_note": "All sentences in the script are covered by the provided exact claims, and every claim is fully supported by the corresponding trusted excerpts.",
   "claims": [
     {
       "id": "C1",
       "scene": 1,
-      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds.",
+      "sentence": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/Flying_river"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://www.usgs.gov/water-science-school/science/evapotranspiration-and-water-cycle"
       ],
-      "reason": "The fetched excerpt explicitly states that beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds."
+      "reason": "The USGS excerpt confirms that plant leaves release water vapor into the air through transpiration."
     },
     {
       "id": "C2",
       "scene": 2,
-      "sentence": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated.",
+      "sentence": "This moisture is deposited in other localities in the form of precipitation, forming a virtual river across the region.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/Flying_river"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/Flying_river"
       ],
-      "reason": "The excerpt confirms that in Europe, beavers were reduced to fragmented populations with combined population numbers being estimated."
+      "reason": "The excerpt matches word-for-word that forest trees release water vapor deposited in other localities as precipitation, forming a virtual river."
     },
     {
       "id": "C3",
       "scene": 3,
-      "sentence": "River ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants.",
+      "sentence": "With its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/River_ecosystem"
+        "https://en.wikipedia.org/wiki/Flying_river"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/River_ecosystem"
+        "https://en.wikipedia.org/wiki/Flying_river"
       ],
-      "reason": "The excerpt states that river ecosystems are flowing waters that drain the landscape, and include biotic interactions amongst plants."
+      "reason": "The text directly states that with its large surface area and abundant rainfall, Brazil receives more rain in a year than any other country."
     },
     {
       "id": "C4",
       "scene": 4,
-      "sentence": "The major zones in river ecosystems are determined by the river bed gradient or current velocity.",
+      "sentence": "Researchers found that carbon stocks in the Amazon region were reduced following logging processes in the forest.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/River_ecosystem"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/River_ecosystem"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ],
-      "reason": "The excerpt states that the major zones in river ecosystems are determined by the river bed's gradient or by the velocity of the current."
+      "reason": "The excerpt explicitly states that researchers found carbon stocks in the Amazon region were reduced following logging processes."
     },
     {
       "id": "C5",
       "scene": 5,
-      "sentence": "The concept became popular in conservation, and was deployed in a range of contexts to engender support.",
+      "sentence": "This logging demonstrates the negative impact that logging has on the forest ability to store carbon emissions.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ],
-      "reason": "The excerpt confirms that the concept became popular in conservation, and was deployed in a range of contexts to engender support."
+      "reason": "The excerpt matches the claim, noting that logging demonstrates the negative impact on the forest's ability to store carbon."
     },
     {
       "id": "C6",
       "scene": 6,
-      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from encroachment.",
+      "sentence": "Climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
       ],
-      "reason": "The excerpt explicitly notes that wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon."
+      "reason": "The source text directly states that climate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest."
     },
     {
       "id": "C7",
       "scene": 7,
-      "sentence": "However, it is important to note that these groups do not cover the entire range known.",
+      "sentence": "The combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.",
       "source_urls": [
-        "https://www.iucnredlist.org/species/4003/22187946"
+        "https://en.wikipedia.org/wiki/Amazon_rainforest"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://www.iucnredlist.org/species/4003/22187946"
+        "https://en.wikipedia.org/wiki/Amazon_rainforest"
       ],
-      "reason": "The excerpt states that these groups do not cover the entire range known to be occupied by the subspecies."
+      "reason": "The excerpt states that according to the WWF, the combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires."
     },
     {
       "id": "C8",
       "scene": 8,
-      "sentence": "Therefore, we divided spatial units by clusters of states to understand the range occupied by subspecies.",
+      "sentence": "Brazil protections of the Amazon rainforest were slashed, resulting in a severe loss of trees across the land.",
       "source_urls": [
-        "https://www.iucnredlist.org/species/4003/22187946"
+        "https://en.wikipedia.org/wiki/Amazon_rainforest"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://www.iucnredlist.org/species/4003/22187946"
+        "https://en.wikipedia.org/wiki/Amazon_rainforest"
       ],
-      "reason": "The excerpt confirms that we divided spatial units by clusters of states."
+      "reason": "The excerpt confirms that in 2019 Brazil's protections of the Amazon rainforest were slashed, resulting in a severe loss of trees."
     }
   ],
   "sources": [
     {
       "claim_id": "C1",
-      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
-      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
-      "host": "en.wikipedia.org",
-      "http_status": 200,
-      "page_title": "Beaver",
-      "excerpt": "== Ecology ==\n\nBeavers live in freshwater ecosystems such as rivers, streams, lakes and ponds. Beavers can be found in a number of freshwater habitats, such as rivers, streams, lakes and ponds. When building dams, beavers alter the paths of streams and rivers, allowing for the creation of extensive wetland habitats. These ponds can increase the productivity of freshwater ecosystems by accumulating nitrogen in sediments. In a study of Wyoming streams and rivers, watercourses with beavers had 75 times as many ducks as those without. Beavers prefer slower moving streams, typically with a gradient (steepness) of one percent, though they have been recorded using streams with gradients as high as 15 percent. Beavers are found in wider streams more often than in narrower ones. === Infrastructure ===\n\nBeavers need trees and shrubs to use as building material for dams, which restrict flowing wate",
+      "requested_url": "https://en.wikipedia.org/wiki/Flying_river",
+      "status": "not_usable",
       "source_kind": "planned",
+      "reason": "Could not fetch evidence source https://en.wikipedia.org/wiki/Flying_river: HTTPError (HTTP 429)"
+    },
+    {
+      "claim_id": "C1",
+      "requested_url": "https://www.usgs.gov/special-topics/water-science-school/science/evapotranspiration-and-water-cycle",
+      "resolved_url": "https://www.usgs.gov/water-science-school/science/evapotranspiration-and-water-cycle",
+      "host": "www.usgs.gov",
+      "http_status": 200,
+      "page_title": "Evapotranspiration and the Water Cycle | U.S. Geological Survey",
+      "excerpt": "Transpiration occurs when plants take up liquid water from the soil and release water vapor into the air from their leaves. Transpiration has three main steps Roots uptake water from the soil Water moves through plant tissues, serving critical metabolic and physiologic functions in the plant Leaves release water vapor into the air through their stomata Media Sources/Usage: Public Domain. Transpiration occurs when plants take up liquid water from the soil and release water vapor into the air from their leaves. Transpiration has three main steps Roots uptake water from the soil Water moves through plant tissues, serving critical metabolic and physiologic functions in the plant Leaves release water vapor into the air through their stomata Media Sources/Usage: Public Domain. Evapotranspiration is the sum of all processes by which water moves from the land surface to the atmosphere via evapor",
+      "source_kind": "recovered",
       "status": "usable"
     },
     {
+      "claim_id": "C1",
+      "requested_url": "https://www.nasa.gov/missions/grace/nasa-satellites-help-quantify-how-amazon-trees-use-water/",
+      "status": "not_usable",
+      "source_kind": "recovered",
+      "reason": "Could not fetch evidence source https://www.nasa.gov/missions/grace/nasa-satellites-help-quantify-how-amazon-trees-use-water/: HTTPError (HTTP 404)"
+    },
+    {
       "claim_id": "C2",
-      "requested_url": "https://en.wikipedia.org/wiki/Beaver",
-      "resolved_url": "https://en.wikipedia.org/wiki/Beaver",
+      "requested_url": "https://en.wikipedia.org/wiki/Flying_river",
+      "resolved_url": "https://en.wikipedia.org/wiki/Flying_river",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Beaver",
-      "excerpt": "In Europe, beavers were reduced to fragmented populations, with combined population numbers being estimated at 1,200 individuals for the Rhône of France, the Elbe in Germany, southern Norway, the Neman river and Dnieper Basin in Belarus, and the Voronezh river in Russia. In 2020, the total Eurasian beaver population in Europe was estimated at over one million. As of 2019, the introduced population of North American beavers in Finland has been moving closer to the habitat of the Eurasian beaver. Protections have allowed the beaver population on the continent to rebound to an estimated 6–12 million by the late 20th century; still far lower than the originally estimated 60–400 million North American beavers before the fur trade. The introduced population in Tierra del Fuego is estimated at 35,000–50,000 individuals as of 2016. Beaver populations now range across western, central, and easter",
+      "page_title": "Flying river",
+      "excerpt": "The forest trees release water vapor into the atmosphere through transpiration and this moisture is deposited in other localities in the form of precipitation, forming a virtual river. The flying river is a movement of large quantities of water vapor transported in the atmosphere from the Amazon Basin to other parts of South America, and the world. == Climatic consequences of deforestation ==\n\nIn 2009 Antonio Nobre, a Brazilian climate scientist, stated that without the flying river, much of southern Brazil, which produces approximately 70% of the country's GNP, would be arid desert. Smoke from the fires set by some farmers to clear land sends particles into the atmosphere, resulting in diminished precipitation, which in turn leaves the trees, which have evolved in wet conditions, vulnerable to fire. The primary objective of the project is to \"try to ascertain the origin of the water vap",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C3",
-      "requested_url": "https://en.wikipedia.org/wiki/River_ecosystem",
-      "resolved_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "requested_url": "https://en.wikipedia.org/wiki/Flying_river",
+      "resolved_url": "https://en.wikipedia.org/wiki/Flying_river",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "River ecosystem",
-      "excerpt": "River ecosystems are flowing waters that drain the landscape, and include the biotic (living) interactions amongst plants, animals and micro-organisms, as well as abiotic (nonliving) physical and chemical interactions of its many parts. River ecosystems are part of larger watershed networks or catchments, where smaller headwater streams drain into mid-size streams, which progressively drain into larger river networks. The common orders of insects that are found in river ecosystems include Ephemeroptera (also known as a mayfly), Trichoptera (also known as a caddisfly), Plecoptera (also known as a stonefly, Diptera (also known as a true fly), some types of Coleoptera (also known as a beetle), Odonata (the group that includes the dragonfly and the damselfly), and some types of Hemiptera (also known as true bugs). Additional invertebrate taxa common to flowing waters include mollusks such as",
+      "page_title": "Flying river",
+      "excerpt": "== Flying Rivers Project ==\nWith its large surface area and abundant rainfall, Brazil receives more rain in a year (estimated at 15,000 cubic kilometres (3,600 cu mi)) than any other country. It has been found that whereas every square metre of the surface of the sea evaporates one litre of water each day, the same area of forest evaporates about eight times as much because of the multiple layers of foliage in the crown of the trees. When this air mass reaches the Andes, the mountain range acts as a \"natural barrier\", redirecting huge volumes of humid air towards the Amazon regions of Colombia, Ecuador, north and south of Peru, central and southern Brazil as well as towards northern Argentina, Paraguay, and Uruguay, and rain falls in these areas. == Climatic consequences of deforestation ==\n\nIn 2009 Antonio Nobre, a Brazilian climate scientist, stated that without the flying river, much ",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C4",
-      "requested_url": "https://en.wikipedia.org/wiki/River_ecosystem",
-      "resolved_url": "https://en.wikipedia.org/wiki/River_ecosystem",
+      "requested_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "resolved_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "River ecosystem",
-      "excerpt": "The major zones in river ecosystems are determined by the river bed's gradient or by the velocity of the current. River ecosystems are flowing waters that drain the landscape, and include the biotic (living) interactions amongst plants, animals and micro-organisms, as well as abiotic (nonliving) physical and chemical interactions of its many parts. River ecosystems are part of larger watershed networks or catchments, where smaller headwater streams drain into mid-size streams, which progressively drain into larger river networks. River ecosystems are prime examples of lotic ecosystems. === Chemistry ===\nWater chemistry in river ecosystems varies depending on which dissolved solutes and gases are present in the water column of the stream. Specifically river water can include, apart from the water itself,\n\ndissolved inorganic matter and major ions (calcium, sodium, magnesium, potassium, bi",
+      "page_title": "Deforestation of the Amazon rainforest",
+      "excerpt": "In a 2023 study, researchers found that carbon stocks in the Amazon region were reduced following logging processes, demonstrating the negative impact that logging has on the forest's ability to store carbon and regulate global carbon emissions. A 2013 paper found a correlation between rainforest logging in the Amazon and reduced precipitation in the area, resulting in lower yields per hectare. Additionally, the increased openness of the canopy due to logging has been found to increase herbivory rates in seedlings within the Amazon. Indigenous territories in the Amazon also serve as a bulwark against deforestation, logging, and wildfires, making logging in these territories detrimental to the region as a whole. According to other research, complete Amazon deforestation will render the region itself (including 7 million square kilometers, 9 states in Brazil and 8 other countries) more or ",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C5",
-      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
-      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "requested_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "resolved_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Keystone species",
-      "excerpt": "The concept became popular in conservation, and was deployed in a range of contexts and mobilized to engender support for conservation, especially where human activities had damaged ecosystems, such as by removing keystone predators. It became a popular concept in conservation biology, alongside flagship and umbrella species. Although the concept is valued as a descriptor for particularly strong inter-species interactions, and has allowed easier communication between ecologists and conservation policy-makers, it has been criticized for oversimplifying complex ecological systems. The keystone concept is defined by its ecological effects, and these in turn make it important for conservation. In this it overlaps with several other species conservation concepts such as flagship species (attracting support), indicator species (showing the health of the environment), and umbrella species (indi",
+      "page_title": "Deforestation of the Amazon rainforest",
+      "excerpt": "In a 2023 study, researchers found that carbon stocks in the Amazon region were reduced following logging processes, demonstrating the negative impact that logging has on the forest's ability to store carbon and regulate global carbon emissions. The Brazilian government implemented the RED (reducing emissions from deforestation and forest degradation) program to combat deforestation, providing support to various African countries through education programs and financial contributions. The completion of these roads was followed by a significant influx of settlers, who also had a substantial impact on the forest. Logging often leads to the destruction of forest ecosystems, resulting in the loss of habitat for numerous plant and animal species. Loss of biodiversity also leads to negative effects in terms of forest resilience to global shifts, as well as the adaptability of ecosystems. While",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C6",
-      "requested_url": "https://en.wikipedia.org/wiki/Keystone_species",
-      "resolved_url": "https://en.wikipedia.org/wiki/Keystone_species",
+      "requested_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
+      "resolved_url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Keystone species",
-      "excerpt": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having their food sources encroached upon. Beavers affect the environment first altering the edges of riparian areas by cutting down older trees to use for their dams. It promotes the goals of carnivore recovery, protecting and restoring connectivity through Madrean woodland and riparian areas, and protecting and restoring riparian areas. The removal of wolves had a direct effect on beaver populations, as their habitat became grazing territory. When wolves were reintroduced, the beaver population and the whole riparian ecosystem recovered dramatically within a few years. Increased browsing on willows and conifers along Blacktail Creek due to a lack of predation caused channel incision because the beavers helped slow the water down, allowing soil to stay in place. Prairie dog burrows provid",
+      "page_title": "Deforestation of the Amazon rainforest",
+      "excerpt": "=== Climate change ===\n\nClimate change seriously increases the likelihood of droughts in the Amazon rainforest, which severely hurt the forest. A study published in Nature Climate Change in 2022 provided empirical evidence that more than three-quarters of the Amazon rainforest has experienced a decline in resilience since the early 2000s, posing risks of dieback that would impact biodiversity, carbon storage, and climate change. Carlos Nobre, an expert on the Amazon and climate change, warned in September 2019 that if deforestation rates continued at their current pace, the Amazon forest could reach a tipping point within 20 to 30 years, potentially resulting in large portions of the forest transforming into a dry savanna, particularly in the southern and northern regions. World Weather Attribution found that climate change and increased global temperatures are the main reason for the re",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C7",
-      "requested_url": "https://www.iucnredlist.org/species/4003/22187946",
-      "resolved_url": "https://www.iucnredlist.org/species/4003/22187946",
-      "host": "www.iucnredlist.org",
+      "requested_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+      "resolved_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+      "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Castor canadensis (North American Beaver) | IUCN Red List of Threatened Species Castor canadensis. The IUCN Red List of Threatened Species 2016: e.T4003A22187946",
-      "excerpt": "However, it is important to note that these groups do not cover the entire range known to be occupied by the subspecies and thus further genetic analysis is needed. Therefore, as we could not solely rely on biological information to define spatial units for the entire range and there is sufficient information at the state level, we divided spatial units by clusters of states. Ecological Function in detail Threats Threats in detail Use and Trade Wearing apparel, accessories Local: ✘ National: ✔ International: ✔ Use and Trade in detail Conservation Actions In-place land/water protection Conservation sites identified : Yes, over entire range In-place species management Harvest management plan : Yes Conservation Actions in detail Bibliography Red List Bibliography Green Status Bibliography External Data Images and External Links Images and External Links in detail CITES Legislation from Spec",
+      "page_title": "Amazon rainforest",
+      "excerpt": "According to the World Wide Fund for Nature, the combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.In 2010, the Amazon rainforest experienced another severe drought, in some ways more extreme than the 2005 drought. Climate change impacts and human activities in the area – mainly wildfires, current land-use and deforestation – are causing a release of forcing agents that likely result in a net warming effect. Climate change, El Nino, deforestation increases the likelihood of drought condition in the Amazon. === Climate change ===\nEnvironmentalists are concerned about loss of biodiversity that will result from destruction of the forest, and also about the release of the carbon contained within the vegetation, which could accelerate global warming. However, simulations of Amazon basin climate change across many different models",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C8",
-      "requested_url": "https://www.iucnredlist.org/species/4003/22187946",
-      "resolved_url": "https://www.iucnredlist.org/species/4003/22187946",
-      "host": "www.iucnredlist.org",
+      "requested_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+      "resolved_url": "https://en.wikipedia.org/wiki/Amazon_rainforest",
+      "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Castor canadensis (North American Beaver) | IUCN Red List of Threatened Species Castor canadensis. The IUCN Red List of Threatened Species 2016: e.T4003A22187946",
-      "excerpt": "Therefore, as we could not solely rely on biological information to define spatial units for the entire range and there is sufficient information at the state level, we divided spatial units by clusters of states. Version 2026-1 Geographic range in detail Taxonomy Assessment Information Green Status Assessment Information Geographic Range Indigenous and Expected Additional Range Population Spatial Units Habitat and Ecology Ecological Function Threats Use and Trade Conservation Actions Bibliography External Data Expand all Collapse all Taxonomy Kingdom Animalia Phylum Chordata Class Mammalia Order Rodentia Family Castoridae Genus Castor Taxonomy in detail Assessment Information Global Assessment IUCN Red List Category and Criteria - Global Assessment Least Concern ver 3.1 Date assessed 07 August 2016 Year published 2016 Assessment Information in detail Green Status Assessment Information ",
+      "page_title": "Amazon rainforest",
+      "excerpt": "In 2019 Brazil's protections of the Amazon rainforest were slashed, resulting in a severe loss of trees. According to the World Wide Fund for Nature, the combination of climate change and deforestation increases the drying effect of dead trees that fuels forest fires.In 2010, the Amazon rainforest experienced another severe drought, in some ways more extreme than the 2005 drought. One computer model of future climate change caused by greenhouse gas emissions shows that the Amazon rainforest could become unsustainable under conditions of severely reduced rainfall and increased temperatures, leading to an almost complete loss of rainforest cover in the basin by 2100., and severe economic, natural capital and ecosystem services impacts of not averting the tipping point. The Amazon represents over half of the total area of remaining rainforests on Earth, and comprises the largest and most bi",
       "source_kind": "planned",
       "status": "usable"
     }

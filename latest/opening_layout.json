@@ -1,15 +1,15 @@
 {
-  "path": "output/opening_hook_overlay.png",
+  "path": "output/opening_overlay.png",
   "title_lines": [
-    "HOW BEAVERS RESHAPE RIVERS"
+    "THE AMAZON RAINFOREST"
   ],
   "hook_lines": [
-    "Beavers live in",
-    "freshwater ecosystems",
-    "such as rivers."
+    "The forest trees release",
+    "water vapor into the",
+    "atmosphere."
   ],
-  "title_text": "How Beavers Reshape Rivers",
-  "hook_text": "Beavers live in freshwater ecosystems such as rivers.",
+  "title_text": "The Amazon Rainforest",
+  "hook_text": "The forest trees release water vapor into the atmosphere.",
   "title_font_size": 27,
   "hook_font_size": 62,
   "max_text_width": 880,
