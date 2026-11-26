@@ -44,6 +44,14 @@ _GROUPS = {
 
 _SPECIFIC = ("jaguar", "orchid", "insect", "bird")
 
+# Leading words that are settings or qualifiers rather than a filmable named
+# subject; searching them alone returns generic scenery.
+_GENERIC_SUBJECTS = {
+    "global", "tropical", "rainfall", "precipitation", "rain", "water",
+    "river", "stream", "forest", "rainforest", "region", "regional", "world",
+    "area", "landscape", "nature", "wildlife", "country", "riverbed",
+}
+
 
 def _tokens(text: str) -> list[str]:
     return re.findall(r"[a-z0-9']+", str(text or "").lower())
@@ -173,6 +181,12 @@ def expand_visual_search_variants(raw_queries: tuple[str, ...] | list[str]) -> l
         core = _clean_query(" ".join(core_words))
         if core and core.lower() != base.lower():
             variants.append(core)
+        # A rare subject is often buried in a descriptive phrase the stock index
+        # does not match ("beaver resting in stream" returned only streams).
+        # Searching the bare subject retrieves its whole library, and the Vision
+        # check still rejects any clip that does not show it.
+        if len(core_words) > 1 and core_words[0] not in _GENERIC_SUBJECTS:
+            variants.append(core_words[0])
 
         groups = _present_groups(base)
         if "rain" in groups and "rainforest" in groups:
