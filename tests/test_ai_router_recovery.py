@@ -270,7 +270,7 @@ class DocumentaryPromptBudgetTests(unittest.TestCase):
         prompt = main.documentary_prompt("Beavers", self.POOL)
         for required in (
             "Exactly 8 scenes",
-            "150-180",
+            "135-180",
             "visual_focus",
             "at least half of them must appear",
             "TWO independent trusted hosts",
