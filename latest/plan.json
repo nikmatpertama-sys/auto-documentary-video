@@ -3,265 +3,345 @@
   "hook": "Beavers transform freshwater ecosystems entirely.",
   "scenes": [
     {
-      "narration": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across various landscapes.",
-      "visual_focus": "beaver in pond",
-      "visual_query": "beaver swimming in pond water",
+      "narration": "In Europe, beavers were reduced to fragmented populations across several regions before conservation efforts successfully helped them recover.",
+      "visual_focus": "beaver in freshwater",
+      "visual_query": "beaver swimming in freshwater",
       "visual_queries": [
-        "beaver swimming in pond water",
-        "beaver resting near stream"
+        "beaver in freshwater",
+        "beaver swimming in stream"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver swimming in pond water",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "beaver swimming in freshwater",
+      "source_label": "Wikipedia Beaver",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0,
       "voice_timing": {
         "start_seconds": 0.0,
-        "spoken_end_seconds": 7.806,
-        "visual_end_seconds": 8.506,
-        "duration_seconds": 8.506,
+        "spoken_end_seconds": 9.342,
+        "visual_end_seconds": 10.042,
+        "duration_seconds": 10.042,
         "first_sentence_index": 0,
         "last_sentence_index": 0
+      },
+      "media_file": "output/footage/scene_01.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "rodent, muskrat, nutria, animal, nature, rat, wool, wet, lake, pond, forest, water, river, beaver",
+      "selected_footage_url": "https://pixabay.com/videos/id-248239/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show a beaver in freshwater near a snowy riverbank, directly matching the required visible focus.",
+        "query": "beaver"
       }
     },
     {
-      "narration": "In Europe, beavers were reduced to fragmented populations with combined population numbers being estimated.",
-      "visual_focus": "beaver in river",
-      "visual_query": "beaver swimming in river",
+      "narration": "Combined population numbers were estimated at small totals for specific rivers and basins located throughout Europe.",
+      "visual_focus": "beaver near river",
+      "visual_query": "beaver near river",
       "visual_queries": [
-        "beaver swimming in river",
-        "beaver along river bank"
+        "beaver near river",
+        "beaver beside stream"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver swimming in river",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "beaver near river",
+      "source_label": "Wikipedia Beaver",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1,
       "voice_timing": {
-        "start_seconds": 8.506,
-        "spoken_end_seconds": 15.418,
-        "visual_end_seconds": 15.718,
-        "duration_seconds": 7.212,
+        "start_seconds": 10.042,
+        "spoken_end_seconds": 17.41,
+        "visual_end_seconds": 17.71,
+        "duration_seconds": 7.668,
         "first_sentence_index": 1,
         "last_sentence_index": 1
+      },
+      "media_file": "output/footage/scene_02.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "beaver, beaver family, animals, wildlife, nature, canada, alberta",
+      "selected_footage_url": "https://pixabay.com/videos/id-3346/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show a beaver swimming near a river/waterway while carrying or interacting with leafy branches, directly matching the required focus of a beaver near a river.",
+        "query": "beaver"
       }
     },
     {
-      "narration": "These historical reductions affected populations within regions like the Rhône of France and the Elbe.",
-      "visual_focus": "river water flow",
-      "visual_query": "river water flowing stream",
+      "narration": "Beavers live naturally in freshwater ecosystems such as rivers, streams, lakes and ponds where they build dams.",
+      "visual_focus": "beaver in pond",
+      "visual_query": "beaver in pond",
       "visual_queries": [
-        "river water flowing stream",
-        "stream water flowing through forest"
+        "beaver in pond",
+        "beaver on lake"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "river water flowing stream",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "beaver in pond",
+      "source_label": "Wikipedia Beaver",
+      "source_url": "https://en.wikipedia.org/wiki/Beaver",
       "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2,
       "voice_timing": {
-        "start_seconds": 15.718,
-        "spoken_end_seconds": 22.078,
-        "visual_end_seconds": 22.378,
-        "duration_seconds": 6.66,
+        "start_seconds": 17.71,
+        "spoken_end_seconds": 24.934,
+        "visual_end_seconds": 25.234,
+        "duration_seconds": 7.524,
         "first_sentence_index": 2,
         "last_sentence_index": 2
+      },
+      "media_file": "output/footage/scene_03.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "beaver, animal, nature, mammal, wool, water, cute, brown",
+      "selected_footage_url": "https://pixabay.com/videos/id-140101/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show a beaver in a pond/water body, directly supporting the scene's required focus.",
+        "query": "beaver"
       }
     },
     {
-      "narration": "Similar fragmented groups survived near southern Norway and the Neman river and Dnieper Basin.",
-      "visual_focus": "river stream flow",
-      "visual_query": "river stream flow water",
+      "narration": "The keystone species concept became popular in conservation and was deployed to engender support for protecting damaged ecosystems.",
+      "visual_focus": "wild animal in forest",
+      "visual_query": "wild animal in forest",
       "visual_queries": [
-        "river stream flow water",
-        "stream flowing through trees"
+        "wild animal in forest",
+        "wildlife in riparian area"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "river stream flow water",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "wild animal in forest",
+      "source_label": "Wikipedia Keystone species",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3,
       "voice_timing": {
-        "start_seconds": 22.378,
-        "spoken_end_seconds": 28.426,
-        "visual_end_seconds": 28.726,
-        "duration_seconds": 6.348,
+        "start_seconds": 25.234,
+        "spoken_end_seconds": 33.442,
+        "visual_end_seconds": 33.742,
+        "duration_seconds": 8.508,
         "first_sentence_index": 3,
         "last_sentence_index": 3
+      },
+      "media_file": "output/footage/scene_04.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "wild dog, african wild dog, wildlife, animal, zoo, wild animal, predator",
+      "selected_footage_url": "https://pixabay.com/videos/id-217806/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show a wild animal (an African wild dog) walking in a forested area, matching the required visible focus of a wild animal in a forest.",
+        "query": "wild"
       }
     },
     {
-      "narration": "Additional survivors persisted along the Voronezh river in Russia within similar freshwater habitats.",
-      "visual_focus": "river stream water",
-      "visual_query": "river stream water flow",
+      "narration": "Conservation initiatives were mobilized where human activities had damaged ecosystems, especially by removing vital keystone predators.",
+      "visual_focus": "wolf in wilderness",
+      "visual_query": "wolf in wilderness",
       "visual_queries": [
-        "river stream water flow",
-        "water flowing in river"
+        "wolf in wilderness",
+        "wild wolf in"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "river stream water flow",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "wolf in wilderness",
+      "source_label": "Wikipedia Keystone species",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4,
       "voice_timing": {
-        "start_seconds": 28.726,
-        "spoken_end_seconds": 35.47,
-        "visual_end_seconds": 35.77,
-        "duration_seconds": 7.044,
+        "start_seconds": 33.742,
+        "spoken_end_seconds": 42.55,
+        "visual_end_seconds": 42.85,
+        "duration_seconds": 9.108,
         "first_sentence_index": 4,
         "last_sentence_index": 4
+      },
+      "media_file": "output/footage/scene_05.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "wolf, predator, dangerous, european wolf, carnivores, furry, wildlife, slow motion",
+      "selected_footage_url": "https://pixabay.com/videos/id-138688/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show a wolf standing in a wilderness setting surrounded by foliage and rocks, directly matching the required visible focus.",
+        "query": "wolf"
       }
     },
     {
-      "narration": "The keystone species concept became popular in conservation and was deployed in various contexts.",
-      "visual_focus": "beaver on land",
-      "visual_query": "beaver walking on land",
+      "narration": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having food sources encroached upon.",
+      "visual_focus": "wolf in riparian area",
+      "visual_query": "wolf in riparian area",
       "visual_queries": [
-        "beaver walking on land",
-        "beaver near water edge"
+        "wolf in riparian area",
+        "wolf near riverbank"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "beaver walking on land",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "wolf in riparian area",
+      "source_label": "Wikipedia Keystone species",
+      "source_url": "https://en.wikipedia.org/wiki/Keystone_species",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5,
       "voice_timing": {
-        "start_seconds": 35.77,
-        "spoken_end_seconds": 42.322,
-        "visual_end_seconds": 42.622,
-        "duration_seconds": 6.852,
+        "start_seconds": 42.85,
+        "spoken_end_seconds": 51.442,
+        "visual_end_seconds": 51.742,
+        "duration_seconds": 8.892,
         "first_sentence_index": 5,
         "last_sentence_index": 5
+      },
+      "media_file": "output/footage/scene_06.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "wolf, animal, mammal, nature wild, predator, wolves, nature, wild, wildlife, atmospheric, hunter, atmosphere, carnivores, fur, canine",
+      "selected_footage_url": "https://pixabay.com/videos/id-27400/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.9,
+        "reason": "The frames clearly show a wolf in a forested, near-water environment (riparian area context), matching the required visible focus of a wolf.",
+        "query": "wolf"
       }
     },
     {
-      "narration": "This conservation framework was mobilized to engender support where human activities had damaged ecosystems.",
-      "visual_focus": "forest river bank",
-      "visual_query": "forest river bank trees",
+      "narration": "Ecological engineering uses ecology and engineering to predict, design, construct or restore, and manage ecosystems for mutual benefit.",
+      "visual_focus": "river",
+      "visual_query": "river",
       "visual_queries": [
-        "forest river bank trees",
-        "river flowing through forest"
+        "river",
+        "stream view"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "forest river bank trees",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "river",
+      "source_label": "Wikipedia Ecological engineering",
+      "source_url": "https://en.wikipedia.org/wiki/Ecological_engineering",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6,
       "voice_timing": {
-        "start_seconds": 42.622,
-        "spoken_end_seconds": 49.678,
-        "visual_end_seconds": 49.978,
-        "duration_seconds": 7.356,
+        "start_seconds": 51.742,
+        "spoken_end_seconds": 61.102,
+        "visual_end_seconds": 61.402,
+        "duration_seconds": 9.66,
         "first_sentence_index": 6,
         "last_sentence_index": 6
+      },
+      "media_file": "output/footage/scene_07.mp4",
+      "selected_footage_source": "Coverr",
+      "selected_footage_tags": "Rocky river Aerial shot of a rocky river in the Gerês National Park. river rocks water clear crystal clear river flow flowing ecology environment gerês national park portugal natural beauty beautiful place outdoors outside fresh air landscape scenery nature aerial top view",
+      "selected_footage_url": "https://coverr.co/videos/ihgpy08UQ6",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show a rocky river with flowing water over stone beds, directly matching the required focus 'river'.",
+        "query": "river"
       }
     },
     {
-      "narration": "Stream restoration or river restoration activities aim to improve the environmental health of a system.",
-      "visual_focus": "stream water flow",
-      "visual_query": "stream water flow rocks",
+      "narration": "These engineered ecosystems integrate human society with its natural environment for the benefit of both balanced living systems.",
+      "visual_focus": "natural environment",
+      "visual_query": "natural environment",
       "visual_queries": [
-        "stream water flow rocks",
-        "river stream flowing gently"
+        "natural environment",
+        "balanced natural"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "stream water flow rocks",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "natural environment",
+      "source_label": "Wikipedia Ecological engineering",
+      "source_url": "https://en.wikipedia.org/wiki/Ecological_engineering",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7,
       "voice_timing": {
-        "start_seconds": 49.978,
-        "spoken_end_seconds": 56.65,
-        "visual_end_seconds": 57.9,
-        "duration_seconds": 7.922,
+        "start_seconds": 61.402,
+        "spoken_end_seconds": 69.538,
+        "visual_end_seconds": 70.788,
+        "duration_seconds": 9.386,
         "first_sentence_index": 7,
         "last_sentence_index": 7
+      },
+      "media_file": "output/footage/scene_08.mp4",
+      "selected_footage_source": "Coverr",
+      "selected_footage_tags": "Walking down the mountains High-angle shot of someone walking down the mountains.  mountains landscape scenery scenic environment travel photographer climb rocky mountains hills mountain top greenery plant blue sky skyline wanderlust natural beauty outdoors outside fresh air man male guy curly summer sunny day nature people",
+      "selected_footage_url": "https://coverr.co/videos/sq9xPtAvqo",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show a natural environment with a person walking through a mountainous landscape, matching the required focus.",
+        "query": "natural environment"
       }
     }
   ],
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across various landscapes.",
+      "sentence": "In Europe, beavers were reduced to fragmented populations across several regions before conservation efforts successfully helped them recover.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 2,
-      "sentence": "In Europe, beavers were reduced to fragmented populations with combined population numbers being estimated.",
+      "sentence": "Combined population numbers were estimated at small totals for specific rivers and basins located throughout Europe.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 3,
-      "sentence": "These historical reductions affected populations within regions like the Rhône of France and the Elbe.",
+      "sentence": "Beavers live naturally in freshwater ecosystems such as rivers, streams, lakes and ponds where they build dams.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Beaver"
       ]
     },
     {
       "scene": 4,
-      "sentence": "Similar fragmented groups survived near southern Norway and the Neman river and Dnieper Basin.",
+      "sentence": "The keystone species concept became popular in conservation and was deployed to engender support for protecting damaged ecosystems.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 5,
-      "sentence": "Additional survivors persisted along the Voronezh river in Russia within similar freshwater habitats.",
+      "sentence": "Conservation initiatives were mobilized where human activities had damaged ecosystems, especially by removing vital keystone predators.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Beaver"
+        "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 6,
-      "sentence": "The keystone species concept became popular in conservation and was deployed in various contexts.",
+      "sentence": "In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having food sources encroached upon.",
       "source_urls": [
         "https://en.wikipedia.org/wiki/Keystone_species"
       ]
     },
     {
       "scene": 7,
-      "sentence": "This conservation framework was mobilized to engender support where human activities had damaged ecosystems.",
+      "sentence": "Ecological engineering uses ecology and engineering to predict, design, construct or restore, and manage ecosystems for mutual benefit.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Keystone_species"
+        "https://en.wikipedia.org/wiki/Ecological_engineering"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Stream restoration or river restoration activities aim to improve the environmental health of a system.",
+      "sentence": "These engineered ecosystems integrate human society with its natural environment for the benefit of both balanced living systems.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stream_restoration"
+        "https://en.wikipedia.org/wiki/Ecological_engineering"
       ]
     }
   ],
-  "script": "Beavers live in freshwater ecosystems such as rivers, streams, lakes and ponds across various landscapes. In Europe, beavers were reduced to fragmented populations with combined population numbers being estimated. These historical reductions affected populations within regions like the Rhône of France and the Elbe. Similar fragmented groups survived near southern Norway and the Neman river and Dnieper Basin. Additional survivors persisted along the Voronezh river in Russia within similar freshwater habitats. The keystone species concept became popular in conservation and was deployed in various contexts. This conservation framework was mobilized to engender support where human activities had damaged ecosystems. Stream restoration or river restoration activities aim to improve the environmental health of a system.",
+  "script": "In Europe, beavers were reduced to fragmented populations across several regions before conservation efforts successfully helped them recover. Combined population numbers were estimated at small totals for specific rivers and basins located throughout Europe. Beavers live naturally in freshwater ecosystems such as rivers, streams, lakes and ponds where they build dams. The keystone species concept became popular in conservation and was deployed to engender support for protecting damaged ecosystems. Conservation initiatives were mobilized where human activities had damaged ecosystems, especially by removing vital keystone predators. In addition, wolves often kept animals from grazing in riparian areas, which protected beavers from having food sources encroached upon. Ecological engineering uses ecology and engineering to predict, design, construct or restore, and manage ecosystems for mutual benefit. These engineered ecosystems integrate human society with its natural environment for the benefit of both balanced living systems.",
   "ai_provider": {
     "provider": "gemini",
     "model": "gemini-3.5-flash-lite"
