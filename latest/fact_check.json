@@ -1,37 +1,167 @@
 {
-  "status": "unsupported",
-  "overall": "fail",
-  "claims": [],
-  "checked": 0,
-  "supported": 0,
+  "claims": [
+    {
+      "claim": "Taal Volcano, a small island in a Philippine lake, sits on the Pacific Ring of Fire, where converging plates fuel violent eruptions.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Location on the Pacific Ring of Fire",
+      "quote": "the Pacific Ring of Fire has volcanoes caused by convergent tectonic plates",
+      "source": {
+        "id": "S2",
+        "title": "Volcano",
+        "url": "https://en.wikipedia.org/wiki/Volcano"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "On the afternoon of 12 January 2020, seismic swarms began at eleven a.m., and by one p.m. a phreatomagmatic blast ripped through the main crater, sending ash and steam skyward.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Timing of the seismic swarms and phreatomagmatic blast",
+      "quote": "seismic swarms began at 11 am and were later followed by a phreatic eruption from Volcano Island Main Crater at around 1 pm Philippine Standard Time (UTC+8)",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The explosion hurled a hundred‑meter ash column, darkened Manila’s sky, and forced officials to raise the alert to level four, the highest warning.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of the explosion's effects",
+      "quote": "By 2:30 pm, PHIVOLCS raised the alert status to Alert Level 2, although PHIVOLCS through its Taal Volcano Observatory had advised residents of Volcano Island to evacuate at around 1 pm. Stronger explosions began around 3 pm that spewed an ash column",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Ash fell across Calabarzon, schools closed, flights halted, and the once‑blue crater lake temporarily dried, erasing the tiny Vulcan Point island.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Effects of the eruption on the surrounding area",
+      "quote": "resulting in the suspension of school classes, work schedules, and flights in the area, as well as temporarily drying up Taal Main Crater Lake and destroying Vulcan Point, an Island surrounded by the lake",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Smaller eruptions returned in July 2021 and again in March 2022, each prompting a temporary jump to alert level three as scientists monitored renewed magma‑water interaction.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Timing and effects of smaller eruptions",
+      "quote": "Volcanic activity continued into 2021, when smaller eruptions occurred in July 2021. On March 26, 2022, a short-lived phreatomagmatic eruption was recorded by PHIVOLCS raising the status from Alert level 2 to Alert level 3",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "These brief but fierce outbursts illustrate how water meeting magma creates explosive power that can reshape a landscape in minutes.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Universal principle of magma-water interaction",
+      "quote": "Volcanoes resulting from divergent tectonic activity are usually nonexplosive whereas those resulting from convergent tectonic activity cause violent eruptions",
+      "source": {
+        "id": "S2",
+        "title": "Volcano",
+        "url": "https://en.wikipedia.org/wiki/Volcano"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "On the afternoon of 12 January 2020, seismic swarms began at eleven a.m., and by one p.m.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Timing of the seismic swarms",
+      "quote": "seismic swarms began at 11 am and were later followed by a phreatic eruption from Volcano Island Main Crater at around 1 pm Philippine Standard Time (UTC+8)",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "a phreatomagmatic blast ripped through the main crater, sending ash and steam skyward.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of the phreatomagmatic blast",
+      "quote": "seismic swarms began at 11 am and were later followed by a phreatic eruption from Volcano Island Main Crater at around 1 pm Philippine Standard Time (UTC+8)",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    }
+  ],
+  "checked": 8,
+  "supported": 8,
   "unsupported": 0,
   "contradicted": 0,
+  "sourced_supports": 8,
+  "general_knowledge_supports": 0,
+  "sources": [
+    {
+      "id": "S1",
+      "title": "2020–2022 Taal Volcano eruptions",
+      "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+    },
+    {
+      "id": "S2",
+      "title": "Volcano",
+      "url": "https://en.wikipedia.org/wiki/Volcano"
+    },
+    {
+      "id": "S3",
+      "title": "Letusan Gunung Taal 2020",
+      "url": "https://id.wikipedia.org/wiki/Letusan_Gunung_Taal_2020"
+    },
+    {
+      "id": "S4",
+      "title": "Gunung berapi",
+      "url": "https://id.wikipedia.org/wiki/Gunung_berapi"
+    }
+  ],
+  "overall": "pass",
+  "checked_at": "2026-11-27T13:31:00+00:00",
+  "provider": "Cloudflare AI key pair 1",
+  "research_articles": [
+    {
+      "title": "2020–2022 Taal Volcano eruptions",
+      "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+    },
+    {
+      "title": "Volcano",
+      "url": "https://en.wikipedia.org/wiki/Volcano"
+    },
+    {
+      "title": "Letusan Gunung Taal 2020",
+      "url": "https://id.wikipedia.org/wiki/Letusan_Gunung_Taal_2020"
+    },
+    {
+      "title": "Gunung berapi",
+      "url": "https://id.wikipedia.org/wiki/Gunung_berapi"
+    }
+  ],
   "claim_source": "semantic:Groq key 1",
   "coverage": {
     "script_sentences": 9,
-    "claimed_sentences": 5,
-    "non_factual_sentences": 4,
+    "claimed_sentences": 8,
+    "non_factual_sentences": 2,
     "uncovered_sentences": [],
     "coverage": 1.0
   },
   "skipped_sentences": [],
-  "error": null,
-  "research_articles": [
-    {
-      "title": "Rainforest",
-      "url": "https://en.wikipedia.org/wiki/Rainforest"
-    },
-    {
-      "title": "2019 Amazon rainforest wildfires",
-      "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
-    },
-    {
-      "title": "Hutan hujan",
-      "url": "https://id.wikipedia.org/wiki/Hutan_hujan"
-    },
-    {
-      "title": "Kebakaran hutan Brasil 2019",
-      "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
-    }
-  ]
+  "status": "checked"
 }

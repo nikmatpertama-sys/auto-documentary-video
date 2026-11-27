@@ -2,5 +2,5 @@ run=46006252309
 sha=deea62fbee0bb6f74e2433e38bd21d116182bfc9
 branch=main
 job_status=failure
-topic=Amazon rainforest canopy aerial
+topic=Volcano eruption
 pipeline_exit=failure

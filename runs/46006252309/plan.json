@@ -1,80 +1,88 @@
 {
-  "title": "Beneath the Emerald Roof: Amazon Canopy",
-  "hook": "What secrets hide beneath the emerald roof of the Amazon?",
-  "script": "What secrets hide beneath the emerald roof of the Amazon? From high above, the endless canopy stretches like a green ocean, shielding a world of life. Its continuous roof of interlocking leaves hosts epiphytes and lianas, creating a humid maze where countless insects thrive. Scientists estimate that between forty and seventy‑seven percent of all terrestrial species call rainforests home, many still unknown, and more than a quarter of modern medicines were first discovered here. The Amazon alone stores billions of carbon, acting as the planet’s largest carbon sink and contributing roughly forty percent of the oxygen we breathe. Yet in 2019 a surge of over eighty thousand fires ripped through the forest, a seventy‑seven percent jump that sent smoke drifting thousands of kilometres. Those flames pierced the canopy, reminding us how fragile this roof truly is. Protecting the canopy means preserving the climate, the medicines, and the countless species that dwell beneath it. The next time you look up at a canopy of green, remember it is the planet’s living ceiling, and its health rests in our hands.",
+  "title": "Taal Volcano: When a Lake Explodes",
+  "hook": "What happens when a peaceful lake suddenly erupts into fire?",
+  "script": "What happens when a peaceful lake suddenly erupts into fire? Taal Volcano, a small island in a Philippine lake, sits on the Pacific Ring of Fire, where converging plates fuel violent eruptions. On the afternoon of 12 January 2020, seismic swarms began at eleven a.m., and by one p.m. a phreatomagmatic blast ripped through the main crater, sending ash and steam skyward. The explosion hurled a hundred‑meter ash column, darkened Manila’s sky, and forced officials to raise the alert to level four, the highest warning. Ash fell across Calabarzon, schools closed, flights halted, and the once‑blue crater lake temporarily dried, erasing the tiny Vulcan Point island. Smaller eruptions returned in July 2021 and again in March 2022, each prompting a temporary jump to alert level three as scientists monitored renewed magma‑water interaction. These brief but fierce outbursts illustrate how water meeting magma creates explosive power that can reshape a landscape in minutes. Today, Taal’s calm surface reminds us that even the smallest volcano can unleash Earth’s restless interior at any moment.",
   "scenes": [
     {
-      "narration": "What secrets hide beneath the emerald roof of the Amazon? From high above, the endless canopy stretches like a green ocean, shielding a world of life.",
-      "visual_query": "aerial view of Amazon canopy",
+      "narration": "What happens when a peaceful lake suddenly erupts into fire? Taal Volcano, a small island in a Philippine lake, sits on the Pacific Ring of Fire, where converging plates fuel violent eruptions.",
+      "visual_query": "Crater lake aerial",
       "visual_queries": [
-        "drone shot over Amazon canopy",
-        "helicopter footage of Amazon canopy"
+        "Crater lake aerial",
+        "Volcanic lake drone"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 1
     },
     {
-      "narration": "Its continuous roof of interlocking leaves hosts epiphytes and lianas, creating a humid maze where countless insects thrive.",
-      "visual_query": "close-up of epiphyte on branch",
+      "narration": "On the afternoon of 12 January 2020, seismic swarms began at eleven a.m., and by one p.m. a phreatomagmatic blast ripped through the main crater, sending ash and steam skyward.",
+      "visual_query": "Volcano plume close-up",
       "visual_queries": [
-        "close-up of liana winding around trunk",
-        "macro shot of orchid on tree"
+        "Volcano plume close-up",
+        "Ash cloud over island"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
       "sentence_start": 2,
-      "sentence_end": 2
-    },
-    {
-      "narration": "Scientists estimate that between forty and seventy‑seven percent of all terrestrial species call rainforests home, many still unknown, and more than a quarter of modern medicines were first discovered here.",
-      "visual_query": "colorful butterfly among canopy leaves",
-      "visual_queries": [
-        "bright toucan perched in canopy",
-        "vivid macaw flying above canopy"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
-      "sentence_start": 3,
-      "sentence_end": 3
-    },
-    {
-      "narration": "The Amazon alone stores billions of carbon, acting as the planet’s largest carbon sink and contributing roughly forty percent of the oxygen we breathe.",
-      "visual_query": "sunlight filtering through canopy",
-      "visual_queries": [
-        "mist rising above canopy",
-        "rays of light breaking through forest roof"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
-      "sentence_start": 4,
-      "sentence_end": 4
-    },
-    {
-      "narration": "Yet in 2019 a surge of over eighty thousand fires ripped through the forest, a seventy‑seven percent jump that sent smoke drifting thousands of kilometres. Those flames pierced the canopy, reminding us how fragile this roof truly is.",
-      "visual_query": "smoke plume over Amazon forest",
-      "visual_queries": [
-        "satellite view of fire hotspots",
-        "aerial footage of burning canopy"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
-      "sentence_start": 5,
       "sentence_end": 6
     },
     {
-      "narration": "Protecting the canopy means preserving the climate, the medicines, and the countless species that dwell beneath it. The next time you look up at a canopy of green, remember it is the planet’s living ceiling, and its health rests in our hands.",
-      "visual_query": "rainforest seedlings emerging",
+      "narration": "The explosion hurled a hundred‑meter ash column, darkened Manila’s sky, and forced officials to raise the alert to level four, the highest warning.",
+      "visual_query": "Ash column over city",
       "visual_queries": [
-        "community members planting trees in forest",
-        "young saplings under canopy"
+        "Ash column over city",
+        "Ash falling on streets"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
       "sentence_start": 7,
+      "sentence_end": 7
+    },
+    {
+      "narration": "Ash fell across Calabarzon, schools closed, flights halted, and the once‑blue crater lake temporarily dried, erasing the tiny Vulcan Point island.",
+      "visual_query": "Dry crater lake surface",
+      "visual_queries": [
+        "Dry crater lake surface",
+        "Vulcan Point remains submerged"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 8,
       "sentence_end": 8
+    },
+    {
+      "narration": "Smaller eruptions returned in July 2021 and again in March 2022, each prompting a temporary jump to alert level three as scientists monitored renewed magma‑water interaction.",
+      "visual_query": "Volcanology monitoring station",
+      "visual_queries": [
+        "Volcanology monitoring station",
+        "Scientists at volcano observatory"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 9,
+      "sentence_end": 9
+    },
+    {
+      "narration": "These brief but fierce outbursts illustrate how water meeting magma creates explosive power that can reshape a landscape in minutes. Today, Taal’s calm surface reminds us that even the smallest volcano can unleash Earth’s restless interior at any moment.",
+      "visual_query": "Sunrise over volcanic island",
+      "visual_queries": [
+        "Sunrise over volcanic island",
+        "Peaceful volcano landscape dawn"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 10,
+      "sentence_end": 11
     }
-  ]
+  ],
+  "fact_check": {
+    "overall": "pass",
+    "checked": 8,
+    "supported": 8,
+    "unsupported": 0,
+    "contradicted": 0,
+    "claim_source": "semantic:Groq key 1"
+  }
 }

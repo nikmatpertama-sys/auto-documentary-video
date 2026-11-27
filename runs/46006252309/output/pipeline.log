@@ -1,6 +1,6 @@
 Markdown cleanup: no generated upgrade/validation files found.
 Pipeline stage started: research
-1/8 Researching credible sources for: Amazon rainforest canopy aerial
+1/8 Researching credible sources for: Volcano eruption
 Research complete: 4 source article(s) stored in research.json.
 Pipeline stage started: documentary_plan_generation
 2/8 Generating documentary plan from the research material...
@@ -22,44 +22,302 @@ Quota-aware routing snapshot:
   Selected next: Groq key 1
 Quota-aware selection: Groq key 1 (best currently known capacity).
 Documentary plan generated successfully by Groq key 1.
-Script ready: 178 words, 6 scenes.
+Script ready: 171 words, 6 scenes.
 Pipeline stage started: fact_checking
 3/8 Fact-checking claims against the research material...
 Quota-aware routing snapshot:
-  - Groq key 1: 56.2% measured (RPD 998/1000, TPM 4494/8000)
+  - Groq key 1: 54.6% measured (RPD 998/1000, TPM 4370/8000)
   - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
   Selected next: Groq key 1
+Claim extraction skipped 2 sentence(s); 2 were recovered as claims for verification.
 Quota-aware routing snapshot:
-  - Groq key 1: 16.3% measured (RPD 997/1000, TPM 1303/8000)
+  - Groq key 1: 15.9% measured (RPD 997/1000, TPM 1274/8000)
   - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
   Selected next: Gemini key 1
-Temporary AI service issue; retrying once in 5s...
-fact check: Gemini key 1: Gemini HTTP 503: {   "error": {     "code": 503,     "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",     "status": "UNAVAILABLE"   } } 
+AI connection issue; retrying once in 5s...
+fact check: Gemini key 1: Gemini HTTP 429: {   "error": {     "code": 429,     "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 18h29m32.012328763s.",     "status": "RESOURCE_EXHAUSTED",     "details": [       {         "@type": "type.googleapis.com/google.rpc.Hel
 Quota-aware routing snapshot:
-  - Groq key 1: 16.3% measured (RPD 997/1000, TPM 1303/8000)
+  - Groq key 1: 15.9% measured (RPD 997/1000, TPM 1274/8000)
   - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
   Selected next: Cloudflare AI key pair 1
-Fact check: 4 supported (4 with a cited source), 1 unsupported, 0 contradicted (overall revise); sentence coverage 100%.
+Fact check: 8 supported (8 with a cited source), 0 unsupported, 0 contradicted (overall pass); sentence coverage 100%.
+Fact check stored in fact_check.json (overall pass, 8 claim(s) checked).
+Pipeline stage started: voiceover_and_subtitle_generation
+4/8 Generating the verified voice-over and subtitles...
+Speechify voice catalog key slot 1 unavailable; trying the next configured key: Speechify voice catalog HTTP 403: {"error":{"code":"insufficient_scope","message":"You do not have permission to perform this operation."},"request_id":"c0376de7080a404d19528136"}
+
+Speechify voice catalog is not readable with the configured credential (403 insufficient_scope is a token scope limit, not a bad key). Falling back to the documented shared voice id.
+Speechify VO sentence 1/12 rendered (3.66s).
+Speechify VO sentence 2/12 rendered (8.71s).
+Speechify VO sentence 3/12 rendered (5.26s).
+Speechify VO sentence 4/12 rendered (0.83s).
+Speechify VO sentence 5/12 rendered (1.42s).
+Speechify VO sentence 6/12 rendered (0.83s).
+Speechify VO sentence 7/12 rendered (6.53s).
+Speechify VO sentence 8/12 rendered (8.87s).
+Speechify VO sentence 9/12 rendered (10.16s).
+Speechify VO sentence 10/12 rendered (12.34s).
+Speechify VO sentence 11/12 rendered (8.32s).
+Speechify VO sentence 12/12 rendered (7.66s).
+Voice-over provider: Speechify (model simba-3.5, voice geffen_32, locale en-US).
+VO audio check: 79.33s, mean -23.7 dBFS, peak -4.8 dBFS
+VO timeline ready: 79.33s (minimum 70s; no maximum duration).
+Voice-over verified: 79.33s of narration (minimum 70s, ends with the narration).
+Pipeline stage started: footage_search_download_and_visual_verification
+5/8 Searching, downloading and visually verifying footage...
+Footage request budget for 6 scene(s): Coverr=30, Internet Archive=240, Wikimedia Commons=200, NASA=240, Web Search=88, Google Search=58. Cached searches do not consume it.
+Footage discovery priority: Coverr native-vertical API -> Internet Archive -> Wikimedia Commons -> NASA -> Google Search direct reusable-video files. Coverr vertical/free/non-AI search is enabled via COVERR_API_KEY. Pexels/Pixabay remain disabled unless explicitly enabled.
+Visual verification enabled with automatic failover: Groq (1 key(s), qwen/qwen3.8-27b) -> OpenRouter (1 key(s), nvidia/nemotron-3.5-super-vl:free) -> OpenRouter backup model (inclusionai/ling-3.2-flash:free) -> Gemini (1 key(s), gemini-3.8-flash) -> Cloudflare Workers AI (2 key pair(s), @cf/meta/llama-3.2-11b-vision-instruct). Minimum confidence=0.72.
+Scene 1: applying metadata anchors independently to each of 6 search variants.
+  Coverr: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'crater lake aerial' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'crater lake' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'crater' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 1 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+  Google web discovery: 0 result page(s).
+  Web Search: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+Web Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google web discovery unavailable: 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dcrater%2Blake%2Baerial%2Bvideo%2B%2528%2522creative%2Bc
+  Google Search: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'crater lake' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'crater' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 19 candidate(s); source result cached.
+  NASA: 6 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (82s remaining); no stale cache available.
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google Search search unavailable for 'crater lake': 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dcrater%2Blake%2Bfiletype%253Amp4%2B%2528%2522public%2Bdomain%2522%2BOR%2B%2522Creative%2BCommons%2522%2BOR%2BCC0%2BOR%2B%2522CC%2BBY%2522%2529%26num%3D30%26filter%3D0&q=EgRA7MkzGLiMptgGIjAHRwO29CQBHjP92K62aTEYF47a_D9U_i19G8Zq5GMEG2a4UVcmCr4ayIqTf0B01VYyAnJSWgFDYI3T_Zq6z4Ld5AE
+  Internet Archive: 30 item(s) matched 'crater aerial' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'crater' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 3 candidate(s); source result cached.
+  NASA: 3 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (76s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (85s remaining); no stale cache available.
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 19 candidate(s); source result cached.
+  NASA: 5 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (70s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (79s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'volcanic lake drone' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'volcanic lake' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'volcanic' produced 3 candidate(s).
+  Internet Archive: 3 candidate(s); source result cached.
+  Wikimedia Commons: 2 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (61s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (70s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'volcanic lake' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'volcanic' produced 3 candidate(s).
+  Internet Archive: 3 candidate(s); source result cached.
+  Wikimedia Commons: 20 candidate(s); source result cached.
+  NASA: 1 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (58s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (67s remaining); no stale cache available.
+Scene 1: footage discovery summary — strict=84, relaxed=0, ranked=23, partial-metadata-for-visual-review=1, visual-check-limit=26; filtered=metadata:5, resolution:5, duration:4, relevance:39, context:8
+Scene 1: portrait metadata hints=0; orientation deferred to downloaded-file ffprobe=17.
+Scene 1: 24 metadata-qualified candidate(s) across 6 search variants; checking up to 23 candidates.
+  Candidate rank 1: Wikimedia Commons ID=144356810 score=0.92 match=2/2 query='crater lake' metadata=File:Nyungu Crater Lake in Rubirizi District in Uganda.webm It is a crater lake located in Rubirizi District in Uganda 
+  Candidate rank 2: Wikimedia Commons ID=24655538 score=0.92 match=2/2 query='moon lake' metadata=File:Praying in Wen Wu Temple, Sun Moon Lake.webm Praying in a Buddhist Temple in Taiwan Videos about the culture of Taiwan Videos of temples Wen Wu Temple, Sun
+  Candidate rank 3: Wikimedia Commons ID=155125012 score=0.92 match=2/2 query='volcanic lake' metadata=File:PTnM9UGJHFU-Obsidian rock formation on Glass Mountain - Medicine Lake Highlands Volcanic Area - Scenic Mt Shasta.webm Obsidian rock formation on Glass Moun
+  Candidate rank 4: Wikimedia Commons ID=44526066 score=0.92 match=2/2 query='volcanic lake' metadata=File:Sunrise on a lake in Newberry National Volcanic Monument.webm Sunrise on a lake in Newberry National Volcanic Monument, Oregon, USA. Videos of 2015
+  Candidate rank 5: NASA ID=JPL-20210507-TECHf-0001-Ingenuity 5th Flight Recap score=0.81 match=2/2 query='crater aerial' metadata=NASA’s Ingenuity Mars Helicopter Fifth Flight Lands in New Airfield NASA’s Ingenuity Mars Helicopter completed its fifth flight with a one-way journey from Wrig
+Scene 1: candidate download budget=900 MB (metadata relevance 0.92).
 Quota-aware routing snapshot:
-  - Groq key 1: 16.3% measured (RPD 997/1000, TPM 1303/8000)
-  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
-  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
-  Selected next: Cloudflare AI key pair 2
-Fact-check repair failed: Scene narration totals 86 words; expected 120-200.
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 1/23 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): visible subject and composition do not match the SCENE PRIMARY VISUAL QUERY and source metadata does not support the claim of a crater lake in the Philippines.
+Scene 1: candidate download budget=900 MB (metadata relevance 0.92).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 2/23 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): visible subject and composition do not match the SCENE PRIMARY VISUAL QUERY, and source metadata does not support a crater lake aerial setting.
+Scene 1: candidate download budget=900 MB (metadata relevance 0.92).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 3/23 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): no visible crater lake aerial, volcanic lake, or eruption evidence
+Scene 1: candidate download budget=900 MB (metadata relevance 0.92).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 4/23 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): The visible footage does not show a volcanic lake, and the source metadata does not support a Philippine setting.
+Scene 1: candidate download budget=650 MB (metadata relevance 0.81).
+Scene 1: candidate rejected/skipped (NASA): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778).
+Scene 1: candidate download budget=650 MB (metadata relevance 0.81).
+Scene 1: candidate rejected/skipped (NASA): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778).
+Scene 1: candidate download budget=650 MB (metadata relevance 0.73).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 7/23 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): no visible evidence of crater lake aerial, and metadata does not support this setting.
+Scene 1: candidate download budget=650 MB (metadata relevance 0.78).
+Scene 1: candidate rejected/skipped (NASA): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778).
+Scene 1: candidate download budget=180 MB (metadata relevance 0.62).
+Scene 1: candidate rejected/skipped (NASA): Clip is 190.3 MB, above the 180 MB relevance-based limit.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.62).
+Scene 1: candidate rejected/skipped (NASA): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778).
+Scene 1: candidate download budget=180 MB (metadata relevance 0.54).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 11/23 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): no visible crater lake aerial, and source metadata does not support a crater lake setting
+Scene 1: candidate download budget=180 MB (metadata relevance 0.54).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 12/23 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the visible footage does not show a crater lake aerial, and the source metadata does not support a crater lake setting.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.54).
+Scene 1: candidate rejected/skipped (Wikimedia Commons): Clip is 284.7 MB, above the 180 MB relevance-based limit.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.54).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 14/23 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): The visible subject is not a crater lake, and the metadata does not support a Philippine setting.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.54).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 15/23 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the main subject is absent, and the visible environment does not match the primary visual query
+Scene 1: candidate download budget=180 MB (metadata relevance 0.53).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 16/23 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the visible subject is a volcanic eruption, not a crater lake aerial
+Scene 1: candidate download budget=180 MB (metadata relevance 0.53).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 17/23 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): brief visible evidence and metadata basis
+Scene 1: candidate download budget=180 MB (metadata relevance 0.47).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 18/23 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the visible subject is a volcano crater, not a lake, and the source metadata does not support a crater lake aerial scene.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.47).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 19/23 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): brief visible evidence and metadata basis
+Scene 1: candidate download budget=180 MB (metadata relevance 0.43).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 20/23 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the primary visual query is for a crater lake aerial, but the image shows a landscape with fields and craters, but no lake
+Scene 1: candidate download budget=180 MB (metadata relevance 0.38).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 997/1000, TPM 1274/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 21/23 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the main subject is not visible, and the source metadata does not support a crater lake aerial setting.
+Scene 1: candidate rejected/skipped (Internet Archive): Candidate file is 560.7 MB, above its relevance-based 180 MB download budget.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.31).
+Scene 1: candidate rejected/skipped (NASA): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778).
+Scene 1: candidate download budget=180 MB (metadata relevance 0.03).
+Scene 1: candidate rejected/skipped (Internet Archive): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 854x480 (aspect 1.7792).
+Scene 1: initial candidates exhausted; starting one rejection-guided search retry with 2 targeted query variant(s).
+  Coverr: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'crater lake aerial drone overhead perspective wide documentary footage' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'crater lake aerial' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'crater lake' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'crater lake aerial' produced 1 candidate(s).
+  Wikimedia Commons: 1 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+  Google web discovery: 0 result page(s).
+  Web Search: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+Web Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google web discovery unavailable: 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dcrater%2Blake%2Baerial%2Bdrone%2Boverhead%2Bperspective
+  Google Search: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'crater lake aerial high altitude camera wide landscape' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'crater lake aerial' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'crater lake' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'crater lake aerial' produced 1 candidate(s).
+  Wikimedia Commons: 1 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (85s remaining); no stale cache available.
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google Search search unavailable for 'crater lake aerial high altitude camera wide landscape': 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dcrater%2Blake%2Baerial%2Bhigh%2Baltitude%2Bcamera%2Bwide%2Blandscape%2Bfiletype%253Amp4%2B%2528%2522public%2Bdomain%2522%2BOR%2B%2522Creative%2BCommons%2522%2BOR%2BCC0%2BOR%2B%2522CC%2BBY%2522%2529%26num%3D30%26filter%3D0&q=EgRA7MkzGIiOptgGIjDqrG2RjrhoMSz9mPHReFHzBojKB4KRY74jiAl6fzk4_AM_BEqra2-hwcBLQ-BWCbMyAnJSWgFDYNW_3cOQlPfYJA
+Scene 1: adaptive retry added no new eligible candidates.
 Traceback (most recent call last):
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8077, in run_with_diagnostics
     main()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 7939, in main
-    verification = fact_check_plan(plan, research_data)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 1920, in fact_check_plan
-    _fail_fact_check(
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 1758, in _fail_fact_check
-    raise RuntimeError(message)
-RuntimeError: Fact check could not support 1 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The Amazon alone stores billions of carbon, acting as the planet’s largest carbon sink and contributing roughly forty percent of the oxygen we breathe.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8030, in main
+    fetch_footage(plan)
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 6498, in fetch_footage
+    raise RuntimeError(
+RuntimeError: Scene 1 could not obtain verified relevant footage. None of the 24 candidates checked from 23 metadata-ranked candidates passed visual verification or downloaded successfully. Details: NASA JPL-20210507-TECHf-0001-Ingenuity 5th Flight Recap: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20210419-TECHf-0001-First Video of NASA’s Ingenuity Mars Helicopter in Flight: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20220906-Perseverance_Explores_Jezero_Crater_Delta_UHD: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA NHQ_2020_0814_Gravity Assist_Kennda Lynch: Clip is 190.3 MB, above the 180 MB relevance-based limit. Queries tried: ['crater lake aerial', 'crater lake', 'crater aerial', 'moon lake', 'volcanic lake drone', 'volcanic lake', 'crater lake aerial drone overhead perspective wide documentary footage', 'crater lake aerial high altitude camera wide landscape']. No unrelated footage or diagram will be substituted.
 Markdown cleanup: no generated upgrade/validation files found.
