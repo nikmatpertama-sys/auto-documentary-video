@@ -1,0 +1,84 @@
+{
+  "title": "When a Lake Volcano Erupts",
+  "hook": "What happens when a lake erupts and disappears in minutes?",
+  "script": "What happens when a lake erupts and disappears in minutes? Taal Volcano sits in the heart of Batangas, Philippines, rising from the middle of a pristine lake. On 12 January 2020, after 43 years of quiet, the volcano unleashed a phreatomagmatic blast that sent ash soaring over nearby provinces and the capital. Seismic swarms began around 11 am, and by 1 pm the first explosive eruption ripped through the main crater. The blast was loud enough to be felt and heard across Volcano Island, shaking the ground beneath nearby towns. Ash columns rose, darkening the sky over Calabarzon, Metro Manila and parts of Central Luzon. The Philippine Institute of Volcanology and Seismology raised the alert to Level 4, warning that a hazardous explosive eruption could occur within hours to days. The eruption forced the temporary drying of Taal’s Main Crater Lake and destroyed the tiny island of Vulcan Point that once floated inside it. Thousands of residents from Balete, San Nicolas and Talisay were ordered to evacuate as ash fell over the area. Smaller eruptions returned in July 2021, and a brief phreatomagmatic event on 26 March 2022 pushed the alert back to Level 3. These episodes show how volcanoes at convergent plate boundaries, like the Pacific Ring of Fire, can shift from quiet to violent in moments. Monitoring systems such as PHIVOLCS’s observatory give communities crucial minutes to prepare and protect lives. Understanding the forces beneath the surface turns a terrifying eruption into a lesson about our dynamic planet. Follow our channel for the next documentary and share your thoughts in the comments.",
+  "scenes": [
+    {
+      "narration": "What happens when a lake erupts and disappears in minutes? Taal Volcano sits in the heart of Batangas, Philippines, rising from the middle of a pristine lake.",
+      "visual_query": "Taal Lake aerial view",
+      "visual_queries": [
+        "volcano island drone shot",
+        "lake with island panorama"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "visual_type": "footage",
+      "sentence_start": 0,
+      "sentence_end": 1
+    },
+    {
+      "narration": "On 12 January 2020, after 43 years of quiet, the volcano unleashed a phreatomagmatic blast that sent ash soaring over nearby provinces and the capital. Seismic swarms began around 11 am, and by 1 pm the first explosive eruption ripped through the main crater. The blast was loud enough to be felt and heard across Volcano Island, shaking the ground beneath nearby towns.",
+      "visual_query": "ash plume eruption wide",
+      "visual_queries": [
+        "volcano crater explosion close",
+        "seismograph spikes screen"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 2,
+      "sentence_end": 4
+    },
+    {
+      "narration": "Ash columns rose, darkening the sky over Calabarzon, Metro Manila and parts of Central Luzon. The Philippine Institute of Volcanology and Seismology raised the alert to Level 4, warning that a hazardous explosive eruption could occur within hours to days. The eruption forced the temporary drying of Taal’s Main Crater Lake and destroyed the tiny island of Vulcan Point that once floated inside it.",
+      "visual_query": "ash covering city skyline",
+      "visual_queries": [
+        "dry crater lake view",
+        "destroyed Vulcan Point aerial"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 5,
+      "sentence_end": 7
+    },
+    {
+      "narration": "Thousands of residents from Balete, San Nicolas and Talisay were ordered to evacuate as ash fell over the area. Smaller eruptions returned in July 2021, and a brief phreatomagmatic event on 26 March 2022 pushed the alert back to Level 3.",
+      "visual_query": "evacuation of residents bus",
+      "visual_queries": [
+        "PHIVOLCS alert sign",
+        "people loading belongings"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 8,
+      "sentence_end": 9
+    },
+    {
+      "narration": "These episodes show how volcanoes at convergent plate boundaries, like the Pacific Ring of Fire, can shift from quiet to violent in moments. Monitoring systems such as PHIVOLCS’s observatory give communities crucial minutes to prepare and protect lives.",
+      "visual_query": "Pacific Ring of Fire volcanoes",
+      "visual_queries": [
+        "volcanic mountain convergent margin",
+        "monitoring station at volcano"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Volcano",
+      "sentence_start": 10,
+      "sentence_end": 11
+    },
+    {
+      "narration": "Understanding the forces beneath the surface turns a terrifying eruption into a lesson about our dynamic planet. Follow our channel for the next documentary and share your thoughts in the comments.",
+      "visual_query": "volcanologist examining rock",
+      "visual_queries": [
+        "sunrise over Taal volcano",
+        "field scientist at volcano"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Volcano",
+      "sentence_start": 12,
+      "sentence_end": 13
+    }
+  ],
+  "cta": {
+    "text": "Follow our channel for the next documentary and share your thoughts in the comments.",
+    "source": "script"
+  }
+}
