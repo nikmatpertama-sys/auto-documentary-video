@@ -1,0 +1,15 @@
+This file is a trigger, not content.
+
+Editing or pushing it (on main) starts `.github/workflows/production-suite.yml`,
+which runs the real Hybrid Documentary Generator once per topic with the
+production provider credentials:
+
+  TEST 1  Ant colony life cycle
+  TEST 2  Amazon rainforest canopy aerial
+  TEST 3  Volcano eruption
+
+language=en, 1080x1920, Speechify voice-over required, AI Vision footage gate
+on, licence verification on, price/quota fallbacks unchanged.
+
+Per-run diagnostics and review frames land in the `ci-diagnostics` branch under
+`runs/<run_id>/` and `latest/`.

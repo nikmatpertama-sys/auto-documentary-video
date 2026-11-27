@@ -181,6 +181,62 @@ real providers, instead of only under mocks. No new feature surface was added.
   story, and a scene that finds no relevant, licensed, visually verified clip
   fails loudly rather than accepting filler.
 
+## 4b. MM7.3 — wide scenes, realness of the voice, and the production suite
+
+### The 9:16 gate rejected every wide scene
+
+A live production run (`45994571383`) failed at footage discovery with
+`Required visual content is too wide for 9:16 at sample 1` on every candidate.
+A 16:9 source only leaves a 31.6%-wide portrait window, so any shot whose
+subject is the whole expanse - an aerial canopy, a horizon, an insect trail, a
+fire front - could never pass, which made those documentaries impossible by
+construction rather than by relevance.
+
+The crop planner now classifies the shot as `discrete` or `extended`.
+
+- `discrete` (an animal, a person, a vehicle, one nest): unchanged and still
+  fail-closed. The whole subject plus margin must fit one window at every
+  sampled frame, otherwise the candidate is rejected.
+- `extended` (aerial/canopy, horizon, weather, texture, trail, crowd): the
+  window may traverse the scene with a smooth pan, which is what a human
+  editor does with a wide establishing shot. The plan records
+  `subject_kind: extended` and the number of extended frames used.
+- When the planner omits the classification, only a box covering almost the
+  whole frame (`>= 0.85` width, `>= 0.70` height) is inferred as extended.
+  Anything smaller keeps the strict discrete rule, so a wide subject group is
+  never panned away from.
+- Pan speed, edge safety, box confidence, `composition_fits` and the post-crop
+  visual verification are all still enforced for extended scenes.
+
+### The Speechify "voice catalog 403" was not a voice-over blocker
+
+`tools/speechify_tts_probe.py` ran in Actions with the real credential and
+proved two separate facts, which the earlier audit had conflated:
+
+- `GET /v1/voices` returns `403 insufficient_scope` for every documented
+  parameter combination, because the token is not scoped for the catalog. The
+  credential authenticates; the catalog listing is simply not permitted.
+- `POST /v1/audio/speech` with the exact body `main.py` sends returned HTTP 200,
+  742,902 bytes of WAV audio, peak amplitude 18,134 and 20 word marks from the
+documented shared voice `geffen_32` with `simba-3.5`. Speechify really does
+synthesize the narration.
+
+The pipeline no longer depended on a readable catalog: it used to fall back to
+an unverified id (`george`) that the speech endpoint would reject, aborting the
+narration. Voice selection is now an ordered chain - pinned `SPEECHIFY_VOICE_ID`,
+then the catalog pick when readable, then the documented, live-verified
+`geffen_32` (`SPEECHIFY_FALLBACK_VOICE_ID` overrides it) - and a `400/404/422`
+voice rejection rotates to the next candidate instead of ending the run.
+Quota and auth errors still stop the run; nothing is substituted silently.
+
+### Production suite
+
+`.github/workflows/production-suite.yml` calls the real `render.yml` once per
+topic, so a suite run cannot drift from the production workflow. `render.yml`
+is now reusable (`workflow_call`), keys its concurrency group by topic, and its
+diagnostics step publishes the finished video's `ffprobe` metadata plus 24
+review frames per run, in `ci-diagnostics/runs/<run_id>/` as well as `latest/`.
+
 ## 5. Speechify is the only production voice-over path
 
 - A Speechify error now aborts the run instead of silently switching to Edge TTS.

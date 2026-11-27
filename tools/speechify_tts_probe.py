@@ -239,7 +239,12 @@ def _measure_wav(path: str) -> dict:
             raw = handle.readframes(frames)
     except (wave.Error, EOFError, OSError) as error:
         return {"valid": False, "error": str(error)[:120]}
-    duration = frames / float(rate)
+    # Streaming/unknown-size WAV headers report a bogus frame count, so measure
+    # the duration from the bytes actually received.
+    if rate and channels and width:
+        duration = len(raw) / float(rate * channels * width)
+    else:
+        duration = frames / float(rate)
     peak = 0
     if width == 2 and raw:
         samples = struct.unpack("<%dh" % (len(raw) // 2), raw[: (len(raw) // 2) * 2])

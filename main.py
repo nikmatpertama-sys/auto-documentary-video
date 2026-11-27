@@ -211,6 +211,13 @@ CLOUDFLARE_VISION_MODEL = os.getenv(
 ).strip()
 SPEECHIFY_MODEL = os.getenv("SPEECHIFY_MODEL", "simba-3.5").strip() or "simba-3.5"
 SPEECHIFY_VOICE_ID = os.getenv("SPEECHIFY_VOICE_ID", "").strip()
+# A workspace key can be authorised for speech synthesis while GET /v1/voices
+# answers 403 insufficient_scope. Speechify documents this shared voice id, and
+# it was verified against the live speech endpoint (HTTP 200, wav audio), so it
+# is the built-in voice when the catalog cannot be read and no voice is pinned.
+SPEECHIFY_DOCUMENTED_VOICE_ID = os.getenv(
+    "SPEECHIFY_FALLBACK_VOICE_ID", "geffen_32"
+).strip() or "geffen_32"
 # Filled at generation time so the manifest records the voice actually used.
 SPEECHIFY_VOICE_USED = ""
 
@@ -4903,12 +4910,14 @@ FRAME TIMESTAMPS IN ATTACHMENT ORDER (seconds): [{times}]
 TASK:
 1. Identify the main visual subject AND all scene-critical elements needed to preserve the requested meaning. For a group, include the whole group; for a broad aerial canopy or landscape, include the area that makes the shot type recognizable.
 2. For every attached frame, return one normalized bounding box [x1,y1,x2,y2] from 0 to 1 around that entire required visual content in the ORIGINAL frame. Coordinates are normalized to the full image: origin top-left. Do not return a box for a tiny arbitrary detail while ignoring other required scene elements.
-3. Decide whether a single 9:16 crop window at each time can contain the full required bounding box with safe margin. If any required subject is too wide, clipped by the source edge, not visible, or cannot be kept in one vertical window, set composition_fits=false.
+3. Classify the shot in subject_kind. Use "discrete" when the scene is built around one object or group that must stay whole in frame (an animal, a person, a vehicle, a single nest, a machine). Use "extended" when the frame is itself the subject and no single element must stay whole at one instant: landscape, aerial or canopy views, horizons, weather, textures, migration lines, trails, crowds, fire fronts.
+   - discrete: a single 9:16 window at each time must contain the whole bounding box plus safe margin. If the subject is too wide, clipped by the edge, not visible, or cannot stay in one vertical window, set composition_fits=false.
+   - extended: the vertical window may traverse the scene with a smooth horizontal pan, because the narration describes the whole expanse. Set composition_fits=false only when the content cannot be traversed smoothly within the pan-speed limit, or extends beyond the source edge.
 4. Track the same subject/composition across time. Bounding boxes must follow movement frame by frame, not stay fixed at image center.
 5. Be conservative. If you cannot identify the requested content reliably, set subject_visible=false or composition_fits=false. Never invent off-frame positions.
 
 Return ONLY JSON with exactly this structure:
-{{"subject":"short subject description","subject_visible":true,"composition_fits":true,"reason":"brief reason","frames":[{{"bbox":[0.20,0.10,0.42,0.80],"confidence":0.90}}]}}
+{{"subject":"short subject description","subject_kind":"discrete","subject_visible":true,"composition_fits":true,"reason":"brief reason","frames":[{{"bbox":[0.20,0.10,0.42,0.80],"confidence":0.90}}]}}
 
 The frames array MUST contain exactly {len(frame_times)} boxes, in the same order as the attached images. Every bbox coordinate must be numeric from 0 to 1 and satisfy x1<x2 and y1<y2. Confidence must be 0 to 1. Do not include markdown."""
 
@@ -4925,6 +4934,9 @@ def validate_smart_crop_plan(payload, source_info, frame_times):
     raw_frames = payload.get("frames")
     if not isinstance(raw_frames, list) or len(raw_frames) != len(frame_times):
         raise RuntimeError("Crop planner did not return one bounding box for every sampled frame.")
+    subject_kind = str(payload.get("subject_kind") or "").strip().lower()
+    if subject_kind not in ("discrete", "extended"):
+        subject_kind = ""
 
     width = int(source_info.get("width") or 0)
     height = int(source_info.get("height") or 0)
@@ -4936,6 +4948,7 @@ def validate_smart_crop_plan(payload, source_info, frame_times):
     if crop_fraction <= 0 or crop_fraction >= 1:
         raise RuntimeError("Invalid 9:16 crop window for this source aspect ratio.")
     margin = crop_fraction * SMART_CROP_BOX_MARGIN_FRACTION
+    extended_frames_used = 0
     points = []
     desired_starts = []
     feasible_ranges = []
@@ -4955,19 +4968,49 @@ def validate_smart_crop_plan(payload, source_info, frame_times):
             raise RuntimeError(f"Crop planner frame {index + 1} has out-of-range bounding coordinates.")
         if not SMART_CROP_MIN_BOX_CONFIDENCE <= confidence <= 1:
             raise RuntimeError(f"Crop planner frame {index + 1} confidence is too low ({confidence:.2f}).")
-        if (x2 - x1) + 2 * margin > crop_fraction:
+        box_width = x2 - x1
+        box_height = y2 - y1
+        # An extended scene (aerial canopy, horizon, trail, crowd) cannot fit a
+        # single vertical window at one instant, and does not have to: the shot
+        # is the expanse, and the crop pans across it while the narration runs.
+        # A discrete subject must still stay whole, which is what keeps the
+        # fail-closed rule against cutting off scene-critical content.
+        frame_kind = subject_kind
+        if not frame_kind:
+            # Without an explicit classification, only a box that covers almost
+            # the whole frame (an aerial, horizon or texture shot) counts as an
+            # extended scene. Anything smaller keeps the strict rule, so a wide
+            # subject group is never panned away from.
+            frame_kind = (
+                "extended"
+                if box_width > crop_fraction and box_width >= 0.85 and box_height >= 0.70
+                else "discrete"
+            )
+        extended_frame = frame_kind == "extended"
+        if not extended_frame and box_width + 2 * margin > crop_fraction:
             raise RuntimeError(
                 f"Required visual content is too wide for 9:16 at sample {index + 1}; "
                 "the generator will not cut off scene-critical subjects."
             )
 
-        # Feasible crop-left interval that keeps the full bbox plus safety margin.
-        low = max(0.0, x2 + margin - crop_fraction)
-        high = min(1.0 - crop_fraction, x1 - margin)
-        if low > high:
-            raise RuntimeError(
-                f"Required visual content touches an unsafe edge at sample {index + 1}."
-            )
+        if extended_frame:
+            # The window must stay inside the extended content and is free to
+            # traverse it, so the feasible interval is the traversable span.
+            low = max(0.0, min(1.0 - crop_fraction, x1))
+            high = min(1.0 - crop_fraction, x2 - crop_fraction)
+            if low > high:
+                raise RuntimeError(
+                    f"Required visual content touches an unsafe edge at sample {index + 1}."
+                )
+            extended_frames_used += 1
+        else:
+            # Feasible crop-left interval that keeps the full bbox plus safety margin.
+            low = max(0.0, x2 + margin - crop_fraction)
+            high = min(1.0 - crop_fraction, x1 - margin)
+            if low > high:
+                raise RuntimeError(
+                    f"Required visual content touches an unsafe edge at sample {index + 1}."
+                )
         center = (x1 + x2) / 2.0
         preferred = center - crop_fraction / 2.0
         preferred = max(low, min(high, preferred))
@@ -5001,6 +5044,8 @@ def validate_smart_crop_plan(payload, source_info, frame_times):
     return {
         "mode": "ai_content_aware_dynamic_crop",
         "target_aspect": "9:16",
+        "subject_kind": "extended" if extended_frames_used else "discrete",
+        "extended_scene_frames": extended_frames_used,
         "source_width": width,
         "source_height": height,
         "source_aspect_ratio": round(aspect, 6),
@@ -6759,7 +6804,7 @@ def _speechify_choose_voice(api_keys):
         api_keys = [api_keys]
     api_keys = [str(key).strip() for key in (api_keys or []) if str(key).strip()]
     url = "https://api.speechify.ai/v1/voices"
-    preferred = ("george", "henry")
+    preferred = (SPEECHIFY_DOCUMENTED_VOICE_ID, "george", "henry")
 
     for key_index, api_key in enumerate(api_keys):
         voices = []
@@ -6853,8 +6898,31 @@ def _speechify_choose_voice(api_keys):
             )
             continue
 
-    print("Speechify voice discovery found no matching catalog entry; using built-in voice fallback.")
-    return "george"
+    # The catalog is unreadable with this credential. Returning an empty string
+    # lets the caller fall through to the verified documented voice instead of
+    # guessing an id the speech endpoint may reject.
+    print(
+        "Speechify voice catalog is not readable with the configured credential "
+        "(403 insufficient_scope is a token scope limit, not a bad key). Falling "
+        "back to the documented shared voice id."
+    )
+    return ""
+
+
+def _speechify_voice_candidates(api_keys):
+    """Ordered voice ids: pinned secret, catalog pick, documented shared voice."""
+    candidates = []
+    for candidate in (SPEECHIFY_VOICE_ID, _speechify_choose_voice(api_keys), SPEECHIFY_DOCUMENTED_VOICE_ID):
+        candidate = str(candidate or "").strip()
+        if candidate and candidate not in candidates:
+            candidates.append(candidate)
+    return candidates
+
+
+def _speechify_invalid_voice_error(error):
+    """True when the error means this voice id is unusable, not the account."""
+    match = re.search(r"HTTP (\d{3})", str(error or ""))
+    return bool(match and match.group(1) in ("400", "404", "422"))
 
 
 def _speechify_sentence_ssml(sentence, index, total):
@@ -6997,7 +7065,10 @@ def _generate_speechify_parts(sentences):
     api_keys = SPEECHIFY_KEYS
     if not api_keys:
         raise RuntimeError("SPVO_API/SPEECHIFY_API_KEY is not configured.")
-    voice_id = _speechify_choose_voice(api_keys)
+    voice_candidates = _speechify_voice_candidates(api_keys)
+    if not voice_candidates:
+        raise RuntimeError("Speechify has no usable voice id (no pinned, catalog or documented voice).")
+    voice_id = voice_candidates[0]
     SPEECHIFY_VOICE_USED = voice_id
     wav_parts = []
     sentence_word_events = []
@@ -7015,9 +7086,35 @@ def _generate_speechify_parts(sentences):
             raise RuntimeError(
                 f"Speechify sentence {index + 1} exceeds the safe 1,950-character request budget."
             )
-        audio_bytes, word_marks, key_index = _request_speechify_audio(
-            sentence, index, len(sentences), voice_id, api_keys, key_index
-        )
+        if index == 0 and len(voice_candidates) > 1:
+            # The first sentence proves the voice id. A rejected id rotates to
+            # the next candidate instead of aborting the whole narration.
+            last_voice_error = None
+            for candidate in voice_candidates:
+                try:
+                    audio_bytes, word_marks, key_index = _request_speechify_audio(
+                        sentence, index, len(sentences), candidate, api_keys, key_index
+                    )
+                except RuntimeError as exc:
+                    if not _speechify_invalid_voice_error(exc):
+                        raise
+                    print(
+                        f"Speechify rejected voice {candidate!r}; trying the next "
+                        "configured voice id."
+                    )
+                    last_voice_error = exc
+                    continue
+                if candidate != voice_id:
+                    print(f"Speechify switched to voice {candidate!r} after a voice-id rejection.")
+                voice_id = candidate
+                SPEECHIFY_VOICE_USED = candidate
+                break
+            else:
+                raise last_voice_error or RuntimeError("Every configured Speechify voice id was rejected.")
+        else:
+            audio_bytes, word_marks, key_index = _request_speechify_audio(
+                sentence, index, len(sentences), voice_id, api_keys, key_index
+            )
         raw_path = OUT / f"tts_{index:02d}_speechify_raw.wav"
         wav_path = OUT / f"tts_{index:02d}.wav"
         raw_path.write_bytes(audio_bytes)

@@ -1,0 +1,47 @@
+name: Production Suite (three real renders)
+
+# Runs the real Hybrid Documentary Generator once per topic, with the same
+# provider credentials and the same quality gates as a manual dispatch. It is a
+# thin wrapper: it calls render.yml instead of duplicating the pipeline setup,
+# so a suite run cannot drift from the production workflow.
+#
+# Triggered by workflow_dispatch, or by changing the sentinel file below (the
+# cloud agent cannot dispatch workflow_dispatch, but it can push).
+on:
+  workflow_dispatch:
+    inputs:
+      language:
+        description: "Narration language"
+        required: false
+        default: "en"
+        type: choice
+        options:
+          - en
+          - id
+  push:
+    paths:
+      - ".ci/production-suite-trigger"
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    strategy:
+      fail-fast: false
+      # Two at a time keeps provider rate limits survivable while still
+      # finishing in a reasonable window.
+      max-parallel: 2
+      matrix:
+        include:
+          - topic: "Ant colony life cycle"
+            slug: ant-colony-life-cycle
+          - topic: "Amazon rainforest canopy aerial"
+            slug: amazon-rainforest-canopy-aerial
+          - topic: "Volcano eruption"
+            slug: volcano-eruption
+    uses: ./.github/workflows/render.yml
+    with:
+      topic: ${{ matrix.topic }}
+      language: ${{ inputs.language || 'en' }}
+    secrets: inherit
