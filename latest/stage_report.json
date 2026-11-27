@@ -1,45 +1,26 @@
 {
   "status": "failed",
-  "current_stage": "voiceover_and_subtitle_generation",
+  "current_stage": "documentary_plan_generation",
   "stages": [
     {
       "name": "research",
       "status": "completed",
-      "started_at_epoch": 1795786690.7166994,
-      "finished_at_epoch": 1795786693.1530468,
-      "duration_seconds": 2.44
+      "started_at_epoch": 1795786891.5198689,
+      "finished_at_epoch": 1795786894.494552,
+      "duration_seconds": 2.97
     },
     {
       "name": "documentary_plan_generation",
-      "status": "completed",
-      "started_at_epoch": 1795786693.1532147,
-      "finished_at_epoch": 1795786700.1916611,
-      "duration_seconds": 7.04
-    },
-    {
-      "name": "fact_checking",
-      "status": "completed",
-      "started_at_epoch": 1795786700.1919725,
-      "finished_at_epoch": 1795786746.0420468,
-      "duration_seconds": 45.85
-    },
-    {
-      "name": "voiceover_and_subtitle_generation",
       "status": "failed",
-      "started_at_epoch": 1795786746.0422955,
-      "finished_at_epoch": 1795786806.0494978,
+      "started_at_epoch": 1795786894.4946766,
+      "finished_at_epoch": 1795786928.783346,
       "failure_type": "RuntimeError",
-      "failure_message": "Fact check could not support 1 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Remember, the canopy is both a shield and a signal—protecting biodiversity while warning us of the fragile balance we must preserve.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
+      "failure_message": "All configured AI providers failed:\n- OpenRouter key 1: OpenRouter HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null,\"previous_errors\":[{\"code\":429,\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit\n- Groq key 1: Groq returned an unreadable response: Provider response did not contain a complete JSON object.; body={'id': 'chatcmpl-72aa1341-b207-4567-8dc2-cff663da01a9', 'object': 'chat.completion', 'created': 1795786907, 'model': 'openai/gpt-oss-120b', 'choices': [{'index': 0, 'message': {'role': 'assistant', 'content': '{\\n  \"title\": \"When a Lake Erupts: The Story of Taal Volcano\",\\n  \"hook\": \"What happens when a lake erupts and its island disappears?\",\\n  \"script\": \"What happens when a lake erupts and its island disappears? On January twelfth, 2020, Taal Volcano in Batangas erupted after 43 years of silence. Seismic swarms started around eleven, and a phreatic blast from the main crater erupted at one o’clock. The explosion sent ash up to a hundred meters, darkening the sky over Calabarzon, Metro Man\n- Gemini key 1: Gemini HTTP 429: {   \"error\": {     \"code\": 429,     \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 18h18m12.324348686s.\",     \"status\": \"RESOURCE_EXHAUSTED\",     \"details\": [       {         \"@type\": \"type.googleapis.com/google.rpc.Hel\n- Cloudflare AI key pair 1: Scene narration totals 109 words; expected 120-200.\n- Cloudflare AI key pair 2: Scene narration totals 89 words; expected 120-200."
     }
   ],
-  "voice_provider": "Speechify",
-  "voice": "geffen_32",
-  "voice_model": "simba-3.5",
-  "language": "en",
-  "voiceover_manifest": "output/voiceover_manifest.json",
   "failure": {
     "error_type": "RuntimeError",
-    "error_message": "Fact check could not support 1 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Remember, the canopy is both a shield and a signal—protecting biodiversity while warning us of the fragile balance we must preserve.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
-    "finished_at_epoch": 1795786806.0508745
+    "error_message": "All configured AI providers failed:\n- OpenRouter key 1: OpenRouter HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null,\"previous_errors\":[{\"code\":429,\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit\n- Groq key 1: Groq returned an unreadable response: Provider response did not contain a complete JSON object.; body={'id': 'chatcmpl-72aa1341-b207-4567-8dc2-cff663da01a9', 'object': 'chat.completion', 'created': 1795786907, 'model': 'openai/gpt-oss-120b', 'choices': [{'index': 0, 'message': {'role': 'assistant', 'content': '{\\n  \"title\": \"When a Lake Erupts: The Story of Taal Volcano\",\\n  \"hook\": \"What happens when a lake erupts and its island disappears?\",\\n  \"script\": \"What happens when a lake erupts and its island disappears? On January twelfth, 2020, Taal Volcano in Batangas erupted after 43 years of silence. Seismic swarms started around eleven, and a phreatic blast from the main crater erupted at one o’clock. The explosion sent ash up to a hundred meters, darkening the sky over Calabarzon, Metro Man\n- Gemini key 1: Gemini HTTP 429: {   \"error\": {     \"code\": 429,     \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 18h18m12.324348686s.\",     \"status\": \"RESOURCE_EXHAUSTED\",     \"details\": [       {         \"@type\": \"type.googleapis.com/google.rpc.Hel\n- Cloudflare AI key pair 1: Scene narration totals 109 words; expected 120-200.\n- Cloudflare AI key pair 2: Scene narration totals 89 words; expected 120-200.",
+    "finished_at_epoch": 1795786928.7843022
   }
 }
