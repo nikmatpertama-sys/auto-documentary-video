@@ -1,15 +1,16 @@
 {
-  "path": "output/opening_hook_overlay.png",
+  "path": "output/opening_overlay.png",
   "title_lines": [
-    "STELLAR EVOLUTION AND COSMIC ORIGINS"
+    "THE HIDDEN LIFE CYCLE OF ANTS"
   ],
   "hook_lines": [
-    "Have you ever looked up",
-    "into the night sky and",
-    "wondered just"
+    "Discover how tiny eggs",
+    "transform into complex",
+    "colonies beneath our",
+    "feet."
   ],
-  "title_text": "Stellar Evolution and Cosmic Origins",
-  "hook_text": "Have you ever looked up into the night sky and wondered just",
+  "title_text": "The Hidden Life Cycle of Ants",
+  "hook_text": "Discover how tiny eggs transform into complex colonies beneath our feet.",
   "title_font_size": 27,
   "hook_font_size": 62,
   "max_text_width": 880,
@@ -17,6 +18,6 @@
     48,
     150,
     1032,
-    470
+    538
   ]
 }

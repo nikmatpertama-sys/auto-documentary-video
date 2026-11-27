@@ -1,368 +1,295 @@
 {
-  "title": "Stellar Evolution and Cosmic Origins",
-  "hook": "Have you ever looked up into the night sky and wondered just",
+  "title": "The Hidden Life Cycle of Ants",
+  "hook": "Discover how tiny eggs transform into complex colonies beneath our feet.",
   "scenes": [
     {
-      "narration": "Have you ever looked up into the night sky and wondered just how many stars there are in space?",
-      "visual_focus": "night sky filled with stars",
-      "visual_query": "night sky filled with stars",
+      "narration": "Tiny white ant eggs are carefully tended by worker ants within the hidden depths of the dark underground nest.",
+      "visual_focus": "ant eggs in nest",
+      "visual_query": "worker ants tending eggs in underground nest",
       "visual_queries": [
-        "starlit night sky timelapse",
-        "galaxy stars night sky"
+        "ant colony workers caring eggs",
+        "close up of ant nursery chambers"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "night sky filled with stars",
-      "source_label": "European Space Agency",
-      "source_url": "https://www.esa.int/articles/about-us/directorates/science/how-many-stars-are-there-in-the-universe",
+      "reference_query": "worker ants tending eggs in underground nest",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0,
       "voice_timing": {
         "start_seconds": 0.0,
-        "spoken_end_seconds": 6.27,
-        "visual_end_seconds": 6.97,
-        "duration_seconds": 6.97,
+        "spoken_end_seconds": 7.374,
+        "visual_end_seconds": 8.074,
+        "duration_seconds": 8.074,
         "first_sentence_index": 0,
         "last_sentence_index": 0
-      },
-      "media_file": "output/footage/scene_01.mp4",
-      "selected_footage_source": "Coverr",
-      "selected_footage_tags": "Silhouette Walking on Beach Beneath a Star-Filled Sky A lone silhouette walks the shoreline beneath a vast star-filled sky and the Milky Way, stars faintly reflecting on the calm ocean — cinematic long-exposure footage ideal for nature, meditation, travel and ambient backgrounds. night sky stars milky way beach ocean shoreline silhouette walking long exposure astrophotography reflection cinematic landscape panoramic meditation ambient nature calm nocturnal stock footage",
-      "selected_footage_url": "https://coverr.co/videos/67eeLQQZcp",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show a person walking along a beach beneath a vast night sky filled with stars, directly supporting the scene narration and visual focus.",
-        "query": "night sky filled with stars"
       }
     },
     {
-      "narration": "The observable universe contains an estimated range of celestial bodies and distant light sources.",
-      "visual_focus": "distant stars in space",
-      "visual_query": "distant stars in space",
+      "narration": "Hatching from these fragile eggs emerge legless larvae that rely entirely on adults for constant nourishment and care.",
+      "visual_focus": "ant larvae being fed",
+      "visual_query": "ant larvae receiving food from workers",
       "visual_queries": [
-        "deep space stars field",
-        "observable universe star clusters"
+        "worker ant feeding growing larva",
+        "macro shot of ant larvae"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "distant stars in space",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Star",
+      "reference_query": "ant larvae receiving food from workers",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1,
       "voice_timing": {
-        "start_seconds": 6.97,
-        "spoken_end_seconds": 13.498,
-        "visual_end_seconds": 13.798,
-        "duration_seconds": 6.828,
+        "start_seconds": 8.074,
+        "spoken_end_seconds": 15.274,
+        "visual_end_seconds": 15.574,
+        "duration_seconds": 7.5,
         "first_sentence_index": 1,
         "last_sentence_index": 1
-      },
-      "media_file": "output/footage/scene_02.mp4",
-      "selected_footage_source": "Wikimedia Commons",
-      "selected_footage_tags": "File:Rubin Looks Deep Into a Famous Cosmic Field (noirlab2618a).webm This exceptionally deep image from NSF–DOE Vera C. Rubin Observatory reveals the renowned COSMOS field and its surroundings in the constellation Sextans. The view is crowded with galaxies and galaxy clusters spanning an immense range of distances and cosmic ages, while only a handful of foreground stars belong to our own Milky Way. It was created by combining multiple observations from Rubin’s LSST Camera into a deep coadded image and is being released to mark Early Data Preview 2, the first Rubin data preview based on LSST Camera observations.The COSMOS field was selected more than two decades ago to provide astronomers with a relatively unobstructed window into the distant Universe. Located away from the crowded plane of the Milky Way, it contains comparatively few bright stars and little intervening dust, and it is accessible to major observatories on Earth and in space. Even in this exceptionally clear region, Rubin’s remarkable sensitivity reveals traces of faint, glowing galactic cirrus: wisps of interstellar dust within our own Milky Way superimposed on the much more distant cosmic landscape.Early Data Preview 2 comes on the heels of the  beginning  of the Legacy Survey of Space and Time ( LSST ). With its ability to observe the southern sky deeply, widely, and repeatedly, Rubin Observatory is poised to transform many areas of astronomy.",
-      "selected_footage_url": "https://commons.wikimedia.org/wiki/File:Rubin_Looks_Deep_Into_a_Famous_Cosmic_Field_(noirlab2618a).webm",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show distant stars in deep space and star fields, perfectly matching the required visible focus.",
-        "query": "deep space stars field"
       }
     },
     {
-      "narration": "All stars are formed from collapsing clouds of gas and dust known as molecular clouds.",
-      "visual_focus": "collapsing clouds of gas",
-      "visual_query": "collapsing clouds of gas",
+      "narration": "During the resting pupal stage, the motionless insect undergoes a remarkable internal transformation into an adult form.",
+      "visual_focus": "ant pupae in chambers",
+      "visual_query": "ant pupae resting in underground chamber",
       "visual_queries": [
-        "nebula gas dust",
-        "molecular cloud star formation"
+        "developing ant pupae close up",
+        "worker ants moving ant pupae"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "collapsing clouds of gas",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Stellar_evolution",
+      "reference_query": "ant pupae resting in underground chamber",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2,
       "voice_timing": {
-        "start_seconds": 13.798,
-        "spoken_end_seconds": 19.366,
-        "visual_end_seconds": 19.666,
-        "duration_seconds": 5.868,
+        "start_seconds": 15.574,
+        "spoken_end_seconds": 23.446,
+        "visual_end_seconds": 23.746,
+        "duration_seconds": 8.172,
         "first_sentence_index": 2,
         "last_sentence_index": 2
-      },
-      "media_file": "output/footage/scene_03.mp4",
-      "selected_footage_source": "Wikimedia Commons",
-      "selected_footage_tags": "File:Tarantula Nebula- 30 Doradus and The Growing Tarantula Within (2011-30dor - spacescoop 30dor lg web).webm The star-forming region, 30 Doradus, is one of the largest located close to the Milky Way and is found in the neighboring galaxy Large Magellanic Cloud. About 2,400 massive stars in the center of 30 Doradus, also known as the Tarantula Nebula, are producing intense radiation and powerful winds as they blow off material. Multimillion-degree gas detected in X-rays (blue) by the Chandra X-ray Observatory comes from shock fronts -- similar to sonic booms --formed by these stellar winds and by supernova explosions. This hot gas carves out gigantic bubbles in the surrounding cooler gas and dust shown here in infrared emission from the Spitzer Space Telescope (orange). 30 Doradus is also known as an HII (pronounced \"H-two\") region, created when the radiation from hot, young stars strips away the electrons from neutral hydrogen atoms (HI) to form clouds of ionized hydrogen (HII). It is the most massive and largest HII region in the Local Group of galaxies, which contains the Milky Way, Andromeda and about 30 other smaller galaxies including the two Magellanic Clouds. Because of its proximity and size, 30 Doradus is an excellent target for studying the effects of massive stars on the evolution of an HII region. The Tarantula Nebula is expanding, and researchers have recently published two studies that attempt to determine what drives this growth. The most recent study concluded that the evolution and the large-scale structure of 30 Doradus is determined by the bubbles of hot, X-ray bright gas confined by surrounding gas, and that pressure from radiation generated by massive stars does not currently play an important role in shaping the overall structure. A study published earlier in 2011 came to the opposite conclusion and argued that radiation pressure is more important than pressure from hot gas in driving the evolution of 30 Doradus, especially in the central regions near the massive stars. More detailed analysis and deeper Chandra observations of 30 Doradus may help decide between these different ideas. Fast Facts for Tarantula Nebula: Credit X-ray: NASA/CXC/PSU/L.Townsley et al.; Infrared: NASA/JPL/PSU/L.Townsley et al. Release Date November 10, 2011 Scale 24 arcmin across (about 1100 light years across) Category Normal Stars &amp; Star Clusters Coordinates (J2000) RA 05h 38m 42.9s | Dec -69° 06' 3\" Constellation Dorado Observation Date 21 Sep 1999 - 30 Jan 2006 Observation Time 31 hours 40 min Obs. ID 22, 5906, 7263, 7264, 62520 Instrument ACIS Also Known As 30 Doradus Color Code X-ray (Blue); Infrared (Red, Green, Blue) Distance Estimate About 160,000 light years",
-      "selected_footage_url": "https://commons.wikimedia.org/wiki/File:Tarantula_Nebula-_30_Doradus_and_The_Growing_Tarantula_Within_(2011-30dor_-_spacescoop_30dor_lg_web).webm",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly display vast clouds of gas and dust in a nebula (such as the Tarantula Nebula), directly illustrating the required visible focus of collapsing clouds of gas associated with star formation.",
-        "query": "nebula gas dust"
       }
     },
     {
-      "narration": "Astronomers state that all stars like our sun are always born with a sibling.",
-      "visual_focus": "binary stars in space",
-      "visual_query": "binary stars in space",
+      "narration": "Newly emerged adult workers begin their lives inside the subterranean nest by performing essential maintenance and nursery duties.",
+      "visual_focus": "young adult worker ant",
+      "visual_query": "young adult worker ant inside nest",
       "visual_queries": [
-        "binary star system orbit",
-        "twin stars in space"
+        "newly emerged ant in colony",
+        "worker ant cleaning nest chamber"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "binary stars in space",
-      "source_label": "Berkeley News",
-      "source_url": "https://news.berkeley.edu/2017/06/13/new-evidence-that-all-stars-are-born-in-pairs/",
+      "reference_query": "young adult worker ant inside nest",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3,
       "voice_timing": {
-        "start_seconds": 19.666,
-        "spoken_end_seconds": 24.826,
-        "visual_end_seconds": 25.126,
-        "duration_seconds": 5.46,
+        "start_seconds": 23.746,
+        "spoken_end_seconds": 31.738,
+        "visual_end_seconds": 32.038,
+        "duration_seconds": 8.292,
         "first_sentence_index": 3,
         "last_sentence_index": 3
-      },
-      "media_file": "output/footage/scene_04.mp4",
-      "selected_footage_source": "Wikimedia Commons",
-      "selected_footage_tags": "File:TESS Satellite Discovered Its 1st World Orbiting 2 Stars 8FrlhrtVEW8.webm Researchers working with data from NASA’s Transiting Exoplanet Survey Satellite (TESS) have discovered the mission’s first circumbinary planet, a world orbiting two stars. The planet, called TOI 1338b, is around 6.9 times larger than Earth, or between the sizes of Neptune and Saturn. It lies in a system 1,300 light-years away in the constellation Pictor.\n The stars in the system make an eclipsing binary, which occurs when the stellar companions circle each other in our plane of view. One is about 10% more massive than our Sun, while the other is cooler, dimmer and only one-third the Sun’s mass. \n  TOI 1338b’s transits are irregular, between every 93 and 95 days, and vary in depth and duration thanks to the orbital motion of its stars. TESS only sees the transits crossing the larger star — the transits of the smaller star are too faint to detect. Although the planet transits irregularly, its orbit is stable for at least the next 10 million years. The orbit’s angle to us, however, changes enough that the planet transit will cease after November 2023 and resume eight years later.\n  Read more:  https://www.nasa.gov/feature/goddard/2020/nasa-s-tess-mission-uncovers-its-1st-world-with-two-stars \n   Music: \\\"Albatross\\\" from Universal Production Music.\n  Video credit: NASA's Goddard Space Flight Center\nChris Smith (USRA): Lead Producer\nChris Smith (USRA): Lead Animator\nJeanette Kazmierczak (University of Maryland College Park): Lead Science Writer\nChris Smith (USRA): Writer\nVeselin Kostov (NASA Postdoctoral Fellow): Scientist\n  This video is public domain and along with other supporting visualizations can be downloaded from NASA Goddard's Scientific Visualization Studio at:  https://svs.gsfc.nasa.gov/13510 \n  If you liked this video, subscribe to the NASA Goddard YouTube channel:  https://www.youtube.com/NASAGoddard \n  Follow NASA’s Goddard Space Flight Center\n· Instagram  http://www.instagram.com/nasagoddard \n· Twitter  https://twitter.com/NASAGoddard \n· Twitter  https://twitter.com/NASAGoddardPix \n· Facebook:  http://www.facebook.com/NASAGoddard \n \n· Flickr  https://www.flickr.com/photos/gsfc ",
-      "selected_footage_url": "https://commons.wikimedia.org/wiki/File:TESS_Satellite_Discovered_Its_1st_World_Orbiting_2_Stars_8FrlhrtVEW8.webm",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show binary stars in space, specifically a simulation and system diagram of the binary star system TOI 1338 with orbiting planet, directly matching the required visible focus.",
-        "query": "binary stars in space"
       }
     },
     {
-      "narration": "Many other stars are visible to the naked eye at night across the constellations.",
-      "visual_focus": "stars visible in night sky",
-      "visual_query": "stars visible in night sky",
+      "narration": "As these workers grow older, they transition to foraging outside for vital resources to sustain the entire growing colony.",
+      "visual_focus": "foraging worker ant",
+      "visual_query": "foraging worker ant searching for food",
       "visual_queries": [
-        "bright stars constellations night",
-        "naked eye stars viewing"
+        "ant walking on forest floor",
+        "worker ant carrying food particle"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "stars visible in night sky",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Star",
+      "reference_query": "foraging worker ant searching for food",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4,
       "voice_timing": {
-        "start_seconds": 25.126,
-        "spoken_end_seconds": 30.406,
-        "visual_end_seconds": 30.706,
-        "duration_seconds": 5.58,
+        "start_seconds": 32.038,
+        "spoken_end_seconds": 39.694,
+        "visual_end_seconds": 39.994,
+        "duration_seconds": 7.956,
         "first_sentence_index": 4,
         "last_sentence_index": 4
-      },
-      "media_file": "output/footage/scene_05.mp4",
-      "selected_footage_source": "Wikimedia Commons",
-      "selected_footage_tags": "File:NASA - A Swift Tour of the Nearest Galaxies in UV Light 53yokIKAnDs.webm Astronomers at NASA's Goddard Space Flight Center in Greenbelt, Md., and the Pennsylvania State University in University Park, Pa., have used NASA's Swift satellite to create the most detailed surveys of the Large and Small Magellanic Clouds, the two closest major galaxies, in ultraviolet light.\n Thousands of images were assembled into seamless portraits of the main body of each galaxy to produce the highest-resolution surveys of the Magellanic Clouds at ultraviolet wavelengths. The project was proposed by Stefan Immler, an astronomer at Goddard.\n  The Large and Small Magellanic Clouds, or LMC and SMC for short, lie about 163,000 and 200,000 light-years away, respectively, and orbit each other as well as our own Milky Way galaxy.\n  Compared to the Milky Way, the LMC has about one-tenth its physical size and only 1 percent of its mass. The SMC is only half the size of the LMC and contains about two-thirds of its mass.\nThe new images reveal about a million ultraviolet sources within the LMC and about 250,000 in the SMC.\n  Viewing in the ultraviolet allows astronomers to suppress the light of normal stars like the sun, which are not very bright at these higher energies, and provide a clearer picture of the hottest stars and star-formation regions.\n  Only Swift's Ultraviolet/Optical Telescope, or UVOT, is capable of producing such high-resolution wide-field multi-color surveys in the ultraviolet. The LMC and SMC images range from 1,600 to 3,300 angstroms, UV wavelengths largely blocked by Earth's atmosphere.\n  The Large and Small Magellanic Clouds are readily visible from the Southern Hemisphere as faint, glowing patches in the night sky. The galaxies are named after Ferdinand Magellan, the Portuguese explorer who in 1519 led an expedition to sail around the world. He and his crew were among the first Europeans to sight the objects.       \n \n All visible light imagery provided by Axel Mellinger, Central Michigan University.\n \n This video is public domain and can be downloaded at:  http://svs.gsfc.nasa.gov/goto?11293 \n  Like our videos? Subscribe to NASA's Goddard Shorts HD podcast:\n http://svs.gsfc.nasa.gov/vis/iTunes/f0004_index.html \n  Or find NASA Goddard Space Flight Center on facebook:\n http://www.facebook.com/NASA.GSFC \n  Or find us on Twitter:\n \n https://twitter.com/NASAGoddard ",
-      "selected_footage_url": "https://commons.wikimedia.org/wiki/File:NASA_-_A_Swift_Tour_of_the_Nearest_Galaxies_in_UV_Light_53yokIKAnDs.webm",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show numerous stars visible in the night sky, including views of the Large and Small Magellanic Clouds, directly supporting the required visual focus.",
-        "query": "stars visible in night sky"
       }
     },
     {
-      "narration": "As atoms at the core become helium, stars like the Sun begin to fuse hydrogen.",
-      "visual_focus": "core of a star",
-      "visual_query": "core of a star",
+      "narration": "Within the heart of the community, the specialized queen remains focused primarily on continuous egg production and colony expansion.",
+      "visual_focus": "ant queen in nest",
+      "visual_query": "ant queen surrounded by worker ants",
       "visual_queries": [
-        "stellar core fusion",
-        "sun hydrogen fusion layers"
+        "queen ant laying eggs in chamber",
+        "large ant queen in colony"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "core of a star",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Stellar_evolution",
+      "reference_query": "ant queen surrounded by worker ants",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5,
       "voice_timing": {
-        "start_seconds": 30.706,
-        "spoken_end_seconds": 36.178,
-        "visual_end_seconds": 36.478,
-        "duration_seconds": 5.772,
+        "start_seconds": 39.994,
+        "spoken_end_seconds": 48.13,
+        "visual_end_seconds": 48.43,
+        "duration_seconds": 8.436,
         "first_sentence_index": 5,
         "last_sentence_index": 5
-      },
-      "media_file": "output/footage/scene_06.mp4",
-      "selected_footage_source": "NASA",
-      "selected_footage_tags": "KSC-04-S-00359 As Swift begins its investigation of gamma-ray bursts, NASA scientists are anxious to see if their origins lie in the explanations of three possible theories. Ranging from simple to complex, all three theories have something in common: the destruction of stars to form infamous black holes.  The first theory suggests a burst is triggered when a star's core collapses. Millions of years before the collapse, the hydrogen fuel inside the core begins to wither. Once the internal fuel supply is exhausted, the core implodes and creates a black hole. Within seconds of its formation, tandem particle jets erupt from the black hole's center. The twin jets rupture the star and produce a supernova explosion. This stellar detonation in turn ignites the gamma-ray burst.  Like the previous 'collapsar' theory, the supernova model also involves the implosion of a star's core. As the star burns the last of its hydrogen, it swells into a red super-giant. At the same time, the inner iron core implodes, compressing its atoms and raising the internal temperature by billions of degrees.  This rapid increase in temperature and pressure unleashes a devastating shock wave. When the shock wave reaches the star's outer layers, they are superheated and thrust out into space, resulting in a brilliant release of supernova light.  The final concept is known as the binary merger theory. Perhaps the simplest of all the theories, it begins with a pair of neutron stars, or a neutron star and a black hole orbiting each other.  The gravity between the two objects causes them to draw nearer and whirl at increasing speed. The force of their gravitational attraction is so strong that it begins to distort their shape. Before long, the two objects merge, producing a black hole and an eruption of gamma rays. swift grb gamma_ray_burst afterglow X-ray observatory telescope astronomy midex early_universe survey blastwave ultraviolet optical multi-wavelength",
-      "selected_footage_url": "https://images-assets.nasa.gov/video/ksc_111604_swift_three_theories/collection.json",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.85,
-        "reason": "The frames show an animated depiction of a star's core and stellar processes, matching the scene's focus on the core of a star.",
-        "query": "core of a star"
       }
     },
     {
-      "narration": "The lifecycle of high mass stars diverges from low mass stars after carbon fusion.",
-      "visual_focus": "massive star in space",
-      "visual_query": "massive star in space",
+      "narration": "Mature colonies eventually produce winged reproductives that prepare to leave the natal nest during seasonal mating flights.",
+      "visual_focus": "winged ant reproductives",
+      "visual_query": "winged ant reproductives reproductive ants preparing for flight",
       "visual_queries": [
-        "massive star evolution phase",
-        "high mass star luminosity"
+        "alates gathering on ant nest",
+        "winged ants ready fly"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "massive star in space",
-      "source_label": "Penn State ASTRO 801",
-      "source_url": "https://courses.ems.psu.edu/astro801/content/l6_p5.html",
+      "reference_query": "winged ant reproductives reproductive ants preparing for flight",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6,
       "voice_timing": {
-        "start_seconds": 36.478,
-        "spoken_end_seconds": 41.95,
-        "visual_end_seconds": 42.25,
-        "duration_seconds": 5.772,
+        "start_seconds": 48.43,
+        "spoken_end_seconds": 55.75,
+        "visual_end_seconds": 56.05,
+        "duration_seconds": 7.62,
         "first_sentence_index": 6,
         "last_sentence_index": 6
-      },
-      "media_file": "output/footage/scene_07.mp4",
-      "selected_footage_source": "NASA",
-      "selected_footage_tags": "Supernova with Expanding Shell Stars which are 8 times or more massive than our Sun end their lives in a most spectacular way; they go supernova. A supernova explosion will occur when there is no longer enough fuel for the fusion process in the core of the star to create an outward pressure which combats the inward gravitational pull of the star's great mass. In less than a second, the star begins the final phase of gravitational collapse. The core temperature rises to over 100 billion degrees as the iron atoms are crushed together. The repulsive force between the nuclei is overcome by the force of gravity. So the core compresses but then recoils. The energy of the recoil is transferred to the envelope of the star, which then explodes and produces a shock wave. As the shock encounters material in the star's outer layers, the material is heated, fusing to form new elements and radioactive isotopes. The shock then propels that matter out into space. The material that is exploded away from the star is now known as a supernova remnant. Galaxy Space Science Astrophyiscs Universe Supernova Star",
-      "selected_footage_url": "https://images-assets.nasa.gov/video/GSFC_20100126_Nova_m10547_SuperNova/collection.json",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly depict a massive star in space surrounded by glowing gas and nebular material, directly supporting the required visual focus.",
-        "query": "massive star in space"
       }
     },
     {
-      "narration": "Neutron stars are the second smallest and second densest known class of stellar objects.",
-      "visual_focus": "dense neutron star",
-      "visual_query": "dense neutron star",
+      "narration": "Successful mated females shed their wings to establish brand new foundations and begin the intricate cycle anew.",
+      "visual_focus": "queen ant shedding wings",
+      "visual_query": "new queen ant shedding wings",
       "visual_queries": [
-        "neutron star in space",
-        "pulsar neutron star rotation"
+        "mated female ant starting nest",
+        "queen ant digging new burrow"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "dense neutron star",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Neutron_star",
+      "reference_query": "new queen ant shedding wings",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7,
       "voice_timing": {
-        "start_seconds": 42.25,
-        "spoken_end_seconds": 47.938,
-        "visual_end_seconds": 49.188,
-        "duration_seconds": 6.938,
+        "start_seconds": 56.05,
+        "spoken_end_seconds": 62.962,
+        "visual_end_seconds": 64.212,
+        "duration_seconds": 8.162,
         "first_sentence_index": 7,
         "last_sentence_index": 7
-      },
-      "media_file": "output/footage/scene_08.mp4",
-      "selected_footage_source": "Wikimedia Commons",
-      "selected_footage_tags": "File:Neutron star merger animation ending with kilonova explosion.webm This artist’s impression video shows how two tiny but very dense neutron stars merge and explode as a kilonova. Such a very rare event is expected to produce both gravitational waves and a short gamma-ray burst, both of which were observed on 17 August 2017 by LIGO–Virgo and Fermi/INTEGRAL respectively. Subsequent detailed observations with many ESO telescopes have confirmed that this object, seen in the galaxy NGC 4993 about 130 million light-years from the Earth, is indeed a kilonova. Such objects are the main source of very heavy chemical elements, such as gold and platinum in the Universe.",
-      "selected_footage_url": "https://commons.wikimedia.org/wiki/File:Neutron_star_merger_animation_ending_with_kilonova_explosion.webm",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show dense neutron stars in space, matching the required visual focus of a dense neutron star.",
-        "query": "dense neutron star"
       }
     }
   ],
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "Have you ever looked up into the night sky and wondered just how many stars there are in space?",
+      "sentence": "Tiny white ant eggs are carefully tended by worker ants within the hidden depths of the dark underground nest.",
       "source_urls": [
-        "https://www.esa.int/articles/about-us/directorates/science/how-many-stars-are-there-in-the-universe"
+        "https://en.wikipedia.org/wiki/Ant",
+        "https://en.wikipedia.org/wiki/Ant_colony"
       ]
     },
     {
       "scene": 2,
-      "sentence": "The observable universe contains an estimated range of celestial bodies and distant light sources.",
+      "sentence": "Hatching from these fragile eggs emerge legless larvae that rely entirely on adults for constant nourishment and care.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Star"
+        "https://en.wikipedia.org/wiki/Ant",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7762752"
       ]
     },
     {
       "scene": 3,
-      "sentence": "All stars are formed from collapsing clouds of gas and dust known as molecular clouds.",
+      "sentence": "During the resting pupal stage, the motionless insect undergoes a remarkable internal transformation into an adult form.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stellar_evolution"
+        "https://en.wikipedia.org/wiki/Ant",
+        "https://pubmed.ncbi.nlm.nih.gov/33390754"
       ]
     },
     {
       "scene": 4,
-      "sentence": "Astronomers state that all stars like our sun are always born with a sibling.",
+      "sentence": "Newly emerged adult workers begin their lives inside the subterranean nest by performing essential maintenance and nursery duties.",
       "source_urls": [
-        "https://news.berkeley.edu/2017/06/13/new-evidence-that-all-stars-are-born-in-pairs/"
+        "https://en.wikipedia.org/wiki/Ant_colony",
+        "https://pubmed.ncbi.nlm.nih.gov/24094856"
       ]
     },
     {
       "scene": 5,
-      "sentence": "Many other stars are visible to the naked eye at night across the constellations.",
+      "sentence": "As these workers grow older, they transition to foraging outside for vital resources to sustain the entire growing colony.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Star"
+        "https://en.wikipedia.org/wiki/Ant",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2567467"
       ]
     },
     {
       "scene": 6,
-      "sentence": "As atoms at the core become helium, stars like the Sun begin to fuse hydrogen.",
+      "sentence": "Within the heart of the community, the specialized queen remains focused primarily on continuous egg production and colony expansion.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stellar_evolution"
+        "https://en.wikipedia.org/wiki/Ant_colony",
+        "https://pubmed.ncbi.nlm.nih.gov/18794530"
       ]
     },
     {
       "scene": 7,
-      "sentence": "The lifecycle of high mass stars diverges from low mass stars after carbon fusion.",
+      "sentence": "Mature colonies eventually produce winged reproductives that prepare to leave the natal nest during seasonal mating flights.",
       "source_urls": [
-        "https://courses.ems.psu.edu/astro801/content/l6_p5.html"
+        "https://en.wikipedia.org/wiki/Ant",
+        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4021219"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Neutron stars are the second smallest and second densest known class of stellar objects.",
+      "sentence": "Successful mated females shed their wings to establish brand new foundations and begin the intricate cycle anew.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Neutron_star"
+        "https://en.wikipedia.org/wiki/Ant",
+        "https://pubmed.ncbi.nlm.nih.gov/24886136"
       ]
     }
   ],
-  "script": "Have you ever looked up into the night sky and wondered just how many stars there are in space? The observable universe contains an estimated range of celestial bodies and distant light sources. All stars are formed from collapsing clouds of gas and dust known as molecular clouds. Astronomers state that all stars like our sun are always born with a sibling. Many other stars are visible to the naked eye at night across the constellations. As atoms at the core become helium, stars like the Sun begin to fuse hydrogen. The lifecycle of high mass stars diverges from low mass stars after carbon fusion. Neutron stars are the second smallest and second densest known class of stellar objects.",
+  "script": "Tiny white ant eggs are carefully tended by worker ants within the hidden depths of the dark underground nest. Hatching from these fragile eggs emerge legless larvae that rely entirely on adults for constant nourishment and care. During the resting pupal stage, the motionless insect undergoes a remarkable internal transformation into an adult form. Newly emerged adult workers begin their lives inside the subterranean nest by performing essential maintenance and nursery duties. As these workers grow older, they transition to foraging outside for vital resources to sustain the entire growing colony. Within the heart of the community, the specialized queen remains focused primarily on continuous egg production and colony expansion. Mature colonies eventually produce winged reproductives that prepare to leave the natal nest during seasonal mating flights. Successful mated females shed their wings to establish brand new foundations and begin the intricate cycle anew.",
   "ai_provider": {
     "provider": "gemini",
     "model": "gemini-3.5-flash-lite"
   },
   "opening_overlay": {
     "path": "output/opening_overlay.png",
-    "adjustments": [
-      "hook shortened to 12 words"
-    ],
+    "adjustments": [],
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "STELLAR EVOLUTION AND COSMIC ORIGINS"
+        "THE HIDDEN LIFE CYCLE OF ANTS"
       ],
       "hook_lines": [
-        "Have you ever looked up",
-        "into the night sky and",
-        "wondered just"
+        "Discover how tiny eggs",
+        "transform into complex",
+        "colonies beneath our",
+        "feet."
       ],
-      "title_text": "Stellar Evolution and Cosmic Origins",
-      "hook_text": "Have you ever looked up into the night sky and wondered just",
+      "title_text": "The Hidden Life Cycle of Ants",
+      "hook_text": "Discover how tiny eggs transform into complex colonies beneath our feet.",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,
@@ -370,7 +297,7 @@
         48,
         150,
         1032,
-        470
+        538
       ]
     }
   },

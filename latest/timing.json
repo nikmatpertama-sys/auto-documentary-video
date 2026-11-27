@@ -2,876 +2,1051 @@
   "sentences": [
     {
       "start": 0.75,
-      "end": 6.27,
-      "duration": 5.52
+      "end": 7.374,
+      "duration": 6.624
     },
     {
-      "start": 6.97,
-      "end": 13.498,
-      "duration": 6.528
+      "start": 8.074,
+      "end": 15.274000000000001,
+      "duration": 7.2
     },
     {
-      "start": 13.798,
-      "end": 19.366,
-      "duration": 5.568
+      "start": 15.574000000000002,
+      "end": 23.446,
+      "duration": 7.872
     },
     {
-      "start": 19.666,
-      "end": 24.826,
-      "duration": 5.16
+      "start": 23.746000000000002,
+      "end": 31.738000000000003,
+      "duration": 7.992
     },
     {
-      "start": 25.126,
-      "end": 30.406000000000002,
-      "duration": 5.28
+      "start": 32.038000000000004,
+      "end": 39.694,
+      "duration": 7.656
     },
     {
-      "start": 30.706000000000003,
-      "end": 36.178000000000004,
-      "duration": 5.472
+      "start": 39.994,
+      "end": 48.129999999999995,
+      "duration": 8.136
     },
     {
-      "start": 36.478,
-      "end": 41.95,
-      "duration": 5.472
+      "start": 48.42999999999999,
+      "end": 55.74999999999999,
+      "duration": 7.32
     },
     {
-      "start": 42.25,
-      "end": 47.938,
-      "duration": 5.688
+      "start": 56.04999999999999,
+      "end": 62.96199999999999,
+      "duration": 6.912
     }
   ],
   "word_events": [
     {
-      "text": "Have",
+      "text": "Tiny",
       "offset": 0.852083,
-      "duration": 0.208333,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "you",
-      "offset": 1.086458,
-      "duration": 0.15625,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "ever",
-      "offset": 1.25575,
-      "duration": 0.208333,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "looked",
-      "offset": 1.490125,
-      "duration": 0.234375,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "up",
-      "offset": 1.750541,
-      "duration": 0.14325,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "into",
-      "offset": 1.919791,
-      "duration": 0.169291,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "the",
-      "offset": 2.115125,
-      "duration": 0.104166,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "night",
-      "offset": 2.232291,
-      "duration": 0.208333,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "sky",
-      "offset": 2.453666,
       "duration": 0.338541,
       "timing_source": "edge_tts",
       "sentence_index": 0
     },
     {
-      "text": "and",
-      "offset": 2.805208,
-      "duration": 0.104166,
+      "text": "white",
+      "offset": 1.216666,
+      "duration": 0.234375,
       "timing_source": "edge_tts",
       "sentence_index": 0
     },
     {
-      "text": "wondered",
-      "offset": 2.935416,
-      "duration": 0.325541,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "just",
-      "offset": 3.273958,
-      "duration": 0.221375,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "how",
-      "offset": 3.508333,
-      "duration": 0.117208,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "many",
-      "offset": 3.638541,
-      "duration": 0.247416,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "stars",
-      "offset": 3.912,
-      "duration": 0.364583,
-      "timing_source": "edge_tts",
-      "sentence_index": 0
-    },
-    {
-      "text": "there",
-      "offset": 4.302625,
+      "text": "ant",
+      "offset": 1.477083,
       "duration": 0.182291,
       "timing_source": "edge_tts",
       "sentence_index": 0
     },
     {
-      "text": "are",
-      "offset": 4.5109580000000005,
-      "duration": 0.130208,
+      "text": "eggs",
+      "offset": 1.685416,
+      "duration": 0.234375,
       "timing_source": "edge_tts",
       "sentence_index": 0
     },
     {
-      "text": "in",
-      "offset": 4.6672080000000005,
+      "text": "are",
+      "offset": 1.945833,
       "duration": 0.104166,
       "timing_source": "edge_tts",
       "sentence_index": 0
     },
     {
-      "text": "space?",
-      "offset": 4.797416,
-      "duration": 0.546875,
+      "text": "carefully",
+      "offset": 2.076041,
+      "duration": 0.46875,
       "timing_source": "edge_tts",
       "sentence_index": 0
     },
     {
-      "text": "The",
-      "offset": 7.072083,
+      "text": "tended",
+      "offset": 2.570833,
+      "duration": 0.338541,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "by",
+      "offset": 2.935416,
+      "duration": 0.14325,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "worker",
+      "offset": 3.104708,
+      "duration": 0.429708,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "ants",
+      "offset": 3.560416,
+      "duration": 0.260416,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "within",
+      "offset": 3.846875,
+      "duration": 0.2995,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "the",
+      "offset": 4.172416,
+      "duration": 0.078125,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "hidden",
+      "offset": 4.263541,
+      "duration": 0.2995,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "depths",
+      "offset": 4.5890830000000005,
+      "duration": 0.338541,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "of",
+      "offset": 4.953666,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "the",
+      "offset": 5.070833,
+      "duration": 0.117208,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "dark",
+      "offset": 5.201041,
+      "duration": 0.260416,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "underground",
+      "offset": 5.4875,
+      "duration": 0.533875,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "nest.",
+      "offset": 6.034375,
+      "duration": 0.403666,
+      "timing_source": "edge_tts",
+      "sentence_index": 0
+    },
+    {
+      "text": "Hatching",
+      "offset": 8.176083,
+      "duration": 0.403666,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "from",
+      "offset": 8.605791,
       "duration": 0.15625,
       "timing_source": "edge_tts",
       "sentence_index": 1
     },
     {
-      "text": "observable",
-      "offset": 7.241375,
+      "text": "these",
+      "offset": 8.788083,
+      "duration": 0.182291,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "fragile",
+      "offset": 8.996416,
+      "duration": 0.403666,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "eggs",
+      "offset": 9.426083,
+      "duration": 0.234375,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "emerge",
+      "offset": 9.6865,
+      "duration": 0.325541,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "legless",
+      "offset": 10.038083,
+      "duration": 0.377625,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "larvae",
+      "offset": 10.441708,
+      "duration": 0.377625,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "that",
+      "offset": 10.845375,
+      "duration": 0.182291,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "rely",
+      "offset": 11.040666,
+      "duration": 0.2995,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "entirely",
+      "offset": 11.366208,
       "duration": 0.612,
       "timing_source": "edge_tts",
       "sentence_index": 1
     },
     {
-      "text": "universe",
-      "offset": 7.879375,
-      "duration": 0.533875,
+      "text": "on",
+      "offset": 12.004208,
+      "duration": 0.117208,
       "timing_source": "edge_tts",
       "sentence_index": 1
     },
     {
-      "text": "contains",
-      "offset": 8.42625,
-      "duration": 0.45575,
-      "timing_source": "edge_tts",
-      "sentence_index": 1
-    },
-    {
-      "text": "an",
-      "offset": 8.908040999999999,
-      "duration": 0.130208,
-      "timing_source": "edge_tts",
-      "sentence_index": 1
-    },
-    {
-      "text": "estimated",
-      "offset": 9.05125,
-      "duration": 0.572916,
-      "timing_source": "edge_tts",
-      "sentence_index": 1
-    },
-    {
-      "text": "range",
-      "offset": 9.650208,
-      "duration": 0.351583,
-      "timing_source": "edge_tts",
-      "sentence_index": 1
-    },
-    {
-      "text": "of",
-      "offset": 10.027833,
-      "duration": 0.104166,
-      "timing_source": "edge_tts",
-      "sentence_index": 1
-    },
-    {
-      "text": "celestial",
-      "offset": 10.158041,
-      "duration": 0.572916,
-      "timing_source": "edge_tts",
-      "sentence_index": 1
-    },
-    {
-      "text": "bodies",
-      "offset": 10.743958,
-      "duration": 0.403666,
-      "timing_source": "edge_tts",
-      "sentence_index": 1
-    },
-    {
-      "text": "and",
-      "offset": 11.173666,
-      "duration": 0.15625,
-      "timing_source": "edge_tts",
-      "sentence_index": 1
-    },
-    {
-      "text": "distant",
-      "offset": 11.355958,
+      "text": "adults",
+      "offset": 12.147458,
       "duration": 0.390625,
       "timing_source": "edge_tts",
       "sentence_index": 1
     },
     {
-      "text": "light",
-      "offset": 11.772625,
-      "duration": 0.208333,
+      "text": "for",
+      "offset": 12.551083,
+      "duration": 0.169291,
       "timing_source": "edge_tts",
       "sentence_index": 1
     },
     {
-      "text": "sources.",
-      "offset": 11.993958,
-      "duration": 0.559916,
+      "text": "constant",
+      "offset": 12.746416,
+      "duration": 0.45575,
       "timing_source": "edge_tts",
       "sentence_index": 1
     },
     {
-      "text": "All",
-      "offset": 13.900083,
-      "duration": 0.234375,
+      "text": "nourishment",
+      "offset": 13.228166,
+      "duration": 0.520833,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "and",
+      "offset": 13.762041,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "care.",
+      "offset": 13.89225,
+      "duration": 0.442708,
+      "timing_source": "edge_tts",
+      "sentence_index": 1
+    },
+    {
+      "text": "During",
+      "offset": 15.676083000000002,
+      "duration": 0.3125,
       "timing_source": "edge_tts",
       "sentence_index": 2
     },
     {
-      "text": "stars",
-      "offset": 14.1605,
+      "text": "the",
+      "offset": 16.014625000000002,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "resting",
+      "offset": 16.144833000000002,
+      "duration": 0.390625,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "pupal",
+      "offset": 16.561500000000002,
+      "duration": 0.364583,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "stage,",
+      "offset": 16.952125000000002,
+      "duration": 0.429708,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "the",
+      "offset": 17.564125,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "motionless",
+      "offset": 17.681291,
+      "duration": 0.546875,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "insect",
+      "offset": 18.254208000000002,
+      "duration": 0.442708,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "undergoes",
+      "offset": 18.709958,
+      "duration": 0.546875,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "a",
+      "offset": 19.282875,
+      "duration": 0.065125,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "remarkable",
+      "offset": 19.374000000000002,
+      "duration": 0.638041,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "internal",
+      "offset": 20.025041,
+      "duration": 0.481791,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "transformation",
+      "offset": 20.532875,
+      "duration": 0.807291,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "into",
+      "offset": 21.366208,
+      "duration": 0.221375,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "an",
+      "offset": 21.600583,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 2
+    },
+    {
+      "text": "adult",
+      "offset": 21.717750000000002,
       "duration": 0.325541,
       "timing_source": "edge_tts",
       "sentence_index": 2
     },
     {
-      "text": "are",
-      "offset": 14.512083,
-      "duration": 0.091166,
+      "text": "form.",
+      "offset": 22.069333,
+      "duration": 0.442708,
       "timing_source": "edge_tts",
       "sentence_index": 2
     },
     {
-      "text": "formed",
-      "offset": 14.62925,
-      "duration": 0.3125,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "from",
-      "offset": 14.967791,
-      "duration": 0.169291,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "collapsing",
-      "offset": 15.163125,
-      "duration": 0.559916,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "clouds",
-      "offset": 15.749041,
-      "duration": 0.338541,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "of",
-      "offset": 16.100625,
-      "duration": 0.104166,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "gas",
-      "offset": 16.230833,
-      "duration": 0.3125,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "and",
-      "offset": 16.569375,
-      "duration": 0.091166,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "dust",
-      "offset": 16.686541,
-      "duration": 0.260416,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "known",
-      "offset": 16.973,
-      "duration": 0.234375,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "as",
-      "offset": 17.220416,
-      "duration": 0.117208,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "molecular",
-      "offset": 17.350625,
-      "duration": 0.559916,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "clouds.",
-      "offset": 17.936541,
-      "duration": 0.520833,
-      "timing_source": "edge_tts",
-      "sentence_index": 2
-    },
-    {
-      "text": "Astronomers",
-      "offset": 19.768083,
-      "duration": 0.76825,
+      "text": "Newly",
+      "offset": 23.848083000000003,
+      "duration": 0.364583,
       "timing_source": "edge_tts",
       "sentence_index": 3
     },
     {
-      "text": "state",
-      "offset": 20.562375,
-      "duration": 0.286458,
+      "text": "emerged",
+      "offset": 24.238708000000003,
+      "duration": 0.403666,
       "timing_source": "edge_tts",
       "sentence_index": 3
     },
     {
-      "text": "that",
-      "offset": 20.874875,
-      "duration": 0.15625,
+      "text": "adult",
+      "offset": 24.668416,
+      "duration": 0.325541,
       "timing_source": "edge_tts",
       "sentence_index": 3
     },
     {
-      "text": "all",
-      "offset": 21.057166,
-      "duration": 0.195333,
+      "text": "workers",
+      "offset": 25.019958000000003,
+      "duration": 0.442708,
       "timing_source": "edge_tts",
       "sentence_index": 3
     },
     {
-      "text": "stars",
-      "offset": 21.2785,
-      "duration": 0.351583,
-      "timing_source": "edge_tts",
-      "sentence_index": 3
-    },
-    {
-      "text": "like",
-      "offset": 21.656125,
-      "duration": 0.195333,
-      "timing_source": "edge_tts",
-      "sentence_index": 3
-    },
-    {
-      "text": "our",
-      "offset": 21.877458,
-      "duration": 0.130208,
-      "timing_source": "edge_tts",
-      "sentence_index": 3
-    },
-    {
-      "text": "sun",
-      "offset": 22.033708,
+      "text": "begin",
+      "offset": 25.488708000000003,
       "duration": 0.2995,
       "timing_source": "edge_tts",
       "sentence_index": 3
     },
     {
-      "text": "are",
-      "offset": 22.35925,
+      "text": "their",
+      "offset": 25.81425,
       "duration": 0.15625,
       "timing_source": "edge_tts",
       "sentence_index": 3
     },
     {
-      "text": "always",
-      "offset": 22.541541000000002,
-      "duration": 0.3125,
-      "timing_source": "edge_tts",
-      "sentence_index": 3
-    },
-    {
-      "text": "born",
-      "offset": 22.880083,
-      "duration": 0.260416,
-      "timing_source": "edge_tts",
-      "sentence_index": 3
-    },
-    {
-      "text": "with",
-      "offset": 23.1535,
-      "duration": 0.14325,
-      "timing_source": "edge_tts",
-      "sentence_index": 3
-    },
-    {
-      "text": "a",
-      "offset": 23.322791000000002,
-      "duration": 0.065125,
-      "timing_source": "edge_tts",
-      "sentence_index": 3
-    },
-    {
-      "text": "sibling.",
-      "offset": 23.413916,
-      "duration": 0.494791,
-      "timing_source": "edge_tts",
-      "sentence_index": 3
-    },
-    {
-      "text": "Many",
-      "offset": 25.228083,
-      "duration": 0.377625,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "other",
-      "offset": 25.63175,
-      "duration": 0.208333,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "stars",
-      "offset": 25.866125,
+      "text": "lives",
+      "offset": 25.996541,
       "duration": 0.364583,
       "timing_source": "edge_tts",
-      "sentence_index": 4
+      "sentence_index": 3
     },
     {
-      "text": "are",
-      "offset": 26.25675,
+      "text": "inside",
+      "offset": 26.387166,
+      "duration": 0.390625,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "the",
+      "offset": 26.790791000000002,
       "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "subterranean",
+      "offset": 26.908,
+      "duration": 0.729166,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "nest",
+      "offset": 27.663208,
+      "duration": 0.286458,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "by",
+      "offset": 27.962666000000002,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "performing",
+      "offset": 28.118916000000002,
+      "duration": 0.507833,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "essential",
+      "offset": 28.639750000000003,
+      "duration": 0.481791,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "maintenance",
+      "offset": 29.134541000000002,
+      "duration": 0.533875,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "and",
+      "offset": 29.681416000000002,
+      "duration": 0.169291,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "nursery",
+      "offset": 29.87675,
+      "duration": 0.403666,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "duties.",
+      "offset": 30.293416,
+      "duration": 0.520833,
+      "timing_source": "edge_tts",
+      "sentence_index": 3
+    },
+    {
+      "text": "As",
+      "offset": 32.140083000000004,
+      "duration": 0.221375,
       "timing_source": "edge_tts",
       "sentence_index": 4
     },
     {
-      "text": "visible",
-      "offset": 26.373916,
+      "text": "these",
+      "offset": 32.3875,
+      "duration": 0.182291,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "workers",
+      "offset": 32.595833000000006,
       "duration": 0.429708,
       "timing_source": "edge_tts",
       "sentence_index": 4
     },
     {
-      "text": "to",
-      "offset": 26.829666,
-      "duration": 0.104166,
+      "text": "grow",
+      "offset": 33.051541,
+      "duration": 0.221375,
       "timing_source": "edge_tts",
       "sentence_index": 4
     },
     {
-      "text": "the",
-      "offset": 26.959875,
-      "duration": 0.104166,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "naked",
-      "offset": 27.077041,
-      "duration": 0.351583,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "eye",
-      "offset": 27.454666000000003,
-      "duration": 0.130208,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "at",
-      "offset": 27.610916000000003,
-      "duration": 0.130208,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "night",
-      "offset": 27.767166000000003,
-      "duration": 0.234375,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "across",
-      "offset": 28.027583,
-      "duration": 0.364583,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "the",
-      "offset": 28.418208,
-      "duration": 0.104166,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "constellations.",
-      "offset": 28.535375000000002,
-      "duration": 0.9245,
-      "timing_source": "edge_tts",
-      "sentence_index": 4
-    },
-    {
-      "text": "As",
-      "offset": 30.808083000000003,
-      "duration": 0.208333,
-      "timing_source": "edge_tts",
-      "sentence_index": 5
-    },
-    {
-      "text": "atoms",
-      "offset": 31.042458000000003,
-      "duration": 0.351583,
-      "timing_source": "edge_tts",
-      "sentence_index": 5
-    },
-    {
-      "text": "at",
-      "offset": 31.420083,
-      "duration": 0.078125,
-      "timing_source": "edge_tts",
-      "sentence_index": 5
-    },
-    {
-      "text": "the",
-      "offset": 31.524250000000002,
-      "duration": 0.117208,
-      "timing_source": "edge_tts",
-      "sentence_index": 5
-    },
-    {
-      "text": "core",
-      "offset": 31.667458000000003,
-      "duration": 0.260416,
-      "timing_source": "edge_tts",
-      "sentence_index": 5
-    },
-    {
-      "text": "become",
-      "offset": 31.940916,
+      "text": "older,",
+      "offset": 33.298958000000006,
       "duration": 0.2995,
       "timing_source": "edge_tts",
-      "sentence_index": 5
+      "sentence_index": 4
     },
     {
-      "text": "helium,",
-      "offset": 32.26641600000001,
+      "text": "they",
+      "offset": 33.780708000000004,
+      "duration": 0.117208,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "transition",
+      "offset": 33.923958000000006,
+      "duration": 0.572916,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "to",
+      "offset": 34.522916,
+      "duration": 0.104166,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "foraging",
+      "offset": 34.640083000000004,
+      "duration": 0.494791,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "outside",
+      "offset": 35.160916,
+      "duration": 0.416666,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "for",
+      "offset": 35.590625,
+      "duration": 0.15625,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "vital",
+      "offset": 35.772916,
+      "duration": 0.325541,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "resources",
+      "offset": 36.124458000000004,
+      "duration": 0.546875,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "to",
+      "offset": 36.697375,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "sustain",
+      "offset": 36.814583000000006,
       "duration": 0.45575,
       "timing_source": "edge_tts",
-      "sentence_index": 5
+      "sentence_index": 4
     },
     {
-      "text": "stars",
-      "offset": 32.9305,
-      "duration": 0.364583,
+      "text": "the",
+      "offset": 37.296333000000004,
+      "duration": 0.078125,
       "timing_source": "edge_tts",
-      "sentence_index": 5
+      "sentence_index": 4
     },
     {
-      "text": "like",
-      "offset": 33.308083,
-      "duration": 0.15625,
+      "text": "entire",
+      "offset": 37.4005,
+      "duration": 0.45575,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "growing",
+      "offset": 37.882291,
+      "duration": 0.3125,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "colony.",
+      "offset": 38.207791,
+      "duration": 0.546875,
+      "timing_source": "edge_tts",
+      "sentence_index": 4
+    },
+    {
+      "text": "Within",
+      "offset": 40.096083,
+      "duration": 0.351583,
       "timing_source": "edge_tts",
       "sentence_index": 5
     },
     {
       "text": "the",
-      "offset": 33.490375,
-      "duration": 0.117208,
+      "offset": 40.473708,
+      "duration": 0.091166,
       "timing_source": "edge_tts",
       "sentence_index": 5
     },
     {
-      "text": "Sun",
-      "offset": 33.633625,
-      "duration": 0.260416,
+      "text": "heart",
+      "offset": 40.577875,
+      "duration": 0.221375,
       "timing_source": "edge_tts",
       "sentence_index": 5
     },
     {
-      "text": "begin",
-      "offset": 33.920083000000005,
+      "text": "of",
+      "offset": 40.81225,
+      "duration": 0.065125,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "the",
+      "offset": 40.903375,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "community,",
+      "offset": 41.020583,
+      "duration": 0.546875,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "the",
+      "offset": 41.788791,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "specialized",
+      "offset": 41.932041,
+      "duration": 0.664083,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "queen",
+      "offset": 42.622125,
       "duration": 0.286458,
       "timing_source": "edge_tts",
       "sentence_index": 5
     },
     {
-      "text": "to",
-      "offset": 34.21954100000001,
-      "duration": 0.091166,
+      "text": "remains",
+      "offset": 42.934625,
+      "duration": 0.403666,
       "timing_source": "edge_tts",
       "sentence_index": 5
     },
     {
-      "text": "fuse",
-      "offset": 34.323708,
-      "duration": 0.2995,
+      "text": "focused",
+      "offset": 43.351291,
+      "duration": 0.403666,
       "timing_source": "edge_tts",
       "sentence_index": 5
     },
     {
-      "text": "hydrogen.",
-      "offset": 34.64925,
-      "duration": 0.598958,
+      "text": "primarily",
+      "offset": 43.781,
+      "duration": 0.612,
       "timing_source": "edge_tts",
       "sentence_index": 5
     },
     {
-      "text": "The",
-      "offset": 36.580083,
-      "duration": 0.14325,
+      "text": "on",
+      "offset": 44.419,
+      "duration": 0.130208,
       "timing_source": "edge_tts",
-      "sentence_index": 6
+      "sentence_index": 5
     },
     {
-      "text": "lifecycle",
-      "offset": 36.749375,
+      "text": "continuous",
+      "offset": 44.57525,
+      "duration": 0.651041,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "egg",
+      "offset": 45.252333,
+      "duration": 0.15625,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "production",
+      "offset": 45.421625,
       "duration": 0.533875,
       "timing_source": "edge_tts",
-      "sentence_index": 6
+      "sentence_index": 5
     },
     {
-      "text": "of",
-      "offset": 37.29625,
-      "duration": 0.091166,
+      "text": "and",
+      "offset": 45.9815,
+      "duration": 0.117208,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "colony",
+      "offset": 46.12475,
+      "duration": 0.416666,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "expansion.",
+      "offset": 46.567458,
+      "duration": 0.625,
+      "timing_source": "edge_tts",
+      "sentence_index": 5
+    },
+    {
+      "text": "Mature",
+      "offset": 48.53208299999999,
+      "duration": 0.416666,
       "timing_source": "edge_tts",
       "sentence_index": 6
     },
     {
-      "text": "high",
-      "offset": 37.413416,
+      "text": "colonies",
+      "offset": 48.96179099999999,
+      "duration": 0.507833,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "eventually",
+      "offset": 49.49562499999999,
+      "duration": 0.507833,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "produce",
+      "offset": 50.01645799999999,
+      "duration": 0.377625,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "winged",
+      "offset": 50.42012499999999,
+      "duration": 0.286458,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "reproductives",
+      "offset": 50.73262499999999,
+      "duration": 0.78125,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "that",
+      "offset": 51.53991599999999,
       "duration": 0.14325,
       "timing_source": "edge_tts",
       "sentence_index": 6
     },
     {
-      "text": "mass",
-      "offset": 37.582708000000004,
-      "duration": 0.2995,
+      "text": "prepare",
+      "offset": 51.709165999999996,
+      "duration": 0.351583,
       "timing_source": "edge_tts",
       "sentence_index": 6
     },
     {
-      "text": "stars",
-      "offset": 37.908208,
+      "text": "to",
+      "offset": 52.08679099999999,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "leave",
+      "offset": 52.20395799999999,
+      "duration": 0.221375,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "the",
+      "offset": 52.45137499999999,
+      "duration": 0.091166,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "natal",
+      "offset": 52.568540999999996,
+      "duration": 0.338541,
+      "timing_source": "edge_tts",
+      "sentence_index": 6
+    },
+    {
+      "text": "nest",
+      "offset": 52.93312499999999,
       "duration": 0.3125,
       "timing_source": "edge_tts",
       "sentence_index": 6
     },
     {
-      "text": "diverges",
-      "offset": 38.24675,
-      "duration": 0.520833,
+      "text": "during",
+      "offset": 53.25866599999999,
+      "duration": 0.273458,
       "timing_source": "edge_tts",
       "sentence_index": 6
     },
     {
-      "text": "from",
-      "offset": 38.793625,
-      "duration": 0.195333,
+      "text": "seasonal",
+      "offset": 53.55812499999999,
+      "duration": 0.442708,
       "timing_source": "edge_tts",
       "sentence_index": 6
     },
     {
-      "text": "low",
-      "offset": 39.015,
-      "duration": 0.169291,
+      "text": "mating",
+      "offset": 54.01387499999999,
+      "duration": 0.2995,
       "timing_source": "edge_tts",
       "sentence_index": 6
     },
     {
-      "text": "mass",
-      "offset": 39.197291,
-      "duration": 0.260416,
+      "text": "flights.",
+      "offset": 54.33937499999999,
+      "duration": 0.494791,
       "timing_source": "edge_tts",
       "sentence_index": 6
     },
     {
-      "text": "stars",
-      "offset": 39.48375,
-      "duration": 0.390625,
+      "text": "Successful",
+      "offset": 56.15208299999999,
+      "duration": 0.651041,
       "timing_source": "edge_tts",
-      "sentence_index": 6
+      "sentence_index": 7
     },
     {
-      "text": "after",
-      "offset": 39.900416,
-      "duration": 0.247416,
+      "text": "mated",
+      "offset": 56.81616599999999,
+      "duration": 0.3125,
       "timing_source": "edge_tts",
-      "sentence_index": 6
+      "sentence_index": 7
     },
     {
-      "text": "carbon",
-      "offset": 40.173833,
-      "duration": 0.364583,
-      "timing_source": "edge_tts",
-      "sentence_index": 6
-    },
-    {
-      "text": "fusion.",
-      "offset": 40.564458,
+      "text": "females",
+      "offset": 57.15470799999999,
       "duration": 0.45575,
       "timing_source": "edge_tts",
-      "sentence_index": 6
+      "sentence_index": 7
     },
     {
-      "text": "Neutron",
-      "offset": 42.352083,
-      "duration": 0.481791,
+      "text": "shed",
+      "offset": 57.63645799999999,
+      "duration": 0.247416,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "stars",
-      "offset": 42.859916,
-      "duration": 0.377625,
+      "text": "their",
+      "offset": 57.90991599999999,
+      "duration": 0.14325,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "are",
-      "offset": 43.263541000000004,
-      "duration": 0.078125,
+      "text": "wings",
+      "offset": 58.07916599999999,
+      "duration": 0.260416,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "the",
-      "offset": 43.354708,
-      "duration": 0.091166,
+      "text": "to",
+      "offset": 58.36562499999999,
+      "duration": 0.117208,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "second",
-      "offset": 43.471875,
-      "duration": 0.377625,
+      "text": "establish",
+      "offset": 58.49583299999999,
+      "duration": 0.546875,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "smallest",
-      "offset": 43.8625,
-      "duration": 0.481791,
+      "text": "brand",
+      "offset": 59.05574999999999,
+      "duration": 0.3125,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "new",
+      "offset": 59.38124999999999,
+      "duration": 0.130208,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "foundations",
+      "offset": 59.52449999999999,
+      "duration": 0.664083,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
       "text": "and",
-      "offset": 44.370333,
+      "offset": 60.21458299999999,
       "duration": 0.091166,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "second",
-      "offset": 44.4875,
-      "duration": 0.364583,
-      "timing_source": "edge_tts",
-      "sentence_index": 7
-    },
-    {
-      "text": "densest",
-      "offset": 44.878125,
-      "duration": 0.416666,
-      "timing_source": "edge_tts",
-      "sentence_index": 7
-    },
-    {
-      "text": "known",
-      "offset": 45.320833,
-      "duration": 0.234375,
-      "timing_source": "edge_tts",
-      "sentence_index": 7
-    },
-    {
-      "text": "class",
-      "offset": 45.58125,
+      "text": "begin",
+      "offset": 60.33179099999999,
       "duration": 0.3125,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "of",
-      "offset": 45.906791,
-      "duration": 0.091166,
+      "text": "the",
+      "offset": 60.67033299999999,
+      "duration": 0.104166,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "stellar",
-      "offset": 46.023958,
-      "duration": 0.403666,
+      "text": "intricate",
+      "offset": 60.80054099999999,
+      "duration": 0.45575,
       "timing_source": "edge_tts",
       "sentence_index": 7
     },
     {
-      "text": "objects.",
-      "offset": 46.453666,
-      "duration": 0.559916,
+      "text": "cycle",
+      "offset": 61.28229099999999,
+      "duration": 0.390625,
+      "timing_source": "edge_tts",
+      "sentence_index": 7
+    },
+    {
+      "text": "anew.",
+      "offset": 61.69895799999999,
+      "duration": 0.338541,
       "timing_source": "edge_tts",
       "sentence_index": 7
     }
@@ -879,124 +1054,149 @@
   "caption_groups": [
     {
       "start": 0.852083,
-      "end": 2.219291,
-      "text": "Have you ever looked up into the"
+      "end": 2.9093739999999997,
+      "text": "Tiny white ant eggs are carefully tended"
     },
     {
-      "start": 2.232291,
-      "end": 3.885957,
-      "text": "night sky and wondered just how many"
+      "start": 2.935416,
+      "end": 4.927624000000001,
+      "text": "by worker ants within the hidden depths"
     },
     {
-      "start": 3.912,
-      "end": 5.344291,
-      "text": "stars there are in space?"
+      "start": 4.953666,
+      "end": 6.438041,
+      "text": "of the dark underground nest."
     },
     {
-      "start": 7.072083,
-      "end": 9.038248999999999,
-      "text": "The observable universe contains an"
+      "start": 8.176083,
+      "end": 10.012041,
+      "text": "Hatching from these fragile eggs emerge"
     },
     {
-      "start": 9.05125,
-      "end": 11.329916,
-      "text": "estimated range of celestial bodies and"
+      "start": 10.038083,
+      "end": 12.538083,
+      "text": "legless larvae that rely entirely on adults"
     },
     {
-      "start": 11.355958,
-      "end": 12.553873999999999,
-      "text": "distant light sources."
+      "start": 12.551083,
+      "end": 14.334958,
+      "text": "for constant nourishment and care."
     },
     {
-      "start": 13.900083,
-      "end": 16.087582,
-      "text": "All stars are formed from collapsing clouds"
+      "start": 15.676083000000002,
+      "end": 17.381833000000004,
+      "text": "During the resting pupal stage,"
     },
     {
-      "start": 16.100625,
-      "end": 17.910541000000002,
-      "text": "of gas and dust known as molecular"
+      "start": 17.564125,
+      "end": 20.012041000000004,
+      "text": "the motionless insect undergoes a remarkable"
     },
     {
-      "start": 17.936541,
-      "end": 18.457373999999998,
-      "text": "clouds."
+      "start": 20.025041,
+      "end": 22.512041,
+      "text": "internal transformation into an adult form."
     },
     {
-      "start": 19.768083,
-      "end": 22.007666,
-      "text": "Astronomers state that all stars like our"
+      "start": 23.848083000000003,
+      "end": 25.9705,
+      "text": "Newly emerged adult workers begin their"
     },
     {
-      "start": 22.033708,
-      "end": 23.908707,
-      "text": "sun are always born with a sibling."
+      "start": 25.996541,
+      "end": 28.092874000000002,
+      "text": "lives inside the subterranean nest by"
     },
     {
-      "start": 25.228083,
-      "end": 27.064041,
-      "text": "Many other stars are visible to the"
+      "start": 28.118916000000002,
+      "end": 30.280416000000002,
+      "text": "performing essential maintenance and nursery"
     },
     {
-      "start": 27.077041,
-      "end": 28.522374,
-      "text": "naked eye at night across the"
+      "start": 30.293416,
+      "end": 30.814249,
+      "text": "duties."
     },
     {
-      "start": 28.535375000000002,
-      "end": 29.459875,
-      "text": "constellations."
+      "start": 32.140083000000004,
+      "end": 33.59845800000001,
+      "text": "As these workers grow older,"
     },
     {
-      "start": 30.808083000000003,
-      "end": 32.72216600000001,
-      "text": "As atoms at the core become helium,"
+      "start": 33.780708000000004,
+      "end": 35.746875,
+      "text": "they transition to foraging outside for"
     },
     {
-      "start": 32.9305,
-      "end": 34.623208000000005,
-      "text": "stars like the Sun begin to fuse"
+      "start": 35.772916,
+      "end": 37.85625,
+      "text": "vital resources to sustain the entire"
     },
     {
-      "start": 34.64925,
-      "end": 35.248208000000005,
-      "text": "hydrogen."
+      "start": 37.882291,
+      "end": 38.754666,
+      "text": "growing colony."
     },
     {
-      "start": 36.580083,
-      "end": 38.767583,
-      "text": "The lifecycle of high mass stars diverges"
+      "start": 40.096083,
+      "end": 41.567458,
+      "text": "Within the heart of the community,"
     },
     {
-      "start": 38.793625,
-      "end": 41.020208000000004,
-      "text": "from low mass stars after carbon fusion."
+      "start": 41.788791,
+      "end": 43.754957000000005,
+      "text": "the specialized queen remains focused"
     },
     {
-      "start": 42.352083,
-      "end": 44.461499,
-      "text": "Neutron stars are the second smallest and"
+      "start": 43.781,
+      "end": 46.098707999999995,
+      "text": "primarily on continuous egg production and"
     },
     {
-      "start": 44.4875,
-      "end": 46.427624,
-      "text": "second densest known class of stellar"
+      "start": 46.12475,
+      "end": 47.192458,
+      "text": "colony expansion."
     },
     {
-      "start": 46.453666,
-      "end": 47.013582,
-      "text": "objects."
+      "start": 48.53208299999999,
+      "end": 50.706582999999995,
+      "text": "Mature colonies eventually produce winged"
+    },
+    {
+      "start": 50.73262499999999,
+      "end": 52.54254099999999,
+      "text": "reproductives that prepare to leave the"
+    },
+    {
+      "start": 52.568540999999996,
+      "end": 54.83416599999999,
+      "text": "natal nest during seasonal mating flights."
+    },
+    {
+      "start": 56.15208299999999,
+      "end": 58.482832999999985,
+      "text": "Successful mated females shed their wings to"
+    },
+    {
+      "start": 58.49583299999999,
+      "end": 60.64429099999999,
+      "text": "establish brand new foundations and begin"
+    },
+    {
+      "start": 60.67033299999999,
+      "end": 62.03749899999999,
+      "text": "the intricate cycle anew."
     }
   ],
   "alignment": {
-    "total_words": 119,
-    "edge_timed_words": 119,
+    "total_words": 144,
+    "edge_timed_words": 144,
     "estimated_words": 0,
     "full_sentence_estimate_words": 0,
     "edge_timing_coverage": 1.0,
-    "caption_group_count": 22,
+    "caption_group_count": 27,
     "alignment_status": "complete_edge_timing"
   },
-  "total_duration": 49.188,
+  "total_duration": 64.212,
   "timing_master": "validated_voiceover"
 }
