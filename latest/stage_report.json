@@ -1,33 +1,26 @@
 {
   "status": "failed",
-  "current_stage": "fact_checking",
+  "current_stage": "documentary_plan_generation",
   "stages": [
     {
       "name": "research",
       "status": "completed",
-      "started_at_epoch": 1795789546.8200557,
-      "finished_at_epoch": 1795789550.008044,
-      "duration_seconds": 3.19
+      "started_at_epoch": 1795789635.199642,
+      "finished_at_epoch": 1795789638.4485717,
+      "duration_seconds": 3.25
     },
     {
       "name": "documentary_plan_generation",
-      "status": "completed",
-      "started_at_epoch": 1795789550.0194185,
-      "finished_at_epoch": 1795789558.3794677,
-      "duration_seconds": 8.36
-    },
-    {
-      "name": "fact_checking",
       "status": "failed",
-      "started_at_epoch": 1795789558.4445639,
-      "finished_at_epoch": 1795789631.5219483,
+      "started_at_epoch": 1795789638.448718,
+      "finished_at_epoch": 1795789658.167929,
       "failure_type": "RuntimeError",
-      "failure_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts. | produced a hundred‑meter ash plume, prompting evacuations of nearby towns.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
+      "failure_message": "All configured AI providers failed:\n- OpenRouter key 1: OpenRouter HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null,\"previous_errors\":[{\"code\":429,\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit\n- Groq key 1: Groq HTTP 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 193516, Requested 6958. Please try again in 3m24.768s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}} \n- Gemini key 1: Gemini HTTP 429: {   \"error\": {     \"code\": 429,     \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 17h32m41.209593956s.\",     \"status\": \"RESOURCE_EXHAUSTED\",     \"details\": [       {         \"@type\": \"type.googleapis.com/google.rpc.Hel\n- Cloudflare AI key pair 1: Scene narration totals 101 words; expected 120-200.\n- Cloudflare AI key pair 2: Scene narration totals 83 words; expected 120-200."
     }
   ],
   "failure": {
     "error_type": "RuntimeError",
-    "error_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts. | produced a hundred‑meter ash plume, prompting evacuations of nearby towns.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
-    "finished_at_epoch": 1795789631.5230074
+    "error_message": "All configured AI providers failed:\n- OpenRouter key 1: OpenRouter HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null,\"previous_errors\":[{\"code\":429,\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit\n- Groq key 1: Groq HTTP 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 193516, Requested 6958. Please try again in 3m24.768s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}} \n- Gemini key 1: Gemini HTTP 429: {   \"error\": {     \"code\": 429,     \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 17h32m41.209593956s.\",     \"status\": \"RESOURCE_EXHAUSTED\",     \"details\": [       {         \"@type\": \"type.googleapis.com/google.rpc.Hel\n- Cloudflare AI key pair 1: Scene narration totals 101 words; expected 120-200.\n- Cloudflare AI key pair 2: Scene narration totals 83 words; expected 120-200.",
+    "finished_at_epoch": 1795789658.1690512
   }
 }
