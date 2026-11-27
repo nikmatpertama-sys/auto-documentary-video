@@ -146,6 +146,7 @@ class CoverrVerticalSourceTests(unittest.TestCase):
              patch.object(main, "internet_archive_search", return_value=[]), \
              patch.object(main, "commons_search", return_value=[]), \
              patch.object(main, "nasa_search", return_value=[]), \
+             patch.object(main, "web_page_video_search", return_value=[]), \
              patch.object(main, "google_open_web_video_search", return_value=[]):
             main.search_all_footage_sources("vertical rainforest", include_coverr=True)
             main.search_all_footage_sources("vertical rainforest", include_coverr=True)

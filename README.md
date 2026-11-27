@@ -1,7 +1,7 @@
-# Auto Documentary Video — MM6
+# Auto Documentary Video — MM7
 
 Automated vertical documentary generator for Facebook Reels. It researches a
- topic, writes a grounded 120-200-word Indonesian documentary script, fact-checks
+ topic, writes a grounded 120-200-word English documentary script, fact-checks
  its claims, searches and visually verifies real-world footage, generates a
  voice-over and reference-style subtitles, mixes a royalty-free music bed and
  sound design, renders a 1080x1920 video that ends with the narration, and gates
@@ -14,18 +14,43 @@ TOPIC -> RESEARCH -> SCRIPT -> FACT-CHECK -> FOOTAGE SEARCH -> VISUAL MATCHING
       -> VOICE-OVER -> EDITING -> AUDIO MIX -> RENDER -> QUALITY CONTROL
 ```
 
-MM6 details are documented in [`MM6_RELEASE_NOTES.md`](MM6_RELEASE_NOTES.md).
+MM6 details are documented in [`MM6_RELEASE_NOTES.md`](MM6_RELEASE_NOTES.md);
+the MM7 production-failure fixes are in
+[`MM7_RELEASE_NOTES.md`](MM7_RELEASE_NOTES.md).
+
+## MM7 — production failure fixes
+
+- **Research relevance:** search hits are scored before use. A hit whose *title*
+  does not share a topic word is rejected, so "siklus kehidupan semut" no longer
+  researches the topic from "Ekosistem" or "Rayap". The topic's own language is
+  searched first and its article's Wikipedia language links supply the matching
+  English/Indonesian counterpart (`research.json` also records rejected hits).
+- **Fact-checking:** claims are identified semantically (a model lists the
+  factual statements) with a declarative-sentence fallback. Every claim must
+  carry a verdict *and* evidence, and a run with fewer than three checked claims
+  fails instead of reporting PASS.
+- **Footage discovery:** queries are planned in short, subject-preserving layers
+  with synonym variants; every provider retries a shorter query when the full
+  one returns nothing (all these APIs AND their terms). Wikimedia Commons uses
+  `videoinfo` for real durations and English categories, and candidates whose
+  metadata only partly names the subject are sent to the visual model instead of
+  being discarded. A new `Web Search` source follows indexed pages to their
+  embedded `og:video`/`<video>`/`.mp4` sources, but only when the page states a
+  reusable licence.
+- **Ranking:** naming the exact subject outranks naming its broad category, so an
+  ant colony clip wins over a generic "insect on a leaf" clip.
 
 ## MM6 — reference-style production stages
 
-- **Language:** `SCRIPT_LANGUAGE=id` (default) writes and narrates in Bahasa
-  Indonesia with `id-ID-ArdiNeural`; `en` keeps the English path. Captions,
-  hook and vocabulary checks follow the same setting.
+- **Language:** English (`SCRIPT_LANGUAGE=en`) is the project default, narrated
+  with `en-US-GuyNeural`; `SCRIPT_LANGUAGE=id` switches the script, captions and
+  voice to Bahasa Indonesia (`id-ID-ArdiNeural`). Captions, hook and vocabulary
+  checks follow the same setting.
 - **Research:** `research.py` reads the public Wikipedia API (no key) and stores
   the evidence, URLs and licences in `research.json`.
-- **Fact-checking:** numeric/absolute claims are verified per claim, repaired
-  once when needed, and a surviving contradiction stops the run
-  (`fact_check.json`).
+- **Fact-checking:** claims are identified per sentence (semantically in MM7),
+  verified against the research brief, repaired once when needed, and a
+  surviving contradiction stops the run (`fact_check.json`).
 - **Duration:** the measured voice-over decides the video length. If it is under
   70 seconds the script is deepened or the delivery is slowed naturally and the
   VO regenerated; silence padding is never used.
@@ -45,7 +70,7 @@ MM6 details are documented in [`MM6_RELEASE_NOTES.md`](MM6_RELEASE_NOTES.md).
 
 ## Footage discovery — MM5 (MM4 source retained)
 
-The active footage search retains the MM4 Coverr integration (when `COVERR_API_KEY` is configured), Internet Archive, Wikimedia Commons, NASA, and Google Search for directly indexed reusable video files. Coverr is queried only for the primary scene query and one targeted retry, using `is_vertical:true`, `is_premium:false`, and `is_ai_generated:false`; catalog aspect ratios other than 9:16 are discarded before download, and `ffprobe` must still confirm the actual downloaded file is native 9:16. Coverr remains a native-vertical source; MM5's landscape reframing applies to other eligible high-relevance candidates only after separate AI crop planning and post-crop visual verification. This uses Coverr's official REST API rather than scraping its website. The open archives are preferred when candidates are similarly relevant; Google Search is a discovery index, not a video host. Ordinary YouTube/social pages are not scraped or downloaded. Google HTML results can be rate-limited or changed, so its candidates are ranked behind comparable archive results.
+The active footage search retains the MM4 Coverr integration (when `COVERR_API_KEY` is configured), Internet Archive, Wikimedia Commons, NASA, Web Search (page-embedded reusable video) and Google Search for directly indexed reusable video files. MM7 adds layered query planning, provider-side query relaxation and synonym bridging, because these catalogs AND every term in a query and a natural-language scene description used to return no hits at all. Coverr is queried only for the primary scene query and one targeted retry, using `is_vertical:true`, `is_premium:false`, and `is_ai_generated:false`; catalog aspect ratios other than 9:16 are discarded before download, and `ffprobe` must still confirm the actual downloaded file is native 9:16. Coverr remains a native-vertical source; MM5's landscape reframing applies to other eligible high-relevance candidates only after separate AI crop planning and post-crop visual verification. This uses Coverr's official REST API rather than scraping its website. The open archives are preferred when candidates are similarly relevant; Google Search is a discovery index, not a video host. Ordinary YouTube/social pages are not scraped or downloaded. Google HTML results can be rate-limited or changed, so its candidates are ranked behind comparable archive results.
 
 Coverr is optional: the workflow already maps `COVERR_API_KEY` from GitHub Actions secrets. If the secret is blank or unavailable, Coverr is skipped and all previous sources continue normally. Coverr's current license (updated 2026-11-04) allows commercial use of stock library footage, while the free Demo API tier requires attribution to Coverr and the creator; the retained MM4 integration adds that attribution to `credits.txt`. The API's documented Demo allowance is 50 requests/hour, so the integration caps its own Coverr searches at 18 per run and caches results. It excludes premium/watermarked and AI-generated library clips. See the [Coverr API video filters](https://coverr.co/api/docs/videos), [API rate limits](https://coverr.co/api/docs/start), and [current Coverr license](https://coverr.co/license/).
 

@@ -52,7 +52,7 @@ ENGLISH_SCRIPT = (
 )
 
 
-def make_plan(script=INDONESIAN_SCRIPT):
+def make_plan(script=ENGLISH_SCRIPT):
     sentences = [s.strip() for s in script.split(".") if s.strip()]
     # One sentence per scene, padding by splitting if needed.
     while len(sentences) < 8:
@@ -75,11 +75,13 @@ def make_plan(script=INDONESIAN_SCRIPT):
 
 
 class LanguageProfileTests(unittest.TestCase):
-    def test_default_language_is_indonesian(self):
-        self.assertEqual(reference_style.resolve_language_code(""), "id")
+    def test_default_language_is_english(self):
+        # The project's narration and VO foundation is English; Indonesian stays
+        # available through SCRIPT_LANGUAGE=id.
+        self.assertEqual(reference_style.resolve_language_code(""), "en")
+        self.assertEqual(reference_style.resolve_language_code("en-US"), "en")
         self.assertEqual(reference_style.resolve_language_code("id-ID"), "id")
         self.assertEqual(reference_style.resolve_language_code("in_ID"), "id")
-        self.assertEqual(reference_style.resolve_language_code("en"), "en")
 
     def test_profiles_use_matching_free_tts_voices(self):
         self.assertEqual(
@@ -242,17 +244,26 @@ class PlanValidationTests(unittest.TestCase):
         import main as main_module
         self.main = main_module
 
-    def test_valid_indonesian_plan_is_accepted_and_mapped(self):
+    def test_valid_english_plan_is_accepted_and_mapped(self):
         plan = self.main.validate_plan_candidate(make_plan())
         self.assertEqual(len(plan["scenes"]), 8)
         for scene in plan["scenes"]:
             self.assertIn("sentence_start", scene)
 
-    def test_english_plan_is_rejected_for_indonesian_runs(self):
-        if self.main.SCRIPT_LANGUAGE != "id":
-            self.skipTest("project default language is not Indonesian")
+    def test_valid_indonesian_plan_is_accepted_when_configured(self):
+        from unittest.mock import patch
+
+        with patch.object(self.main, "SCRIPT_LANGUAGE", "id"):
+            plan = self.main.validate_plan_candidate(make_plan(INDONESIAN_SCRIPT))
+        self.assertEqual(len(plan["scenes"]), 8)
+        for scene in plan["scenes"]:
+            self.assertIn("sentence_start", scene)
+
+    def test_indonesian_plan_is_rejected_for_english_runs(self):
+        if self.main.SCRIPT_LANGUAGE != "en":
+            self.skipTest("project default language is not English")
         with self.assertRaisesRegex(RuntimeError, "not written in"):
-            self.main.validate_plan_candidate(make_plan(ENGLISH_SCRIPT))
+            self.main.validate_plan_candidate(make_plan(INDONESIAN_SCRIPT))
 
     def test_plan_with_too_few_words_is_rejected(self):
         plan = make_plan()

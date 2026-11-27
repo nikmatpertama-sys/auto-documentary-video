@@ -59,7 +59,7 @@ LANGUAGE_PROFILES = {
     },
 }
 
-DEFAULT_LANGUAGE = "id"
+DEFAULT_LANGUAGE = "en"
 
 # Common function words used only to detect an obvious language mismatch
 # (for example an English script returned for an Indonesian request).
@@ -98,7 +98,7 @@ def resolve_language_code(value: str | None) -> str:
 
 
 def language_profile(code: str | None = None) -> dict:
-    """Return a copy of the profile for ``code`` (defaults to Indonesian)."""
+    """Return a copy of the profile for ``code`` (defaults to English)."""
     resolved = resolve_language_code(code)
     profile = dict(LANGUAGE_PROFILES[resolved])
     profile["code"] = resolved

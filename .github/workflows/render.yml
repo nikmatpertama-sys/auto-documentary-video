@@ -8,13 +8,13 @@ on:
         required: true
         type: string
       language:
-        description: "Narration language (id = Bahasa Indonesia, en = English)"
+        description: "Narration language (en = English, id = Bahasa Indonesia)"
         required: false
-        default: "id"
+        default: "en"
         type: choice
         options:
-          - id
           - en
+          - id
 
 permissions:
   contents: write

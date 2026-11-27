@@ -15,7 +15,7 @@ import traceback
 import html
 import threading
 from pathlib import Path
-from urllib.parse import quote, urlparse, parse_qs, urljoin
+from urllib.parse import quote, unquote, urlparse, parse_qs, urljoin
 from html.parser import HTMLParser
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -23,6 +23,7 @@ from email.utils import parsedate_to_datetime
 import requests
 import edge_tts
 
+import footage_queries
 import qc as qc_module
 import reference_style
 import research as research_module
@@ -306,6 +307,7 @@ FOOTAGE_SOURCE_PRIORITY = (
     "Internet Archive",
     "Wikimedia Commons",
     "NASA",
+    "Web Search",
     "Google Search",
     "Pexels",
     "Pixabay",
@@ -315,6 +317,7 @@ FOOTAGE_SOURCE_CANDIDATE_LIMITS = {
     "Internet Archive": 20,
     "Wikimedia Commons": 16,
     "NASA": 12,
+    "Web Search": 10,
     "Google Search": 12,
     "Pexels": 4,
     "Pixabay": 4,
@@ -374,8 +377,9 @@ FOOTAGE_SOURCE_COOLDOWN_UNTIL = {}
 FOOTAGE_SOURCE_MIN_INTERVAL = {
     "Coverr": 1.5,
     "Internet Archive": 1.0,
-    "Wikimedia Commons": 3.0,
+    "Wikimedia Commons": 2.0,
     "NASA": 1.0,
+    "Web Search": 2.5,
     "Google Search": 5.0,
     "Pexels": 1.0,
     "Pixabay": 1.0,
@@ -385,8 +389,12 @@ FOOTAGE_SOURCE_MAX_REQUESTS_PER_RUN = {
     # makes at most two targeted Coverr searches per scene, capped conservatively.
     "Coverr": 18,
     "Internet Archive": 240,
-    "Wikimedia Commons": 48,
+    # Commons is the workhorse for nature footage and allows paced bulk search.
+    # 48 was exhausted before the last scenes of a run, which left them with no
+    # discovery at all ("no candidate passed the metadata filter").
+    "Wikimedia Commons": 200,
     "NASA": 240,
+    "Web Search": 80,
     "Google Search": 36,
     "Pexels": 48,
     "Pixabay": 48,
@@ -399,6 +407,7 @@ FOOTAGE_SOURCE_CACHE_TTL = {
     "Internet Archive": 6 * 3600,
     "Wikimedia Commons": 6 * 3600,
     "NASA": 12 * 3600,
+    "Web Search": 3 * 3600,
     "Google Search": 3 * 3600,
     "Pexels": 6 * 3600,
     "Pixabay": 6 * 3600,
@@ -988,6 +997,58 @@ def normalize_words(text):
     )
 
 
+def candidate_search_text(hit):
+    """All searchable text a provider supplied for one candidate.
+
+    Catalogs disagree about which field holds the useful words: Commons keeps
+    the description and categories in extmetadata, Internet Archive in
+    ``subject``, a web result in its page title, and every one of them ships a
+    filename that often names the subject (``Ant_trail_on_concrete.webm``).
+    Normalising them here means relevance decisions behave the same across
+    providers and incomplete metadata is not mistaken for irrelevance.
+    """
+    url_path = ""
+    try:
+        url_path = unquote(urlparse(str(hit.get("url") or "")).path).replace("_", " ")
+    except Exception:
+        url_path = ""
+    return " ".join([
+        str(hit.get("title") or ""),
+        str(hit.get("tags") or ""),
+        str(hit.get("metadata") or ""),
+        str(hit.get("page_url") or ""),
+        url_path,
+    ])
+
+
+def candidate_partial_subject_match(hit, query):
+    """True when metadata names the scene's subject, even if details are missing.
+
+    Such a candidate is not accepted; it merely earns an AI visual review, which
+    is the only authority on whether the footage really matches the scene.
+    """
+    text_tokens = set(normalize_words(candidate_search_text(hit)))
+    if not text_tokens:
+        return False
+    _, groups = query_concepts(str(query or ""))
+    subject_names = {
+        "rainforest", "forest", "canopy", "aerial", "river", "waterfall",
+        "wildlife", "insect", "orchid", "jaguar", "bird", "rain", "ocean",
+        "desert", "forest_floor", "mountain", "research_activity",
+        "field_instrument",
+    }
+    subject_aliases = []
+    for name, aliases in groups.items():
+        if name in subject_names:
+            subject_aliases.append(aliases)
+    canonical = footage_queries.canonical_subject(
+        footage_queries.content_terms(str(query or ""))
+    )
+    if canonical:
+        subject_aliases.append(footage_queries.SYNONYM_GROUPS.get(canonical, set()))
+    return any(text_tokens & set(aliases) for aliases in subject_aliases)
+
+
 # ============================================================
 # AI DOCUMENTARY PLANNER
 # ============================================================
@@ -1495,24 +1556,63 @@ def _verify_claims(script, claims, research_data, label="fact check"):
     return result
 
 
+# A fact-check that checked nothing is a failure, not a pass.
+MIN_FACT_CHECK_CLAIMS = 3
+
+
+def extract_script_claims(script):
+    """Identify the script's factual claims semantically.
+
+    The model reads the narration and lists every statement that asserts a
+    verifiable fact, so claims are not limited to sentences containing a digit.
+    The sentence-level heuristic is only used when no provider is reachable, and
+    it now treats any declarative statement as a claim.
+    """
+    script = str(script or "").strip()
+    if not script:
+        return [], "none"
+    try:
+        payload, provider = call_json_with_providers(
+            research_module.claims_prompt(script), "claim extraction"
+        )
+        claims = research_module.parse_claims(payload)
+        if claims:
+            return claims, f"semantic:{provider}"
+        print(
+            "Claim extraction returned no usable claim; falling back to "
+            "sentence-level analysis."
+        )
+    except Exception as exc:
+        print(
+            "Semantic claim extraction unavailable "
+            f"({str(exc)[:200]}); using sentence-level analysis."
+        )
+    return research_module.extract_claims(script), "heuristic"
+
+
 def fact_check_plan(plan, research_data, max_repairs=1):
     """Verify factual claims and repair contradicted/unsupported sentences.
 
     A contradicted claim aborts the run after the repair attempt. Unsupported
     claims are repaired once and otherwise recorded as warnings, never hidden.
+    A run in which no claim could be checked fails instead of reporting PASS.
     """
-    claims = research_module.extract_claims(plan.get("script", ""))
-    if not claims:
-        return {
-            "claims": [],
-            "supported": 0,
-            "unsupported": 0,
-            "contradicted": 0,
-            "overall": "pass",
-            "note": "No numeric, dated or absolute claim was detected in the script.",
-        }
+    claims, claim_source = extract_script_claims(plan.get("script", ""))
+    if len(claims) < MIN_FACT_CHECK_CLAIMS:
+        raise RuntimeError(
+            "Fact check could not identify at least "
+            f"{MIN_FACT_CHECK_CLAIMS} verifiable claims in the script "
+            f"(found {len(claims)} via {claim_source}). A PASS without checked "
+            "claims is not allowed; the script must be regenerated with concrete, "
+            "verifiable statements."
+        )
 
     verification = _verify_claims(plan["script"], claims, research_data)
+    verification["claim_source"] = claim_source
+    verification["research_articles"] = [
+        {"title": article.get("title"), "url": article.get("url")}
+        for article in research_data.get("articles") or []
+    ]
     print(
         f"Fact check: {verification['supported']} supported, "
         f"{verification['unsupported']} unsupported, "
@@ -1550,12 +1650,20 @@ def fact_check_plan(plan, research_data, max_repairs=1):
             break
         plan.clear()
         plan.update(repaired)
+        repaired_claims, repaired_claim_source = extract_script_claims(plan["script"])
+        if len(repaired_claims) < MIN_FACT_CHECK_CLAIMS:
+            raise RuntimeError(
+                "The repaired script no longer contains enough verifiable claims "
+                f"({len(repaired_claims)} via {repaired_claim_source}); refusing to "
+                "report a fact-check pass."
+            )
         verification = _verify_claims(
             plan["script"],
-            research_module.extract_claims(plan["script"]),
+            repaired_claims,
             research_data,
             label="fact-check re-verification",
         )
+        verification["claim_source"] = repaired_claim_source
         verification["repair_provider"] = provider
         print(
             f"Fact check after repair: {verification['supported']} supported, "
@@ -1869,7 +1977,7 @@ class _GoogleResultParser(HTMLParser):
             self._text = []
 
 
-def google_open_web_video_search(query):
+def _google_direct_file_search(query):
     """Discover directly indexed reusable MP4 files through Google Search.
 
     Google is a discovery index, not a video host. Only direct video-file URLs
@@ -1938,6 +2046,244 @@ def google_open_web_video_search(query):
     if results:
         print(f"  Google Search: {len(results)} direct reusable-video file candidate(s)")
     return results
+
+
+# Hosts whose media is published for reuse by the site owner or by statute.
+_PUBLIC_MEDIA_HOSTS = (
+    "nasa.gov", "noaa.gov", "usgs.gov", "nps.gov", "loc.gov", "si.edu",
+    "commons.wikimedia.org", "archive.org", "esa.int", "esa.int",
+    "pexels.com", "pixabay.com", "coverr.co", "videvo.net", "mixkit.co",
+)
+_REUSE_SIGNAL = re.compile(
+    r"public\s*domain|creative\s*commons|\bcc0\b|\bcc[\s-]?by\b|free\s+to\s+use|"
+    r"royalty[\s-]free|no\s+attribution\s+required",
+    re.IGNORECASE,
+)
+_VIDEO_FILE_PATTERN = re.compile(
+    r"https?://[^\s\"'<>]+?\.(?:mp4|m4v|mov|webm)(?:\?[^\s\"'<>]*)?", re.IGNORECASE
+)
+_VIDEO_PAGE_PATTERN = re.compile(
+    r"<(?:video|source)[^>]+src=[\"']([^\"']+)[\"']|"
+    r"<meta[^>]+(?:property|name)=[\"'](?:og:video(?::secure_url|:url)?|"
+    r"twitter:player:stream)[\"'][^>]+content=[\"']([^\"']+)[\"']",
+    re.IGNORECASE,
+)
+
+
+def _decode_search_result_href(href):
+    """Resolve Google redirect links and DuckDuckGo ``uddg`` wrappers."""
+    href = str(href or "").strip()
+    if href.startswith("/url?"):
+        return parse_qs(urlparse(href).query).get("q", [""])[0]
+    parsed = urlparse(href)
+    if "duckduckgo.com" in (parsed.hostname or "") and parsed.path.startswith("/l/"):
+        return parse_qs(parsed.query).get("uddg", [""])[0]
+    if href.startswith("//"):
+        return "https:" + href
+    return href
+
+
+def _web_result_pages(search_text, source="Web Search", limit=40):
+    """Ordinary web result pages from Google, falling back to DuckDuckGo HTML.
+
+    Google increasingly answers scripted requests with a consent/JavaScript page
+    that contains no result links; DuckDuckGo's HTML endpoint is a free,
+    no-key fallback that still exposes indexed pages. Only result *pages* are
+    returned here; media URLs are resolved and licence-checked separately.
+    """
+    engines = (
+        ("DuckDuckGo", "https://html.duckduckgo.com/html/", {"q": search_text}),
+        ("Google", "https://www.google.com/search", {"q": search_text, "num": 30, "filter": "0"}),
+    )
+    for engine, endpoint, params in engines:
+        try:
+            response = _footage_source_get(
+                source,
+                endpoint,
+                params=params,
+                headers={
+                    "User-Agent": "AutoDocumentaryVideo/7.0 (+https://github.com/nikmatpertama-sys/auto-documentary-video)",
+                    "Accept-Language": "en-US,en;q=0.9",
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+        except (FootageSourceBudgetExceeded, FootageSourceCooldownActive):
+            raise
+        except Exception as exc:
+            print(f"  {engine} web discovery unavailable: {str(exc)[:180]}")
+            continue
+
+        parser = _GoogleResultParser()
+        parser.feed(response.text)
+        pages = []
+        seen = set()
+        for href, title in parser.results:
+            resolved = _decode_search_result_href(href)
+            if not resolved.startswith("https://"):
+                continue
+            host = (urlparse(resolved).hostname or "").lower()
+            if not host or any(
+                blocked in host
+                for blocked in ("google.", "gstatic.", "duckduckgo.", "youtube.", "youtu.be")
+            ):
+                continue
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            pages.append((engine, resolved, title))
+            if len(pages) >= limit:
+                break
+        print(f"  {engine} web discovery: {len(pages)} result page(s).")
+        if pages:
+            return pages
+    return []
+
+
+def _page_video_urls(page_url, page_html):
+    urls = []
+    for match in _VIDEO_PAGE_PATTERN.finditer(page_html):
+        candidate = match.group(1) or match.group(2)
+        if candidate:
+            urls.append(candidate)
+    urls.extend(_VIDEO_FILE_PATTERN.findall(page_html[:400000]))
+
+    resolved = []
+    seen = set()
+    for raw in urls:
+        absolute = urljoin(page_url, html.unescape(str(raw or "").strip()))
+        if not absolute.startswith("https://"):
+            continue
+        if not re.search(r"\.(?:mp4|m4v|mov|webm)(?:\?|$)", absolute, re.IGNORECASE):
+            continue
+        if absolute in seen:
+            continue
+        seen.add(absolute)
+        resolved.append(absolute)
+        if len(resolved) >= 4:
+            break
+    return resolved
+
+
+def _page_license_note(page_url, page_text):
+    """Return a licence statement only when the page actually grants reuse."""
+    host = (urlparse(page_url).hostname or "").lower()
+    if any(host == allowed or host.endswith("." + allowed) for allowed in _PUBLIC_MEDIA_HOSTS):
+        return f"Published by {host} for reuse; verify page terms ({page_url})"
+    match = _REUSE_SIGNAL.search(page_text)
+    if match:
+        return f"Page states reusable licence ('{match.group(0)}'); verify page terms ({page_url})"
+    return ""
+
+
+def google_open_web_video_search(query):
+    """Discover directly indexed reusable MP4 files through Google Search.
+
+    When the precise direct-file path finds little, page-embedded video sources
+    are added by ``web_page_video_search`` through the separate web-page source.
+    """
+    query = clean_query(query)
+    if not query:
+        return []
+
+    try:
+        results = _google_direct_file_search(query)
+    except (FootageSourceBudgetExceeded, FootageSourceCooldownActive) as exc:
+        print(f"  Google Search skipped: {str(exc)[:160]}")
+        return []
+
+    if len(results) >= 8:
+        return results[:12]
+    return _web_page_video_candidates(query, results)
+
+
+def web_page_video_search(query):
+    """Discover reusable video files embedded in ordinary web pages.
+
+    Search engines index *pages* that host footage (stock libraries, agency
+    media galleries, university and museum sites), not only bare .mp4 files.
+    Those pages are fetched and their embedded video sources (``<video>``,
+    ``og:video`` and .mp4 links) are extracted. A page is only used when it
+    carries an explicit reuse licence or belongs to a public-media host, so web
+    discovery never turns into "download whatever a search result shows".
+    """
+    return _web_page_video_candidates(clean_query(query), [])
+
+
+def _web_page_video_candidates(query, results):
+    """Append page-embedded video candidates discovered through web search."""
+    if not query:
+        return results
+    seen_urls = {item["url"] for item in results}
+    search_text = (
+        f'{query} video ("creative commons" OR "public domain" OR CC0 OR "CC BY" '
+        'OR "free stock footage")'
+    )
+    try:
+        pages = _web_result_pages(search_text, source="Web Search", limit=30)
+    except (FootageSourceBudgetExceeded, FootageSourceCooldownActive) as exc:
+        print(f"  Web page discovery stopped: {str(exc)[:160]}")
+        return results
+
+    for engine, page_url, title in pages:
+        if len(results) >= 12:
+            break
+        try:
+            page = _footage_source_get(
+                "Web Search",
+                page_url,
+                headers={
+                    "User-Agent": "AutoDocumentaryVideo/7.0 (+https://github.com/nikmatpertama-sys/auto-documentary-video)",
+                    "Accept": "text/html,application/xhtml+xml",
+                },
+                timeout=25,
+            )
+            page.raise_for_status()
+        except (FootageSourceBudgetExceeded, FootageSourceCooldownActive) as exc:
+            print(f"  Web page discovery stopped: {str(exc)[:160]}")
+            break
+        except Exception as exc:
+            print(f"  Web page skipped ({page_url[:80]}): {str(exc)[:120]}")
+            continue
+
+        content_type = str(page.headers.get("Content-Type") or "").lower()
+        if "html" not in content_type and "xml" not in content_type:
+            continue
+        page_html = page.text[:500000]
+        video_urls = _page_video_urls(page_url, page_html)
+        if not video_urls:
+            continue
+        page_text = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", page_html)))[:60000]
+        license_note = _page_license_note(page_url, page_text)
+        if not license_note:
+            print(f"  Web page has video but no reuse licence stated: {page_url[:100]}")
+            continue
+
+        page_title = title
+        if not page_title and "<title>" in page_html:
+            page_title = page_html.split("<title>", 1)[1].split("</title>", 1)[0].strip()
+        for video_url in video_urls[:2]:
+            if video_url in seen_urls:
+                continue
+            seen_urls.add(video_url)
+            results.append({
+                "source": "Web Search",
+                "id": hashlib.sha256(video_url.encode()).hexdigest()[:20],
+                "url": video_url,
+                "width": 0,
+                "height": 0,
+                "duration": 0,
+                "title": page_title or page_url,
+                "metadata": f"{page_title or ''} {title} {page_text[:900]}",
+                "tags": f"{page_title or ''} {title}",
+                "creator": "See source page",
+                "page_url": page_url,
+                "license": license_note,
+                "engine": engine,
+            })
+        print(f"  Web page video source accepted: {page_url[:100]} ({len(video_urls)} file(s))")
+
+    return results[:12]
 
 
 def pixabay_search(query):
@@ -2212,6 +2558,41 @@ def nasa_search(query):
 
 
 def commons_search(query):
+    """Search Commons with subject-preserving query relaxation.
+
+    Commons search ANDs every term, so a natural-language scene description such
+    as "ant colony underground tunnels macro" matches no file at all. The full
+    query is tried first, then progressively shorter variants that still name the
+    scene subject. Relaxed discovery is only discovery: every candidate is still
+    filtered by the metadata anchors and reviewed by the visual model.
+    """
+    variants = footage_queries.provider_query_variants(query, 3) or [clean_query(query)]
+    first_error = None
+    for index, variant in enumerate(variants):
+        try:
+            results = _commons_search_once(variant)
+        except (FootageSourceBudgetExceeded, FootageSourceCooldownActive):
+            raise
+        except Exception as exc:
+            # A provider hiccup on a relaxed variant must not hide results the
+            # strict query could still deliver.
+            if first_error is None:
+                first_error = exc
+            print(f"  Wikimedia Commons: query {variant!r} failed: {str(exc)[:200]}")
+            continue
+        if results:
+            if index:
+                print(
+                    f"  Wikimedia Commons: relaxed query {variant!r} produced "
+                    f"{len(results)} candidate(s)."
+                )
+            return results
+    if first_error is not None and len(variants) == 1:
+        raise first_error
+    return []
+
+
+def _commons_search_once(query):
     """Make one paced Commons search; the caller cools the source after HTTP 429."""
     global WIKIMEDIA_LAST_REQUEST_AT
 
@@ -2222,8 +2603,12 @@ def commons_search(query):
         "gsrsearch": f"filetype:video {clean_query(query)}",
         "gsrnamespace": 6,
         "gsrlimit": 20,
-        "prop": "imageinfo",
-        "iiprop": "url|size|mime|extmetadata",
+        # videoinfo carries the play length, and categories are the English
+        # subject labels many non-English uploads rely on.
+        "prop": "videoinfo|categories",
+        "viprop": "url|size|mime|extmetadata|metadata",
+        "clshow": "!hidden",
+        "cllimit": 20,
     }
     headers = {
         "User-Agent": WIKIMEDIA_USER_AGENT
@@ -2242,7 +2627,7 @@ def commons_search(query):
     results = []
 
     for page in pages.values():
-        info = (page.get("imageinfo") or [{}])[0]
+        info = (page.get("videoinfo") or page.get("imageinfo") or [{}])[0]
         mime = str(info.get("mime", ""))
         if not mime.startswith("video/"):
             continue
@@ -2284,7 +2669,33 @@ def commons_search(query):
             r"<[^>]+>", " ",
             str((ext.get("ImageDescription") or {}).get("value", "")),
         )
-        metadata = f"{page.get('title', '')} {description}"
+        categories = " ".join(
+            re.sub(r"^Category:", "", str(category.get("title") or ""))
+            for category in (page.get("categories") or [])
+            if isinstance(category, dict)
+        )
+        duration = 0.0
+        for entry in info.get("metadata") or []:
+            if not isinstance(entry, dict):
+                continue
+            if str(entry.get("name") or "").lower() not in (
+                "length", "playtime_seconds", "duration"
+            ):
+                continue
+            raw_length = str(entry.get("value") or "").strip()
+            try:
+                duration = float(raw_length)
+            except (TypeError, ValueError):
+                try:
+                    parts = [float(part) for part in raw_length.split(":")]
+                    duration = 0.0
+                    for part in parts:
+                        duration = duration * 60 + part
+                except (TypeError, ValueError):
+                    duration = 0.0
+            break
+
+        metadata = f"{page.get('title', '')} {description} {categories}"
         results.append({
             "source": "Wikimedia Commons",
             "id": str(page.get("pageid")),
@@ -2292,9 +2703,9 @@ def commons_search(query):
             "url": url,
             "width": int(info.get("width") or 0),
             "height": int(info.get("height") or 0),
-            "duration": 0,
+            "duration": duration,
             "metadata": metadata,
-            "tags": metadata,
+            "tags": f"{page.get('title', '')} {categories}",
             "creator": artist,
             "page_url": (
                 page.get("canonicalurl")
@@ -2308,6 +2719,26 @@ def commons_search(query):
 
 
 def internet_archive_search(query):
+    """Search Internet Archive with subject-preserving query relaxation.
+
+    Its advanced search treats an over-specific query as a set of required
+    terms; the strict query runs first and shorter variants are only tried when
+    it finds nothing. Licences are still checked per item below.
+    """
+    variants = footage_queries.provider_query_variants(query, 3) or [clean_query(query)]
+    for index, variant in enumerate(variants):
+        results = _internet_archive_search_once(variant)
+        if results:
+            if index:
+                print(
+                    f"  Internet Archive: relaxed query {variant!r} produced "
+                    f"{len(results)} candidate(s)."
+                )
+            return results
+    return []
+
+
+def _internet_archive_search_once(query):
     """Search Internet Archive for video files with an explicit reusable license."""
     query = clean_query(query)
     terms = [term for term in query.lower().split() if len(term) > 2]
@@ -2358,6 +2789,8 @@ def internet_archive_search(query):
         )
         response.raise_for_status()
         documents = response.json().get("response", {}).get("docs", [])
+        if not documents:
+            print(f"  Internet Archive: no item matched {query!r}.")
     except requests.RequestException as exc:
         if (
             getattr(getattr(exc, "response", None), "status_code", None) == 429
@@ -2418,8 +2851,9 @@ def internet_archive_search(query):
 
     results = []
     metadata_checks = 0
-    for item in documents[:12]:
-        if len(results) >= 6 or metadata_checks >= 8:
+    rejected_license = 0
+    for item in documents[:16]:
+        if len(results) >= 8 or metadata_checks >= 12:
             break
 
         identifier = str(item.get("identifier") or "").strip()
@@ -2433,6 +2867,7 @@ def internet_archive_search(query):
             item.get("rights"),
         ])
         if not license_name:
+            rejected_license += 1
             continue
 
         metadata_cache = CACHE / (
@@ -2592,6 +3027,12 @@ def internet_archive_search(query):
             "license": license_name,
         })
 
+    if not results:
+        print(
+            f"  Internet Archive: {len(documents)} item(s) matched {query!r} but "
+            f"none had a reusable licence and a usable video file "
+            f"({rejected_license} rejected for licence)."
+        )
     return results
 
 def _deduplicate_footage_results(items):
@@ -2824,6 +3265,7 @@ def search_all_footage_sources(query, include_coverr=False):
         ("Internet Archive", internet_archive_search),
         ("Wikimedia Commons", commons_search),
         ("NASA", nasa_search),
+        ("Web Search", web_page_video_search),
         ("Google Search", google_open_web_video_search),
     ]
     # Coverr is queried only for the primary scene query and one targeted retry.
@@ -3128,6 +3570,14 @@ def expand_visual_queries(raw_queries, narration=""):
             expanded.append(normalized)
             seen.add(key)
 
+    # Every footage API ANDs the terms of a query, so a long natural-language
+    # scene description frequently returns zero hits. Short subject-preserving
+    # layers go first because they are the queries that actually reach footage;
+    # each one still names the scene subject and is filtered as strictly below.
+    for raw in raw_queries:
+        for layer in footage_queries.layered_queries(raw, narration, limit=4):
+            add_query(layer)
+
     for raw in raw_queries:
         base = clean_query(raw)
         if not base:
@@ -3199,7 +3649,9 @@ def expand_visual_queries(raw_queries, narration=""):
         ):
             add_query(query)
 
-    return expanded[:12]
+    # Bound the API cost per scene. Six variants per scene stay inside the
+    # per-run request budgets of every provider, including Commons.
+    return expanded[:6]
 
 
 def fallback_visual_queries(raw_queries, narration=""):
@@ -3374,11 +3826,7 @@ def fallback_visual_queries(raw_queries, narration=""):
 
 def unrequested_context_conflicts(hit, query, narration=""):
     """Return strong off-topic contexts found in metadata but absent from scene intent."""
-    metadata = " ".join([
-        str(hit.get("title", "")),
-        str(hit.get("tags", "")),
-        str(hit.get("metadata", "")),
-    ])
+    metadata = candidate_search_text(hit)
     metadata_tokens = set(normalize_words(metadata))
     intent_tokens = set(normalize_words(f"{query or ''} {narration or ''}"))
     return tuple(
@@ -3391,7 +3839,12 @@ def relevance_score(hit, query, narration):
     """Score explicit title/tags strongly and treat long descriptions as supporting evidence."""
     title_tokens = set(normalize_words(hit.get("title", "")))
     tag_tokens = set(normalize_words(hit.get("tags", "")))
-    description_tokens = set(normalize_words(hit.get("metadata", "")))
+    # Providers expose different fields; treat every descriptive field plus the
+    # filename as supporting evidence so missing metadata is not read as off-topic.
+    filename_tokens = set(normalize_words(
+        unquote(urlparse(str(hit.get("url") or "")).path).replace("_", " ")
+    ))
+    description_tokens = set(normalize_words(hit.get("metadata", ""))) | filename_tokens
     page_tokens = set(normalize_words(hit.get("page_url", "")))
     primary_metadata_tokens = title_tokens | tag_tokens
     supporting_metadata_tokens = description_tokens | page_tokens
@@ -3468,6 +3921,19 @@ def relevance_score(hit, query, narration):
     camera_bonus = 0.08 if camera_requested and camera_match else 0.0
     camera_penalty = 0.10 if camera_requested and not camera_match else 0.0
 
+    # Naming the exact subject beats naming its broad category: an ant clip must
+    # outrank a generic "insect on a leaf" clip for an ant scene.
+    specificity = 0.0
+    canonical = footage_queries.canonical_subject(
+        footage_queries.content_terms(str(query or ""))
+    )
+    required = footage_queries.specific_terms(canonical)
+    if required:
+        # Naming the subject itself is stronger evidence than naming its broad
+        # category ("insect", "animal"). The broad-only clip is down-ranked, not
+        # discarded: the visual model remains the deciding gate.
+        specificity = 0.12 if (metadata_tokens & required) else -0.15
+
     conflicts = unrequested_context_conflicts(hit, query, narration)
     conflict_penalty = 0.0
     for conflict in conflicts:
@@ -3481,6 +3947,7 @@ def relevance_score(hit, query, narration):
         + 0.06 * description_coverage
         + 0.10 * narration_coverage
         + camera_bonus
+        + specificity
         - camera_penalty
         - min(0.72, conflict_penalty)
     )
@@ -3510,13 +3977,7 @@ def candidate_matches_visual_anchors(hit, query, primary_query=None):
     if not anchors:
         return False
 
-    metadata = " ".join([
-        str(hit.get("title", "")),
-        str(hit.get("metadata", "")),
-        str(hit.get("tags", "")),
-        str(hit.get("page_url", "")),
-    ])
-    tokens = set(normalize_words(metadata))
+    tokens = set(normalize_words(candidate_search_text(hit)))
 
     strict_aliases = {
         # Generic forest/tree wording is not enough to claim a rainforest match.
@@ -3558,11 +4019,39 @@ def candidate_matches_visual_anchors(hit, query, primary_query=None):
     for mandatory_anchor in ("research_activity", "field_instrument"):
         if mandatory_anchor in anchors and mandatory_anchor not in matched:
             return False
-    if requested_subjects and not requested_subjects.issubset(matched):
+
+    # Only the subject the query actually leads with is mandatory. A word that
+    # merely appears later in the sentence ("ants carrying leaves" -> "leaves"
+    # belongs to the canopy group) describes the shot, not its required subject;
+    # demanding every such group would reject correct footage such as a clip of
+    # ants carrying seeds. Relevance scoring and the visual model still judge
+    # those secondary words.
+    head_terms = set(footage_queries.content_terms(str(query or ""))[:2])
+    head_groups = {
+        name for name, aliases in anchors.items() if head_terms & set(aliases)
+    }
+    mandatory_subjects = requested_subjects & head_groups
+    if mandatory_subjects:
+        if not mandatory_subjects.issubset(matched):
+            return False
+    elif requested_subjects and not (requested_subjects & matched):
         return False
+
     if "rainforest" in anchors and "rainforest" not in matched:
         return False
     if "aerial" in anchors and "aerial" not in matched:
+        return False
+
+    # A broad synonym group is not evidence of a specific subject: "insect on a
+    # leaf" is not an ant colony, and "animal" is not a jaguar. When the query
+    # names a specific subject, the metadata must name that subject (or a real
+    # synonym for it) to qualify strictly. Otherwise it waits for visual review
+    # in the partial-metadata queue instead of being accepted.
+    canonical = footage_queries.canonical_subject(
+        footage_queries.content_terms(str(query or ""))
+    )
+    required = footage_queries.specific_terms(canonical)
+    if required and not (tokens & required):
         return False
 
     # Preserve core anchors from the original scene query even when the
@@ -3575,8 +4064,16 @@ def candidate_matches_visual_anchors(hit, query, primary_query=None):
             "wildlife", "insect", "orchid", "jaguar", "bird", "rain", "ocean",
             "desert", "forest_floor", "mountain",
         }
+        # Same rule as above: only the subject the scene query leads with is
+        # mandatory. A later word ("...carrying leaves") qualifies the shot and
+        # must not veto footage whose subject is correct.
+        primary_head = set(footage_queries.content_terms(str(primary_query))[:2])
         for name, aliases in primary.items():
-            if name in primary_core and not anchor_matches(name, aliases):
+            if name not in primary_core:
+                continue
+            if not (primary_head & set(aliases)):
+                continue
+            if not anchor_matches(name, aliases):
                 return False
 
         primary_tokens = set(normalize_words(primary_query))
@@ -4997,6 +5494,9 @@ def fetch_footage(plan):
         }
         visual_rejection_feedback = []
         rejected_context_groups = set()
+        # Candidates whose metadata only partly names the scene subject. They are
+        # not accepted here; they are shown to the visual model, which decides.
+        pending_vision = {}
 
         def collect_query_candidates(
             query, allow_relaxed=False, include_coverr=False
@@ -5035,6 +5535,16 @@ def fetch_footage(plan):
                     if not allow_relaxed or not candidate_matches_relaxed_metadata(
                         hit, query, scene.get("narration", ""), min_score=0.08
                     ):
+                        if (
+                            visual_provider_names
+                            and len(pending_vision) < VISION_CANDIDATE_LIMIT
+                            and candidate_partial_subject_match(hit, query)
+                        ):
+                            pending_vision[identity] = (
+                                *relevance_score(hit, query, scene.get("narration", "")),
+                                hit,
+                                query,
+                            )
                         rejection_counts["metadata"] += 1
                         continue
                     relaxed_candidate_count += 1
@@ -5130,10 +5640,23 @@ def fetch_footage(plan):
                 if len(ranked) >= VISION_CANDIDATE_LIMIT:
                     break
 
+        # A candidate is queued only when no admitted candidate already covers
+        # it, and it is still subject to the same downloaded-video visual review.
+        admitted_identities = {
+            f"{item[1].get('source')}:{item[1].get('id')}" for item in ranked
+        }
+        vision_queue = [
+            (hit, query, score, matched, total)
+            for identity, (score, matched, total, hit, query) in pending_vision.items()
+            if identity not in admitted_identities
+        ]
+        vision_queue.sort(key=lambda item: -item[2])
+
         print(
             f"Scene {i}: footage discovery summary — "
             f"strict={strict_candidate_count}, relaxed={relaxed_candidate_count}, "
-            f"ranked={len(ranked)}, visual-check-limit={VISION_CANDIDATE_LIMIT}; "
+            f"ranked={len(ranked)}, partial-metadata-for-visual-review={len(vision_queue)}, "
+            f"visual-check-limit={VISION_CANDIDATE_LIMIT}; "
             "filtered=" + ", ".join(
                 f"{key}:{value}" for key, value in rejection_counts.items() if value
             )
@@ -5191,6 +5714,12 @@ def fetch_footage(plan):
         checked = 0
 
         candidate_attempts = list(ranked[:VISION_CANDIDATE_LIMIT])
+        # Partial-metadata candidates are appended last so they can never displace
+        # a candidate that passed the metadata anchors, but they are still shown
+        # to the visual model instead of being discarded unread.
+        partial_budget = max(0, VISION_CANDIDATE_LIMIT // 3)
+        for hit, query, score, matched, total in vision_queue[:partial_budget]:
+            candidate_attempts.append((score, hit, query, matched, total))
         attempted_candidate_ids = set()
         attempt_cursor = 0
         adaptive_search_done = False
@@ -6803,12 +7332,21 @@ def main():
     print("3/8 Fact-checking claims against the research material...")
     verification = fact_check_plan(plan, research_data)
     research_module.write_research_files(research_data, verification)
+    plan["fact_check"] = {
+        "overall": verification["overall"],
+        "checked": verification.get("checked", 0),
+        "supported": verification.get("supported", 0),
+        "unsupported": verification.get("unsupported", 0),
+        "contradicted": verification.get("contradicted", 0),
+        "claim_source": verification.get("claim_source"),
+    }
     Path("plan.json").write_text(
         json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8"
     )
     print(
         f"Fact check stored in fact_check.json "
-        f"(overall {verification['overall']})."
+        f"(overall {verification['overall']}, "
+        f"{verification.get('checked', 0)} claim(s) checked)."
     )
     finish_pipeline_stage()
 
