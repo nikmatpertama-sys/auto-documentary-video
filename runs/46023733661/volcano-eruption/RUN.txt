@@ -1,0 +1,6 @@
+run=46023733661
+sha=febf000686d3c3d59965b596e32aa1d831e380a8
+branch=main
+job_status=failure
+topic=Volcano eruption
+pipeline_exit=failure
