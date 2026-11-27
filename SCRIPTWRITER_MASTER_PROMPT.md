@@ -12,7 +12,9 @@ Create an original, compelling [[LANGUAGE]]-language mini-documentary for a vert
 
 **NARRATION LANGUAGE:** [[LANGUAGE]] ([[LANGUAGE_NATIVE]]). Every spoken sentence must be written in [[LANGUAGE]], including the hook and the closing line. Keep proper nouns, species names and scientific terms accurate; do not translate them into another language. Do not code-switch into English except for a term that has no natural [[LANGUAGE]] equivalent. Numbers and units must be written the way a [[LANGUAGE]] narrator naturally says them.
 
-The complete narration must contain **120–200 spoken words**. The final video is at least 70 seconds; the renderer follows the complete voice-over duration without a 90-second upper limit. Aim for approximately 150–190 words when the story supports it, while never violating the strict 120–200-word boundary. The story must feel like a polished short documentary, not a generic AI summary, listicle, advertisement, or school report.
+There is **no minimum and no maximum word count**. How long the narration is depends on what the story genuinely needs: the only length rule is that the spoken voice-over must run for at least 70 seconds, and the pipeline measures the real audio and asks for more sourced detail if the narration falls short. Never pad, repeat, or invent to reach a length, and never cut a fact the story needs to stay short. The story must feel like a polished short documentary, not a generic AI summary, listicle, advertisement, or school report.
+
+The narration must end with a **call to action**, as its final spoken sentence, written in [[LANGUAGE]] and natural to the documentary: ask the viewer to follow the channel for the next documentary and to share their thoughts, questions or feedback in the comments. One short sentence is enough. Do not use the same wording for every video; fit the line to the topic, and never make it sound like an advertisement.
 
 ## RESEARCH MATERIAL — USE IT, DO NOT INVENT AROUND IT
 
@@ -58,7 +60,8 @@ Return the scenes the story actually needs, in story order: normally 6 to 10, an
 - Scene 1 contains the hook and must be supported by real-world footage.
 - Each scene must advance the story. Do not repeat the same fact or split one short sentence unnaturally just to fill a scene.
 - The concatenation of every scene narration is the entire script. Do not omit lines, add a second unassigned script, or repeat the story in the scene fields.
-- Combined narration must be 120–200 spoken words inclusive. Aim for roughly 150–190 words where the subject supports it, but keep the story factual and coherent. The finished video must be at least 70 seconds; it may exceed 90 seconds and must continue to the end of the complete voice-over.
+- Combined narration has no word limit: it must be as long as the story honestly needs, and the spoken voice-over must reach at least 70 seconds. It may run longer, and the renderer follows the complete voice-over.
+- The final sentence of the last scene is the call to action: follow the channel and comment. It is spoken like every other sentence, so it must be natural, short, and in [[LANGUAGE]].
 
 ## FOOTAGE QUERY DESIGN
 
@@ -80,7 +83,7 @@ Return **only one valid JSON object**. No Markdown fences, commentary, prefatory
 {
   "title": "Short documentary title",
   "hook": "The opening hook sentence",
-  "script": "The complete 120–200 word narration",
+  "script": "The complete narration, ending with the call to action",
   "scenes": [
     {
       "narration": "The complete spoken narration assigned to this scene",
@@ -100,7 +103,7 @@ Return **only one valid JSON object**. No Markdown fences, commentary, prefatory
 Before returning the JSON, verify all of the following:
 
 - Between 4 and 12 scenes are present, and the count follows the story rather than a quota.
-- The combined scene narration is 120–200 words and matches `script` exactly in substance and order.
+- The combined scene narration matches `script` exactly in substance and order, and its final sentence is a spoken call to action that asks the viewer to follow and to comment.
 - The first sentence is a compelling hook of 12 words or fewer.
 - The story has a logical beginning, development, reveal, and ending.
 - No factual statement, statistic, date, source, quote, or URL has been invented.

@@ -1,7 +1,8 @@
 # Auto Documentary Video — MM7
 
 Automated vertical documentary generator for Facebook Reels. It researches a
- topic, writes a grounded 120-200-word English documentary script, fact-checks
+ topic, writes a grounded English documentary script of whatever length the story
+ needs, ends it with a spoken follow + comment call to action, fact-checks
  its claims, searches and visually verifies real-world footage, generates a
  voice-over and reference-style subtitles, mixes a royalty-free music bed and
  sound design, renders a 1080x1920 video that ends with the narration, and gates
@@ -66,7 +67,7 @@ the MM7 production-failure fixes are in
 
 ## Master scriptwriter prompt
 
-`SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, a story-driven scene count (4–12 scenes, normally 6–10, never padded to a quota), a strict 120–200-word narration boundary, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
+`SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, a story-driven scene count (4–12 scenes, normally 6–10, never padded to a quota), a narration with no word minimum or maximum (the measured 70-second voice-over is the only length rule), a mandatory closing follow + comment CTA, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
 
 ## Footage discovery — MM5 (MM4 source retained)
 
@@ -210,7 +211,8 @@ vertical clips instead of stock footage).
 - Automatically discovers base and numbered API-key secrets for Groq, OpenRouter, Gemini, and Cloudflare, then rotates to the next configured credential after quota, billing, authentication, or transient provider failures.
 - Adds Cloudflare Workers AI as an extra text-generation and visual-verification provider. Visual verification remains fail-closed; the pipeline does not bypass footage review when all providers are exhausted.
 - Uses Speechify `simba-3.5` as the primary voice-over provider when `SPVO_API` is configured. The voice selector prefers calm/deep/baritone-style male voice metadata, applies a lower-pitched calm baseline, and varies delivery subtly around hooks, questions, and the ending. Edge TTS remains a complete-script fallback.
-- Enforces a script size of 120–200 spoken words.
+- Enforces no narration length at all: there is no minimum and no maximum word count. The only length rule is the measured voice-over — at least 70 seconds of actual Speechify audio — and the script is deepened with sourced detail and re-spoken until it reaches it.
+- Requires a closing call to action as the final spoken sentence: the viewer is asked to follow the channel and to comment. It is validated in the script and in the generated audio, so a voice-over without it cannot pass.
 - Enforces a minimum final video duration of 70 seconds. If the complete VO timeline is longer than 70 seconds, the video continues to the end of that VO. There is no 90-second maximum; short timelines receive only enough end silence to reach the 70-second minimum.
 - Checks final rendered duration and fails if the video ends before the complete VO timeline or falls below the 70-second minimum.
 

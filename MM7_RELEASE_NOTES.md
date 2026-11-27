@@ -237,6 +237,40 @@ is now reusable (`workflow_call`), keys its concurrency group by topic, and its
 diagnostics step publishes the finished video's `ffprobe` metadata plus 24
 review frames per run, in `ci-diagnostics/runs/<run_id>/` as well as `latest/`.
 
+## 4d. MM7.5 — narration length is decided by the voice-over, and every script closes with a CTA
+
+### No word minimum, no word maximum
+
+Every fixed word rule is gone from the production path: the scriptwriter prompt,
+`validate_plan_candidate`, the fact-check repair prompt and the duration
+expansion. `MIN_PLAN_WORDS` and `MIN_REPAIRED_WORDS` no longer exist, and a script
+of any length is accepted.
+
+The only length rule is measured audio. After the first voice-over is spoken, the
+pipeline reads the real duration of the last spoken sentence (the trailing hold
+and inter-sentence gaps are excluded) and, while that is under 70 seconds:
+
+1. derives how much more script the *measured* speaking rate needs,
+2. asks the writer to deepen each scene with source-supported detail (never
+   filler, repetition, or invented numbers),
+3. re-runs the fact-check on the deepened script,
+4. regenerates the complete Speechify voice-over and measures it again,
+
+up to four extensions, then one attempt at a slower but still natural delivery
+pace. It never pads with silence and never speeds the audio up.
+
+### The closing CTA is spoken, not metadata
+
+`script_cta.py` owns the rule: a sentence that asks for both a **follow** and a
+**comment**, written in the narration's language. `validate_plan_candidate`
+enforces it for the initial draft, the fact-check repair and every duration
+extension — a CTA the writer produced is kept verbatim, and otherwise any stray
+CTA is removed and one natural closing line is appended to the last scene.
+`verify_cta_in_voiceover` then refuses the voice-over unless the CTA is the final
+spoken sentence and ends at the end of the spoken timeline, and
+`voiceover_manifest.json` records its text and end time. Final QC checks
+`script_ends_with_cta` instead of the old 120–200-word check.
+
 ## 4c. MM7.4 — what the production suite proved, and what it fixed
 
 Ten real suite runs were executed on GitHub Actions with the production

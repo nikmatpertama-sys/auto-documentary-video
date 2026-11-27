@@ -90,63 +90,71 @@ class PlanLengthGraceTests(unittest.TestCase):
 
 
 class DurationExtensionTests(unittest.TestCase):
-    def test_extension_asks_again_until_the_word_floor_is_met(self):
+    def test_extension_asks_again_when_the_estimate_is_missed(self):
         short = _plan(scenes=4)
-        long_plan = {
-            "title": "Ants",
-            "hook": "What if a colony thinks?",
-            "script": " ".join([
-                "Ants live in soil and build nests under stones where the queen lays her "
-                "eggs and workers feed the brood every day while the colony grows."
-            ] * 6),
-            "scenes": [
-                {
-                    "narration": (
-                        "Ants live in soil and build nests under stones where the queen "
-                        "lays her eggs and workers feed the brood every day while the "
-                        "colony grows."
-                    ),
-                    "visual_query": "ant colony close",
-                    "visual_queries": ["ant colony"],
-                    "source_label": "Ant",
-                    "source_url": "https://en.wikipedia.org/wiki/Ant",
-                }
-            ] * 6,
-        }
-        self.assertGreaterEqual(len(long_plan["script"].split()), 120)
+        deeper = dict(short, scenes=[dict(scene) for scene in short["scenes"]])
+        deeper_sentences = [
+            f"Chamber {index} holds larvae while nurses carry food through the "
+            "tunnel and the queen lays more eggs in the warm dark, while guards "
+            "patrol the entrance and keep the whole colony safe."
+            for index in range(4)
+        ]
+        for scene, sentence in zip(deeper["scenes"], deeper_sentences):
+            scene["narration"] = sentence
+        deeper["script"] = " ".join(deeper_sentences)
         with mock.patch.object(main, "call_json_with_providers",
-                               side_effect=[(short, "mock"), (long_plan, "mock")]) as caller:
+                               side_effect=[(short, "mock"), (deeper, "mock")]) as caller:
+            result = main.extend_plan_for_duration(
+                dict(short, scenes=[dict(scene) for scene in short["scenes"]]),
+                "brief",
+                target_words=120,
+            )
+        self.assertEqual(caller.call_count, 2)
+        self.assertIn("Chamber 0", result["script"])
+
+    def test_extension_never_fails_on_length_and_keeps_the_longest_draft(self):
+        # MM7.5: no word floor exists, so a provider that keeps answering short
+        # must not abort the run; the orchestrator measures the next voice-over.
+        short = _plan(scenes=4)
+        with mock.patch.object(main, "call_json_with_providers",
+                               side_effect=[(short, "mock")] * 3):
+            result = main.extend_plan_for_duration(
+                dict(short, scenes=[dict(scene) for scene in short["scenes"]]),
+                "brief",
+                target_words=400,
+            )
+        self.assertTrue(result["script"])
+        self.assertTrue(result["cta"]["text"])
+
+    def test_extension_accepts_a_plan_of_any_length(self):
+        short = _plan(scenes=4)
+        long_plan = dict(short, scenes=[dict(scene) for scene in short["scenes"]])
+        long_sentences = [
+            f"Chamber {index} keeps the brood dry while workers carry larvae "
+            "between rooms and the queen lays another batch of eggs."
+            for index in range(4)
+        ]
+        for scene, sentence in zip(long_plan["scenes"], long_sentences):
+            scene["narration"] = sentence
+        long_plan["script"] = " ".join(long_sentences)
+        with mock.patch.object(main, "call_json_with_providers",
+                               return_value=(long_plan, "mock")):
             result = main.extend_plan_for_duration(
                 dict(short, scenes=[dict(scene) for scene in short["scenes"]]),
                 "brief",
                 target_words=150,
             )
-        self.assertGreaterEqual(len(result["script"].split()), 150)
-        self.assertEqual(caller.call_count, 2)
-
-    def test_extension_fails_loudly_instead_of_shipping_a_short_voiceover(self):
-        short = _plan(scenes=4)
-        with mock.patch.object(main, "call_json_with_providers",
-                               side_effect=[(short, "mock")] * 3):
-            with self.assertRaisesRegex(RuntimeError, "could not reach 120 words"):
-                main.extend_plan_for_duration(
-                    dict(short, scenes=[dict(scene) for scene in short["scenes"]]),
-                    "brief",
-                    target_words=160,
-                )
+        self.assertIn("Chamber 0", result["script"])
+        self.assertTrue(result["cta"]["text"])
 
 
 class RepairLengthGraceTests(unittest.TestCase):
-    def test_short_but_valid_plan_is_accepted_at_the_repair_floor(self):
+    def test_short_but_valid_plan_is_accepted(self):
         plan = _plan(scenes=4)
         self.assertLess(len(plan["script"].split()), 120)
-        with self.assertRaises(RuntimeError):
-            main.validate_plan_candidate(dict(plan))
-        accepted = main.validate_plan_candidate(dict(plan), min_words=main.MIN_REPAIRED_WORDS)
+        accepted = main.validate_plan_candidate(dict(plan))
         self.assertTrue(accepted["scenes"])
-
-    def test_repair_floor_allows_dropping_unsupported_sentences(self):
-        self.assertLess(main.MIN_REPAIRED_WORDS, 120)
+        self.assertTrue(main.script_cta.ends_with_cta(accepted["script"]))
 
 
 if __name__ == "__main__":

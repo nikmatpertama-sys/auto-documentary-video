@@ -29,6 +29,7 @@ import footage_queries
 import qc as qc_module
 import reference_style
 import research as research_module
+import script_cta
 from quota_router import QuotaAwareRouter
 from visual_retry import visual_retry_policy, redact_provider_error
 
@@ -1574,15 +1575,13 @@ def gemini_plan(topic, research_brief=None):
         print(f"Quota-aware selection: {provider_name} (best currently known capacity).")
 
         try:
-            candidate = validate_plan_candidate(route["run"](), min_words=MIN_PLAN_WORDS)
+            candidate = validate_plan_candidate(route["run"]())
             plan = candidate
-            words = len(str(plan.get("script") or "").split())
             print(f"Documentary plan generated successfully by {provider_name}.")
-            if words < 120:
-                print(
-                    f"Draft narration is {words} words; the duration expansion will "
-                    "extend it and the fact-check is re-verified afterwards."
-                )
+            print(
+                "Narration length is decided by the measured voice-over, not by a "
+                "word count; the script is measured and extended after speech."
+            )
             break
         except Exception as exc:
             errors.append(f"{provider_name}: {exc}")
@@ -1600,11 +1599,14 @@ def gemini_plan(topic, research_brief=None):
     return plan
 
 
-def validate_plan_candidate(candidate, min_words=120, max_words=200):
+def validate_plan_candidate(candidate):
     """Validate a generated/repaired/expanded plan and map its sentences.
 
     Shared by the initial plan, the fact-check repair pass and the duration
-    recovery pass so every plan obeys the same format invariants.
+    recovery pass. Narration length is deliberately not checked here: the only
+    length rule is the measured voice-over in the orchestrator, so a short or a
+    long script is equally acceptable as long as the story is complete. What
+    every plan must carry is the closing follow + comment CTA.
     """
     if not isinstance(candidate, dict):
         raise RuntimeError("Plan response is not a JSON object.")
@@ -1632,16 +1634,26 @@ def validate_plan_candidate(candidate, min_words=120, max_words=200):
         scene_narrations.append(narration)
 
     candidate["script"] = " ".join(scene_narrations).strip()
-    word_count = len(candidate["script"].split())
-    if not min_words <= word_count <= max_words:
-        raise RuntimeError(
-            f"Scene narration totals {word_count} words; expected {min_words}-{max_words}."
-        )
+    # The language is judged on the writer's narration only: the CTA is ours and
+    # always written in the requested language, so it must not skew the check.
     if not reference_style.narration_language_matches(candidate["script"], SCRIPT_LANGUAGE):
         raise RuntimeError(
             f"Narration is not written in {LANGUAGE['name']}. "
             "The provider ignored the requested narration language."
         )
+    # MM7.5: the CTA is the last spoken sentence of the narration, not metadata.
+    narrations, cta_info = script_cta.enforce_cta(
+        scene_narrations,
+        SCRIPT_LANGUAGE,
+        topic=candidate.get("title") or candidate.get("topic"),
+        seed=candidate.get("hook"),
+    )
+    for scene, narration in zip(candidate["scenes"], narrations):
+        scene["narration"] = narration
+    candidate["script"] = " ".join(narrations).strip()
+    candidate["cta"] = cta_info
+    if cta_info["source"] == "appended":
+        print(f"Closing CTA added to the final scene: {cta_info['text']}")
 
     hook = str(candidate.get("hook") or "").strip()
     if not hook:
@@ -1679,18 +1691,13 @@ def _verify_claims(script, claims, research_data, label="fact check"):
 # Scene counts are derived from the story, never padded to a quota.
 MIN_PLAN_SCENES = 4
 MAX_PLAN_SCENES = 12
-# A first draft may be shorter than the narration target. extend_plan_for_duration
-# expands it and the fact-check is re-run afterwards, so rejecting the draft here
-# only discarded otherwise usable provider output: the surviving free provider
-# (Cloudflare Workers AI) writes 79-108-word plans, and every run was thrown away
-# by this single gate instead of being expanded.
-MIN_PLAN_WORDS = 80
+# There is no minimum or maximum narration length. Word counts are never a
+# quality signal and never reject a script: the only length rule is the measured
+# voice-over, which the orchestrator grows to MIN_VIDEO_DURATION by extending the
+# script with sourced detail and speaking it again.
 
 # A fact-check that checked nothing is a failure, not a pass.
 MIN_FACT_CHECK_CLAIMS = 3
-# A repaired script may drop unsupported sentences; the duration expansion
-# restores the 120-word narration target afterwards.
-MIN_REPAIRED_WORDS = 80
 # A legitimately atmospheric script can have no factual claim at all, but that
 # is a different outcome from the extractor failing to read the narration.
 NO_CLAIMS_COVERAGE = 0.8
@@ -1982,8 +1989,8 @@ def fact_check_plan(plan, research_data, max_repairs=2):
             "superlative (largest, biggest, most, only) unless those exact words "
             "appear in the source material. Describe the mechanism instead.\n"
             "- Deleting a sentence is allowed. Replacing a removed claim with "
-            "another unverifiable dramatic line is not: the word count target is "
-            "secondary to correctness.\n"
+            "another unverifiable dramatic line is not: correctness comes first "
+            "and length is never a reason to keep a claim.\n"
             "- Keep at least three separate sentences that make a checkable "
             "statement the source material supports.\n\n"
             f"SOURCE MATERIAL:\n{research_data.get('brief') or '(none supplied)'}\n\n"
@@ -1991,8 +1998,10 @@ def fact_check_plan(plan, research_data, max_repairs=2):
             f"PROBLEMS:\n{problems}\n\n"
             "Return ONLY the same JSON object schema: title, hook, script, and "
             f"exactly {scene_count} scenes each with narration, visual_query, "
-            "visual_queries, source_label, source_url. The combined narration must "
-            f"stay between 120 and 200 words and must be written in {LANGUAGE['name']}."
+            "visual_queries, source_label, source_url. Write the narration in "
+            f"{LANGUAGE['name']} and keep the final sentence as a call to action "
+            "that asks the viewer to follow and to comment. There is no word "
+            "limit: keep exactly the sentences the corrected story needs."
         )
         repaired = None
         provider = None
@@ -2004,7 +2013,7 @@ def fact_check_plan(plan, research_data, max_repairs=2):
                 # removing an unsupported claim must not be rejected by the
                 # length gate that the later duration expansion restores. That
                 # rejection used to abort the repair and fail the whole run.
-                repaired = validate_plan_candidate(payload, min_words=MIN_REPAIRED_WORDS)
+                repaired = validate_plan_candidate(payload)
                 break
             except Exception as exc:
                 print(f"Fact-check repair attempt {attempt} failed: {str(exc)[:300]}")
@@ -2100,24 +2109,32 @@ def fact_check_plan(plan, research_data, max_repairs=2):
     return verification
 
 
-def extend_plan_for_duration(plan, research_brief, target_words=185):
-    """Ask the writer to deepen the script so the spoken VO reaches 70s.
+def extend_plan_for_duration(plan, research_brief, target_words=None):
+    """Ask the writer to deepen the script until the spoken VO reaches 70s.
 
-    Used only when the measured voice-over is too short; the result is fully
-    re-validated (120-200 words, target language). ``target_words`` comes from
-    the measured speaking rate, because 120 words only bought 58 seconds of
-    narration at this pipeline's delivery pace.
+    There is no word minimum and no word maximum. ``target_words`` is only an
+    estimate of how much script the measured speaking rate needs for
+    ``MIN_VIDEO_DURATION`` seconds; the orchestrator speaks the result and
+    measures the real audio, so the estimate never becomes a hard limit and a
+    draft of any length is accepted here.
     """
-    required_words = max(120, min(200, int(target_words or 185)))
-    target_words = required_words
+    estimate_note = (
+        f"The measured speaking rate suggests about {int(target_words)} words for "
+        f"{MIN_VIDEO_DURATION:.0f} seconds, but that is an estimate, not a limit: "
+        "write as much as the story honestly needs. "
+        if target_words else ""
+    )
     prompt = (
-        "A documentary voice-over measured shorter than the required 70 seconds. "
-        f"Deepen the narration so it reads at roughly {target_words} words while "
-        "staying between 120 and 200 words. Add concrete, source-supported detail, a "
-        "clearer mechanism, or a stronger transition; never add filler, "
-        "repetition, or unsupported numbers. Keep the current number of scenes "
-        "(never add a scene just to lengthen the video), keep every visual query "
-        "usable, and keep the hook at 12 words or fewer.\n\n"
+        "A documentary voice-over measured shorter than the required "
+        f"{MIN_VIDEO_DURATION:.0f} seconds. Deepen the narration so the spoken "
+        f"voice-over reaches at least {MIN_VIDEO_DURATION:.0f} seconds. "
+        + estimate_note
+        + "Add concrete, source-supported detail, a clearer mechanism, or a "
+        "stronger transition; never add filler, repetition, or unsupported "
+        "numbers. Keep the current number of scenes (never add a scene just to "
+        "lengthen the video), keep every visual query usable, keep the hook at 12 "
+        "words or fewer, and end the narration with a call to action that asks the "
+        "viewer to follow and to comment.\n\n"
         f"SOURCE MATERIAL:\n{research_brief or '(none supplied)'}\n\n"
         f"CURRENT PLAN JSON:\n{json.dumps(plan, ensure_ascii=False)[:9000]}\n\n"
         "Return ONLY the same JSON object schema: title, hook, script, and the "
@@ -2125,9 +2142,9 @@ def extend_plan_for_duration(plan, research_brief, target_words=185):
         "visual_query, visual_queries, source_label, source_url. Narration "
         f"language: {LANGUAGE['name']}."
     )
-    # A provider can ignore the word target, and one ignored answer used to end
-    # the run at a 40-second voice-over. Ask again with the measured shortfall
-    # before failing, and never accept a draft that is still under the floor.
+    # A provider can under-deliver, and one ignored answer used to end the run at
+    # a 40-second voice-over. Ask again when the estimate was missed, but keep the
+    # longest answer: no draft is rejected for its length.
     attempts = 0
     current_prompt = prompt
     extended = None
@@ -2136,29 +2153,23 @@ def extend_plan_for_duration(plan, research_brief, target_words=185):
     while attempts < 3:
         attempts += 1
         payload, provider = call_json_with_providers(current_prompt, "duration extension")
-        candidate = validate_plan_candidate(payload, min_words=MIN_REPAIRED_WORDS)
+        candidate = validate_plan_candidate(payload)
         words = len(candidate["script"].split())
-        extended = candidate
-        if words >= required_words:
+        if extended is None or words > len(extended["script"].split()):
+            extended = candidate
+        if not target_words or words >= int(target_words):
             break
         print(
             f"Duration recovery: the provider returned {words} words "
-            f"(attempt {attempts}/3); asking for the {required_words} word target again."
+            f"(attempt {attempts}/3, about {int(target_words)} estimated); asking for "
+            "more sourced detail."
         )
         current_prompt = (
             prompt
-            + f"\n\nYour previous answer contained only {words} words, which is too "
-            f"short. Rewrite the narration with {required_words} words by adding "
-            "source-supported detail to each scene. Do not repeat sentences and do "
-            "not invent numbers, dates or superlatives."
-        )
-    if words < 120:
-        # The caller re-measures the voice-over and extends again if the target
-        # was not reached, so only the 120-word format floor is fatal here.
-        raise RuntimeError(
-            f"The duration extension could not reach 120 words after 3 attempts "
-            f"(last draft: {words} words). The run stops rather than shipping a "
-            "voice-over shorter than the format requires."
+            + f"\n\nYour previous answer was shorter than the measured rate needs "
+            f"(about {int(target_words)} words for {MIN_VIDEO_DURATION:.0f}s). Deepen "
+            "each scene with source-supported detail. Do not repeat sentences, do "
+            "not pad, and do not invent numbers, dates or superlatives."
         )
 
     # The footage for each scene was already downloaded and visually verified
@@ -2181,7 +2192,8 @@ def extend_plan_for_duration(plan, research_brief, target_words=185):
             new_scene["visual_queries"] = old_scene["visual_queries"]
     print(
         f"Duration recovery: script expanded to "
-        f"{len(extended['script'].split())} words by {provider}."
+        f"{len(extended['script'].split())} words by {provider} "
+        "(length is not judged by a word rule; the next voice-over is measured)."
     )
     return extended
 
@@ -7388,7 +7400,7 @@ def _generate_speechify_parts(sentences):
         sentence_word_events.append(timed_sentence_words)
         wav_parts.append(wav_path)
         cursor += duration
-        sentence_events.append({"start": sentence_start, "end": cursor})
+        sentence_events.append({"start": sentence_start, "end": cursor, "text": sentence})
         if index < len(sentences) - 1:
             gap = HOOK_GAP if index == 0 else SENTENCE_GAP
             silence = _create_silence(OUT / f"gap_{index:02d}.wav", gap)
@@ -7459,7 +7471,7 @@ def _generate_edge_parts(sentences):
             sentence_word_events.append(timed_sentence_words)
             wav_parts.append(wav_path)
             cursor += duration
-            sentence_events.append({"start": sentence_start, "end": cursor})
+            sentence_events.append({"start": sentence_start, "end": cursor, "text": sentence})
             if index < len(sentences) - 1:
                 gap = HOOK_GAP if index == 0 else SENTENCE_GAP
                 silence = _create_silence(OUT / f"gap_{index:02d}.wav", gap)
@@ -7497,6 +7509,72 @@ def validate_voice_audio(path, duration):
             "final mix limiter handles it, but the TTS output is hot."
         )
     return loudness
+
+
+def _spoken_duration(sentence_events, total_duration):
+    """Duration of the narration that is actually spoken.
+
+    ``total_duration`` includes the trailing hold and inter-sentence gaps; the
+    end of the last spoken sentence is what the voice-over really delivers, and
+    that is what the 70 second rule and the CTA check are measured against.
+    """
+    if sentence_events:
+        try:
+            return float(sentence_events[-1]["end"])
+        except (KeyError, TypeError, ValueError):
+            pass
+    return float(total_duration or 0.0)
+
+
+def needs_duration_extension(spoken_duration):
+    """True while the measured narration is still under the format minimum."""
+    return float(spoken_duration or 0.0) + 0.05 < MIN_VIDEO_DURATION
+
+
+def verify_cta_in_voiceover(plan, sentence_events, spoken_duration):
+    """Fail unless the follow + comment CTA is the last thing spoken.
+
+    A CTA that only lives in the plan is not a CTA: the generated voice-over must
+    end with it, so the last spoken sentence is checked against the narration
+    and its measured end time must sit at the end of the spoken timeline.
+    """
+    cta = (plan or {}).get("cta") or {}
+    cta_text = str(cta.get("text") or "").strip()
+    if not cta_text or not script_cta.is_cta_sentence(cta_text):
+        raise RuntimeError(
+            "The narration has no closing CTA that asks for both a follow and a "
+            "comment, so the voice-over cannot end with one."
+        )
+    sentences = split_sentences(str((plan or {}).get("script") or ""))
+    if not sentences or not script_cta.is_cta_sentence(sentences[-1]):
+        raise RuntimeError(
+            "The CTA is not the final sentence of the script; the spoken closing "
+            "line must be the call to action."
+        )
+    if not sentence_events:
+        raise RuntimeError("No voice-over sentence timings were produced.")
+    last_event = sentence_events[-1]
+    spoken_text = str(last_event.get("text") or "")
+    if spoken_text and not script_cta.is_cta_sentence(spoken_text):
+        raise RuntimeError(
+            "The final spoken sentence is not the CTA "
+            f"({spoken_text[:120]!r}); the audio does not end with a follow and "
+            "comment call."
+        )
+    end = float(last_event.get("end") or 0.0)
+    if abs(end - float(spoken_duration or 0.0)) > 1.0:
+        raise RuntimeError(
+            f"The CTA ends at {end:.2f}s but the narration runs to "
+            f"{float(spoken_duration):.2f}s; the audio does not end with the CTA."
+        )
+    result = {"text": cta_text, "end": round(end, 3), "source": cta.get("source")}
+    PIPELINE_STATE["cta"] = cta_text
+    PIPELINE_STATE["cta_verification"] = result
+    print(
+        f"CTA verified in the audio: final spoken sentence ends at {end:.2f}s "
+        f"({script_cta.FOLLOW_PATTERN.search(cta_text).group(0)} + comment)."
+    )
+    return result
 
 
 def build_voice_and_subs(script, enforce_minimum=True):
@@ -7567,11 +7645,13 @@ def build_voice_and_subs(script, enforce_minimum=True):
         wav_parts.append(ending)
 
     total_duration = sum(ffprobe_duration(part) for part in wav_parts)
-    if total_duration < MIN_VIDEO_DURATION:
+    spoken_duration = _spoken_duration(sentence_events, total_duration)
+    PIPELINE_STATE["voice_narration_duration"] = round(spoken_duration, 3)
+    if spoken_duration < MIN_VIDEO_DURATION:
         # MM6: never pad the timeline with silence. The orchestrator extends the
         # script or slows delivery naturally, then regenerates the whole VO.
         print(
-            f"VO timeline is {total_duration:.2f}s, below the "
+            f"VO speaks {spoken_duration:.2f}s of narration, below the "
             f"{MIN_VIDEO_DURATION:.0f}s format minimum. No silence padding is added; "
             "the script/delivery must be adjusted and the VO regenerated."
         )
@@ -7641,6 +7721,14 @@ def build_voice_and_subs(script, enforce_minimum=True):
         "locale": LANGUAGE.get("speechify_locale") or LANGUAGE.get("edge_voice"),
         "script_sha256": hashlib.sha256(script.encode("utf-8")).hexdigest(),
         "script_words": len(script.split()),
+        "narration_duration": round(float(spoken_duration), 3),
+        "cta": {
+            "text": script_cta.last_sentence(script),
+            "spoken_until": round(float(spoken_duration), 3),
+            "is_final_sentence": bool(
+                script_cta.ends_with_cta(script)
+            ),
+        },
         "total_duration": round(float(total_duration), 3),
         "audio_files": [str(OUT / "voiceover.wav"), str(OUT / "voiceover.mp3")],
         "sentences": [
@@ -8208,27 +8296,30 @@ def main():
         plan["script"], enforce_minimum=False
     )
 
-    # MM6: the 120-word floor does not guarantee 70 seconds of speech. Measure
-    # the real VO, deepen the script or slow delivery naturally, regenerate.
+    # MM7.5: there is no word minimum or maximum. The narration is judged only by
+    # the voice-over it actually produces: extend the script with sourced detail,
+    # speak it again, and measure the new audio until the spoken timeline reaches
+    # MIN_VIDEO_DURATION.
+    spoken_duration = _spoken_duration(sentence_events, total_duration)
     attempts = 0
-    while total_duration + 0.05 < MIN_VIDEO_DURATION and attempts < 2:
+    while needs_duration_extension(spoken_duration) and attempts < 4:
         attempts += 1
         print(
-            f"Voice-over is {total_duration:.2f}s; extending the script "
-            f"(attempt {attempts}/2) instead of padding with silence."
+            f"Voice-over speaks {spoken_duration:.2f}s of narration; extending the "
+            f"script (attempt {attempts}/4) instead of padding with silence."
         )
         try:
-            # The word floor alone is not a duration: measure the delivery rate of
-            # the voice-over that was actually produced and target the words that
-            # rate needs for the minimum duration, with a small safety margin.
+            # Estimate how much more script the measured rate needs. It is an
+            # estimate only: the next voice-over is what decides.
             spoken_words = max(1, len(str(plan.get("script") or "").split()))
-            words_per_second = spoken_words / max(0.5, total_duration)
+            words_per_second = spoken_words / max(0.5, spoken_duration)
             needed_words = int(
-                min(200, max(120, math.ceil(MIN_VIDEO_DURATION * words_per_second * 1.08)))
+                math.ceil(MIN_VIDEO_DURATION * words_per_second * 1.08)
             )
             print(
-                f"Duration planning: {total_duration:.2f}s for {spoken_words} words "
-                f"({words_per_second:.2f} words/s); targeting {needed_words} words."
+                f"Duration planning: {spoken_duration:.2f}s for {spoken_words} words "
+                f"({words_per_second:.2f} words/s); about {needed_words} words are "
+                "needed at this rate (no word limit is enforced)."
             )
             plan = extend_plan_for_duration(
                 plan, research_data.get("brief"), target_words=needed_words
@@ -8258,8 +8349,9 @@ def main():
         sentence_events, total_duration = build_voice_and_subs(
             plan["script"], enforce_minimum=False
         )
+        spoken_duration = _spoken_duration(sentence_events, total_duration)
 
-    if total_duration + 0.05 < MIN_VIDEO_DURATION:
+    if needs_duration_extension(spoken_duration):
         print(
             "Duration recovery: trying a slower but still natural delivery pace "
             f"({os.getenv('TTS_RATE_RECOVERY', '-12%')})."
@@ -8268,17 +8360,20 @@ def main():
         sentence_events, total_duration = build_voice_and_subs(
             plan["script"], enforce_minimum=False
         )
+        spoken_duration = _spoken_duration(sentence_events, total_duration)
 
-    if total_duration + 0.05 < MIN_VIDEO_DURATION:
+    if needs_duration_extension(spoken_duration):
         raise RuntimeError(
-            f"Voice-over is {total_duration:.2f}s after script extension and a "
+            f"Voice-over speaks {spoken_duration:.2f}s after script extension and a "
             f"natural slower delivery; the format requires at least "
-            f"{MIN_VIDEO_DURATION:.0f}s. The run is stopped rather than padding "
-            "the timeline with silence or empty footage."
+            f"{MIN_VIDEO_DURATION:.0f}s of narration. The run is stopped rather than "
+            "padding the timeline with silence or empty footage."
         )
+    verify_cta_in_voiceover(plan, sentence_events, spoken_duration)
     print(
-        f"Voice-over verified: {total_duration:.2f}s of narration "
-        f"(minimum {MIN_VIDEO_DURATION:.0f}s, ends with the narration)."
+        f"Voice-over verified: {spoken_duration:.2f}s of narration "
+        f"(minimum {MIN_VIDEO_DURATION:.0f}s), ending with the spoken CTA: "
+        f"{plan['cta']['text']}"
     )
     finish_pipeline_stage()
 

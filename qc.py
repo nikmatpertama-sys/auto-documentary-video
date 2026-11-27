@@ -13,6 +13,8 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+import script_cta
+
 MIN_DURATION = 70.0
 EXPECTED_WIDTH = 1080
 EXPECTED_HEIGHT = 1920
@@ -121,7 +123,6 @@ def run_qc(final_path, plan, voice_duration, captions_path="output/captions.ass"
     blacks = detect_black_frames(final_path)
     caption_events = count_caption_events(captions_path)
     script = str((plan or {}).get("script") or "")
-    words = len(script.split())
     scenes = len((plan or {}).get("scenes") or [])
 
     checks = []
@@ -150,10 +151,11 @@ def run_qc(final_path, plan, voice_duration, captions_path="output/captions.ass"
         f"video {media['duration']:.2f}s vs VO {float(voice_duration):.2f}s",
     )
     add("has_audio_track", media["has_audio"], "audio stream present" if media["has_audio"] else "no audio stream")
+    # MM7.5: narration length is not a rule; the closing CTA is.
     add(
-        "scripts_words_120_200",
-        120 <= words <= 200,
-        f"{words} words",
+        "script_ends_with_cta",
+        script_cta.ends_with_cta(script),
+        script_cta.last_sentence(script)[:160] or "no closing sentence",
     )
     add(
         "captions_present",

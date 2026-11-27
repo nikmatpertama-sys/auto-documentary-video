@@ -265,12 +265,27 @@ class PlanValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "not written in"):
             self.main.validate_plan_candidate(make_plan(INDONESIAN_SCRIPT))
 
-    def test_plan_with_too_few_words_is_rejected(self):
+    def test_plan_without_a_word_minimum_is_accepted(self):
+        # MM7.5: there is no word minimum and no word maximum. Only the spoken
+        # voice-over duration decides whether the narration is long enough.
         plan = make_plan()
-        for scene in plan["scenes"]:
-            scene["narration"] = "Komodo bergerak."
-        with self.assertRaisesRegex(RuntimeError, "120-200"):
-            self.main.validate_plan_candidate(plan)
+        short = [
+            "Komodo dragons hunt deer.",
+            "They ambush prey on open ground.",
+            "A flicking tongue samples the air.",
+            "Females guard nests in the soil.",
+            "Hatchlings climb trees to survive.",
+            "Adults patrol dry riverbeds.",
+            "Their bite delivers venom.",
+            "Few predators challenge them.",
+        ]
+        for scene, sentence in zip(plan["scenes"], short):
+            scene["narration"] = sentence
+        plan["script"] = " ".join(short)
+        validated = self.main.validate_plan_candidate(plan)
+        self.assertEqual(len(validated["scenes"]), 8)
+        self.assertLess(len(validated["script"].split()), 120)
+        self.assertTrue(self.main.script_cta.ends_with_cta(validated["script"]))
 
     def test_duration_extension_keeps_approved_footage(self):
         from unittest.mock import patch
@@ -282,7 +297,7 @@ class PlanValidationTests(unittest.TestCase):
             scene["selected_footage_source"] = "Wikimedia Commons"
 
         expanded = make_plan()
-        # Deepened wording that still fits the 120-200 word format.
+        # Deepened wording; no word limit applies to the extension.
         for scene in expanded["scenes"]:
             scene["narration"] = scene["narration"].rstrip(".") + ", dan itu penting."
         expanded["script"] = " ".join(
