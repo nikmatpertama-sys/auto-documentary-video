@@ -1,52 +1,33 @@
 {
   "status": "failed",
-  "current_stage": "footage_search_download_and_visual_verification",
+  "current_stage": "fact_checking",
   "stages": [
     {
       "name": "research",
       "status": "completed",
-      "started_at_epoch": 1795789159.2034514,
-      "finished_at_epoch": 1795789161.7980652,
-      "duration_seconds": 2.59
+      "started_at_epoch": 1795789546.8200557,
+      "finished_at_epoch": 1795789550.008044,
+      "duration_seconds": 3.19
     },
     {
       "name": "documentary_plan_generation",
       "status": "completed",
-      "started_at_epoch": 1795789161.798244,
-      "finished_at_epoch": 1795789169.4939911,
-      "duration_seconds": 7.7
+      "started_at_epoch": 1795789550.0194185,
+      "finished_at_epoch": 1795789558.3794677,
+      "duration_seconds": 8.36
     },
     {
       "name": "fact_checking",
-      "status": "completed",
-      "started_at_epoch": 1795789169.4942968,
-      "finished_at_epoch": 1795789186.7321987,
-      "duration_seconds": 17.24
-    },
-    {
-      "name": "voiceover_and_subtitle_generation",
-      "status": "completed",
-      "started_at_epoch": 1795789186.7324603,
-      "finished_at_epoch": 1795789241.2180288,
-      "duration_seconds": 54.49
-    },
-    {
-      "name": "footage_search_download_and_visual_verification",
       "status": "failed",
-      "started_at_epoch": 1795789241.218273,
-      "finished_at_epoch": 1795789458.89374,
+      "started_at_epoch": 1795789558.4445639,
+      "finished_at_epoch": 1795789631.5219483,
       "failure_type": "RuntimeError",
-      "failure_message": "Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 67574213: Clip is 533.3 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 178823538: Clip is 324.4 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 41067354: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). | Internet Archive YourHitParade-May21951musicvariety: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). Queries tried: ['aerial canopy sweep', 'canopy sweep', 'canopy aerial', 'treetops sweep', 'drone treetops', 'treetops drone', 'tropical rainforest canopy aerial', 'rainforest treetops drone', 'jungle canopy overhead', 'tropical forest canopy aerial', 'jungle treetops aerial', 'Amazon basin forest canopy', 'aerial canopy sweep drone overhead perspective wide documentary footage', 'aerial canopy sweep high altitude camera wide landscape']. No unrelated footage or diagram will be substituted."
+      "failure_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts. | produced a hundred‑meter ash plume, prompting evacuations of nearby towns.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
     }
   ],
-  "voice_provider": "Speechify",
-  "voice": "geffen_32",
-  "voice_model": "simba-3.5",
-  "language": "en",
-  "voiceover_manifest": "output/voiceover_manifest.json",
   "failure": {
     "error_type": "RuntimeError",
-    "error_message": "Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 67574213: Clip is 533.3 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 178823538: Clip is 324.4 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 41067354: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). | Internet Archive YourHitParade-May21951musicvariety: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). Queries tried: ['aerial canopy sweep', 'canopy sweep', 'canopy aerial', 'treetops sweep', 'drone treetops', 'treetops drone', 'tropical rainforest canopy aerial', 'rainforest treetops drone', 'jungle canopy overhead', 'tropical forest canopy aerial', 'jungle treetops aerial', 'Amazon basin forest canopy', 'aerial canopy sweep drone overhead perspective wide documentary footage', 'aerial canopy sweep high altitude camera wide landscape']. No unrelated footage or diagram will be substituted.",
-    "finished_at_epoch": 1795789458.8955045
+    "error_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts. | produced a hundred‑meter ash plume, prompting evacuations of nearby towns.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+    "finished_at_epoch": 1795789631.5230074
   }
 }

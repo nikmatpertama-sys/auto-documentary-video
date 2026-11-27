@@ -1,128 +1,176 @@
 {
+  "status": "unsupported",
+  "overall": "fail",
   "claims": [
     {
-      "claim": "This green ceiling shelters between forty and seventy-five percent of the planet’s known species, and scientists believe millions more remain undiscovered.",
+      "claim": "On January twelfth, 2020, Taal Volcano in the Philippines erupted after a 43‑year quiet.",
       "kind": "",
       "verdict": "supported",
-      "evidence": "Estimates of species in rainforests",
-      "quote": "Estimates vary from 40% to 75% of all biotic species being indigenous to the rainforests",
+      "evidence": "The volcano erupted on the afternoon of January 12, 2020, 43 years after its previous eruption in 1977.",
+      "quote": "The volcano erupted on the afternoon of January 12, 2020, 43 years after its previous eruption in 1977.",
       "source": {
         "id": "S1",
-        "title": "Rainforest",
-        "url": "https://en.wikipedia.org/wiki/Rainforest"
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
       },
       "evidence_type": "source_quote"
     },
     {
-      "claim": "Because many plants yield medicines, the forest has been called the world’s largest pharmacy, providing over a quarter of natural remedies.",
+      "claim": "Seismic swarms began at eleven in the morning, followed by a phreatic blast from the main crater around one o’clock.",
       "kind": "",
       "verdict": "supported",
-      "evidence": "Rainforests as a source of medicines",
-      "quote": "Tropical rainforests have been called the 'jewels of the Earth' and the 'world's largest pharmacy', because over one quarter of natural medicines have been discovered there",
+      "evidence": "Seismic swarms began at 11 am and were later followed by a phreatic eruption from Volcano Island Main Crater at around 1 pm Philippine Standard Time (UTC+8).",
+      "quote": "Seismic swarms began at 11 am and were later followed by a phreatic eruption from Volcano Island Main Crater at around 1 pm Philippine Standard Time (UTC+8).",
       "source": {
         "id": "S1",
-        "title": "Rainforest",
-        "url": "https://en.wikipedia.org/wiki/Rainforest"
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
       },
       "evidence_type": "source_quote"
     },
     {
-      "claim": "The Amazon rainforest, spanning over 670 million hectares, is the largest terrestrial carbon sink, playing a crucial role in mitigating global warming by capturing up to 25% of global carbon dioxide emissions.",
+      "claim": "The explosion sent a towering ash column over the surrounding Calabarzon region and even reached Metro Manila.",
       "kind": "",
       "verdict": "supported",
-      "evidence": "Amazon rainforest size and carbon capture",
-      "quote": "Hutan Amazon memiliki luas 670.000.000 hektar ... dan diperkirakan dapat menangkap hingga 25% dari generasi karbon dioksida global menjadi tanaman dan biomassa lainnya",
+      "evidence": "a phreatomagmatic eruption from its main crater spewed ashes over Calabarzon, Metro Manila, and some parts of Central Luzon and Ilocos Region",
+      "quote": "a phreatomagmatic eruption from its main crater spewed ashes over Calabarzon, Metro Manila, and some parts of Central Luzon and Ilocos Region",
       "source": {
-        "id": "S4",
-        "title": "Kebakaran hutan Brasil 2019",
-        "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
       },
       "evidence_type": "source_quote"
     },
     {
-      "claim": "Yet the same canopy is under siege; slash-and-burn clearing during the dry season sparks fires that surged dramatically in 2019, with satellite data showing more than 80,000 fires across Brazil, a 77% rise, darkening skies as far away as São Paulo.",
+      "claim": "Ash fell so thick that schools closed, flights were halted, and the lake’s surface temporarily dried, erasing the tiny Vulcan Point island.",
       "kind": "",
       "verdict": "supported",
-      "evidence": "2019 Amazon rainforest wildfires",
-      "quote": "As of August 29, 2019, INPE reported more than 80,000 fires across all of Brazil, a 77% year-to-year increase for the same tracking period",
+      "evidence": "resulting in the suspension of school classes, work schedules, and flights in the area, as well as temporarily drying up Taal Main Crater Lake and destroying Vulcan Point, an Island surrounded by the lake.",
+      "quote": "resulting in the suspension of school classes, work schedules, and flights in the area, as well as temporarily drying up Taal Main Crater Lake and destroying Vulcan Point, an Island surrounded by the lake.",
       "source": {
-        "id": "S2",
-        "title": "2019 Amazon rainforest wildfires",
-        "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
       },
       "evidence_type": "source_quote"
     },
     {
-      "claim": "The canopy’s health therefore matters to the whole planet, acting as a buffer against global warming, and protecting it preserves countless species, medicines, and the climate we all share.",
+      "claim": "PHIVOLCS raised the alert to level four, warning that a hazardous eruption could occur within hours to days.",
       "kind": "",
       "verdict": "supported",
-      "evidence": "Importance of rainforests for the planet",
-      "quote": "The largest terrestrial carbon dioxide sink and plays a significant role in mitigating global warming",
+      "evidence": "The Philippine Institute of Volcanology and Seismology (PHIVOLCS) subsequently issued an Alert Level 4, indicating 'that a hazardous explosive eruption is possible within hours to days.'",
+      "quote": "The Philippine Institute of Volcanology and Seismology (PHIVOLCS) subsequently issued an Alert Level 4, indicating 'that a hazardous explosive eruption is possible within hours to days.'",
       "source": {
-        "id": "S2",
-        "title": "2019 Amazon rainforest wildfires",
-        "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Stronger explosions at three p.m. produced a hundred‑meter ash plume, prompting evacuations of nearby towns.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Stronger explosions began around 3 pm that spewed an ash column",
+      "quote": "Stronger explosions began around 3 pm that spewed an ash column",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Later, smaller eruptions continued through 2021, and a brief phreatomagmatic burst on March twenty‑six, 2022, lifted the alert to level three.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Volcanic activity continued into 2021, when smaller eruptions occurred in July 2021. On March 26, 2022, a short-lived phreatomagmatic eruption was recorded by PHIVOLCS raising the status from Alert level 2 to Alert level 3.",
+      "quote": "Volcanic activity continued into 2021, when smaller eruptions occurred in July 2021. On March 26, 2022, a short-lived phreatomagmatic eruption was recorded by PHIVOLCS raising the status from Alert level 2 to Alert level 3.",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts.",
+      "kind": "",
+      "verdict": "unsupported",
+      "evidence": "The source material does not explicitly state that Taal Volcano is at a convergent plate boundary.",
+      "quote": "",
+      "source": null,
+      "evidence_type": "unsupported"
+    },
+    {
+      "claim": "produced a hundred‑meter ash plume, prompting evacuations of nearby towns.",
+      "kind": "",
+      "verdict": "unsupported",
+      "evidence": "The source material mentions a hundred-meter ash column but does not specify the exact circumstances of the evacuations.",
+      "quote": "",
+      "source": null,
+      "evidence_type": "unsupported"
+    },
+    {
+      "claim": "Stronger explosions at three p.m.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Stronger explosions began around 3 pm",
+      "quote": "Stronger explosions began around 3 pm",
+      "source": {
+        "id": "S1",
+        "title": "2020–2022 Taal Volcano eruptions",
+        "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
       },
       "evidence_type": "source_quote"
     }
   ],
-  "checked": 5,
-  "supported": 5,
-  "unsupported": 0,
+  "checked": 10,
+  "supported": 8,
+  "unsupported": 2,
   "contradicted": 0,
-  "sourced_supports": 5,
-  "general_knowledge_supports": 0,
-  "sources": [
+  "rejected_claims": [
     {
-      "id": "S1",
-      "title": "Rainforest",
-      "url": "https://en.wikipedia.org/wiki/Rainforest"
+      "claim": "These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts.",
+      "verdict": "unsupported",
+      "evidence": "The source material does not explicitly state that Taal Volcano is at a convergent plate boundary."
     },
     {
-      "id": "S2",
-      "title": "2019 Amazon rainforest wildfires",
-      "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
-    },
-    {
-      "id": "S3",
-      "title": "Hutan hujan",
-      "url": "https://id.wikipedia.org/wiki/Hutan_hujan"
-    },
-    {
-      "id": "S4",
-      "title": "Kebakaran hutan Brasil 2019",
-      "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
+      "claim": "produced a hundred‑meter ash plume, prompting evacuations of nearby towns.",
+      "verdict": "unsupported",
+      "evidence": "The source material mentions a hundred-meter ash column but does not specify the exact circumstances of the evacuations."
     }
   ],
-  "overall": "pass",
-  "checked_at": "2026-11-27T14:20:29+00:00",
-  "provider": "Cloudflare AI key pair 2",
-  "research_articles": [
-    {
-      "title": "Rainforest",
-      "url": "https://en.wikipedia.org/wiki/Rainforest"
-    },
-    {
-      "title": "2019 Amazon rainforest wildfires",
-      "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
-    },
-    {
-      "title": "Hutan hujan",
-      "url": "https://id.wikipedia.org/wiki/Hutan_hujan"
-    },
-    {
-      "title": "Kebakaran hutan Brasil 2019",
-      "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
-    }
-  ],
-  "claim_source": "semantic:Cloudflare AI key pair 1",
+  "claim_source": "semantic:Groq key 1",
   "coverage": {
-    "script_sentences": 7,
-    "claimed_sentences": 5,
+    "script_sentences": 11,
+    "claimed_sentences": 10,
     "non_factual_sentences": 2,
     "uncovered_sentences": [],
     "coverage": 1.0
   },
   "skipped_sentences": [],
-  "status": "checked"
+  "error": null,
+  "research_articles": [
+    {
+      "title": "2020–2022 Taal Volcano eruptions",
+      "url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions"
+    },
+    {
+      "title": "Volcano",
+      "url": "https://en.wikipedia.org/wiki/Volcano"
+    },
+    {
+      "title": "Letusan Gunung Taal 2020",
+      "url": "https://id.wikipedia.org/wiki/Letusan_Gunung_Taal_2020"
+    },
+    {
+      "title": "Gunung berapi",
+      "url": "https://id.wikipedia.org/wiki/Gunung_berapi"
+    },
+    {
+      "title": "Kīlauea",
+      "url": "https://en.wikipedia.org/wiki/K%C4%ABlauea"
+    }
+  ]
 }

@@ -1,0 +1,33 @@
+{
+  "status": "failed",
+  "current_stage": "fact_checking",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795789546.8200557,
+      "finished_at_epoch": 1795789550.008044,
+      "duration_seconds": 3.19
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795789550.0194185,
+      "finished_at_epoch": 1795789558.3794677,
+      "duration_seconds": 8.36
+    },
+    {
+      "name": "fact_checking",
+      "status": "failed",
+      "started_at_epoch": 1795789558.4445639,
+      "finished_at_epoch": 1795789631.5219483,
+      "failure_type": "RuntimeError",
+      "failure_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts. | produced a hundred‑meter ash plume, prompting evacuations of nearby towns.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
+    }
+  ],
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts. | produced a hundred‑meter ash plume, prompting evacuations of nearby towns.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+    "finished_at_epoch": 1795789631.5230074
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "title": "When a Lake Explodes: The Taal Volcano Story",
+  "hook": "What happens when a lake erupts and its island disappears?",
+  "script": "What happens when a lake erupts and its island disappears? On January twelfth, 2020, Taal Volcano in the Philippines erupted after a 43‑year quiet. Seismic swarms began at eleven in the morning, followed by a phreatic blast from the main crater around one o’clock. The explosion sent a towering ash column over the surrounding Calabarzon region and even reached Metro Manila. Ash fell so thick that schools closed, flights were halted, and the lake’s surface temporarily dried, erasing the tiny Vulcan Point island. PHIVOLCS raised the alert to level four, warning that a hazardous eruption could occur within hours to days. Stronger explosions at three p.m. produced a hundred‑meter ash plume, prompting evacuations of nearby towns. Later, smaller eruptions continued through 2021, and a brief phreatomagmatic burst on March twenty‑six, 2022, lifted the alert to level three. These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts. Understanding Taal’s restless nature reminds us that the Earth’s interior is never truly still.",
+  "scenes": [
+    {
+      "narration": "What happens when a lake erupts and its island disappears? On January twelfth, 2020, Taal Volcano in the Philippines erupted after a 43‑year quiet.",
+      "visual_query": "Taal Volcano crater lake wide",
+      "visual_queries": [
+        "Taal Volcano aerial view",
+        "Taal Volcano crater lake sunrise"
+      ],
+      "source_label": "Wikipedia - Taal Volcano 2020–2022",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "visual_type": "footage",
+      "sentence_start": 0,
+      "sentence_end": 1
+    },
+    {
+      "narration": "Seismic swarms began at eleven in the morning, followed by a phreatic blast from the main crater around one o’clock. The explosion sent a towering ash column over the surrounding Calabarzon region and even reached Metro Manila.",
+      "visual_query": "Ash plume over Calabarzon",
+      "visual_queries": [
+        "Volcanic ash cloud over Manila",
+        "Ash fallout over Luzon"
+      ],
+      "source_label": "Wikipedia - Taal Volcano 2020–2022",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 2,
+      "sentence_end": 3
+    },
+    {
+      "narration": "Ash fell so thick that schools closed, flights were halted, and the lake’s surface temporarily dried, erasing the tiny Vulcan Point island. PHIVOLCS raised the alert to level four, warning that a hazardous eruption could occur within hours to days.",
+      "visual_query": "Dry Taal crater lake",
+      "visual_queries": [
+        "Vulcan Point island submerged",
+        "Taal lake exposed ash"
+      ],
+      "source_label": "Wikipedia - Taal Volcano 2020–2022",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 4,
+      "sentence_end": 5
+    },
+    {
+      "narration": "Stronger explosions at three p.m. produced a hundred‑meter ash plume, prompting evacuations of nearby towns.",
+      "visual_query": "Residents evacuating Taal",
+      "visual_queries": [
+        "Taal evacuation bus",
+        "People leaving Taal town"
+      ],
+      "source_label": "Wikipedia - Taal Volcano 2020–2022",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 6,
+      "sentence_end": 8
+    },
+    {
+      "narration": "Later, smaller eruptions continued through 2021, and a brief phreatomagmatic burst on March twenty‑six, 2022, lifted the alert to level three.",
+      "visual_query": "2022 Taal eruption short",
+      "visual_queries": [
+        "Taal volcano steam plume 2022",
+        "Taal eruption footage 2022"
+      ],
+      "source_label": "Wikipedia - Taal Volcano 2020–2022",
+      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "sentence_start": 9,
+      "sentence_end": 9
+    },
+    {
+      "narration": "These events illustrate how volcanoes at convergent plate boundaries can shift from quiet magma chambers to violent, ash‑filled blasts. Understanding Taal’s restless nature reminds us that the Earth’s interior is never truly still.",
+      "visual_query": "Convergent plate boundary volcano",
+      "visual_queries": [
+        "Pacific Ring of Fire volcano",
+        "Active volcanic landscape"
+      ],
+      "source_label": "Wikipedia - Volcano",
+      "source_url": "https://en.wikipedia.org/wiki/Volcano",
+      "sentence_start": 10,
+      "sentence_end": 11
+    }
+  ]
+}
