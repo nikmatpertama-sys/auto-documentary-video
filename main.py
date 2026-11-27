@@ -190,6 +190,8 @@ CLOUDFLARE_CREDENTIALS = _collect_cloudflare_credentials()
 GROQ_KEY = GROQ_KEYS[0] if GROQ_KEYS else ""
 OPENROUTER_KEY = OPENROUTER_KEYS[0] if OPENROUTER_KEYS else ""
 GEMINI_KEY = GEMINI_KEYS[0] if GEMINI_KEYS else ""
+DEEPSEEK_KEYS = _collect_env_values("DEEPSEEK_API_KEY")
+DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat").strip() or "deepseek-chat"
 PIXABAY_KEY = os.getenv("PIXABAY_API_KEY", "").strip()
 PEXELS_KEY = os.getenv("PEXELS_API_KEY", "").strip()
 COVERR_API_KEY = os.getenv("COVERR_API_KEY", "").strip()
@@ -1266,6 +1268,16 @@ def call_openai_compatible(provider, api_key, model, prompt):
             "Content-Type": "application/json",
         }
 
+    elif provider == "DeepSeek":
+        # The DEEPSEEK_API_KEY secret was configured but never wired to any
+        # request, so its capacity was invisible to the router. DeepSeek is
+        # OpenAI-compatible, so the same call works with its endpoint.
+        url = "https://api.deepseek.com/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+
     else:
         url = (
             "https://openrouter.ai/api/v1/chat/completions"
@@ -1302,6 +1314,9 @@ def call_openai_compatible(provider, api_key, model, prompt):
 
     if provider == "Groq":
         payload["max_completion_tokens"] = 6000
+    elif provider == "DeepSeek":
+        payload["max_tokens"] = 6000
+        payload.pop("temperature", None)
     else:
         payload["max_tokens"] = 6000
 
@@ -1457,6 +1472,12 @@ def call_json_with_providers(prompt, label="auxiliary request"):
             lambda api_key=api_key: call_gemini(api_key, MODEL, prompt),
             route_id=f"Gemini::{QuotaAwareRouter.fingerprint(api_key)}",
         ))
+    for key_index, api_key in enumerate(DEEPSEEK_KEYS, 1):
+        routes.append(_quota_route(
+            "DeepSeek", f"DeepSeek key {key_index}", api_key,
+            lambda api_key=api_key: call_openai_compatible("DeepSeek", api_key, DEEPSEEK_MODEL, prompt),
+            model=DEEPSEEK_MODEL,
+        ))
     for key_index, credentials in enumerate(CLOUDFLARE_CREDENTIALS, 1):
         routes.append(_quota_route(
             "Cloudflare", f"Cloudflare AI key pair {key_index}", credentials["token"],
@@ -1515,6 +1536,13 @@ def gemini_plan(topic, research_brief=None):
             route_id=f"Gemini::{QuotaAwareRouter.fingerprint(api_key)}",
         ))
 
+    for key_index, api_key in enumerate(DEEPSEEK_KEYS, 1):
+        routes.append(_quota_route(
+            "DeepSeek", f"DeepSeek key {key_index}", api_key,
+            lambda api_key=api_key: call_openai_compatible("DeepSeek", api_key, DEEPSEEK_MODEL, prompt),
+            model=DEEPSEEK_MODEL,
+        ))
+
     for key_index, credentials in enumerate(CLOUDFLARE_CREDENTIALS, 1):
         routes.append(_quota_route(
             "Cloudflare", f"Cloudflare AI key pair {key_index}", credentials["token"],
@@ -1527,7 +1555,7 @@ def gemini_plan(topic, research_brief=None):
     if not routes:
         raise RuntimeError(
             "No AI provider API key found. Configure at least one Groq, "
-            "OpenRouter, Gemini, or Cloudflare AI token/account pair."
+            "OpenRouter, Gemini, DeepSeek, or Cloudflare AI token/account pair."
         )
 
     errors = []
@@ -1565,7 +1593,7 @@ def gemini_plan(topic, research_brief=None):
     return plan
 
 
-def validate_plan_candidate(candidate):
+def validate_plan_candidate(candidate, min_words=120, max_words=200):
     """Validate a generated/repaired/expanded plan and map its sentences.
 
     Shared by the initial plan, the fact-check repair pass and the duration
@@ -1598,8 +1626,10 @@ def validate_plan_candidate(candidate):
 
     candidate["script"] = " ".join(scene_narrations).strip()
     word_count = len(candidate["script"].split())
-    if not 120 <= word_count <= 200:
-        raise RuntimeError(f"Scene narration totals {word_count} words; expected 120-200.")
+    if not min_words <= word_count <= max_words:
+        raise RuntimeError(
+            f"Scene narration totals {word_count} words; expected {min_words}-{max_words}."
+        )
     if not reference_style.narration_language_matches(candidate["script"], SCRIPT_LANGUAGE):
         raise RuntimeError(
             f"Narration is not written in {LANGUAGE['name']}. "
@@ -1645,6 +1675,9 @@ MAX_PLAN_SCENES = 12
 
 # A fact-check that checked nothing is a failure, not a pass.
 MIN_FACT_CHECK_CLAIMS = 3
+# A repaired script may drop unsupported sentences; the duration expansion
+# restores the 120-word narration target afterwards.
+MIN_REPAIRED_WORDS = 80
 # A legitimately atmospheric script can have no factual claim at all, but that
 # is a different outcome from the extractor failing to read the narration.
 NO_CLAIMS_COVERAGE = 0.8
@@ -1948,11 +1981,29 @@ def fact_check_plan(plan, research_data, max_repairs=2):
             "visual_queries, source_label, source_url. The combined narration must "
             f"stay between 120 and 200 words and must be written in {LANGUAGE['name']}."
         )
-        try:
-            payload, provider = call_json_with_providers(prompt, "fact-check repair")
-            repaired = validate_plan_candidate(payload)
-        except Exception as exc:
-            print(f"Fact-check repair failed: {str(exc)[:400]}")
+        repaired = None
+        provider = None
+        repair_prompt = prompt
+        for attempt in range(1, 3):
+            try:
+                payload, provider = call_json_with_providers(repair_prompt, "fact-check repair")
+                # A corrected script is allowed to be shorter than a fresh one:
+                # removing an unsupported claim must not be rejected by the
+                # length gate that the later duration expansion restores. That
+                # rejection used to abort the repair and fail the whole run.
+                repaired = validate_plan_candidate(payload, min_words=MIN_REPAIRED_WORDS)
+                break
+            except Exception as exc:
+                print(f"Fact-check repair attempt {attempt} failed: {str(exc)[:300]}")
+                repair_prompt = (
+                    prompt
+                    + "\n\nYour previous answer was rejected by the plan validator: "
+                    + str(exc)[:300]
+                    + "\nReturn a corrected JSON object that fixes exactly that problem. "
+                    "Every sentence must stay supported by the source material; do not "
+                    "invent numbers, dates or superlatives to reach a length."
+                )
+        if repaired is None:
             break
         plan.clear()
         plan.update(repaired)

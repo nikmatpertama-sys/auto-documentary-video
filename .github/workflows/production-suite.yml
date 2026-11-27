@@ -29,10 +29,11 @@ jobs:
   render:
     strategy:
       fail-fast: false
-      # The early failures turned out to be fact-check logic, not quota, so all
-      # three topics can run at once. Providers still fall back across four
-      # accounts and the pipeline cools down on 429.
-      max-parallel: 3
+      # Sequential on purpose: the free text/vision tiers behind this project
+      # ran out mid-day (Groq tokens-per-day, Gemini 20 requests/day,
+      # OpenRouter 50/day). One topic at a time finishes the topic it starts
+      # instead of splitting an exhausted pool three ways.
+      max-parallel: 1
       matrix:
         include:
           - topic: "Ant colony life cycle"
