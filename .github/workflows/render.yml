@@ -317,6 +317,7 @@ jobs:
         run: python tools/check_credentials.py --json-out credential_status.json
 
       - name: Generate documentary
+        id: generate
         env:
           INPUT_TOPIC: ${{ inputs.topic }}
           # Reference format: Indonesian vertical documentary for Facebook Reels.
@@ -438,68 +439,17 @@ jobs:
 
       - name: Publish redacted diagnostics for this run
         # Without this, a failure on any branch is only visible inside the
-        # Actions log, which needs account access. Reports contain credential
-        # NAMES and stage metadata, never credential values.
+        # Actions log, which needs account access. The script annotates the
+        # failing stage, keeps reports and review frames per run, and never
+        # aborts on a missing artifact. Reports contain credential NAMES and
+        # stage metadata, never credential values.
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_TOPIC: ${{ inputs.topic }}
-        run: |
-          set -euo pipefail
-          PUBLISH=$(mktemp -d)
-          if ! git clone --depth 1 --branch ci-diagnostics \
-              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$PUBLISH" 2>/dev/null; then
-            git clone --depth 1 \
-              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$PUBLISH"
-            git -C "$PUBLISH" checkout --orphan ci-diagnostics
-            git -C "$PUBLISH" rm -rf . >/dev/null 2>&1 || true
-          fi
-          rm -rf "$PUBLISH/latest"
-          mkdir -p "$PUBLISH/latest/output"
-          for report in credential_status.json failure_report.json stage_report.json \
-              production_report.json fact_check.json footage_verification.json \
-              copyright_report.json qc_report.json plan.json timing.json credits.txt; do
-            [ -f "$report" ] && cp "$report" "$PUBLISH/latest/"
-          done
-          [ -f output/voiceover_manifest.json ] && cp output/voiceover_manifest.json "$PUBLISH/latest/"
-          if [ -f output/pipeline.log ]; then
-            # Redact anything that looks like a bearer token or API key.
-            sed -E 's/(sk-[A-Za-z0-9_-]{8,}|AIza[A-Za-z0-9_-]{10,}|gsk_[A-Za-z0-9]{8,})/[redacted]/g' \
-              output/pipeline.log | tail -n 3000 > "$PUBLISH/latest/output/pipeline.log"
-          fi
-          [ -d output/vision ] && cp -r output/vision "$PUBLISH/latest/output/" || true
-          # Prove the finished file is a real, playable 9:16 video and let the
-          # frames be reviewed without downloading a multi-hundred-megabyte
-          # artifact, which needs account access.
-          if [ -f documentary.mp4 ]; then
-            ffprobe -v error -show_format -show_streams -of json documentary.mp4 \
-              > "$PUBLISH/latest/video_ffprobe.json" || true
-            ffmpeg -hide_banner -loglevel error -i documentary.mp4 \
-              -vf "fps=1/5,scale=360:-2" -frames:v 24 -q:v 6 \
-              "$PUBLISH/latest/frame_%02d.jpg" || true
-          fi
-          printf 'run=%s\nsha=%s\nbranch=%s\njob_status=%s\ntopic=%s\n' \
-            "${GITHUB_RUN_ID}" "${GITHUB_SHA}" "${GITHUB_REF_NAME}" \
-            "${{ job.status }}" "${INPUT_TOPIC:-}" > "$PUBLISH/latest/RUN.txt"
-          # Keep every run addressable, not only the newest one.
-          cp -r "$PUBLISH/latest" "$PUBLISH/runs/${GITHUB_RUN_ID}"
-          pushed=0
-          for attempt in 1 2 3 4 5; do
-            git -C "$PUBLISH" add -A
-            git -C "$PUBLISH" -c user.name='documentary-ci' \
-              -c user.email='documentary-ci@users.noreply.github.com' \
-              commit -m "diagnostics for run ${GITHUB_RUN_ID} (${GITHUB_REF_NAME})" || true
-            if git -C "$PUBLISH" push origin HEAD:ci-diagnostics; then
-              pushed=1
-              break
-            fi
-            git -C "$PUBLISH" pull --rebase origin ci-diagnostics || true
-            sleep 5
-          done
-          if [ "$pushed" != "1" ]; then
-            echo "WARN: diagnostics push failed after retries; reports stay in the run artifacts."
-          fi
-
+          JOB_STATUS: ${{ job.status }}
+          PIPELINE_EXIT: ${{ steps.generate.outcome }}
+        run: python tools/ci_publish_diagnostics.py
       - name: Persist generated Markdown cleanup to this branch
         if: always()
         shell: bash

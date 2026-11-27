@@ -29,9 +29,10 @@ jobs:
   render:
     strategy:
       fail-fast: false
-      # Two at a time keeps provider rate limits survivable while still
-      # finishing in a reasonable window.
-      max-parallel: 2
+      # One at a time. Two concurrent renders shared one provider account and
+      # both failed inside the first five minutes, so the suite no longer
+      # competes with itself for quota.
+      max-parallel: 1
       matrix:
         include:
           - topic: "Ant colony life cycle"
