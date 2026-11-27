@@ -48,7 +48,7 @@ class ClaimEvidenceRetrievalTests(unittest.TestCase):
         self.assertIn("larvae", result["brief"])
         self.assertIn("https://en.wikipedia.org/wiki/Ant", result["brief"])
         self.assertEqual(len(result["articles"]), 1)
-        self.assertEqual(result["queries"], ["hatch larvae pupate"])
+        self.assertEqual(result["queries"][0], "hatch larvae pupate")
 
     def test_retrieval_reports_honestly_when_nothing_is_found(self):
         with patch.object(research, "_search_titles", return_value=[]), patch.object(research, "_sleep"):
@@ -56,6 +56,27 @@ class ClaimEvidenceRetrievalTests(unittest.TestCase):
         self.assertEqual(result["brief"], "")
         self.assertTrue(result["warnings"])
         self.assertIn("no passage found", result["warnings"][0])
+
+    def test_query_is_anchored_to_the_topic(self):
+        variants = research.claim_query_variants(["hatch", "larvae", "pupate"], topic_terms=["ant", "colony"])
+        self.assertEqual(variants[0], "ant colony hatch larvae pupate")
+
+    def test_off_topic_article_is_not_used_as_evidence(self):
+        maggot = {
+            "language": "en",
+            "title": "Maggot",
+            "url": "https://en.wikipedia.org/wiki/Maggot",
+            "extract": "A maggot is the larva of a fly; the larva will pupate after feeding.",
+        }
+        with patch.object(research, "_search_titles", return_value=[{"title": "Maggot", "snippet": "larva"}]), \
+                patch.object(research, "rank_search_hits", return_value=[(0.9, 1, {"title": "Maggot", "snippet": "larva"})]), \
+                patch.object(research, "_fetch_article", return_value=maggot), \
+                patch.object(research, "_sleep"):
+            result = research.gather_claim_evidence(
+                ["Larvae pupate after feeding."], topic_terms=["ant", "colony"]
+            )
+        self.assertEqual(result["brief"], "")
+        self.assertIn("ignored off-topic source", " ".join(result["warnings"]))
 
     def test_passages_without_term_overlap_are_not_used_as_evidence(self):
         article = dict(ARTICLE, extract="The weather was mild.\n\nThe river ran north.")

@@ -1804,7 +1804,11 @@ def _retrieve_evidence_for_rejected_claims(plan, verification, research_data, cl
             languages.append(language)
 
     try:
-        retrieval = research_module.gather_claim_evidence(rejected, languages=languages)
+        retrieval = research_module.gather_claim_evidence(
+            rejected,
+            languages=languages,
+            topic_terms=research_data.get("topic_terms") or [],
+        )
     except Exception as exc:
         print(f"Claim evidence retrieval failed: {str(exc)[:300]}")
         return verification

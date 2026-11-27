@@ -512,6 +512,28 @@ def claim_search_terms(claim, limit=7):
     return seen
 
 
+def claim_query_variants(terms, max_variants=4, topic_terms=None):
+    """Progressively broader queries: a full sentence matches almost nothing."""
+    terms = [term for term in terms or [] if term]
+    topic = [str(term) for term in (topic_terms or []) if str(term).strip()][:2]
+    variants = []
+    if topic:
+        # Anchoring the claim to the topic is what finds the Ant article for a
+        # sentence that only says "larvae" and "cocoon".
+        anchored = " ".join(topic + terms[:3]).strip()
+        if anchored:
+            variants.append(anchored)
+    for size in (len(terms), 4, 2):
+        if size < 1 or size > len(terms):
+            continue
+        query = " ".join(terms[:size]).strip()
+        if query and query not in variants:
+            variants.append(query)
+        if len(variants) >= max_variants:
+            break
+    return variants
+
+
 def _passages_for_claim(article, terms, budget, max_passages=2):
     """Passages of this article that actually discuss the claim's terms."""
     text = re.sub(r"\s+", " ", str(article.get("extract") or "")).strip()
@@ -544,6 +566,7 @@ def gather_claim_evidence(
     total_budget=CLAIM_EVIDENCE_BUDGET,
     max_claims=6,
     pause_seconds=0.3,
+    topic_terms=None,
 ):
     """Retrieve encyclopaedic passages that specifically address each claim.
 
@@ -571,49 +594,73 @@ def gather_claim_evidence(
     used = 0
     seen_titles = set()
 
+    topic_set = {str(term).lower() for term in (topic_terms or []) if str(term).strip()}
+
     for claim in wanted:
         terms = claim_search_terms(claim)
         if not terms:
             continue
-        query = " ".join(terms)
-        queries.append(query)
         found = None
         for language in languages:
-            try:
-                hits = _search_titles(language, query, limit=5)
-            except Exception as exc:  # pragma: no cover - network dependent
-                warnings.append(f"{language} search failed: {type(exc).__name__}: {exc}")
-                continue
-            for score, _, hit in rank_search_hits(hits, terms):
-                if score <= 0:
-                    continue
-                key = (language, hit["title"].lower())
-                if key in seen_titles:
-                    continue
+            for variant in claim_query_variants(terms, topic_terms=topic_terms):
+                queries.append(variant)
                 try:
-                    article = _fetch_article(language, hit["title"])
+                    hits = _search_titles(language, variant, limit=5)
                 except Exception as exc:  # pragma: no cover - network dependent
-                    warnings.append(
-                        f"{language}:{hit['title']} fetch failed: {type(exc).__name__}: {exc}"
-                    )
+                    warnings.append(f"{language} search failed: {type(exc).__name__}: {exc}")
+                    hits = []
+                if not hits:
                     continue
-                if pause_seconds:
-                    _sleep(pause_seconds)
-                if not article:
-                    continue
-                passages = _passages_for_claim(article, terms, per_claim_budget)
-                if not passages:
-                    continue
-                seen_titles.add(key)
-                articles.append(article)
-                found = {
-                    "claim": claim,
-                    "title": article["title"],
-                    "url": article["url"],
-                    "language": article["language"],
-                    "passages": passages,
-                }
-                break
+                # Keep search order, but let a title that shares claim terms go
+                # first. Passage overlap decides acceptance, because the right
+                # article ("Ant" for larvae and pupae) often shares no word with
+                # the sentence that makes the claim.
+                ordered = [hit for _, _, hit in rank_search_hits(hits, terms)] or hits
+                for hit in ordered[:4]:
+                    key = (language, str(hit.get("title") or "").lower())
+                    if not hit.get("title") or key in seen_titles:
+                        continue
+                    try:
+                        article = _fetch_article(language, hit["title"])
+                    except Exception as exc:  # pragma: no cover - network dependent
+                        warnings.append(
+                            f"{language}:{hit['title']} fetch failed: {type(exc).__name__}: {exc}"
+                        )
+                        continue
+                    if pause_seconds:
+                        _sleep(pause_seconds)
+                    if not article:
+                        continue
+                    passages = _passages_for_claim(article, terms, per_claim_budget)
+                    if not passages:
+                        continue
+                    # A passage about a different subject is not evidence for
+                    # this documentary. Requiring a topic term in the article
+                    # title or the passage stops a look-alike article (a fly
+                    # larva for an ant claim) from becoming false support.
+                    passage_tokens = _tokens(" ".join(passages))
+                    topic_mentions = sum(1 for token in passage_tokens if token in topic_set)
+                    if topic_set and not (
+                        topic_set & set(_tokens(article.get("title")))
+                        or topic_mentions >= 3
+                    ):
+                        warnings.append(
+                            f"ignored off-topic source for claim: {article.get('title')}"
+                        )
+                        seen_titles.add(key)
+                        continue
+                    seen_titles.add(key)
+                    articles.append(article)
+                    found = {
+                        "claim": claim,
+                        "title": article["title"],
+                        "url": article["url"],
+                        "language": article["language"],
+                        "passages": passages,
+                    }
+                    break
+                if found:
+                    break
             if found:
                 break
 
