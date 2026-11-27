@@ -261,6 +261,35 @@ class PlanValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "120-200"):
             self.main.validate_plan_candidate(plan)
 
+    def test_duration_extension_keeps_approved_footage(self):
+        from unittest.mock import patch
+
+        plan = self.main.validate_plan_candidate(make_plan())
+        for index, scene in enumerate(plan["scenes"]):
+            scene["media_file"] = f"output/footage/scene_{index}.mp4"
+            scene["license"] = "CC BY-SA 4.0"
+            scene["selected_footage_source"] = "Wikimedia Commons"
+
+        expanded = make_plan()
+        # Deepened wording that still fits the 120-200 word format.
+        for scene in expanded["scenes"]:
+            scene["narration"] = scene["narration"].rstrip(".") + ", dan itu penting."
+        expanded["script"] = " ".join(
+            scene["narration"] for scene in expanded["scenes"]
+        )
+
+        with patch.object(
+            self.main, "call_json_with_providers", return_value=(expanded, "Mock")
+        ):
+            result = self.main.extend_plan_for_duration(plan, "brief")
+
+        for index, scene in enumerate(result["scenes"]):
+            self.assertEqual(scene["media_file"], f"output/footage/scene_{index}.mp4")
+            self.assertEqual(scene["license"], "CC BY-SA 4.0")
+            self.assertEqual(scene["selected_footage_source"], "Wikimedia Commons")
+            self.assertTrue(scene["visual_query"])
+            self.assertIn("sentence_start", scene)
+
     def test_long_hook_is_trimmed_to_twelve_words(self):
         plan = make_plan()
         plan["hook"] = " ".join(["kata"] * 20)

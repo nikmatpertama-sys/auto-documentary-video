@@ -6840,6 +6840,14 @@ def main():
         Path("plan.json").write_text(
             json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8"
         )
+        # The deepened wording can introduce new claims: verify it again before
+        # it is spoken and rendered.
+        try:
+            verification = fact_check_plan(plan, research_data)
+            research_module.write_research_files(research_data, verification)
+        except Exception as exc:
+            print(f"Re-verification of the extended script failed: {str(exc)[:400]}")
+            raise
         sentence_events, total_duration = build_voice_and_subs(
             plan["script"], enforce_minimum=False
         )
