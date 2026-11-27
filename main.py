@@ -1573,9 +1573,15 @@ def gemini_plan(topic, research_brief=None):
         print(f"Quota-aware selection: {provider_name} (best currently known capacity).")
 
         try:
-            candidate = validate_plan_candidate(route["run"]())
+            candidate = validate_plan_candidate(route["run"](), min_words=MIN_PLAN_WORDS)
             plan = candidate
+            words = len(str(plan.get("script") or "").split())
             print(f"Documentary plan generated successfully by {provider_name}.")
+            if words < 120:
+                print(
+                    f"Draft narration is {words} words; the duration expansion will "
+                    "extend it and the fact-check is re-verified afterwards."
+                )
             break
         except Exception as exc:
             errors.append(f"{provider_name}: {exc}")
@@ -1672,6 +1678,12 @@ def _verify_claims(script, claims, research_data, label="fact check"):
 # Scene counts are derived from the story, never padded to a quota.
 MIN_PLAN_SCENES = 4
 MAX_PLAN_SCENES = 12
+# A first draft may be shorter than the narration target. extend_plan_for_duration
+# expands it and the fact-check is re-run afterwards, so rejecting the draft here
+# only discarded otherwise usable provider output: the surviving free provider
+# (Cloudflare Workers AI) writes 79-108-word plans, and every run was thrown away
+# by this single gate instead of being expanded.
+MIN_PLAN_WORDS = 80
 
 # A fact-check that checked nothing is a failure, not a pass.
 MIN_FACT_CHECK_CLAIMS = 3

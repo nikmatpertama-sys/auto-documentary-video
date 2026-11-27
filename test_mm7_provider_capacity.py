@@ -64,6 +64,31 @@ class DeepSeekRoutingTests(unittest.TestCase):
         self.assertEqual(caller.call_args[0][0], "DeepSeek")
 
 
+class PlanLengthGraceTests(unittest.TestCase):
+    def test_short_draft_is_accepted_so_the_duration_expansion_can_extend_it(self):
+        draft = _plan(scenes=4)
+        self.assertLess(len(draft["script"].split()), 120)
+        import os
+        import tempfile
+
+        original = os.getcwd()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            os.chdir(temp_dir)
+            try:
+                with mock.patch.object(main, "GROQ_KEYS", []), \
+                        mock.patch.object(main, "OPENROUTER_KEYS", []), \
+                        mock.patch.object(main, "GEMINI_KEYS", []), \
+                        mock.patch.object(main, "DEEPSEEK_KEYS", []), \
+                        mock.patch.object(main, "CLOUDFLARE_CREDENTIALS", [{"token": "t", "account_id": "a"}]), \
+                        mock.patch.object(main, "call_cloudflare_chat", return_value=draft):
+                    result = main.gemini_plan("Ant colony life cycle", research_brief="Ants live in colonies.")
+                written = os.path.isfile(os.path.join(temp_dir, "plan.json"))
+            finally:
+                os.chdir(original)
+        self.assertEqual(len(result["scenes"]), 4)
+        self.assertTrue(written)
+
+
 class RepairLengthGraceTests(unittest.TestCase):
     def test_short_but_valid_plan_is_accepted_at_the_repair_floor(self):
         plan = _plan(scenes=4)
