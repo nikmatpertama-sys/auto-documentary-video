@@ -38,6 +38,7 @@ USER_AGENT = (
 )
 WIKIPEDIA_API = "https://{lang}.wikipedia.org/w/api.php"
 RESEARCH_TEXT_BUDGET = 6000  # characters injected into the scriptwriter prompt
+CLAIM_EVIDENCE_BUDGET = 5000  # extra characters retrieved for unsupported claims
 MAX_ARTICLES_PER_LANGUAGE = 2
 SEARCH_HITS_PER_QUERY = 12
 # A search hit is only treated as a source when its *title* shares a topic term.
@@ -476,6 +477,167 @@ def build_research_brief(articles, terms=None, budget=RESEARCH_TEXT_BUDGET):
             f"({article.get('url')})\n{excerpt}"
         )
     return "\n\n".join(chunks)[:budget]
+
+
+# ------------------------------------------------------------
+# CLAIM-TARGETED EVIDENCE
+# ------------------------------------------------------------
+
+# Words that carry no retrieval signal. Keeping them would make every claim
+# search the same generic articles.
+CLAIM_STOPWORDS = frozenset(
+    """
+    a an the and or but if then than that this these those it its it's they them their
+    there here was were is are be been being has have had do does did not no nor so
+    such as at by for from in into of on onto over under to up with within without
+    which who whom whose when where why how all any both each few more most other
+    some very can could may might must shall should will would also just only even
+    still yet about after before during while through across between among around
+    one two three first second new many much own same s t itself themselves we our
+    you your he she his her i me my mine us them because until whether per via
+    """.split()
+)
+
+
+def claim_search_terms(claim, limit=7):
+    """Distinctive terms from a claim, in the order they appear."""
+    seen = []
+    for token in _tokens(claim):
+        if len(token) < 4 or token in CLAIM_STOPWORDS or token.isdigit():
+            continue
+        if token not in seen:
+            seen.append(token)
+        if len(seen) >= limit:
+            break
+    return seen
+
+
+def _passages_for_claim(article, terms, budget, max_passages=2):
+    """Passages of this article that actually discuss the claim's terms."""
+    text = re.sub(r"\s+", " ", str(article.get("extract") or "")).strip()
+    if not text:
+        return []
+    paragraphs = [part.strip() for part in re.split(r"(?<=[.!?])\s{2,}", text) if part.strip()]
+    if len(paragraphs) <= 1:
+        paragraphs = [part.strip() for part in text.split("\n") if part.strip()]
+    term_set = set(terms)
+    scored = []
+    for index, paragraph in enumerate(paragraphs):
+        overlap = len(term_set & set(_tokens(paragraph)))
+        if overlap >= 2:
+            scored.append((overlap, index, paragraph))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    chosen = []
+    used = 0
+    for _, _, paragraph in scored[:max_passages]:
+        if used >= budget:
+            break
+        chosen.append(paragraph[:budget])
+        used += len(paragraph)
+    return chosen
+
+
+def gather_claim_evidence(
+    claims,
+    languages=("en",),
+    per_claim_budget=900,
+    total_budget=CLAIM_EVIDENCE_BUDGET,
+    max_claims=6,
+    pause_seconds=0.3,
+):
+    """Retrieve encyclopaedic passages that specifically address each claim.
+
+    The first research pass summarises the topic, which is not the same as
+    supporting the mechanism a sentence claims. When a claim is unsupported by
+    that summary, the fairest next step is to look for the passage that actually
+    discusses it, instead of only rewording the script. Nothing here fabricates
+    evidence: every passage comes from a fetched article and keeps its URL.
+    """
+    wanted = []
+    for claim in claims or []:
+        claim = re.sub(r"\s+", " ", str(claim or "")).strip()
+        if claim and claim not in wanted:
+            wanted.append(claim)
+    wanted = wanted[:max_claims]
+
+    languages = [str(lang).strip() for lang in (languages or ("en",)) if str(lang).strip()]
+    if not languages:
+        languages = ["en"]
+
+    blocks = []
+    articles = []
+    queries = []
+    warnings = []
+    used = 0
+    seen_titles = set()
+
+    for claim in wanted:
+        terms = claim_search_terms(claim)
+        if not terms:
+            continue
+        query = " ".join(terms)
+        queries.append(query)
+        found = None
+        for language in languages:
+            try:
+                hits = _search_titles(language, query, limit=5)
+            except Exception as exc:  # pragma: no cover - network dependent
+                warnings.append(f"{language} search failed: {type(exc).__name__}: {exc}")
+                continue
+            for score, _, hit in rank_search_hits(hits, terms):
+                if score <= 0:
+                    continue
+                key = (language, hit["title"].lower())
+                if key in seen_titles:
+                    continue
+                try:
+                    article = _fetch_article(language, hit["title"])
+                except Exception as exc:  # pragma: no cover - network dependent
+                    warnings.append(
+                        f"{language}:{hit['title']} fetch failed: {type(exc).__name__}: {exc}"
+                    )
+                    continue
+                if pause_seconds:
+                    _sleep(pause_seconds)
+                if not article:
+                    continue
+                passages = _passages_for_claim(article, terms, per_claim_budget)
+                if not passages:
+                    continue
+                seen_titles.add(key)
+                articles.append(article)
+                found = {
+                    "claim": claim,
+                    "title": article["title"],
+                    "url": article["url"],
+                    "language": article["language"],
+                    "passages": passages,
+                }
+                break
+            if found:
+                break
+
+        if not found:
+            warnings.append(f"no passage found for claim: {claim[:120]}")
+            continue
+
+        block = (
+            f"[{found['language']}] {found['title']} ({found['url']})\n"
+            "CLAIM ADDRESSED: " + found["claim"] + "\n"
+            + "\n".join(found["passages"])
+        )
+        if used + len(block) > total_budget:
+            break
+        blocks.append(block)
+        used += len(block)
+
+    return {
+        "brief": "\n\n".join(blocks),
+        "articles": articles,
+        "queries": queries,
+        "warnings": warnings,
+        "characters": used,
+    }
 
 
 # ------------------------------------------------------------

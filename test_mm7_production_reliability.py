@@ -168,6 +168,8 @@ class FactCheckEvidenceTests(unittest.TestCase):
         with patch.object(main, "analyse_script_claims", return_value=analysis), \
                 patch.object(main, "_verify_claims", return_value=dict(verification)), \
                 patch.object(main.research_module, "write_research_files"), \
+                patch.object(main.research_module, "gather_claim_evidence",
+                             return_value={"brief": "", "articles": [], "queries": [], "warnings": []}), \
                 patch.dict("os.environ", {"ALLOW_UNSUPPORTED_CLAIMS": ""}):
             with self.assertRaisesRegex(RuntimeError, "not safe to narrate"):
                 main.fact_check_plan({"script": "x", "scenes": []}, {"brief": ""}, max_repairs=0)

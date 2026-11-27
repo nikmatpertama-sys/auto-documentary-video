@@ -39,6 +39,13 @@ REPORTS = (
 )
 
 
+def run_slug() -> str:
+    """Filesystem-safe topic name for the per-run archive."""
+    topic = os.getenv("INPUT_TOPIC", "").strip().lower()
+    slug = re.sub(r"[^a-z0-9]+", "-", topic).strip("-")
+    return slug[:60] or "run"
+
+
 def annotate(level: str, title: str, message: str) -> None:
     """Emit a GitHub annotation; visible on the public check-run API."""
     safe = re.sub(r"\s+", " ", str(message or "")).strip()[:3000]
@@ -208,7 +215,9 @@ def main() -> int:
     write_run_file(latest)
 
     run_id = os.getenv("GITHUB_RUN_ID", "local")
-    archived = clone / "runs" / run_id
+    # A suite runs several topics under one run id, so the archive is keyed by
+    # topic as well; otherwise each job overwrote the previous job's reports.
+    archived = clone / "runs" / run_id / (run_slug() if os.getenv("INPUT_TOPIC") else "run")
     archived.parent.mkdir(parents=True, exist_ok=True)
     shutil.rmtree(archived, ignore_errors=True)
     shutil.copytree(latest, archived)

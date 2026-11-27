@@ -1734,17 +1734,32 @@ def extract_script_claims(script):
     return analysis["claims"], analysis["source"]
 
 
-def _fail_fact_check(research_data, status, message, analysis=None):
-    """Record the failed fact-check state in fact_check.json before aborting."""
+def _fail_fact_check(research_data, status, message, analysis=None, verification=None):
+    """Record the failed fact-check state in fact_check.json before aborting.
+
+    The claims and their verdicts are kept. An earlier version wrote an empty
+    claim list here, so the only place that said *which* claim was unsupported
+    was a log line nobody without account access could read.
+    """
     analysis = analysis or {}
+    verification = verification or {}
     payload = {
         "status": status,
         "overall": "fail",
-        "claims": [],
-        "checked": 0,
-        "supported": 0,
-        "unsupported": 0,
-        "contradicted": 0,
+        "claims": list(verification.get("claims") or []),
+        "checked": int(verification.get("checked") or 0),
+        "supported": int(verification.get("supported") or 0),
+        "unsupported": int(verification.get("unsupported") or 0),
+        "contradicted": int(verification.get("contradicted") or 0),
+        "rejected_claims": [
+            {
+                "claim": item.get("claim"),
+                "verdict": item.get("verdict"),
+                "evidence": item.get("evidence"),
+            }
+            for item in (verification.get("claims") or [])
+            if item.get("verdict") != "supported"
+        ],
         "claim_source": analysis.get("source"),
         "coverage": analysis.get("coverage"),
         "skipped_sentences": analysis.get("skipped_sentences") or [],
@@ -1756,6 +1771,63 @@ def _fail_fact_check(research_data, status, message, analysis=None):
     except Exception as exc:
         print(f"Could not persist the failed fact-check report: {exc}")
     raise RuntimeError(message)
+
+
+def _retrieve_evidence_for_rejected_claims(plan, verification, research_data, claims):
+    """Look up the passages the rejected claims need, then re-verify.
+
+    Rewriting a script is not research. When a claim is unsupported, the honest
+    next step is to find the passage that actually discusses it and re-run the
+    same evidence-bound verifier against that enriched material. If nothing new
+    is found, the original verdicts stand and the repair path continues.
+    """
+    rejected = [
+        item.get("claim") for item in (verification.get("claims") or [])
+        if item.get("verdict") in ("unsupported", "contradicted") and item.get("claim")
+    ]
+    if not rejected:
+        return verification
+
+    languages = []
+    topic_language = str(research_data.get("topic_language") or "").strip()
+    for language in (topic_language, SCRIPT_LANGUAGE, "en"):
+        if language and language not in languages:
+            languages.append(language)
+
+    try:
+        retrieval = research_module.gather_claim_evidence(rejected, languages=languages)
+    except Exception as exc:
+        print(f"Claim evidence retrieval failed: {str(exc)[:300]}")
+        return verification
+
+    if not retrieval.get("brief"):
+        print(
+            "Claim evidence retrieval found no new passage for "
+            f"{len(rejected)} rejected claim(s); keeping the original verdicts."
+        )
+        return verification
+
+    existing = str(research_data.get("brief") or "")
+    research_data["brief"] = (existing + "\n\n" + retrieval["brief"]).strip()
+    research_data.setdefault("articles", []).extend(retrieval.get("articles") or [])
+    research_data["claim_evidence"] = {
+        "queries": retrieval.get("queries") or [],
+        "characters": retrieval.get("characters") or 0,
+        "sources": [
+            {"title": article.get("title"), "url": article.get("url")}
+            for article in retrieval.get("articles") or []
+        ],
+    }
+    print(
+        "Retrieved "
+        f"{len(retrieval.get('articles') or [])} additional source(s) for "
+        f"{len(rejected)} rejected claim(s); re-verifying against the enriched brief."
+    )
+    rechecked = _verify_claims(
+        plan["script"], claims, research_data, label="fact check with retrieved evidence"
+    )
+    rechecked["evidence_retrieval"] = research_data["claim_evidence"]
+    return rechecked
 
 
 def fact_check_plan(plan, research_data, max_repairs=2):
@@ -1815,6 +1887,7 @@ def fact_check_plan(plan, research_data, max_repairs=2):
         )
 
     verification = _verify_claims(plan["script"], claims, research_data)
+    verification = _retrieve_evidence_for_rejected_claims(plan, verification, research_data, claims)
     verification["claim_source"] = claim_source
     verification["coverage"] = coverage
     verification["skipped_sentences"] = analysis.get("skipped_sentences") or []
@@ -1901,6 +1974,7 @@ def fact_check_plan(plan, research_data, max_repairs=2):
                 f"{item['claim']} ({item['evidence']})" for item in contradicted
             ),
             analysis,
+            verification,
         )
 
     unsupported = [
@@ -1927,6 +2001,7 @@ def fact_check_plan(plan, research_data, max_repairs=2):
                 + ". Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an "
                 "explicit flag in fact_check.json.",
                 analysis,
+                verification,
             )
         print(
             "Fact-check warning: ALLOW_UNSUPPORTED_CLAIMS is set; "
