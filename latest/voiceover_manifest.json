@@ -5,9 +5,9 @@
   "model": "simba-3.5",
   "language": "en",
   "locale": "en-US",
-  "script_sha256": "e0b792f6a3a9c9a08ed12b6cc9512afc69aaeef5cdfddf1be22eaa03277f9cf3",
-  "script_words": 95,
-  "total_duration": 40.82,
+  "script_sha256": "50872fa1d4854f0ecf8dd3d006e0e6ff40dd148fae86797930d8fdc1414f7a46",
+  "script_words": 137,
+  "total_duration": 58.343,
   "audio_files": [
     "output/voiceover.wav",
     "output/voiceover.mp3"
@@ -16,39 +16,33 @@
     {
       "index": 1,
       "start": 0.75,
-      "duration": 5.442,
-      "text": "Ants live together in colonies, which are eusocial, communal, and efficiently organized."
+      "duration": 6.857,
+      "text": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals."
     },
     {
       "index": 2,
-      "start": 6.892,
-      "duration": 9.445,
-      "text": "A typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females."
+      "start": 8.307,
+      "duration": 9.626,
+      "text": "An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy."
     },
     {
       "index": 3,
-      "start": 16.637,
-      "duration": 7.42,
-      "text": "Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests."
+      "start": 18.234,
+      "duration": 11.442,
+      "text": "The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers."
     },
     {
       "index": 4,
-      "start": 24.357,
-      "duration": 5.603,
-      "text": "The males die shortly thereafter, while a small percentage of females survive to initiate new nests."
+      "start": 29.976,
+      "duration": 9.968,
+      "text": "Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival."
     },
     {
       "index": 5,
-      "start": 30.261,
-      "duration": 6.314,
-      "text": "Ant colonies operate with a unified purpose, with each caste playing a vital role in the colony's survival."
-    },
-    {
-      "index": 6,
-      "start": 36.874,
-      "duration": 3.645,
-      "text": "Ants have colonized almost every landmass on Earth."
+      "start": 40.244,
+      "duration": 17.799,
+      "text": "A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success."
     }
   ],
-  "generated_at": "2026-11-27T14:51:39+00:00"
+  "generated_at": "2026-11-27T14:57:33+00:00"
 }

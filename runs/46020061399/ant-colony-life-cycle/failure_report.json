@@ -1,0 +1,32 @@
+{
+  "status": "failed",
+  "current_stage": "voiceover_and_subtitle_generation",
+  "error_type": "RuntimeError",
+  "error_message": "Voice-over is 58.34s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8313, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8252, in main\n    raise RuntimeError(\nRuntimeError: Voice-over is 58.34s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.\n",
+  "finished_at_epoch": 1795791453.2768672,
+  "configuration": {
+    "project_release": "MM6",
+    "visual_verification_required": true,
+    "groq_keys_configured": 1,
+    "openrouter_keys_configured": 1,
+    "gemini_keys_configured": 1,
+    "cloudflare_key_pairs_configured": 2,
+    "speechify_keys_configured": 1,
+    "pixabay_key_configured": true,
+    "pexels_key_configured": false,
+    "release": "MM6",
+    "source_priority": [
+      "Coverr",
+      "Internet Archive",
+      "Wikimedia Commons",
+      "NASA",
+      "Web Search",
+      "Google Search",
+      "Pexels",
+      "Pixabay"
+    ],
+    "footage_source_requests": {},
+    "footage_source_cooldowns_seconds": {}
+  }
+}

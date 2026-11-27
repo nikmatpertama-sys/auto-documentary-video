@@ -1,0 +1,128 @@
+{
+  "claims": [
+    {
+      "claim": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of ant habitats",
+      "quote": "Ants thrive in moist tropical ecosystems and may exceed the combined biomass of wild birds and mammals.",
+      "source": {
+        "id": "S2",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Definition of ant colony",
+      "quote": "An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle.",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of colony composition",
+      "quote": "The typical colony consists of one or more egg-laying queens, numerous sterile females (workers, soldiers) and, seasonally, many winged sexual males and females.",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of colony establishment",
+      "quote": "In order to establish new colonies, ants undertake flights that occur at species-characteristic times of the day.",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of colony organization and female survival",
+      "quote": "A small percentage of the females survive to initiate new nests. The term 'ant colony' refers to a population of workers, reproductive individuals, and brood that live together, cooperate, and treat one another non-aggressively.",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    }
+  ],
+  "checked": 5,
+  "supported": 5,
+  "unsupported": 0,
+  "contradicted": 0,
+  "sourced_supports": 5,
+  "general_knowledge_supports": 0,
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Ant colony",
+      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+    },
+    {
+      "id": "S2",
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "id": "S3",
+      "title": "Koloni semut",
+      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+    },
+    {
+      "id": "S4",
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    }
+  ],
+  "overall": "pass",
+  "checked_at": "2026-11-27T14:57:15+00:00",
+  "provider": "Cloudflare AI key pair 2",
+  "research_articles": [
+    {
+      "title": "Ant colony",
+      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+    },
+    {
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "title": "Koloni semut",
+      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+    },
+    {
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    }
+  ],
+  "claim_source": "semantic:Groq key 1",
+  "coverage": {
+    "script_sentences": 5,
+    "claimed_sentences": 5,
+    "non_factual_sentences": 0,
+    "uncovered_sentences": [],
+    "coverage": 1.0
+  },
+  "skipped_sentences": [],
+  "status": "checked"
+}

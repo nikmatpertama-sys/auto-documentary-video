@@ -5,31 +5,31 @@
     {
       "name": "research",
       "status": "completed",
-      "started_at_epoch": 1795790892.6791236,
-      "finished_at_epoch": 1795790895.962001,
-      "duration_seconds": 3.28
+      "started_at_epoch": 1795791299.1076088,
+      "finished_at_epoch": 1795791302.1475382,
+      "duration_seconds": 3.04
     },
     {
       "name": "documentary_plan_generation",
       "status": "completed",
-      "started_at_epoch": 1795790895.9621766,
-      "finished_at_epoch": 1795790954.1070812,
-      "duration_seconds": 58.14
+      "started_at_epoch": 1795791302.2648313,
+      "finished_at_epoch": 1795791321.1837084,
+      "duration_seconds": 18.92
     },
     {
       "name": "fact_checking",
       "status": "completed",
-      "started_at_epoch": 1795790954.1073327,
-      "finished_at_epoch": 1795790967.540164,
-      "duration_seconds": 13.43
+      "started_at_epoch": 1795791321.1839933,
+      "finished_at_epoch": 1795791345.7729561,
+      "duration_seconds": 24.59
     },
     {
       "name": "voiceover_and_subtitle_generation",
       "status": "failed",
-      "started_at_epoch": 1795790967.540385,
-      "finished_at_epoch": 1795791099.2079947,
+      "started_at_epoch": 1795791345.7732072,
+      "finished_at_epoch": 1795791453.2758515,
       "failure_type": "RuntimeError",
-      "failure_message": "Voice-over is 40.82s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage."
+      "failure_message": "Voice-over is 58.34s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage."
     }
   ],
   "voice_provider": "Speechify",
@@ -39,7 +39,7 @@
   "voiceover_manifest": "output/voiceover_manifest.json",
   "failure": {
     "error_type": "RuntimeError",
-    "error_message": "Voice-over is 40.82s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.",
-    "finished_at_epoch": 1795791099.2090626
+    "error_message": "Voice-over is 58.34s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.",
+    "finished_at_epoch": 1795791453.2768672
   }
 }

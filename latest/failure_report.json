@@ -2,9 +2,9 @@
   "status": "failed",
   "current_stage": "voiceover_and_subtitle_generation",
   "error_type": "RuntimeError",
-  "error_message": "Voice-over is 40.82s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8282, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8221, in main\n    raise RuntimeError(\nRuntimeError: Voice-over is 40.82s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.\n",
-  "finished_at_epoch": 1795791099.2090626,
+  "error_message": "Voice-over is 58.34s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8313, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8252, in main\n    raise RuntimeError(\nRuntimeError: Voice-over is 58.34s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.\n",
+  "finished_at_epoch": 1795791453.2768672,
   "configuration": {
     "project_release": "MM6",
     "visual_verification_required": true,

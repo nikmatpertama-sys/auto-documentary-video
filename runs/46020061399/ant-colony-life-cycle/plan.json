@@ -1,0 +1,68 @@
+{
+  "title": "Ant Colony Life Cycle",
+  "hook": "Ants thrive",
+  "script": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals. An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy. The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers. Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival. A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success.",
+  "scenes": [
+    {
+      "narration": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals.",
+      "visual_query": "Tropical forest ants",
+      "visual_queries": [
+        "Ants in jungle undergrowth",
+        "Tropical ants on tree bark"
+      ],
+      "source_label": "",
+      "source_url": "",
+      "visual_type": "footage",
+      "sentence_start": 0,
+      "sentence_end": 0
+    },
+    {
+      "narration": "An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy.",
+      "visual_query": "Ant colony in action",
+      "visual_queries": [
+        "Ants working together in colony",
+        "Single species ant colony"
+      ],
+      "source_label": "",
+      "source_url": "",
+      "sentence_start": 1,
+      "sentence_end": 1
+    },
+    {
+      "narration": "The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers.",
+      "visual_query": "Ant colony social hierarchy",
+      "visual_queries": [
+        "Queen ant laying eggs",
+        "Sterile female ants at work"
+      ],
+      "source_label": "",
+      "source_url": "",
+      "sentence_start": 2,
+      "sentence_end": 2
+    },
+    {
+      "narration": "Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival.",
+      "visual_query": "Ants in flight",
+      "visual_queries": [
+        "Winged ants flying in swarm",
+        "Ants departing nest in flight"
+      ],
+      "source_label": "",
+      "source_url": "",
+      "sentence_start": 3,
+      "sentence_end": 3
+    },
+    {
+      "narration": "A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success.",
+      "visual_query": "New ant nest formation",
+      "visual_queries": [
+        "Female ant initiating new nest",
+        "Ants working together in new colony"
+      ],
+      "source_label": "",
+      "source_url": "",
+      "sentence_start": 4,
+      "sentence_end": 4
+    }
+  ]
+}

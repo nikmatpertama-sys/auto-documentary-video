@@ -1,85 +1,68 @@
 {
   "title": "Ant Colony Life Cycle",
-  "hook": "Ants live together",
-  "script": "Ants live together in colonies, which are eusocial, communal, and efficiently organized. A typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females. According to Wikipedia, ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests. The males die shortly thereafter, while a small percentage of females survive to initiate new nests. As superorganisms, ant colonies operate with a unified purpose, with each caste playing a vital role in the colony's survival. With over 13,800 described species, ants have colonized almost every landmass on Earth, thriving in moist tropical ecosystems and exceeding the combined biomass of wild birds and mammals in some regions, as noted in the Journal of Insect Science.",
+  "hook": "Ants thrive",
+  "script": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals. An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy. The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers. Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival. A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success.",
   "scenes": [
     {
-      "narration": "Ants live together in colonies, which are eusocial, communal, and efficiently organized.",
-      "visual_query": "Ants in a colony",
+      "narration": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals.",
+      "visual_query": "Tropical forest ants",
       "visual_queries": [
-        "Ants working together",
-        "Ant colony entrance"
+        "Ants in jungle undergrowth",
+        "Tropical ants on tree bark"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "A typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females.",
-      "visual_query": "Ant queen and workers",
+      "narration": "An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy.",
+      "visual_query": "Ant colony in action",
       "visual_queries": [
-        "Ants with different roles",
-        "Queen ant laying eggs"
+        "Ants working together in colony",
+        "Single species ant colony"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
-      "visual_type": "footage",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "According to Wikipedia, ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests.",
-      "visual_query": "Ants in flight",
+      "narration": "The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers.",
+      "visual_query": "Ant colony social hierarchy",
       "visual_queries": [
-        "Winged ants swarming",
-        "Ants leaving the nest"
+        "Queen ant laying eggs",
+        "Sterile female ants at work"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "visual_type": "footage",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 2,
       "sentence_end": 2
     },
     {
-      "narration": "The males die shortly thereafter, while a small percentage of females survive to initiate new nests.",
-      "visual_query": "Female ants starting new nests",
+      "narration": "Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival.",
+      "visual_query": "Ants in flight",
       "visual_queries": [
-        "Female ant digging",
-        "New ant nest formation"
+        "Winged ants flying in swarm",
+        "Ants departing nest in flight"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "visual_type": "footage",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "As superorganisms, ant colonies operate with a unified purpose, with each caste playing a vital role in the colony's survival.",
-      "visual_query": "Ants working together",
+      "narration": "A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success.",
+      "visual_query": "New ant nest formation",
       "visual_queries": [
-        "Ants cooperating",
-        "Ant colony activity"
+        "Female ant initiating new nest",
+        "Ants working together in new colony"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
-      "visual_type": "footage",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 4,
       "sentence_end": 4
-    },
-    {
-      "narration": "With over 13,800 described species, ants have colonized almost every landmass on Earth, thriving in moist tropical ecosystems and exceeding the combined biomass of wild birds and mammals in some regions, as noted in the Journal of Insect Science.",
-      "visual_query": "Ants in a tropical ecosystem",
-      "visual_queries": [
-        "Ants in a rainforest",
-        "Tropical ant colony"
-      ],
-      "source_label": "Journal of Insect Science",
-      "source_url": "https://academic.oup.com/jinsectscience",
-      "visual_type": "footage",
-      "sentence_start": 5,
-      "sentence_end": 5
     }
   ]
 }
