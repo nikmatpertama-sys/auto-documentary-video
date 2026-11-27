@@ -1,0 +1,33 @@
+{
+  "status": "failed",
+  "current_stage": "fact_checking",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795806889.401082,
+      "finished_at_epoch": 1795806892.477526,
+      "duration_seconds": 3.08
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795806892.4776626,
+      "finished_at_epoch": 1795806901.0791302,
+      "duration_seconds": 8.6
+    },
+    {
+      "name": "fact_checking",
+      "status": "failed",
+      "started_at_epoch": 1795806901.0792549,
+      "finished_at_epoch": 1795806906.007742,
+      "failure_type": "RuntimeError",
+      "failure_message": "All configured AI providers failed during the fact check:\n- Groq key 1: Groq HTTP 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7854, Requested 4353. Please try again in 31.5525s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}} "
+    }
+  ],
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "All configured AI providers failed during the fact check:\n- Groq key 1: Groq HTTP 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7854, Requested 4353. Please try again in 31.5525s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}} ",
+    "finished_at_epoch": 1795806906.0087342
+  }
+}
