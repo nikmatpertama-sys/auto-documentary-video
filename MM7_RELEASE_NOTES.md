@@ -230,6 +230,28 @@ and unit-tested but have **not** been exercised against a live provider:
 - the full production run for "Ant colony life cycle",
   "Amazon rainforest canopy aerial" and "Volcano eruption".
 
+### MM7.2 credential wiring audit
+
+An earlier report said provider credentials were unavailable. That was true of the
+local Freebuff workspace only, and it was reported without separating those two
+cases. Repository secrets are available to GitHub Actions: the runtime report from
+run `45916162021` lists `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `GEMINI_API_KEY`,
+`OPENROUTER_API_KEY`, `PIXABAY_API_KEY` and `COVERR_API_KEY` as present, and Gemini
+text and vision calls succeeded in that run. Speechify and Cloudflare were never
+passed by that workflow version, so their presence was unknown rather than absent.
+
+Wiring changes in this revision:
+
+- `GOOGLE_API_KEY` is now forwarded alongside `GEMINI_API_KEY`, because `main.py`
+  accepts either name and a key stored under the alias previously never arrived.
+- `GROQ_VISION_MODEL` is set explicitly to match the vision route the code defaults to.
+- `tools/check_credentials.py` reports every credential group as `SET` or `MISSING`
+  plus, with `--probe`, a read-only provider status code. It never reads a value out.
+- The render workflow runs that check before `python main.py`, so a run states
+  whether a secret was missing or merely not injected.
+- Both workflows publish redacted diagnostics; the render workflow now does it on
+  every branch, not only `ci-run`, so a failure is diagnosable without account access.
+
 Required secrets for that run: at least one of `GROQ_API_KEY`,
 `OPENROUTER_API_KEY`, `GEMINI_API_KEY`/`GOOGLE_API_KEY`, or
 `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`, plus `SPVO_API` /

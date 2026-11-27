@@ -263,6 +263,47 @@ jobs:
           python -m py_compile main.py quota_router.py render.py footage.py research.py qc.py reference_style.py
           python -m unittest discover -v
 
+      - name: Verify provider credential wiring (names only)
+        # Separates "secret never existed" from "secret existed but never
+        # reached this step". Prints SET / MISSING and the credential group each
+        # name belongs to; never a value, prefix or hash of a value.
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_API_KEY_1: ${{ secrets.GROQ_API_KEY_1 }}
+          GROQ_API_KEY_2: ${{ secrets.GROQ_API_KEY_2 }}
+          GROQ_API_KEY_3: ${{ secrets.GROQ_API_KEY_3 }}
+          GROQ_API_KEY_4: ${{ secrets.GROQ_API_KEY_4 }}
+          GROQ_API_KEY_5: ${{ secrets.GROQ_API_KEY_5 }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_API_KEY_1: ${{ secrets.OPENROUTER_API_KEY_1 }}
+          OPENROUTER_API_KEY_2: ${{ secrets.OPENROUTER_API_KEY_2 }}
+          OPENROUTER_API_KEY_3: ${{ secrets.OPENROUTER_API_KEY_3 }}
+          OPENROUTER_API_KEY_4: ${{ secrets.OPENROUTER_API_KEY_4 }}
+          OPENROUTER_API_KEY_5: ${{ secrets.OPENROUTER_API_KEY_5 }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
+          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+          GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+          GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
+          GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GEMINI_PROJECT_ID: ${{ secrets.GEMINI_PROJECT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_API_TK1: ${{ secrets.CF_API_TK1 }}
+          CF_ID1: ${{ secrets.CF_ID1 }}
+          SPVO_API: ${{ secrets.SPVO_API }}
+          SPVO_API_1: ${{ secrets.SPVO_API_1 }}
+          SPVO_API_2: ${{ secrets.SPVO_API_2 }}
+          SPVO_API_3: ${{ secrets.SPVO_API_3 }}
+          SPEECHIFY_API_KEY: ${{ secrets.SPEECHIFY_API_KEY }}
+          SPEECHIFY_VOICE_ID: ${{ secrets.SPEECHIFY_VOICE_ID }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: python tools/check_credentials.py --json-out credential_status.json
+
       - name: Generate documentary
         env:
           INPUT_TOPIC: ${{ inputs.topic }}
@@ -277,6 +318,9 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Accepted alias: main.py reads GEMINI_API_KEY and GOOGLE_API_KEY.
+          # Storing the key under either name now reaches the process.
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
           # Optional numbered provider API keys. Empty secrets are ignored by the project.
@@ -324,6 +368,7 @@ jobs:
 
           # Quota-aware router chooses eligible providers dynamically; no fixed key order is set.
           GROQ_MODEL: openai/gpt-oss-120b
+          GROQ_VISION_MODEL: qwen/qwen3.8-27b
           GEMINI_MODEL: gemini-3.8-flash
           GEMINI_VISION_MODEL: gemini-3.8-flash
           OPENROUTER_MODEL: openrouter/free
@@ -378,6 +423,46 @@ jobs:
             output/pipeline.log
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Publish redacted diagnostics for this run
+        # Without this, a failure on any branch is only visible inside the
+        # Actions log, which needs account access. Reports contain credential
+        # NAMES and stage metadata, never credential values.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          PUBLISH=$(mktemp -d)
+          if ! git clone --depth 1 --branch ci-diagnostics \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$PUBLISH" 2>/dev/null; then
+            git clone --depth 1 \
+              "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$PUBLISH"
+            git -C "$PUBLISH" checkout --orphan ci-diagnostics
+            git -C "$PUBLISH" rm -rf . >/dev/null 2>&1 || true
+          fi
+          rm -rf "$PUBLISH/latest"
+          mkdir -p "$PUBLISH/latest/output"
+          for report in credential_status.json failure_report.json stage_report.json \
+              production_report.json fact_check.json footage_verification.json \
+              copyright_report.json qc_report.json plan.json timing.json credits.txt; do
+            [ -f "$report" ] && cp "$report" "$PUBLISH/latest/"
+          done
+          [ -f output/voiceover_manifest.json ] && cp output/voiceover_manifest.json "$PUBLISH/latest/"
+          if [ -f output/pipeline.log ]; then
+            # Redact anything that looks like a bearer token or API key.
+            sed -E 's/(sk-[A-Za-z0-9_-]{8,}|AIza[A-Za-z0-9_-]{10,}|gsk_[A-Za-z0-9]{8,})/[redacted]/g' \
+              output/pipeline.log | tail -n 3000 > "$PUBLISH/latest/output/pipeline.log"
+          fi
+          [ -d output/vision ] && cp -r output/vision "$PUBLISH/latest/output/" || true
+          printf 'run=%s\nsha=%s\nbranch=%s\njob_status=%s\n' \
+            "${GITHUB_RUN_ID}" "${GITHUB_SHA}" "${GITHUB_REF_NAME}" \
+            "${{ job.status }}" > "$PUBLISH/latest/RUN.txt"
+          git -C "$PUBLISH" add -A
+          git -C "$PUBLISH" -c user.name='documentary-ci' \
+            -c user.email='documentary-ci@users.noreply.github.com' \
+            commit -m "diagnostics for run ${GITHUB_RUN_ID} (${GITHUB_REF_NAME})" || true
+          git -C "$PUBLISH" push origin HEAD:ci-diagnostics
 
       - name: Persist generated Markdown cleanup to this branch
         if: always()
