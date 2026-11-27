@@ -1,0 +1,6 @@
+run=46009167554
+sha=0fec068d387c45357b2717c3ce40c2acf5dc3816
+branch=main
+job_status=failure
+topic=Ant colony life cycle
+pipeline_exit=failure

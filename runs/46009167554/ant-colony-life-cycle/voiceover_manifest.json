@@ -1,0 +1,78 @@
+{
+  "provider": "Speechify",
+  "speechify_used": true,
+  "voice": "geffen_32",
+  "model": "simba-3.5",
+  "language": "en",
+  "locale": "en-US",
+  "script_sha256": "6f668f901de9018aa90cd3bdc3142551d90426787974a7442dff392386830dae",
+  "script_words": 186,
+  "total_duration": 75.676,
+  "audio_files": [
+    "output/voiceover.wav",
+    "output/voiceover.mp3"
+  ],
+  "sentences": [
+    {
+      "index": 1,
+      "start": 0.75,
+      "duration": 3.469,
+      "text": "What if a single queen could birth an entire city?"
+    },
+    {
+      "index": 2,
+      "start": 4.919,
+      "duration": 5.609,
+      "text": "Inside an ant colony, millions of tiny workers cooperate like a living superorganism."
+    },
+    {
+      "index": 3,
+      "start": 10.827,
+      "duration": 6.165,
+      "text": "The colony revolves around one or more egg‑laying queens, whose sole purpose is to lay thousands of eggs."
+    },
+    {
+      "index": 4,
+      "start": 17.292,
+      "duration": 8.179,
+      "text": "From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones."
+    },
+    {
+      "index": 5,
+      "start": 25.771,
+      "duration": 8.321,
+      "text": "Most adults become sterile females—workers that tend brood, forage, and defend the nest, while some develop into larger soldiers."
+    },
+    {
+      "index": 6,
+      "start": 34.392,
+      "duration": 7.808,
+      "text": "At the right season, the queen also raises winged males and virgin females, called alates, that gather in massive swarms."
+    },
+    {
+      "index": 7,
+      "start": 42.5,
+      "duration": 6.504,
+      "text": "These nuptial flights happen at species‑specific times of day, and the alates leave the nest in search of mates."
+    },
+    {
+      "index": 8,
+      "start": 49.304,
+      "duration": 9.045,
+      "text": "Males die soon after mating, and most females also perish, but a few fertilized queens shed their wings and descend to start new colonies."
+    },
+    {
+      "index": 9,
+      "start": 58.649,
+      "duration": 8.897,
+      "text": "The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil."
+    },
+    {
+      "index": 10,
+      "start": 67.846,
+      "duration": 7.53,
+      "text": "From a single egg to a sprawling underground metropolis, the ant colony reminds us that cooperation can build worlds."
+    }
+  ],
+  "generated_at": "2026-11-27T13:45:29+00:00"
+}

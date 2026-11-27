@@ -1,0 +1,467 @@
+Markdown cleanup: no generated upgrade/validation files found.
+Pipeline stage started: research
+1/8 Researching credible sources for: Ant colony life cycle
+Research complete: 4 source article(s) stored in research.json.
+Pipeline stage started: documentary_plan_generation
+2/8 Generating documentary plan from the research material...
+Quota-aware routing snapshot:
+  - Groq key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - OpenRouter key 1: 100.0% measured ($100 of $100 remaining)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: OpenRouter key 1
+Quota-aware selection: OpenRouter key 1 (best currently known capacity).
+OpenRouter key 1: OpenRouter HTTP 429: {"error":{"message":"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit","code":429,"metadata":{"headers":{"X-RateLimit-Limit":"50","X-RateLimit-Remaining":"0","X-RateLimit-Reset":"1795824000000"},"limit_source":"openrouter_free_tier_daily","remedy_hint":"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.","provider_name":null,"previous_errors":[{"code":429,"message":"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit
+Rechecking provider availability and ranking the remaining routes...
+Quota-aware routing snapshot:
+  - Groq key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+Quota-aware selection: Groq key 1 (best currently known capacity).
+Documentary plan generated successfully by Groq key 1.
+Script ready: 186 words, 5 scenes.
+Pipeline stage started: fact_checking
+3/8 Fact-checking claims against the research material...
+Quota-aware routing snapshot:
+  - Groq key 1: 13.3% measured (RPD 997/1000, TPM 1067/8000)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Gemini key 1
+AI connection issue; retrying once in 5s...
+claim extraction: Gemini key 1: Gemini HTTP 429: {   "error": {     "code": 429,     "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 18h15m11.4295585s.",     "status": "RESOURCE_EXHAUSTED",     "details": [       {         "@type": "type.googleapis.com/google.rpc.Help"
+Quota-aware routing snapshot:
+  - Groq key 1: 13.3% measured (RPD 997/1000, TPM 1067/8000)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 1
+Quota-aware routing snapshot:
+  - Groq key 1: 13.3% measured (RPD 997/1000, TPM 1067/8000)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Retrieved 2 additional source(s) for 2 rejected claim(s); re-verifying against the enriched brief.
+Quota-aware routing snapshot:
+  - Groq key 1: 13.3% measured (RPD 997/1000, TPM 1067/8000)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 1
+Fact check: 9 supported (8 with a cited source), 0 unsupported, 0 contradicted (overall pass); sentence coverage 100%.
+Fact check stored in fact_check.json (overall pass, 9 claim(s) checked).
+Pipeline stage started: voiceover_and_subtitle_generation
+4/8 Generating the verified voice-over and subtitles...
+Speechify voice catalog key slot 1 unavailable; trying the next configured key: Speechify voice catalog HTTP 403: {"error":{"code":"insufficient_scope","message":"You do not have permission to perform this operation."},"request_id":"30aa9f3c7085d346db0bd07b"}
+
+Speechify voice catalog is not readable with the configured credential (403 insufficient_scope is a token scope limit, not a bad key). Falling back to the documented shared voice id.
+Speechify VO sentence 1/10 rendered (3.47s).
+Speechify VO sentence 2/10 rendered (5.61s).
+Speechify VO sentence 3/10 rendered (6.16s).
+Speechify VO sentence 4/10 rendered (8.18s).
+Speechify VO sentence 5/10 rendered (8.32s).
+Speechify VO sentence 6/10 rendered (7.81s).
+Speechify VO sentence 7/10 rendered (6.50s).
+Speechify VO sentence 8/10 rendered (9.05s).
+Speechify VO sentence 9/10 rendered (8.90s).
+Speechify VO sentence 10/10 rendered (7.53s).
+Voice-over provider: Speechify (model simba-3.5, voice geffen_32, locale en-US).
+VO audio check: 75.68s, mean -23.7 dBFS, peak -6.5 dBFS
+VO timeline ready: 75.68s (minimum 70s; no maximum duration).
+Voice-over verified: 75.68s of narration (minimum 70s, ends with the narration).
+Pipeline stage started: footage_search_download_and_visual_verification
+5/8 Searching, downloading and visually verifying footage...
+Footage request budget for 5 scene(s): Coverr=30, Internet Archive=240, Wikimedia Commons=200, NASA=240, Web Search=80, Google Search=55. Cached searches do not consume it.
+Footage discovery priority: Coverr native-vertical API -> Internet Archive -> Wikimedia Commons -> NASA -> Google Search direct reusable-video files. Coverr vertical/free/non-AI search is enabled via COVERR_API_KEY. Pexels/Pixabay remain disabled unless explicitly enabled.
+Visual verification enabled with automatic failover: Groq (1 key(s), qwen/qwen3.8-27b) -> OpenRouter (1 key(s), nvidia/nemotron-3.5-super-vl:free) -> OpenRouter backup model (inclusionai/ling-3.2-flash:free) -> Gemini (1 key(s), gemini-3.8-flash) -> Cloudflare Workers AI (2 key pair(s), @cf/meta/llama-3.2-11b-vision-instruct). Minimum confidence=0.72.
+Scene 1: applying metadata anchors independently to each of 6 search variants.
+  Coverr: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'queen ant close' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'queen ant' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 1 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+  Google web discovery: 0 result page(s).
+  Web Search: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+Web Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google web discovery unavailable: 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dqueen%2Bant%2Bclose%2Bvideo%2B%2528%2522creative%2Bcomm
+  Google Search: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'queen close' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'queen' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: 16 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (88s remaining); no stale cache available.
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google Search search unavailable for 'queen close': 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dqueen%2Bclose%2Bfiletype%253Amp4%2B%2528%2522public%2Bdomain%2522%2BOR%2B%2522Creative%2BCommons%2522%2BOR%2BCC0%2BOR%2B%2522CC%2BBY%2522%2529%26num%3D30%26filter%3D0&q=EgQoSstDGIeTptgGIjCeGcMY8ej2QqthxrN0OXU8fuz_SYOL9tb8hm4T2rWw3dpyD4vn6QUFHy9iWTXl6ygyAnJSWgFDYJqbyKOTyP7VjAE
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 3 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (86s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (88s remaining); no stale cache available.
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'ant colony entrance' produced 2 candidate(s).
+  Wikimedia Commons: 2 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (82s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (85s remaining); no stale cache available.
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 2 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (80s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (83s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'ant colony wide' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'ant colony' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'ant colony' produced 6 candidate(s).
+  Wikimedia Commons: 6 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (76s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (78s remaining); no stale cache available.
+Scene 1: strict metadata produced 7 candidates; running a second, AI-gated discovery pass with softer metadata matching.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 1 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: 0 cached candidate(s) (independent source cache, age 0m).
+  Google Search: 0 cached candidate(s) (independent source cache, age 0m).
+  Internet Archive: 0 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 16 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (76s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (78s remaining); no stale cache available.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 3 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (76s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (78s remaining); no stale cache available.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 2 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (76s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (78s remaining); no stale cache available.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 2 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (76s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (78s remaining); no stale cache available.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 6 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (76s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (78s remaining); no stale cache available.
+Scene 1: trying 3 additional subject-preserving fallback searches.
+  Internet Archive: 30 item(s) matched 'insect macro nature' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'insect macro' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'insect' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'insect macro' produced 18 candidate(s).
+  Wikimedia Commons: 18 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (70s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (73s remaining); no stale cache available.
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'insect leaf' produced 17 candidate(s).
+  Wikimedia Commons: 17 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (66s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (68s remaining); no stale cache available.
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'insect crawling' produced 1 candidate(s).
+  Wikimedia Commons: 1 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (61s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (63s remaining); no stale cache available.
+Scene 1: footage discovery summary — strict=33, relaxed=16, ranked=17, partial-metadata-for-visual-review=24, visual-check-limit=26; filtered=metadata:59, resolution:2, relevance:4, context:1
+Scene 1: portrait metadata hints=0; orientation deferred to downloaded-file ffprobe=17.
+Scene 1: 21 metadata-qualified candidate(s) across 9 search variants; checking up to 17 candidates.
+  Candidate rank 1: Wikimedia Commons ID=30657733 score=1.00 match=3/3 query='ant colony entrance wide' metadata=File:Red ant colony entrance.webm Entrance of a red ant colony at Bandelier National Monument, New Mexico Unidentified Formicidae
+  Candidate rank 2: Wikimedia Commons ID=48428139 score=1.00 match=2/2 query='ant colony wide' metadata=File:A Spring Morning with a Carpenter Ant Colony in an Old Fir Stump in East Knox Mountain Park.webm A Spring Morning with a Carpenter Ant Colony in an Old Fir
+  Candidate rank 3: Wikimedia Commons ID=42598820 score=1.00 match=2/2 query='ant colony wide' metadata=File:Large ant colony.webm Large ant colony 
+  Candidate rank 4: Wikimedia Commons ID=161593406 score=0.58 match=2/3 query='insect on leaf closeup' metadata=File:Insect on Leaf.webm An insect on a leaf in Yogyakarta, Indonesia. Unfortunately, the species is not known to me, though it seems common. 
+  Candidate rank 5: Internet Archive ID=Flickr-16780887326 score=0.49 match=1/2 query='ant colony wide' metadata=AntLapse  <br /><br />Source: <a href="https://www.flickr.com/photos/61332248@N08/16780887326" rel="ugc nofollow">https://www.flickr.com/photos/61332248@N08/167
+Scene 1: candidate download budget=900 MB (metadata relevance 1.00).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 13.3% measured (RPD 997/1000, TPM 1067/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 1/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the main requested subject/condition is absent
+Scene 1: candidate download budget=900 MB (metadata relevance 1.00).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 13.3% measured (RPD 997/1000, TPM 1067/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned unusable output; disabling this route. Detail: Cloudflare Vision did not return valid JSON: Provider response did not contain a complete JSON object.; response preview='{"relevant": false, "confidence": 0.0, "reason": "absent queen ant close-up, absent aerial/drone canopy view, absent deforestation phenomenon, absent rainforest setting, absent tropical rainforest canopy, absent Amazon rainforest clip, absent Kelowna, BC, absent East Knox Mountain Park, absent old fir stump, absent carpenter ant colony, absent spri'
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 13.3% measured (RPD 997/1000, TPM 1067/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned unusable output; disabling this route. Detail: Cloudflare Vision did not return valid JSON: Provider response did not contain a complete JSON object.; response preview='{"relevant": false, "confidence": 0.0, "reason": "absent queen ant close-up, absent aerial/drone canopy view, absent deforestation phenomenon, absent rainforest setting, absent tropical rainforest setting, absent Amazon rainforest setting, absent temperate/European forest setting, absent specific geographic claim supported by metadata, absent speci'
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 13.3% measured (RPD 997/1000, TPM 1067/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 2/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a wide shot of a decaying tree stump in a forest, but the primary visual query requires a close-up of a queen ant. No ants, let alone a queen, are visible in the provided frames.
+Scene 1: candidate download budget=900 MB (metadata relevance 1.00).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 62.1% measured (RPD 999/1000, TPM 4968/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.95).
+Scene 1: visual check 3/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.95): The primary visual query explicitly requests a 'queen ant close-up'. The provided frames show a wide shot of a large ant colony mass on a concrete surface. While the metadata supports the 'ant colony' context, the specif
+Scene 1: candidate download budget=180 MB (metadata relevance 0.58).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.7% measured (RPD 998/1000, TPM 1733/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6593, Requested 2910. Please try again in 21.454285714s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 16.8% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.95).
+Scene 1: visual check 4/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.95): The frames show a close-up of a winged insect (resembling a fly or wasp) on a leaf, not a queen ant. The primary visual query specifically requires a queen ant, which is absent.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.49).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 62.5% measured (RPD 999/1000, TPM 5003/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 5/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a textured grey surface (likely concrete or stone) with a single small ant visible in the lower left of the first frame. This does not match the primary visual query for a 'queen ant close-up' (the ant is
+Scene 1: candidate download budget=180 MB (metadata relevance 0.55).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 57.8% measured (RPD 998/1000, TPM 4625/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 4162, Requested 2989. Please try again in 1.294285714s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 47.9% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.95).
+Scene 1: visual check 6/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.95): The primary visual query requires a close-up of a queen ant. The frames show multiple worker ants on sand, not a single queen ant close-up. The source metadata describes a 'dance' of harvester ants, which is a colony-wid
+Scene 1: candidate download budget=180 MB (metadata relevance 0.53).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 61.4% measured (RPD 999/1000, TPM 4911/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (1.00).
+Scene 1: visual check 7/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (1.00): The frames show a person operating a 'Stack' macro photography controller and cables, which is technical equipment setup. There is no queen ant or any insect visible in the footage, failing the primary visual query.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.52).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 22.1% measured (RPD 998/1000, TPM 1769/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6543, Requested 2964. Please try again in 21.488571428s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 18.0% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 8/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a wide shot of a dirt surface with a small hole and a ruler for scale. There is no visible queen ant, and the shot type is a wide environmental view rather than the requested close-up.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.45).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 62.1% measured (RPD 999/1000, TPM 4970/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.95).
+Scene 1: visual check 9/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.95): The frames show a red weaver ant carrying a dead dragonfly on a wall, which does not match the primary visual query for a queen ant close-up. The visible subject is a worker ant engaged in scavenging, not a queen.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.35).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 16.3% measured (RPD 998/1000, TPM 1304/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6771, Requested 3094. Please try again in 24.557142857s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 11.3% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (1.00).
+Scene 1: visual check 10/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (1.00): The frames show a stylized graphic illustration of blue human silhouettes forming a crowd, not a close-up of a queen ant. The visual content completely contradicts the primary query.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.34).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 56.5% measured (RPD 999/1000, TPM 4522/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.95).
+Scene 1: visual check 11/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.95): The frames clearly show a leaf beetle (Chrysolina bankii) on a leaf, which directly contradicts the primary visual query for a 'queen ant close-up'. The source metadata confirms the subject is a beetle, not an ant.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.34).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 18.7% measured (RPD 998/1000, TPM 1495/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6863, Requested 2903. Please try again in 23.708571428s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 12.2% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 12/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a leaf-footed bug (Acanthocephala terminalis) on a leaf, not a queen ant. The primary visual query requires a queen ant close-up, which is absent.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.34).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 58.9% measured (RPD 999/1000, TPM 4713/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 13/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show close-ups of milkweed leaf beetle larvae (caterpillars) on a leaf, which directly contradicts the primary visual query for a 'queen ant close-up'. The source metadata confirms the subject is beetle larvae
+Scene 1: candidate download budget=180 MB (metadata relevance 0.31).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 16.8% measured (RPD 998/1000, TPM 1345/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6876, Requested 2940. Please try again in 24.137142857s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 11.6% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.95).
+Scene 1: visual check 14/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.95): The frames show a close-up of a beetle larva (caterpillar-like insect) on a leaf, not a queen ant. The primary visual query specifically requires a queen ant, which is absent.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.28).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 60.8% measured (RPD 999/1000, TPM 4864/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 15/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show mating wasps (Vespula germanica) on a white surface, not a queen ant. The primary visual query specifically requests a queen ant close-up, which is absent.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.26).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 16.4% measured (RPD 998/1000, TPM 1313/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6780, Requested 2906. Please try again in 23.022857142s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 12.3% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 16/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a large green insect (likely a katydid or leaf-mimicking insect) and a caterpillar on leaves, not a queen ant. The primary visual query specifically requires a queen ant close-up, which is absent.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.26).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 61.7% measured (RPD 999/1000, TPM 4938/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 17/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a cicada (Magicicada) crawling on a human hand, not a queen ant. The primary visual query for a queen ant close-up is not met.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.06).
+Scene 1: candidate rejected/skipped (Wikimedia Commons): Could not extract visual-check frame:  parameters such as bit_rate, rate, width or height.
+[vf#0:0 @ 0x5be69e3dee00] Error sending frames to consumers: Invalid argument
+[vf#0:0 @ 0x5be69e3dee00] Task finished with error code: -22 (Invalid argument)
+[vf#0:0 @ 0x5be69e3dee00] Terminating thread with return code -22 (Invalid argument)
+[vost#0:0/mjpeg 
+Scene 1: candidate download budget=180 MB (metadata relevance 0.05).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 16.8% measured (RPD 998/1000, TPM 1343/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6580, Requested 3005. Please try again in 22.157142857s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.1% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 19/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames clearly show a grasshopper (Caelifera) on dry leaves, which directly contradicts the primary visual query for a queen ant close-up. The source metadata explicitly identifies the subject as an 'Unidentified bro
+Scene 1: candidate download budget=180 MB (metadata relevance 0.04).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 61.7% measured (RPD 999/1000, TPM 4936/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.95).
+Scene 1: visual check 20/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.95): The frames clearly show honeybees at the entrance of a beehive, not ants. The source metadata explicitly identifies the footage as a tour of a USDA apiary with bee hives, which directly contradicts the primary visual que
+Scene 1: candidate download budget=180 MB (metadata relevance 0.04).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 15.9% measured (RPD 998/1000, TPM 1274/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6796, Requested 3224. Please try again in 25.885714285s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 10.6% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 21/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames clearly show honeybees at the entrance of a beehive, not ants. The source metadata explicitly identifies the footage as a tour of a USDA apiary, which directly contradicts the primary visual query for a queen 
+Scene 1: candidate download budget=180 MB (metadata relevance 0.02).
+Scene 1: candidate rejected/skipped (Wikimedia Commons): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 2160x2702 (aspect 0.7994).
+Scene 1: candidate download budget=180 MB (metadata relevance 0.01).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 58.0% measured (RPD 999/1000, TPM 4638/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 23/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a close-up of a green bush-cricket (Leptophyes discoidalis), which is an orthopteran insect, not a queen ant. The primary visual query specifically requires a queen ant, which is absent.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.01).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 19.5% measured (RPD 998/1000, TPM 1561/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier Groq key 1 (qwen/qwen3.8-27b) returned HTTP 429; temporary rate limit; retry after provider reset. It will be reconsidered after 30s. Detail: Groq visual verification HTTP 429: {"error":{"message":"Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on input tokens per minute (ITPM): Limit 7000, Used 6548, Requested 3010. Please try again in 21.925714285s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+All remaining visual routes are temporarily cooling down; waiting 173.0s for quota/service recovery (budget remaining 180.0s).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 17.3% measured (Groq rate limit reached; retry after about 173s)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 2/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 24/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a close-up of a cricket (Modicogryllus truncatus), which is an orthopteran, not an ant. The primary visual query specifically requests a queen ant, and the visible subject is clearly a different type of i
+Scene 1: candidate download budget=180 MB (metadata relevance 0.01).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 61.4% measured (RPD 999/1000, TPM 4908/8000)
+  Selected next: Groq key 1 (qwen/qwen3.8-27b)
+Visual verifier: quota-aware selection -> Groq key 1 (qwen/qwen3.8-27b) (attempt 1/3)...
+Visual verifier: Groq key 1 (qwen/qwen3.8-27b) returned REJECT (0.00).
+Scene 1: visual check 25/17 via Groq key 1 (qwen/qwen3.8-27b) — REJECT (0.00): The frames show a large tree-cricket (Oecanthus dulcisonans) perched on a leaf, which is explicitly identified in the metadata. This does not match the primary visual query for a queen ant close-up.
+Scene 1: initial candidates exhausted; starting one rejection-guided search retry with 2 targeted query variant(s).
+  Coverr: 0 candidate(s); source result cached.
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'insect macro' produced 18 candidate(s).
+  Wikimedia Commons: 18 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+  Google web discovery: 0 result page(s).
+  Web Search: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+Web Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google web discovery unavailable: 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dinsect%2Bmacro%2Bcloseup%2Bon%2Bnatural%2Bleaf%2Bdetail
+  Google Search: 0 candidate(s); source result cached.
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'wild insect' produced 4 candidate(s).
+  Wikimedia Commons: 4 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (84s remaining); no stale cache available.
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google Search search unavailable for 'wild insect crawling on plant macro documentary video': 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dwild%2Binsect%2Bcrawling%2Bon%2Bplant%2Bmacro%2Bdocumentary%2Bvideo%2Bfiletype%253Amp4%2B%2528%2522public%2Bdomain%2522%2BOR%2B%2522Creative%2BCommons%2522%2BOR%2BCC0%2BOR%2B%2522CC%2BBY%2522%2529%26num%3D30%26filter%3D0&q=EgQoSstDGJ-iptgGIjDUEpdaOvVyK8Y3G-K7NtWqwia5bb1BN52CfCCExv3g7tMPIHeORluTvw-EwV87dXsyAnJSWgFDYKnE94TDl-m6yQE
+Scene 1: adaptive retry added no new eligible candidates.
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8176, in run_with_diagnostics
+    main()
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8129, in main
+    fetch_footage(plan)
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 6597, in fetch_footage
+    raise RuntimeError(
+RuntimeError: Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 165976907: Could not extract visual-check frame:  parameters such as bit_rate, rate, width or height.
+[vf#0:0 @ 0x5be69e3dee00] Error sending frames to consumers: Invalid argument
+[vf#0:0 @ 0x5be69e3dee00] Task finished with error code: -22 (Invalid argument)
+[vf#0:0 @ 0x5be69e3dee00] Terminating thread with return code -22 (Invalid argument)
+[vost#0:0/mjpeg @ 0x5be69e3de500] [enc:mjpeg @ 0x5be69e3de940] Could not open encoder before EOF
+[vost#0:0/mjpeg @ 0x5be69e3de500] Task finished with error code: -22 (Invalid argument)
+[vost#0:0/mjpeg @ 0x5be69e3de500] Terminating thread with return code -22 (Invalid argument)
+[out#0/image2 @ 0x5be69e3de180] Nothing was written into output file, because at least one of its streams received no packets. | Wikimedia Commons 194137208: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 2160x2702 (aspect 0.7994). Queries tried: ['queen ant close', 'queen close', 'queen ant', 'ant colony entrance wide', 'ant colony entrance', 'ant colony wide', 'insect macro nature', 'insect on leaf closeup', 'insect crawling plant', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted.
+Markdown cleanup: no generated upgrade/validation files found.

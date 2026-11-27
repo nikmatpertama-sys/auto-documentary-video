@@ -1,0 +1,52 @@
+{
+  "status": "failed",
+  "current_stage": "footage_search_download_and_visual_verification",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795786892.3647125,
+      "finished_at_epoch": 1795786894.844552,
+      "duration_seconds": 2.48
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795786894.8447018,
+      "finished_at_epoch": 1795786903.3321736,
+      "duration_seconds": 8.49
+    },
+    {
+      "name": "fact_checking",
+      "status": "completed",
+      "started_at_epoch": 1795786903.3325114,
+      "finished_at_epoch": 1795787117.656884,
+      "duration_seconds": 214.32
+    },
+    {
+      "name": "voiceover_and_subtitle_generation",
+      "status": "completed",
+      "started_at_epoch": 1795787117.6571028,
+      "finished_at_epoch": 1795787129.8149307,
+      "duration_seconds": 12.16
+    },
+    {
+      "name": "footage_search_download_and_visual_verification",
+      "status": "failed",
+      "started_at_epoch": 1795787129.8152492,
+      "finished_at_epoch": 1795789088.1392868,
+      "failure_type": "RuntimeError",
+      "failure_message": "Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 165976907: Could not extract visual-check frame:  parameters such as bit_rate, rate, width or height.\n[vf#0:0 @ 0x5be69e3dee00] Error sending frames to consumers: Invalid argument\n[vf#0:0 @ 0x5be69e3dee00] Task finished with error code: -22 (Invalid argument)\n[vf#0:0 @ 0x5be69e3dee00] Terminating thread with return code -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x5be69e3de500] [enc:mjpeg @ 0x5be69e3de940] Could not open encoder before EOF\n[vost#0:0/mjpeg @ 0x5be69e3de500] Task finished with error code: -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x5be69e3de500] Terminating thread with return code -22 (Invalid argument)\n[out#0/image2 @ 0x5be69e3de180] Nothing was written into output file, because at least one of its streams received no packets. | Wikimedia Commons 194137208: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 2160x2702 (aspect 0.7994). Queries tried: ['queen ant close', 'queen close', 'queen ant', 'ant colony entrance wide', 'ant colony entrance', 'ant colony wide', 'insect macro nature', 'insect on leaf closeup', 'insect crawling plant', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted."
+    }
+  ],
+  "voice_provider": "Speechify",
+  "voice": "geffen_32",
+  "voice_model": "simba-3.5",
+  "language": "en",
+  "voiceover_manifest": "output/voiceover_manifest.json",
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 165976907: Could not extract visual-check frame:  parameters such as bit_rate, rate, width or height.\n[vf#0:0 @ 0x5be69e3dee00] Error sending frames to consumers: Invalid argument\n[vf#0:0 @ 0x5be69e3dee00] Task finished with error code: -22 (Invalid argument)\n[vf#0:0 @ 0x5be69e3dee00] Terminating thread with return code -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x5be69e3de500] [enc:mjpeg @ 0x5be69e3de940] Could not open encoder before EOF\n[vost#0:0/mjpeg @ 0x5be69e3de500] Task finished with error code: -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x5be69e3de500] Terminating thread with return code -22 (Invalid argument)\n[out#0/image2 @ 0x5be69e3de180] Nothing was written into output file, because at least one of its streams received no packets. | Wikimedia Commons 194137208: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 2160x2702 (aspect 0.7994). Queries tried: ['queen ant close', 'queen close', 'queen ant', 'ant colony entrance wide', 'ant colony entrance', 'ant colony wide', 'insect macro nature', 'insect on leaf closeup', 'insect crawling plant', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted.",
+    "finished_at_epoch": 1795789088.140787
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "claims": [
+    {
+      "claim": "Inside an ant colony, millions of tiny workers cooperate like a living superorganism.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Ant colonies are described as superorganisms",
+      "quote": "The colonies are described as superorganisms because the ants appear to operate as a unified entity, collectively working together to support the colony.",
+      "source": {
+        "id": "S2",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The colony revolves around one or more egg‑laying queens, whose sole purpose is to lay thousands of eggs.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Typical colony consists of one or more egg-laying queens",
+      "quote": "The typical colony consists of one or more egg-laying queens, numerous sterile females (workers, soldiers) and, seasonally, many winged sexual males and females.",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Development from egg to adult",
+      "quote": "From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones.",
+      "source": {
+        "id": "S5",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Most adults become sterile females—workers that tend brood, forage, and defend the nest, while some develop into larger soldiers.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Typical colonies consist of various castes of sterile, wingless females",
+      "quote": "Typical colonies consist of various castes of sterile, wingless females, most of which are workers (ergates), as well as soldiers (dinergates) and other specialised groups.",
+      "source": {
+        "id": "S2",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "At the right season, the queen also raises winged males and virgin females, called alates, that gather in massive swarms.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Seasonal production of winged virgin queens and males",
+      "quote": "A mature ant colony seasonally produces winged virgin queens and males, called alates.",
+      "source": {
+        "id": "S6",
+        "title": "Nuptial flight",
+        "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "These nuptial flights happen at species‑specific times of day, and the alates leave the nest in search of mates.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Nuptial flights occur at species-characteristic times of the day",
+      "quote": "In order to establish new colonies, ants undertake flights that occur at species-characteristic times of the day.",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Males die soon after mating, and most females also perish, but a few fertilized queens shed their wings and descend to start new colonies.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Males die shortly after mating, and most females perish",
+      "quote": "The males die shortly thereafter, along with most of the females. A small percentage of the females survive to initiate new nests.",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "New queen starts a new colony",
+      "quote": "The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil.",
+      "source": {
+        "id": "S6",
+        "title": "Nuptial flight",
+        "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "From a single egg to a sprawling underground metropolis, the ant colony reminds us that cooperation can build worlds.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Universally established fact about cooperation in ant colonies",
+      "quote": "",
+      "source": null,
+      "evidence_type": "general_knowledge"
+    }
+  ],
+  "checked": 9,
+  "supported": 9,
+  "unsupported": 0,
+  "contradicted": 0,
+  "sourced_supports": 8,
+  "general_knowledge_supports": 1,
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Ant colony",
+      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+    },
+    {
+      "id": "S2",
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "id": "S3",
+      "title": "Koloni semut",
+      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+    },
+    {
+      "id": "S4",
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    },
+    {
+      "id": "S5",
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "id": "S6",
+      "title": "Nuptial flight",
+      "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
+    }
+  ],
+  "overall": "pass",
+  "checked_at": "2026-11-27T13:45:17+00:00",
+  "provider": "Cloudflare AI key pair 1",
+  "research_articles": [
+    {
+      "title": "Ant colony",
+      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+    },
+    {
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "title": "Koloni semut",
+      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+    },
+    {
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    },
+    {
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "title": "Nuptial flight",
+      "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
+    }
+  ],
+  "evidence_retrieval": {
+    "queries": [
+      "ant colony emerge larva pupa",
+      "ant colony queen small chamber"
+    ],
+    "characters": 2199,
+    "sources": [
+      {
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      {
+        "title": "Nuptial flight",
+        "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
+      }
+    ]
+  },
+  "claim_source": "semantic:Cloudflare AI key pair 1",
+  "coverage": {
+    "script_sentences": 10,
+    "claimed_sentences": 9,
+    "non_factual_sentences": 1,
+    "uncovered_sentences": [],
+    "coverage": 1.0
+  },
+  "skipped_sentences": [],
+  "status": "checked"
+}

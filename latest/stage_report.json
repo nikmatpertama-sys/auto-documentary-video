@@ -1,26 +1,52 @@
 {
   "status": "failed",
-  "current_stage": "documentary_plan_generation",
+  "current_stage": "footage_search_download_and_visual_verification",
   "stages": [
     {
       "name": "research",
       "status": "completed",
-      "started_at_epoch": 1795786891.5198689,
-      "finished_at_epoch": 1795786894.494552,
-      "duration_seconds": 2.97
+      "started_at_epoch": 1795786892.3647125,
+      "finished_at_epoch": 1795786894.844552,
+      "duration_seconds": 2.48
     },
     {
       "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795786894.8447018,
+      "finished_at_epoch": 1795786903.3321736,
+      "duration_seconds": 8.49
+    },
+    {
+      "name": "fact_checking",
+      "status": "completed",
+      "started_at_epoch": 1795786903.3325114,
+      "finished_at_epoch": 1795787117.656884,
+      "duration_seconds": 214.32
+    },
+    {
+      "name": "voiceover_and_subtitle_generation",
+      "status": "completed",
+      "started_at_epoch": 1795787117.6571028,
+      "finished_at_epoch": 1795787129.8149307,
+      "duration_seconds": 12.16
+    },
+    {
+      "name": "footage_search_download_and_visual_verification",
       "status": "failed",
-      "started_at_epoch": 1795786894.4946766,
-      "finished_at_epoch": 1795786928.783346,
+      "started_at_epoch": 1795787129.8152492,
+      "finished_at_epoch": 1795789088.1392868,
       "failure_type": "RuntimeError",
-      "failure_message": "All configured AI providers failed:\n- OpenRouter key 1: OpenRouter HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null,\"previous_errors\":[{\"code\":429,\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit\n- Groq key 1: Groq returned an unreadable response: Provider response did not contain a complete JSON object.; body={'id': 'chatcmpl-72aa1341-b207-4567-8dc2-cff663da01a9', 'object': 'chat.completion', 'created': 1795786907, 'model': 'openai/gpt-oss-120b', 'choices': [{'index': 0, 'message': {'role': 'assistant', 'content': '{\\n  \"title\": \"When a Lake Erupts: The Story of Taal Volcano\",\\n  \"hook\": \"What happens when a lake erupts and its island disappears?\",\\n  \"script\": \"What happens when a lake erupts and its island disappears? On January twelfth, 2020, Taal Volcano in Batangas erupted after 43 years of silence. Seismic swarms started around eleven, and a phreatic blast from the main crater erupted at one o’clock. The explosion sent ash up to a hundred meters, darkening the sky over Calabarzon, Metro Man\n- Gemini key 1: Gemini HTTP 429: {   \"error\": {     \"code\": 429,     \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 18h18m12.324348686s.\",     \"status\": \"RESOURCE_EXHAUSTED\",     \"details\": [       {         \"@type\": \"type.googleapis.com/google.rpc.Hel\n- Cloudflare AI key pair 1: Scene narration totals 109 words; expected 120-200.\n- Cloudflare AI key pair 2: Scene narration totals 89 words; expected 120-200."
+      "failure_message": "Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 165976907: Could not extract visual-check frame:  parameters such as bit_rate, rate, width or height.\n[vf#0:0 @ 0x5be69e3dee00] Error sending frames to consumers: Invalid argument\n[vf#0:0 @ 0x5be69e3dee00] Task finished with error code: -22 (Invalid argument)\n[vf#0:0 @ 0x5be69e3dee00] Terminating thread with return code -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x5be69e3de500] [enc:mjpeg @ 0x5be69e3de940] Could not open encoder before EOF\n[vost#0:0/mjpeg @ 0x5be69e3de500] Task finished with error code: -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x5be69e3de500] Terminating thread with return code -22 (Invalid argument)\n[out#0/image2 @ 0x5be69e3de180] Nothing was written into output file, because at least one of its streams received no packets. | Wikimedia Commons 194137208: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 2160x2702 (aspect 0.7994). Queries tried: ['queen ant close', 'queen close', 'queen ant', 'ant colony entrance wide', 'ant colony entrance', 'ant colony wide', 'insect macro nature', 'insect on leaf closeup', 'insect crawling plant', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted."
     }
   ],
+  "voice_provider": "Speechify",
+  "voice": "geffen_32",
+  "voice_model": "simba-3.5",
+  "language": "en",
+  "voiceover_manifest": "output/voiceover_manifest.json",
   "failure": {
     "error_type": "RuntimeError",
-    "error_message": "All configured AI providers failed:\n- OpenRouter key 1: OpenRouter HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null,\"previous_errors\":[{\"code\":429,\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit\n- Groq key 1: Groq returned an unreadable response: Provider response did not contain a complete JSON object.; body={'id': 'chatcmpl-72aa1341-b207-4567-8dc2-cff663da01a9', 'object': 'chat.completion', 'created': 1795786907, 'model': 'openai/gpt-oss-120b', 'choices': [{'index': 0, 'message': {'role': 'assistant', 'content': '{\\n  \"title\": \"When a Lake Erupts: The Story of Taal Volcano\",\\n  \"hook\": \"What happens when a lake erupts and its island disappears?\",\\n  \"script\": \"What happens when a lake erupts and its island disappears? On January twelfth, 2020, Taal Volcano in Batangas erupted after 43 years of silence. Seismic swarms started around eleven, and a phreatic blast from the main crater erupted at one o’clock. The explosion sent ash up to a hundred meters, darkening the sky over Calabarzon, Metro Man\n- Gemini key 1: Gemini HTTP 429: {   \"error\": {     \"code\": 429,     \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 18h18m12.324348686s.\",     \"status\": \"RESOURCE_EXHAUSTED\",     \"details\": [       {         \"@type\": \"type.googleapis.com/google.rpc.Hel\n- Cloudflare AI key pair 1: Scene narration totals 109 words; expected 120-200.\n- Cloudflare AI key pair 2: Scene narration totals 89 words; expected 120-200.",
-    "finished_at_epoch": 1795786928.7843022
+    "error_message": "Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 165976907: Could not extract visual-check frame:  parameters such as bit_rate, rate, width or height.\n[vf#0:0 @ 0x5be69e3dee00] Error sending frames to consumers: Invalid argument\n[vf#0:0 @ 0x5be69e3dee00] Task finished with error code: -22 (Invalid argument)\n[vf#0:0 @ 0x5be69e3dee00] Terminating thread with return code -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x5be69e3de500] [enc:mjpeg @ 0x5be69e3de940] Could not open encoder before EOF\n[vost#0:0/mjpeg @ 0x5be69e3de500] Task finished with error code: -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x5be69e3de500] Terminating thread with return code -22 (Invalid argument)\n[out#0/image2 @ 0x5be69e3de180] Nothing was written into output file, because at least one of its streams received no packets. | Wikimedia Commons 194137208: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 2160x2702 (aspect 0.7994). Queries tried: ['queen ant close', 'queen close', 'queen ant', 'ant colony entrance wide', 'ant colony entrance', 'ant colony wide', 'insect macro nature', 'insect on leaf closeup', 'insect crawling plant', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted.",
+    "finished_at_epoch": 1795789088.140787
   }
 }

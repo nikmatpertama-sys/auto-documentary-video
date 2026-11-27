@@ -1,0 +1,76 @@
+{
+  "title": "Life Inside an Ant Colony",
+  "hook": "What if a single queen could birth an entire city?",
+  "script": "What if a single queen could birth an entire city? Inside an ant colony, millions of tiny workers cooperate like a living superorganism. The colony revolves around one or more egg‑laying queens, whose sole purpose is to lay thousands of eggs. From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones. Most adults become sterile females—workers that tend brood, forage, and defend the nest, while some develop into larger soldiers. At the right season, the queen also raises winged males and virgin females, called alates, that gather in massive swarms. These nuptial flights happen at species‑specific times of day, and the alates leave the nest in search of mates. Males die soon after mating, and most females also perish, but a few fertilized queens shed their wings and descend to start new colonies. The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil. From a single egg to a sprawling underground metropolis, the ant colony reminds us that cooperation can build worlds.",
+  "scenes": [
+    {
+      "narration": "What if a single queen could birth an entire city? Inside an ant colony, millions of tiny workers cooperate like a living superorganism.",
+      "visual_query": "queen ant close-up",
+      "visual_queries": [
+        "ant colony entrance wide",
+        "ant nest entrance wide"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "visual_type": "footage",
+      "sentence_start": 0,
+      "sentence_end": 1
+    },
+    {
+      "narration": "The colony revolves around one or more egg‑laying queens, whose sole purpose is to lay thousands of eggs. From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones.",
+      "visual_query": "ant brood chamber macro",
+      "visual_queries": [
+        "larvae in ant nest close-up",
+        "ant larvae macro"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 2,
+      "sentence_end": 3
+    },
+    {
+      "narration": "Most adults become sterile females—workers that tend brood, forage, and defend the nest, while some develop into larger soldiers. At the right season, the queen also raises winged males and virgin females, called alates, that gather in massive swarms.",
+      "visual_query": "worker ants foraging",
+      "visual_queries": [
+        "soldier ants defending nest",
+        "ant workers carrying food"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 4,
+      "sentence_end": 5
+    },
+    {
+      "narration": "These nuptial flights happen at species‑specific times of day, and the alates leave the nest in search of mates. Males die soon after mating, and most females also perish, but a few fertilized queens shed their wings and descend to start new colonies.",
+      "visual_query": "winged alates swarm",
+      "visual_queries": [
+        "ant nuptial flight sky",
+        "alates taking off from nest"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 6,
+      "sentence_end": 7
+    },
+    {
+      "narration": "The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil. From a single egg to a sprawling underground metropolis, the ant colony reminds us that cooperation can build worlds.",
+      "visual_query": "founding queen digging",
+      "visual_queries": [
+        "new ant nest chamber close-up",
+        "queen ant excavating soil"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 8,
+      "sentence_end": 9
+    }
+  ],
+  "fact_check": {
+    "overall": "pass",
+    "checked": 9,
+    "supported": 9,
+    "unsupported": 0,
+    "contradicted": 0,
+    "claim_source": "semantic:Cloudflare AI key pair 1"
+  }
+}
