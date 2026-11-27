@@ -1,88 +1,92 @@
 {
-  "title": "The Hidden City Inside an Ant Colony",
-  "hook": "What if a single insect could build a city that rivals humanity?",
-  "script": "What if a single insect could build a city that rivals humanity? Ants are eusocial insects whose colonies can range from a few dozen individuals to millions. Nearly all ant colonies include one or more fertile females called queens, along with fertile males called drones. Most colony members are sterile, wingless female workers called ergates. Typical colonies consist of various castes of sterile, wingless females, most of which are workers, as well as soldiers and other specialised groups. Some colonies occupy large territories with sizeable nests, and supercolonies can reach hundreds of millions of individuals. In some lineages, such as army ants, the colony does not construct a permanent nest and moves almost incessantly. Ant colonies are described as superorganisms because the ants appear to operate as a unified entity. Ants have colonised almost every landmass on Earth; the only places lacking indigenous ants are Antarctica and a few remote or inhospitable islands. Their highly organised colonies remind us that the smallest lives can build complex societies.",
+  "title": "Life Inside an Ant Colony",
+  "hook": "What if an entire civilization lives inside a single grain?",
+  "script": "What if an entire civilization lives inside a single grain? Beneath the forest floor, an ant colony operates as a superorganism, each individual fulfilling a precise role. At its core sits the queen, the sole fertile female who continuously lays eggs that become the colony’s future. Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae. When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care. As the colony matures, it produces winged males and females, called alates, that gather for a synchronized nuptial flight. During the brief skyward dance, males mate once then die, while only a few fertilized females descend to start new nests. These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire. Through this relentless cycle of growth, reproduction, and renewal, ant colonies persist across continents, shaping ecosystems worldwide.",
   "scenes": [
     {
-      "narration": "What if a single insect could build a city that rivals humanity? Ants are eusocial insects whose colonies can range from a few dozen individuals to millions.",
-      "visual_query": "ant trail close-up",
+      "narration": "What if an entire civilization lives inside a single grain? Beneath the forest floor, an ant colony operates as a superorganism, each individual fulfilling a precise role.",
+      "visual_query": "ant mound aerial view",
       "visual_queries": [
-        "ant mound wide shot",
-        "ant trail close-up"
+        "forest floor ant trail",
+        "ant nest entrance close-up"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 1
     },
     {
-      "narration": "Nearly all ant colonies include one or more fertile females called queens, along with fertile males called drones. Most colony members are sterile, wingless female workers called ergates.",
+      "narration": "At its core sits the queen, the sole fertile female who continuously lays eggs that become the colony’s future.",
       "visual_query": "queen ant close-up",
       "visual_queries": [
-        "queen ant close-up",
-        "founding queen on forest floor"
+        "queen ant inside chamber",
+        "ant queen with wings"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "sentence_start": 2,
+      "sentence_end": 2
+    },
+    {
+      "narration": "Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae.",
+      "visual_query": "ant larvae feeding",
+      "visual_queries": [
+        "workers tending ant brood",
+        "ant larvae in nest"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "Typical colonies consist of various castes of sterile, wingless females, most of which are workers, as well as soldiers and other specialised groups.",
-      "visual_query": "worker ant feeding larvae",
+      "narration": "When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care.",
+      "visual_query": "emerging ant workers",
       "visual_queries": [
-        "worker ant feeding larvae",
-        "ant larvae in nest close-up"
+        "new adult ants exiting nest",
+        "young workers leaving chamber"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "Some colonies occupy large territories with sizeable nests, and supercolonies can reach hundreds of millions of individuals.",
-      "visual_query": "new adult ant exiting nest",
+      "narration": "As the colony matures, it produces winged males and females, called alates, that gather for a synchronized nuptial flight.",
+      "visual_query": "winged ant alates swarm",
       "visual_queries": [
-        "new adult ant exiting nest",
-        "emerging ant pupa"
+        "ant nuptial flight takeoff",
+        "alates gathering on nest surface"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "sentence_start": 5,
       "sentence_end": 5
     },
     {
-      "narration": "In some lineages, such as army ants, the colony does not construct a permanent nest and moves almost incessantly. Ant colonies are described as superorganisms because the ants appear to operate as a unified entity.",
-      "visual_query": "army ant raid",
+      "narration": "During the brief skyward dance, males mate once then die, while only a few fertilized females descend to start new nests.",
+      "visual_query": "founding queen ant alone",
       "visual_queries": [
-        "army ant raid",
-        "soldier ant defending nest"
+        "queen ant carrying egg clutch",
+        "solo queen digging new nest"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Army_ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "sentence_start": 6,
-      "sentence_end": 7
+      "sentence_end": 6
     },
     {
-      "narration": "Ants have colonised almost every landmass on Earth; the only places lacking indigenous ants are Antarctica and a few remote or inhospitable islands. Their highly organised colonies remind us that the smallest lives can build complex societies.",
-      "visual_query": "ant supercolony aerial",
+      "narration": "These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire. Through this relentless cycle of growth, reproduction, and renewal, ant colonies persist across continents, shaping ecosystems worldwide.",
+      "visual_query": "ant colony activity panorama",
       "visual_queries": [
-        "ant supercolony aerial",
-        "massive ant swarm landscape"
+        "ants transporting food across leaf",
+        "large ant trail across forest floor"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
-      "sentence_start": 8,
-      "sentence_end": 9
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 7,
+      "sentence_end": 8
     }
-  ],
-  "fact_check": {
-    "overall": "pass",
-    "checked": 8,
-    "supported": 8,
-    "unsupported": 0,
-    "contradicted": 0,
-    "claim_source": "semantic:OpenRouter key 1"
-  }
+  ]
 }

@@ -1,0 +1,92 @@
+{
+  "title": "Life Inside an Ant Colony",
+  "hook": "What if an entire civilization lives inside a single grain?",
+  "script": "What if an entire civilization lives inside a single grain? Beneath the forest floor, an ant colony operates as a superorganism, each individual fulfilling a precise role. At its core sits the queen, the sole fertile female who continuously lays eggs that become the colony’s future. Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae. When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care. As the colony matures, it produces winged males and females, called alates, that gather for a synchronized nuptial flight. During the brief skyward dance, males mate once then die, while only a few fertilized females descend to start new nests. These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire. Through this relentless cycle of growth, reproduction, and renewal, ant colonies persist across continents, shaping ecosystems worldwide.",
+  "scenes": [
+    {
+      "narration": "What if an entire civilization lives inside a single grain? Beneath the forest floor, an ant colony operates as a superorganism, each individual fulfilling a precise role.",
+      "visual_query": "ant mound aerial view",
+      "visual_queries": [
+        "forest floor ant trail",
+        "ant nest entrance close-up"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "visual_type": "footage",
+      "sentence_start": 0,
+      "sentence_end": 1
+    },
+    {
+      "narration": "At its core sits the queen, the sole fertile female who continuously lays eggs that become the colony’s future.",
+      "visual_query": "queen ant close-up",
+      "visual_queries": [
+        "queen ant inside chamber",
+        "ant queen with wings"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 2,
+      "sentence_end": 2
+    },
+    {
+      "narration": "Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae.",
+      "visual_query": "ant larvae feeding",
+      "visual_queries": [
+        "workers tending ant brood",
+        "ant larvae in nest"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 3,
+      "sentence_end": 3
+    },
+    {
+      "narration": "When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care.",
+      "visual_query": "emerging ant workers",
+      "visual_queries": [
+        "new adult ants exiting nest",
+        "young workers leaving chamber"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 4,
+      "sentence_end": 4
+    },
+    {
+      "narration": "As the colony matures, it produces winged males and females, called alates, that gather for a synchronized nuptial flight.",
+      "visual_query": "winged ant alates swarm",
+      "visual_queries": [
+        "ant nuptial flight takeoff",
+        "alates gathering on nest surface"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 5,
+      "sentence_end": 5
+    },
+    {
+      "narration": "During the brief skyward dance, males mate once then die, while only a few fertilized females descend to start new nests.",
+      "visual_query": "founding queen ant alone",
+      "visual_queries": [
+        "queen ant carrying egg clutch",
+        "solo queen digging new nest"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 6,
+      "sentence_end": 6
+    },
+    {
+      "narration": "These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire. Through this relentless cycle of growth, reproduction, and renewal, ant colonies persist across continents, shaping ecosystems worldwide.",
+      "visual_query": "ant colony activity panorama",
+      "visual_queries": [
+        "ants transporting food across leaf",
+        "large ant trail across forest floor"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 7,
+      "sentence_end": 8
+    }
+  ]
+}

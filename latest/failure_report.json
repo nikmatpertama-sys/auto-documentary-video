@@ -1,10 +1,10 @@
 {
   "status": "failed",
-  "current_stage": "footage_search_download_and_visual_verification",
+  "current_stage": "fact_checking",
   "error_type": "RuntimeError",
-  "error_message": "Scene 1 could not obtain verified relevant footage. None of the 20 candidates checked from 19 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 116234697: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Internet Archive Flickr-16780887326: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Wikimedia Commons 28504331: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Wikimedia Commons 118517403: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 1080x1080 (aspect 1.0000). Queries tried: ['ant trail close', 'ant trail', 'ant close', 'formicidae trail', 'ant mound wide shot', 'ant mound', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted.",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 7980, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 7933, in main\n    fetch_footage(plan)\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 6453, in fetch_footage\n    raise RuntimeError(\nRuntimeError: Scene 1 could not obtain verified relevant footage. None of the 20 candidates checked from 19 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 116234697: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Internet Archive Flickr-16780887326: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Wikimedia Commons 28504331: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Wikimedia Commons 118517403: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 1080x1080 (aspect 1.0000). Queries tried: ['ant trail close', 'ant trail', 'ant close', 'formicidae trail', 'ant mound wide shot', 'ant mound', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted.\n",
-  "finished_at_epoch": 1795781653.1660979,
+  "error_message": "Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae. | When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care. | These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8077, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 7939, in main\n    verification = fact_check_plan(plan, research_data)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 1920, in fact_check_plan\n    _fail_fact_check(\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 1758, in _fail_fact_check\n    raise RuntimeError(message)\nRuntimeError: Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae. | When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care. | These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.\n",
+  "finished_at_epoch": 1795785728.7157454,
   "configuration": {
     "project_release": "MM6",
     "visual_verification_required": true,
@@ -26,17 +26,7 @@
       "Pexels",
       "Pixabay"
     ],
-    "footage_source_requests": {
-      "Coverr": 2,
-      "Internet Archive": 21,
-      "Wikimedia Commons": 31,
-      "NASA": 8,
-      "Web Search": 20,
-      "Google Search": 6
-    },
-    "footage_source_cooldowns_seconds": {
-      "Web Search": 69,
-      "Google Search": 70
-    }
+    "footage_source_requests": {},
+    "footage_source_cooldowns_seconds": {}
   }
 }

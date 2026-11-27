@@ -1,0 +1,33 @@
+{
+  "status": "failed",
+  "current_stage": "fact_checking",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795785684.5552173,
+      "finished_at_epoch": 1795785687.3999255,
+      "duration_seconds": 2.84
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795785687.40012,
+      "finished_at_epoch": 1795785695.1834714,
+      "duration_seconds": 7.78
+    },
+    {
+      "name": "fact_checking",
+      "status": "failed",
+      "started_at_epoch": 1795785695.2741404,
+      "finished_at_epoch": 1795785728.7145154,
+      "failure_type": "RuntimeError",
+      "failure_message": "Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae. | When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care. | These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
+    }
+  ],
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae. | When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care. | These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+    "finished_at_epoch": 1795785728.7157454
+  }
+}

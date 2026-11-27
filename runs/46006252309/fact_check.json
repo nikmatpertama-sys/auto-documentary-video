@@ -1,0 +1,37 @@
+{
+  "status": "unsupported",
+  "overall": "fail",
+  "claims": [],
+  "checked": 0,
+  "supported": 0,
+  "unsupported": 0,
+  "contradicted": 0,
+  "claim_source": "semantic:Groq key 1",
+  "coverage": {
+    "script_sentences": 9,
+    "claimed_sentences": 8,
+    "non_factual_sentences": 1,
+    "uncovered_sentences": [],
+    "coverage": 1.0
+  },
+  "skipped_sentences": [],
+  "error": null,
+  "research_articles": [
+    {
+      "title": "Ant colony",
+      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+    },
+    {
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "title": "Koloni semut",
+      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+    },
+    {
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    }
+  ]
+}
