@@ -66,7 +66,7 @@ the MM7 production-failure fixes are in
 
 ## Master scriptwriter prompt
 
-`SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, an eight-scene structure, a strict 120–200-word narration boundary, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
+`SCRIPTWRITER_MASTER_PROMPT.md` remains the single source of truth for the generator's professional documentary scriptwriter role. `main.py` loads it at runtime through `documentary_prompt()`. The prompt enforces factual discipline, a story-driven scene count (4–12 scenes, normally 6–10, never padded to a quota), a strict 120–200-word narration boundary, and practical footage queries. Its claim-by-claim audit is part of the same prompt; it does not create a second independent fact-check API call.
 
 ## Footage discovery — MM5 (MM4 source retained)
 
@@ -125,7 +125,7 @@ Add one or more AI provider credentials. The pipeline automatically discovers nu
 
 Cloudflare Workers AI supports paired credentials: `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`, and the additional aliases `CF_API_TK1` + `CF_ID1` (or numbered pairs 2, 3, etc.). It is included as an additional text and visual-verification fallback. `PIXABAY_API_KEY` and `PEXELS_API_KEY` remain optional footage-source keys. Internet Archive, Wikimedia Commons, and NASA searches do not require API keys.
 
-Speechify is the primary voice-over provider when `SPVO_API` is available. It uses the `simba-3.5` model and automatically searches multiple pages of the available male voice catalog for calm/deep/baritone-style metadata. Set `SPEECHIFY_VOICE_ID` to pin a specific voice. The narration uses a lower pitch and restrained pace, with subtle variation for hooks, questions, and the final line. Existing Edge TTS remains a full-script backup if Speechify is unavailable or its account-level quota is exhausted.
+Speechify is the primary voice-over provider when `SPVO_API` is available. It uses the `simba-3.5` model and automatically searches multiple pages of the available male voice catalog for calm/deep/baritone-style metadata. Set `SPEECHIFY_VOICE_ID` to pin a specific voice. The narration uses a lower pitch and restrained pace, with subtle variation for hooks, questions, and the final line. A Speechify failure stops the run instead of silently substituting another engine; Edge TTS is used only when Speechify is not configured, or when `ALLOW_VOICE_FALLBACK=1` is set for a local test. `output/voiceover_manifest.json` records the provider, voice, model, language and every sentence duration that were actually used.
 
 **Important Cloudflare Vision setup:** the default visual model is `@cf/meta/llama-3.2-11b-vision-instruct`. Cloudflare may require a one-time acceptance of the model's Meta license/AUP. The automation does not accept legal terms on the user's behalf. If Cloudflare rejects the first vision request because that model has not been enabled, accept the required terms in the Cloudflare dashboard or through the provider's official flow, then rerun. Cloudflare text generation can still be used separately if enabled.
 
@@ -157,7 +157,7 @@ The quota router prints provider names, measured percentages where available, an
 
 ## Output
 
-The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.json`, `research.json`, `fact_check.json`, `copyright_report.json`, `qc_report.json`, voice-over/caption/music files, and diagnostic files (`failure_report.json`, `stage_report.json`, `output/pipeline.log`).
+The pipeline runs RESEARCH → SCRIPTWRITING → FACT-CHECKING → VOICE-OVER (Speechify) → FOOTAGE DISCOVERY → DOWNLOAD → AI VISION → RENDERING → FINAL QC. It produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.json`, `research.json`, `fact_check.json`, `footage_verification.json`, `copyright_report.json`, `qc_report.json`, voice-over/caption/music files (`output/voiceover_manifest.json`, `output/vision/scene_XX/*.jpg`), and diagnostic files (`failure_report.json`, `stage_report.json`, `output/pipeline.log`).
 
 A local end-to-end check that needs no API key is available with
 `python tools/local_e2e.py e2e_run` (real Edge TTS, real render and QC; synthetic

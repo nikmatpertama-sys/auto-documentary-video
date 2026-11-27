@@ -51,13 +51,13 @@ Use precise, natural English. Vary sentence length and rhythm. Prefer active ver
 
 Write for a warm, deep, calm documentary narrator. Use punctuation to support natural spoken pauses. Do not write stage directions, camera directions, editing instructions, music cues, or text overlays in the narration.
 
-## EIGHT-SCENE STRUCTURE
+## SCENE STRUCTURE (DERIVED FROM THE STORY)
 
-Return exactly **8 scenes** in story order. The complete spoken story must be divided across the 8 `narration` fields.
+Return the scenes the story actually needs, in story order: normally 6 to 10, and always between 4 and 12. The scene count must follow the narration, never the other way round. Do not pad, split or merge beats just to reach a number. The complete spoken story must be divided across the `narration` fields.
 
 - Scene 1 contains the hook and must be supported by real-world footage.
 - Each scene must advance the story. Do not repeat the same fact or split one short sentence unnaturally just to fill a scene.
-- The concatenation of all eight scene narrations is the entire script. Do not omit lines, add a second unassigned script, or repeat the story in the scene fields.
+- The concatenation of every scene narration is the entire script. Do not omit lines, add a second unassigned script, or repeat the story in the scene fields.
 - Combined narration must be 120–200 spoken words inclusive. Aim for roughly 150–190 words where the subject supports it, but keep the story factual and coherent. The finished video must be at least 70 seconds; it may exceed 90 seconds and must continue to the end of the complete voice-over.
 
 ## FOOTAGE QUERY DESIGN
@@ -99,7 +99,7 @@ Return **only one valid JSON object**. No Markdown fences, commentary, prefatory
 
 Before returning the JSON, verify all of the following:
 
-- Exactly 8 scenes are present.
+- Between 4 and 12 scenes are present, and the count follows the story rather than a quota.
 - The combined scene narration is 120–200 words and matches `script` exactly in substance and order.
 - The first sentence is a compelling hook of 12 words or fewer.
 - The story has a logical beginning, development, reveal, and ending.

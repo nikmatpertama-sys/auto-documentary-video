@@ -180,8 +180,17 @@ class FactCheckTests(unittest.TestCase):
         )
 
     def test_fact_check_aborts_instead_of_passing_without_claims(self):
-        with patch.object(main, "extract_script_claims", return_value=([], "semantic:mock")):
-            with self.assertRaisesRegex(RuntimeError, "PASS without checked claims"):
+        analysis = {
+            "claims": [],
+            "non_factual": [],
+            "source": "semantic:mock",
+            "error": "extractor returned nothing",
+            "coverage": {"script_sentences": 1, "coverage": 0.0},
+            "skipped_sentences": [],
+        }
+        with patch.object(main, "analyse_script_claims", return_value=analysis), \
+                patch.object(main.research_module, "write_research_files"):
+            with self.assertRaisesRegex(RuntimeError, "No claim was verified"):
                 main.fact_check_plan(
                     {"script": "Something happens.", "scenes": []},
                     {"brief": ""},

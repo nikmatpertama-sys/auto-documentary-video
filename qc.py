@@ -177,10 +177,49 @@ def run_qc(final_path, plan, voice_duration, captions_path="output/captions.ass"
             f"peak {loudness['peak_db']} dBFS",
             critical=False,
         )
+    # MM7: the scene count follows the story; it is only sanity-checked, never
+    # required to hit a fixed quota.
     add(
-        "scene_count_8",
-        scenes == 8,
-        f"{scenes} scenes",
+        "scene_count_follows_story",
+        4 <= scenes <= 12,
+        f"{scenes} scenes (derived from the narration)",
+        critical=False,
+    )
+
+    plan_scenes = list((plan or {}).get("scenes") or [])
+    missing_media = [
+        index for index, scene in enumerate(plan_scenes, 1)
+        if not scene.get("media_file") or not Path(str(scene.get("media_file"))).is_file()
+    ]
+    add(
+        "every_scene_has_footage",
+        bool(plan_scenes) and not missing_media,
+        "all scenes have a media file" if not missing_media else f"missing for scenes {missing_media}",
+    )
+
+    unverified = [
+        index for index, scene in enumerate(plan_scenes, 1)
+        if (scene.get("visual_verification") or {}).get("status") != "approved"
+        and scene.get("visual_verification") is not None
+    ]
+    add(
+        "footage_visually_verified",
+        not unverified,
+        "every accepted clip was approved by AI Vision" if not unverified
+        else f"UNVERIFIED footage in scenes {unverified}",
+        critical=False,
+    )
+
+    unconfirmed_licence = [
+        index for index, scene in enumerate(plan_scenes, 1)
+        if scene.get("license_info") is not None
+        and (scene.get("license_info") or {}).get("status") != "confirmed"
+    ]
+    add(
+        "footage_licences_confirmed",
+        not unconfirmed_licence,
+        "every clip has a traceable reusable licence" if not unconfirmed_licence
+        else f"licence unconfirmed for scenes {unconfirmed_licence}",
         critical=False,
     )
 

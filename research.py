@@ -541,23 +541,75 @@ def extract_claims(script):
 
 
 def claims_prompt(script):
-    """Prompt asking the model for a semantic list of factual claims."""
+    """Prompt asking the model to classify every narration sentence.
+
+    The model must account for the *whole* script: each sentence is either a
+    verifiable factual claim or explicitly non-factual. That makes an empty
+    claim list a legitimate answer (a purely atmospheric script) instead of an
+    indistinguishable extraction failure, and it exposes sentences the model
+    silently skipped.
+    """
     return (
-        "You are a documentary fact-checking editor. Read the narration and list "
-        "every statement that asserts a verifiable fact about the world: a "
-        "mechanism, a behaviour, a quantity, a date, a place, a cause or a "
-        "scientific description. Ignore pure scene-setting mood, rhetorical "
-        "questions and value judgements.\n\n"
+        "You are a documentary fact-checking editor. Read the complete narration "
+        "and classify every sentence into exactly one of two lists.\n\n"
         f"NARRATION:\n{script}\n\n"
         "Return ONLY this JSON object:\n"
-        '{"claims": ["claim 1", "claim 2"]}\n'
+        '{"claims": [{"claim": "sentence copied verbatim", '
+        '"kind": "behaviour|quantity|date|place|cause|identification|comparison|other"}], '
+        '"non_factual": ["sentence copied verbatim"]}\n'
         "Rules:\n"
-        "- Quote each claim as a single self-contained sentence taken from the "
-        "narration, verbatim.\n"
-        "- List between 3 and 20 claims; a narration with fewer than 3 factual "
-        "statements is itself a problem to report as an empty list.\n"
-        "- Never invent claims that are not in the narration."
+        "- Copy each sentence exactly as written; never paraphrase, split or merge."
+        "\n- claims: sentences that assert a verifiable fact about the world "
+        "(a mechanism, a behaviour, a quantity, a date, a place, a cause, an "
+        "identification or a comparison).\n"
+        "- non_factual: sentences that are only mood, imagery, a rhetorical "
+        "question, a transition or a value judgement.\n"
+        "- Every sentence of the narration must appear exactly once across the "
+        "two lists. Do not skip sentences.\n"
+        "- Never invent a sentence that is not in the narration.\n"
+        "- A narration with no factual statement returns an empty claims list; "
+        "that is a valid answer, not an error."
     )
+
+
+def parse_claim_analysis(payload):
+    """Normalise claim extraction into claims plus explicitly non-factual text."""
+    claims = parse_claims(payload)
+    raw_non_factual = payload.get("non_factual") if isinstance(payload, dict) else None
+    non_factual = []
+    seen = {claim.lower() for claim in claims}
+    if isinstance(raw_non_factual, list):
+        for item in raw_non_factual:
+            text = item.get("sentence") if isinstance(item, dict) else item
+            text = re.sub(r"\s+", " ", str(text or "")).strip()
+            if len(text.split()) < 2 or text.lower() in seen:
+                continue
+            seen.add(text.lower())
+            non_factual.append(text)
+    return {"claims": claims, "non_factual": non_factual}
+
+
+def claim_coverage(script, claims, non_factual):
+    """Measure how much of the script the extraction actually accounted for."""
+    sentences = split_sentences(script)
+    normalised = {
+        re.sub(r"\W+", " ", sentence).strip().lower()
+        for sentence in list(claims) + list(non_factual)
+    }
+    uncovered = [
+        sentence for sentence in sentences
+        if re.sub(r"\W+", " ", sentence).strip().lower() not in normalised
+    ]
+    return {
+        "script_sentences": len(sentences),
+        "claimed_sentences": len(claims),
+        "non_factual_sentences": len(non_factual),
+        "uncovered_sentences": uncovered,
+        "coverage": (
+            round((len(sentences) - len(uncovered)) / len(sentences), 3)
+            if sentences else 0.0
+        ),
+    }
 
 
 def parse_claims(payload):
@@ -584,37 +636,73 @@ def parse_claims(payload):
     return claims
 
 
-def fact_check_prompt(script, claims, brief):
-    """Build the verification prompt. The model must cite the supplied brief."""
+def _source_catalogue(sources):
+    """Numbered source list with stable ids (S1, S2, ...) for the verifier."""
+    catalogue = []
+    for index, source in enumerate(sources or [], 1):
+        if not isinstance(source, dict):
+            continue
+        title = re.sub(r"\s+", " ", str(source.get("title") or "")).strip()
+        url = str(source.get("url") or "").strip()
+        if not title and not url:
+            continue
+        catalogue.append({"id": f"S{index}", "title": title, "url": url})
+    return catalogue
+
+
+def fact_check_prompt(script, claims, brief, sources=None):
+    """Build the verification prompt. Supports are linked to a source id."""
     claim_list = "\n".join(f"{i}. {claim}" for i, claim in enumerate(claims, 1))
     evidence = brief or "(No external source material was retrieved.)"
+    catalogue = _source_catalogue(sources)
+    source_lines = "\n".join(
+        f"{item['id']}: {item['title']} ({item['url']})" for item in catalogue
+    ) or "(No source article was retrieved; only universally established knowledge is available.)"
     return (
         "You are a strict documentary fact-checker. You may only use the SOURCE "
-        "MATERIAL below plus universally established knowledge. Do not invent "
-        "sources, numbers, dates or quotations.\n\n"
+        "MATERIAL and SOURCE LIST below plus universally established knowledge. "
+        "Do not invent sources, numbers, dates or quotations.\n\n"
+        f"SOURCE LIST (cite these ids):\n{source_lines}\n\n"
         f"SOURCE MATERIAL:\n{evidence}\n\n"
         f"SCRIPT:\n{script}\n\n"
         f"CLAIMS TO VERIFY:\n{claim_list}\n\n"
         "Return ONLY this JSON object:\n"
         '{"claims": [{"claim": "the claim", "verdict": "supported|unsupported|'
-        'contradicted", "evidence": "short reason or quoted evidence"}], '
+        'contradicted", "evidence": "short reason", "quote": "verbatim words '
+        'from the source material", "source_id": "S1"}], '
         '"overall": "pass|revise|fail"}\n'
         "Rules:\n"
         "- Return exactly one entry per claim listed above, in the same order.\n"
-        "- supported: the claim is consistent with the source material or is a "
-        "widely established fact; name the evidence.\n"
-        "- unsupported: the source material does not contain enough evidence for "
-        "this specific mechanism, number, date or superlative.\n"
-        "- contradicted: the script conflicts with the source material.\n"
-        "- every entry needs non-empty evidence; an empty verdict is treated as "
-        "unsupported.\n"
+        "- supported: the SOURCE MATERIAL states or directly implies the claim, "
+        "or it is a universally established fact. \n"
+        "- For a supported claim, copy the supporting words from the SOURCE "
+        "MATERIAL into 'quote' (verbatim, at least 4 words) and set source_id "
+        "to the source that contains them. If the support is universal "
+        "knowledge rather than the supplied material, set source_id to "
+        "\"general_knowledge\" and still provide the evidence.\n"
+        "- unsupported: the material does not contain enough evidence for this "
+        "specific mechanism, number, date or superlative. Do not mark a claim "
+        "supported because it sounds plausible.\n"
+        "- contradicted: the claim conflicts with the SOURCE MATERIAL; quote the "
+        "conflicting words.\n"
+        "- every entry needs non-empty evidence; a verdict without evidence is "
+        "treated as unsupported.\n"
         "- overall is fail if any claim is contradicted, revise if any claim is "
         "unsupported, otherwise pass."
     )
 
 
-def summarise_verification(payload, claims):
-    """Normalise a verifier response and derive a conservative verdict."""
+def summarise_verification(payload, claims, sources=None):
+    """Normalise a verifier response and derive a conservative verdict.
+
+    Every claim keeps its verdict, its evidence and — when the verifier cited a
+    supplied article — that article's title and URL. A "supported" verdict
+    without evidence is downgraded, so a confident-sounding answer alone can
+    never pass a claim.
+    """
+    catalogue = {item["id"]: item for item in _source_catalogue(sources)}
+    for index, item in enumerate(_source_catalogue(sources), 1):
+        catalogue[str(index)] = item
     items = []
     raw_items = payload.get("claims") if isinstance(payload, dict) else None
     if isinstance(raw_items, list):
@@ -635,24 +723,44 @@ def summarise_verification(payload, claims):
         elif isinstance(raw_items, list) and index < len(raw_items) and isinstance(raw_items[index], dict):
             entry = raw_items[index]
         verdict = str(entry.get("verdict") or "").strip().lower()
-        evidence = str(entry.get("evidence") or "").strip()
+        evidence = re.sub(r"\s+", " ", str(entry.get("evidence") or "")).strip()
+        quote = re.sub(r"\s+", " ", str(entry.get("quote") or "")).strip()
+        source_key = re.sub(r"[^A-Za-z0-9]", "", str(entry.get("source_id") or "")).upper()
+        cited = catalogue.get(source_key)
+        support_source = None
+        if cited and source_key.lower() not in ("general_knowledge", "general", "none"):
+            support_source = {"id": cited["id"], "title": cited["title"], "url": cited["url"]}
         if verdict not in ("supported", "unsupported", "contradicted"):
             verdict = "unsupported"
             if not evidence:
                 evidence = "The verifier returned no verdict for this claim."
         elif verdict == "supported" and not evidence:
-            # A pass without evidence is not a pass.
             verdict = "unsupported"
             evidence = "The verifier gave no supporting evidence for this claim."
+        elif verdict == "supported" and len(evidence.split()) < 4:
+            verdict = "unsupported"
+            evidence = f"Evidence was too thin to verify the claim: {evidence!r}"
         items.append({
             "claim": claim,
+            "kind": str(entry.get("kind") or "").strip(),
             "verdict": verdict,
             "evidence": evidence[:600],
+            "quote": quote[:400],
+            "source": support_source,
+            "evidence_type": (
+                "source_quote" if verdict == "supported" and support_source and quote
+                else "general_knowledge" if verdict == "supported" and support_source is None
+                else "unsupported" if verdict == "unsupported"
+                else verdict
+            ),
         })
 
     contradicted = [item for item in items if item["verdict"] == "contradicted"]
     unsupported = [item for item in items if item["verdict"] == "unsupported"]
     supported = [item for item in items if item["verdict"] == "supported"]
+    unsourced_supported = [
+        item for item in supported if item.get("source") is None
+    ]
     if not items:
         overall = "fail"
     elif contradicted:
@@ -667,6 +775,9 @@ def summarise_verification(payload, claims):
         "supported": len(supported),
         "unsupported": len(unsupported),
         "contradicted": len(contradicted),
+        "sourced_supports": len(supported) - len(unsourced_supported),
+        "general_knowledge_supports": len(unsourced_supported),
+        "sources": _source_catalogue(sources),
         "overall": overall,
         "checked_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }

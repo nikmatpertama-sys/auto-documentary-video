@@ -332,8 +332,12 @@ jobs:
           CLOUDFLARE_CHAT_MODEL: "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
           CLOUDFLARE_VISION_MODEL: "@cf/meta/llama-3.2-11b-vision-instruct"
 
-          # Visual verification remains enabled.
+          # Visual verification remains enabled and fail-closed.
           FOOTAGE_VISION_REQUIRED: "true"
+          # Reuse permission must be confirmed by the source's licence metadata.
+          FOOTAGE_LICENSE_REQUIRED: "true"
+          # Speechify failures stop the run; no TTS engine is substituted silently.
+          ALLOW_VOICE_FALLBACK: "false"
           FOOTAGE_VISION_MIN_CONFIDENCE: "0.72"
           FOOTAGE_VISION_CANDIDATE_LIMIT: "26"
 
@@ -359,6 +363,7 @@ jobs:
             timing.json
             research.json
             fact_check.json
+            footage_verification.json
             copyright_report.json
             qc_report.json
             stage_report.json
@@ -366,6 +371,8 @@ jobs:
             production_report.json
             output/voiceover.mp3
             output/voiceover.wav
+            output/voiceover_manifest.json
+            output/vision/**/*.jpg
             output/captions.ass
             output/music_bed.wav
             output/pipeline.log

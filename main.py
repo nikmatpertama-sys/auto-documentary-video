@@ -23,6 +23,7 @@ from email.utils import parsedate_to_datetime
 import requests
 import edge_tts
 
+import footage_license
 import footage_queries
 import qc as qc_module
 import reference_style
@@ -210,6 +211,8 @@ CLOUDFLARE_VISION_MODEL = os.getenv(
 ).strip()
 SPEECHIFY_MODEL = os.getenv("SPEECHIFY_MODEL", "simba-3.5").strip() or "simba-3.5"
 SPEECHIFY_VOICE_ID = os.getenv("SPEECHIFY_VOICE_ID", "").strip()
+# Filled at generation time so the manifest records the voice actually used.
+SPEECHIFY_VOICE_USED = ""
 
 # MM6: the reference format is an Indonesian vertical documentary. The script
 # language also drives the TTS voice, caption casing and vocabulary checks.
@@ -399,6 +402,52 @@ FOOTAGE_SOURCE_MAX_REQUESTS_PER_RUN = {
     "Pexels": 48,
     "Pixabay": 48,
 }
+# MM7: the run budget scales with the script's actual scene count instead of a
+# fixed ceiling that ran out before the last scenes of a long video. These are
+# still polite ceilings, not targets; cached queries cost nothing.
+FOOTAGE_SOURCE_PER_SCENE_BUDGET = {
+    "Coverr": 2,
+    "Internet Archive": 14,
+    "Wikimedia Commons": 16,
+    "NASA": 8,
+    "Web Search": 8,
+    "Google Search": 3,
+}
+FOOTAGE_SOURCE_REQUEST_CEILING = {
+    "Coverr": 30,
+    "Internet Archive": 720,
+    "Wikimedia Commons": 900,
+    "NASA": 480,
+    "Web Search": 260,
+    "Google Search": 90,
+}
+
+
+def configure_footage_budget(scene_count):
+    """Grow each provider's per-run request budget with the real scene count."""
+    scene_count = max(1, int(scene_count or 1))
+    budgets = {}
+    for source, per_scene in FOOTAGE_SOURCE_PER_SCENE_BUDGET.items():
+        configured = int(FOOTAGE_SOURCE_MAX_REQUESTS_PER_RUN.get(source, 0) or 0)
+        dynamic = 40 + per_scene * scene_count
+        ceiling = int(FOOTAGE_SOURCE_REQUEST_CEILING.get(source, dynamic))
+        budget = min(ceiling, max(configured, dynamic))
+        FOOTAGE_SOURCE_MAX_REQUESTS_PER_RUN[source] = budget
+        budgets[source] = budget
+    print(
+        f"Footage request budget for {scene_count} scene(s): "
+        + ", ".join(f"{source}={budget}" for source, budget in budgets.items())
+        + ". Cached searches do not consume it."
+    )
+    return budgets
+
+
+def footage_source_budget_remaining(source):
+    maximum = int(FOOTAGE_SOURCE_MAX_REQUESTS_PER_RUN.get(source, 0) or 0)
+    used = int(FOOTAGE_SOURCE_REQUEST_COUNTS.get(source, 0) or 0)
+    return max(0, maximum - used)
+
+
 FOOTAGE_SOURCE_REQUEST_COUNTS = {}
 FOOTAGE_SOURCE_LAST_REQUEST_AT = {}
 FOOTAGE_SOURCE_REQUEST_LOCK = threading.Lock()
@@ -1509,8 +1558,17 @@ def validate_plan_candidate(candidate):
     if not isinstance(candidate, dict):
         raise RuntimeError("Plan response is not a JSON object.")
     candidate["scenes"] = candidate.get("scenes", [])
-    if not isinstance(candidate["scenes"], list) or len(candidate["scenes"]) != 8:
-        raise RuntimeError("AI returned an incomplete plan. Expected exactly 8 scenes.")
+    # MM7: the scene count follows the story. Four to twelve scenes are accepted;
+    # no scene may be added just to satisfy a number.
+    if (
+        not isinstance(candidate["scenes"], list)
+        or not MIN_PLAN_SCENES <= len(candidate["scenes"]) <= MAX_PLAN_SCENES
+    ):
+        raise RuntimeError(
+            "AI returned an unusable plan. Expected "
+            f"{MIN_PLAN_SCENES}-{MAX_PLAN_SCENES} scenes that follow the story, got "
+            f"{len(candidate['scenes']) if isinstance(candidate['scenes'], list) else 'no list'}."
+        )
 
     scene_narrations = []
     for scene_index, scene in enumerate(candidate["scenes"], 1):
@@ -1546,78 +1604,221 @@ def validate_plan_candidate(candidate):
     return candidate
 
 
+def _research_sources(research_data):
+    return [
+        {"title": article.get("title"), "url": article.get("url")}
+        for article in (research_data or {}).get("articles") or []
+    ]
+
+
 def _verify_claims(script, claims, research_data, label="fact check"):
+    sources = _research_sources(research_data)
     prompt = research_module.fact_check_prompt(
-        script, claims, research_data.get("brief", "")
+        script, claims, research_data.get("brief", ""), sources=sources
     )
     payload, provider = call_json_with_providers(prompt, label)
-    result = research_module.summarise_verification(payload, claims)
+    result = research_module.summarise_verification(payload, claims, sources=sources)
     result["provider"] = provider
+    result["research_articles"] = sources
     return result
 
 
+# Scene counts are derived from the story, never padded to a quota.
+MIN_PLAN_SCENES = 4
+MAX_PLAN_SCENES = 12
+
 # A fact-check that checked nothing is a failure, not a pass.
 MIN_FACT_CHECK_CLAIMS = 3
+# A legitimately atmospheric script can have no factual claim at all, but that
+# is a different outcome from the extractor failing to read the narration.
+NO_CLAIMS_COVERAGE = 0.8
 
 
-def extract_script_claims(script):
-    """Identify the script's factual claims semantically.
+def analyse_script_claims(script):
+    """Classify every narration sentence as a factual claim or non-factual.
 
-    The model reads the narration and lists every statement that asserts a
-    verifiable fact, so claims are not limited to sentences containing a digit.
-    The sentence-level heuristic is only used when no provider is reachable, and
-    it now treats any declarative statement as a claim.
+    The semantic extractor is asked to account for the whole script. Sentences it
+    leaves out are recorded as skipped and then re-read by the sentence-level
+    analyser, so a claim can never disappear from verification silently. The
+    heuristic path is only used when no provider is reachable.
     """
     script = str(script or "").strip()
+    analysis = {
+        "claims": [],
+        "non_factual": [],
+        "source": "none",
+        "provider": None,
+        "coverage": research_module.claim_coverage(script, [], []),
+        "skipped_sentences": [],
+        "error": None,
+    }
     if not script:
-        return [], "none"
+        return analysis
+
     try:
         payload, provider = call_json_with_providers(
             research_module.claims_prompt(script), "claim extraction"
         )
-        claims = research_module.parse_claims(payload)
-        if claims:
-            return claims, f"semantic:{provider}"
-        print(
-            "Claim extraction returned no usable claim; falling back to "
-            "sentence-level analysis."
-        )
+        semantic = research_module.parse_claim_analysis(payload)
+        if semantic["claims"] or semantic["non_factual"]:
+            analysis.update(
+                claims=semantic["claims"],
+                non_factual=semantic["non_factual"],
+                source=f"semantic:{provider}",
+                provider=provider,
+            )
+            analysis["coverage"] = research_module.claim_coverage(
+                script, analysis["claims"], analysis["non_factual"]
+            )
+            uncovered = list(analysis["coverage"].get("uncovered_sentences") or [])
+            if uncovered:
+                # Sentences the extractor skipped are still part of the script.
+                # Re-read them individually instead of letting them vanish.
+                extra = research_module.extract_claims(" ".join(uncovered))
+                known = {claim.lower() for claim in analysis["claims"]}
+                # Every non-question statement in the uncovered set is treated as
+                # a claim: verifying too much is safe, dropping a claim is not.
+                extra.extend(
+                    sentence for sentence in uncovered
+                    if len(sentence.split()) >= 4
+                    and not sentence.rstrip().endswith("?")
+                )
+                added = []
+                for claim in extra:
+                    if claim.lower() in known:
+                        continue
+                    known.add(claim.lower())
+                    added.append(claim)
+                if added:
+                    analysis["claims"].extend(added)
+                    print(
+                        f"Claim extraction skipped {len(uncovered)} sentence(s); "
+                        f"{len(added)} were recovered as claims for verification."
+                    )
+                analysis["skipped_sentences"] = [
+                    sentence for sentence in uncovered
+                    if sentence.lower() not in {claim.lower() for claim in analysis["claims"]}
+                ]
+                analysis["coverage"] = research_module.claim_coverage(
+                    script, analysis["claims"], analysis["non_factual"]
+                )
+            return analysis
+        analysis["error"] = "The semantic extractor returned no sentence classification."
+        print("Claim extraction returned no usable classification; falling back to sentence-level analysis.")
     except Exception as exc:
+        analysis["error"] = f"{type(exc).__name__}: {str(exc)[:300]}"
         print(
             "Semantic claim extraction unavailable "
             f"({str(exc)[:200]}); using sentence-level analysis."
         )
-    return research_module.extract_claims(script), "heuristic"
+
+    heuristic = research_module.extract_claims(script)
+    analysis.update(claims=heuristic, non_factual=[], source="heuristic")
+    analysis["coverage"] = research_module.claim_coverage(script, heuristic, [])
+    analysis["skipped_sentences"] = list(
+        analysis["coverage"].get("uncovered_sentences") or []
+    )
+    return analysis
 
 
-def fact_check_plan(plan, research_data, max_repairs=1):
-    """Verify factual claims and repair contradicted/unsupported sentences.
+def extract_script_claims(script):
+    """Backwards-compatible wrapper: semantic claims plus their provenance."""
+    analysis = analyse_script_claims(script)
+    return analysis["claims"], analysis["source"]
 
-    A contradicted claim aborts the run after the repair attempt. Unsupported
-    claims are repaired once and otherwise recorded as warnings, never hidden.
-    A run in which no claim could be checked fails instead of reporting PASS.
+
+def _fail_fact_check(research_data, status, message, analysis=None):
+    """Record the failed fact-check state in fact_check.json before aborting."""
+    analysis = analysis or {}
+    payload = {
+        "status": status,
+        "overall": "fail",
+        "claims": [],
+        "checked": 0,
+        "supported": 0,
+        "unsupported": 0,
+        "contradicted": 0,
+        "claim_source": analysis.get("source"),
+        "coverage": analysis.get("coverage"),
+        "skipped_sentences": analysis.get("skipped_sentences") or [],
+        "error": analysis.get("error"),
+        "research_articles": _research_sources(research_data),
+    }
+    try:
+        research_module.write_research_files(research_data, payload)
+    except Exception as exc:
+        print(f"Could not persist the failed fact-check report: {exc}")
+    raise RuntimeError(message)
+
+
+def fact_check_plan(plan, research_data, max_repairs=2):
+    """Verify every factual claim and repair contradicted/unsupported wording.
+
+    Requirements enforced here:
+    * each claimant gets a verdict, evidence and (when available) the cited
+      source title/URL stored in fact_check.json;
+    * a script with no factual claim is reported separately from an extraction
+      failure, and neither can be turned into a PASS;
+    * sentences skipped by the extractor are recorded, never dropped;
+    * unsupported or contradicted wording is repaired and re-verified, and the
+      run aborts rather than shipping unverified factual claims.
     """
-    claims, claim_source = extract_script_claims(plan.get("script", ""))
+    analysis = analyse_script_claims(plan.get("script", ""))
+    claims = list(analysis["claims"])
+    claim_source = analysis["source"]
+    coverage = analysis.get("coverage") or {}
+
+    if not claims:
+        script_sentences = int(coverage.get("script_sentences") or 0)
+        non_factual = analysis.get("non_factual") or []
+        looks_classified = (
+            bool(non_factual)
+            and float(coverage.get("coverage") or 0.0) >= NO_CLAIMS_COVERAGE
+            and script_sentences > 0
+        )
+        if looks_classified:
+            _fail_fact_check(
+                research_data,
+                "no_factual_claims",
+                "Fact check: the script contains no verifiable factual claim "
+                f"({len(non_factual)} sentence(s) classified as non-factual via "
+                f"{claim_source}). This is a legitimate no-claim narration, so the "
+                "run stops instead of issuing a PASS with nothing checked.",
+                analysis,
+            )
+        _fail_fact_check(
+            research_data,
+            "extraction_failed",
+            "Fact check failed to extract claims from the script "
+            f"(source={claim_source}, error={analysis.get('error')}). No claim was "
+            "verified, so no PASS is possible.",
+            analysis,
+        )
+
     if len(claims) < MIN_FACT_CHECK_CLAIMS:
-        raise RuntimeError(
+        _fail_fact_check(
+            research_data,
+            "insufficient_claims",
             "Fact check could not identify at least "
             f"{MIN_FACT_CHECK_CLAIMS} verifiable claims in the script "
             f"(found {len(claims)} via {claim_source}). A PASS without checked "
             "claims is not allowed; the script must be regenerated with concrete, "
-            "verifiable statements."
+            "verifiable statements.",
+            analysis,
         )
 
     verification = _verify_claims(plan["script"], claims, research_data)
     verification["claim_source"] = claim_source
-    verification["research_articles"] = [
-        {"title": article.get("title"), "url": article.get("url")}
-        for article in research_data.get("articles") or []
-    ]
+    verification["coverage"] = coverage
+    verification["skipped_sentences"] = analysis.get("skipped_sentences") or []
+    verification["status"] = "checked"
     print(
-        f"Fact check: {verification['supported']} supported, "
+        f"Fact check: {verification['supported']} supported "
+        f"({verification.get('sourced_supports', 0)} with a cited source), "
         f"{verification['unsupported']} unsupported, "
         f"{verification['contradicted']} contradicted "
-        f"(overall {verification['overall']})."
+        f"(overall {verification['overall']}); sentence coverage "
+        f"{float(coverage.get('coverage') or 0.0):.0%}."
     )
 
     repairs = 0
@@ -1628,19 +1829,20 @@ def fact_check_plan(plan, research_data, max_repairs=1):
             for item in verification["claims"]
             if item["verdict"] != "supported"
         )
+        scene_count = len(plan.get("scenes") or [])
         prompt = (
             "You are correcting a documentary script so that every factual claim "
             "is supported. Rewrite only what is necessary; keep the same story "
-            "and roughly the same visual queries. Remove, correct or soften each "
+            "and the same visual queries. Remove, correct or soften each "
             "problem claim. Do not add new numbers, dates or quotations that the "
             "source material does not contain.\n\n"
             f"SOURCE MATERIAL:\n{research_data.get('brief') or '(none supplied)'}\n\n"
             f"CURRENT PLAN JSON:\n{json.dumps(plan, ensure_ascii=False)[:9000]}\n\n"
             f"PROBLEMS:\n{problems}\n\n"
             "Return ONLY the same JSON object schema: title, hook, script, and "
-            "exactly 8 scenes each with narration, visual_query, visual_queries, "
-            "source_label, source_url. The combined narration must stay between "
-            f"120 and 200 words and must be written in {LANGUAGE['name']}."
+            f"exactly {scene_count} scenes each with narration, visual_query, "
+            "visual_queries, source_label, source_url. The combined narration must "
+            f"stay between 120 and 200 words and must be written in {LANGUAGE['name']}."
         )
         try:
             payload, provider = call_json_with_providers(prompt, "fact-check repair")
@@ -1650,12 +1852,16 @@ def fact_check_plan(plan, research_data, max_repairs=1):
             break
         plan.clear()
         plan.update(repaired)
-        repaired_claims, repaired_claim_source = extract_script_claims(plan["script"])
+        repaired_analysis = analyse_script_claims(plan["script"])
+        repaired_claims = repaired_analysis["claims"]
         if len(repaired_claims) < MIN_FACT_CHECK_CLAIMS:
-            raise RuntimeError(
+            _fail_fact_check(
+                research_data,
+                "insufficient_claims_after_repair",
                 "The repaired script no longer contains enough verifiable claims "
-                f"({len(repaired_claims)} via {repaired_claim_source}); refusing to "
-                "report a fact-check pass."
+                f"({len(repaired_claims)} via {repaired_analysis['source']}); "
+                "refusing to report a fact-check pass.",
+                repaired_analysis,
             )
         verification = _verify_claims(
             plan["script"],
@@ -1663,23 +1869,64 @@ def fact_check_plan(plan, research_data, max_repairs=1):
             research_data,
             label="fact-check re-verification",
         )
-        verification["claim_source"] = repaired_claim_source
+        verification["claim_source"] = repaired_analysis["source"]
+        verification["coverage"] = repaired_analysis.get("coverage")
+        verification["skipped_sentences"] = repaired_analysis.get("skipped_sentences") or []
         verification["repair_provider"] = provider
+        verification["repair_attempt"] = repairs
+        verification["status"] = "checked"
         print(
-            f"Fact check after repair: {verification['supported']} supported, "
+            f"Fact check after repair {repairs}: {verification['supported']} supported, "
             f"{verification['unsupported']} unsupported, "
             f"{verification['contradicted']} contradicted."
         )
 
-    if verification["overall"] == "fail":
-        bad = [
-            item for item in verification["claims"]
-            if item["verdict"] == "contradicted"
-        ]
-        raise RuntimeError(
+    contradicted = [
+        item for item in verification["claims"]
+        if item["verdict"] == "contradicted"
+    ]
+    if contradicted:
+        _fail_fact_check(
+            research_data,
+            "contradicted",
             "Fact check found claims contradicted by the source material after "
-            "repair: " + " | ".join(f"{item['claim']} ({item['evidence']})" for item in bad)
+            "repair: " + " | ".join(
+                f"{item['claim']} ({item['evidence']})" for item in contradicted
+            ),
+            analysis,
         )
+
+    unsupported = [
+        item for item in verification["claims"]
+        if item["verdict"] == "unsupported"
+    ]
+    if unsupported:
+        allow = os.getenv("ALLOW_UNSUPPORTED_CLAIMS", "").strip().lower() in (
+            "1", "true", "yes", "on"
+        )
+        flagged = [
+            {"claim": item["claim"], "evidence": item["evidence"]}
+            for item in unsupported
+        ]
+        verification["flagged_claims"] = flagged
+        if not allow:
+            _fail_fact_check(
+                research_data,
+                "unsupported",
+                "Fact check could not support "
+                f"{len(unsupported)} claim(s) after {max_repairs} repair attempt(s), "
+                "so the script is not safe to narrate: "
+                + " | ".join(item["claim"] for item in unsupported[:6])
+                + ". Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an "
+                "explicit flag in fact_check.json.",
+                analysis,
+            )
+        print(
+            "Fact-check warning: ALLOW_UNSUPPORTED_CLAIMS is set; "
+            f"{len(unsupported)} unsupported claim(s) stay in the script and are "
+            "flagged in fact_check.json."
+        )
+
     return verification
 
 
@@ -1694,13 +1941,15 @@ def extend_plan_for_duration(plan, research_brief, target_words=185):
         "Deepen the narration so it reads at roughly 185 words while staying "
         "between 120 and 200 words. Add concrete, source-supported detail, a "
         "clearer mechanism, or a stronger transition; never add filler, "
-        "repetition, or unsupported numbers. Keep exactly 8 scenes, keep every "
-        "visual query usable, and keep the hook at 12 words or fewer.\n\n"
+        "repetition, or unsupported numbers. Keep the current number of scenes "
+        "(never add a scene just to lengthen the video), keep every visual query "
+        "usable, and keep the hook at 12 words or fewer.\n\n"
         f"SOURCE MATERIAL:\n{research_brief or '(none supplied)'}\n\n"
         f"CURRENT PLAN JSON:\n{json.dumps(plan, ensure_ascii=False)[:9000]}\n\n"
-        "Return ONLY the same JSON object schema: title, hook, script, and exactly "
-        "8 scenes each with narration, visual_query, visual_queries, "
-        f"source_label, source_url. Narration language: {LANGUAGE['name']}."
+        "Return ONLY the same JSON object schema: title, hook, script, and the "
+        f"same {len(plan.get('scenes') or [])} scenes each with narration, "
+        "visual_query, visual_queries, source_label, source_url. Narration "
+        f"language: {LANGUAGE['name']}."
     )
     payload, provider = call_json_with_providers(prompt, "duration extension")
     extended = validate_plan_candidate(payload)
@@ -4127,8 +4376,12 @@ def tag_similarity(tags_a, tags_b):
     )
 
 
-def extract_vision_frames(video_path, frame_count=3):
-    """Extract evenly spaced, low-resolution frames for visual inspection."""
+def extract_vision_frames(video_path, frame_count=3, save_dir=None):
+    """Extract evenly spaced, low-resolution frames for visual inspection.
+
+    When ``save_dir`` is given the exact frames shown to the vision provider are
+    kept on disk as audit evidence for the accepted clip.
+    """
     duration = ffprobe_duration(video_path)
 
     if duration <= 0:
@@ -4201,6 +4454,14 @@ def extract_vision_frames(video_path, frame_count=3):
             frame_paths.append(
                 frame_path.read_bytes()
             )
+
+            if save_dir is not None:
+                keep_dir = Path(save_dir)
+                keep_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(
+                    frame_path,
+                    keep_dir / f"frame_{index:02d}_{timestamp:.2f}s.jpg",
+                )
 
     if len(frame_paths) < 2:
         raise RuntimeError(
@@ -5394,11 +5655,33 @@ def adaptive_visual_retry_queries(scene, rejection_feedback=None):
     return queries[:MAX_ADAPTIVE_FOOTAGE_QUERIES]
 
 
+def footage_identity_signature(hit):
+    """Stable clip identity for cross-scene duplicate detection."""
+    url = str(hit.get("url") or "")
+    filename = unquote(url.rsplit("/", 1)[-1]) if url else ""
+    text = " ".join([str(hit.get("title") or ""), filename])
+    tokens = [
+        token for token in normalize_words(text)
+        if token not in {
+            "video", "videos", "webm", "mp4", "mov", "ogv", "file", "the",
+            "and", "of", "a", "an", "in", "on", "with", "clip", "footage",
+        }
+    ]
+    return " ".join(sorted(set(tokens)))
+
+
 def fetch_footage(plan):
     credits = []
     used_ids = set()
     selected_tag_sets = []
     verified_assets = []
+    footage_audit = []
+    accepted_signatures = set()
+    license_rejections = []
+    license_required = os.getenv("FOOTAGE_LICENSE_REQUIRED", "true").strip().lower() not in (
+        "0", "false", "no", "off"
+    )
+    configure_footage_budget(len(plan.get("scenes") or []))
 
     visual_provider_names = []
 
@@ -5478,6 +5761,22 @@ def fetch_footage(plan):
             scene.get("narration", ""),
         )
 
+        # MM7: if a provider's remaining allowance is nearly spent, search fewer
+        # variants for this scene so the last scenes still have discovery budget.
+        tight_sources = [
+            source for source in (
+                "Wikimedia Commons", "Internet Archive", "NASA", "Web Search"
+            )
+            if 0 < footage_source_budget_remaining(source) < 6
+        ]
+        if tight_sources and len(queries) > 3:
+            queries = queries[:3]
+            print(
+                f"Scene {i}: request budget is nearly exhausted for "
+                f"{', '.join(tight_sources)}; limiting this scene to "
+                f"{len(queries)} query variants so later scenes keep their allowance."
+            )
+
         candidates = {}
 
         print(
@@ -5490,9 +5789,11 @@ def fetch_footage(plan):
         rejection_counts = {
             "metadata": 0, "resolution": 0,
             "duration": 0, "relevance": 0, "context": 0,
-            "visual_context": 0, "duplicate": 0,
+            "visual_context": 0, "duplicate": 0, "license": 0,
         }
         visual_rejection_feedback = []
+        scene_vision_rejections = []
+        scene_license_rejections = []
         rejected_context_groups = set()
         # Candidates whose metadata only partly names the scene subject. They are
         # not accepted here; they are shown to the visual model, which decides.
@@ -5591,6 +5892,36 @@ def fetch_footage(plan):
                     [tag_similarity(tags, old) for old in selected_tag_sets] or [0.0]
                 )
                 if similarity > 0.78:
+                    rejection_counts["duplicate"] += 1
+                    continue
+
+                # MM7: licence confirmation is independent of visual relevance.
+                # An unconfirmed licence ("see file page", "verify terms", empty)
+                # is never treated as reuse permission.
+                license_info = footage_license.resolve_license(hit)
+                if license_required and license_info["status"] != "confirmed":
+                    rejection_counts["license"] += 1
+                    license_rejections.append({
+                        "scene": i,
+                        "source": hit.get("source"),
+                        "title": str(hit.get("title") or "")[:160],
+                        "status": license_info["status"],
+                        "evidence": license_info["evidence"],
+                    })
+                    if len(scene_license_rejections) < 12:
+                        scene_license_rejections.append({
+                            "source": hit.get("source"),
+                            "id": hit.get("id"),
+                            "title": hit.get("title"),
+                            "page_url": hit.get("page_url"),
+                            "status": license_info["status"],
+                            "evidence": license_info["evidence"],
+                        })
+                    continue
+                hit["_license_info"] = license_info
+
+                signature = footage_identity_signature(hit)
+                if signature and signature in accepted_signatures:
                     rejection_counts["duplicate"] += 1
                     continue
 
@@ -5789,6 +6120,24 @@ def fetch_footage(plan):
                 )
                 continue
 
+            license_info = hit.get("_license_info") or footage_license.resolve_license(hit)
+            if license_required and license_info["status"] != "confirmed":
+                print(
+                    f"Scene {i}: candidate skipped — reuse licence is "
+                    f"{license_info['status']} ({license_info['evidence'][:120]})."
+                )
+                if len(scene_license_rejections) < 12:
+                    scene_license_rejections.append({
+                        "source": hit.get("source"),
+                        "id": hit.get("id"),
+                        "title": hit.get("title"),
+                        "page_url": hit.get("page_url"),
+                        "status": license_info["status"],
+                        "evidence": license_info["evidence"],
+                    })
+                continue
+            hit["_license_info"] = license_info
+
             checked += 1
 
             try:
@@ -5852,6 +6201,16 @@ def fetch_footage(plan):
                     )
 
                     if not visually_relevant:
+                        scene_vision_rejections.append({
+                            "source": hit.get("source"),
+                            "id": hit.get("id"),
+                            "title": hit.get("title"),
+                            "query": query,
+                            "status": "rejected",
+                            "provider": vision_provider,
+                            "confidence": round(float(confidence), 3),
+                            "reason": str(visual_reason)[:500],
+                        })
                         visual_rejection_feedback.append({
                             "reason": visual_reason,
                             "query": query,
@@ -5947,6 +6306,16 @@ def fetch_footage(plan):
                     f"{hit.get('source')} "
                     f"{hit.get('id')}: {message}"
                 )
+                scene_vision_rejections.append({
+                    "source": hit.get("source"),
+                    "id": hit.get("id"),
+                    "title": hit.get("title"),
+                    "query": query,
+                    "status": "failed",
+                    "provider": "n/a",
+                    "confidence": None,
+                    "reason": message[:500],
+                })
 
                 print(
                     f"Scene {i}: candidate rejected/skipped "
@@ -6137,6 +6506,10 @@ def fetch_footage(plan):
         scene["creator"] = hit.get("creator")
         scene["page_url"] = hit.get("page_url", "")
         scene["license"] = hit.get("license", "")
+        license_info = hit.get("_license_info") or footage_license.resolve_license(hit)
+        scene["license_info"] = license_info
+        scene["license_reuse_confirmed"] = bool(license_info.get("reuse_allowed"))
+        accepted_signatures.add(footage_identity_signature(hit))
         scene["coverr_attribution"] = str(hit.get("source") or "") == "Coverr"
         scene["source_video_dimensions"] = hit.get("_source_video_info", {})
         scene["output_aspect_ratio"] = "9:16"
@@ -6149,16 +6522,61 @@ def fetch_footage(plan):
         scene["footage_search_retry_count"] = len(adaptive_retry_queries_used)
         scene["footage_search_retry_queries"] = list(adaptive_retry_queries_used)
         scene["footage_visual_rejection_count"] = len(visual_rejection_feedback)
+        scene["vision_rejections"] = list(scene_vision_rejections)
+        scene["license_rejections"] = list(scene_license_rejections)
+
+        # Keep the exact frames the vision model judged, as audit evidence.
+        evidence_dir = OUT / "vision" / f"scene_{i:02d}"
+        evidence_frames = []
+        if vision_confidence is not None:
+            for stale in evidence_dir.glob("*.jpg"):
+                stale.unlink(missing_ok=True)
+            try:
+                extract_vision_frames(destination, frame_count=3, save_dir=evidence_dir)
+                evidence_frames = sorted(str(path) for path in evidence_dir.glob("*.jpg"))
+            except Exception as exc:
+                print(f"Scene {i}: could not store verification frames: {str(exc)[:200]}")
+
         scene["visual_verification"] = {
+            "status": "approved" if vision_confidence is not None else "unverified",
             "method": (
                 f"{vision_provider} Vision"
                 if vision_confidence is not None
-                else "metadata-only fallback"
+                else "metadata-only fallback (no vision provider configured)"
             ),
+            "provider": vision_provider,
             "confidence": vision_confidence,
             "reason": vision_reason,
             "query": query,
+            "frames": evidence_frames,
+            "frame_count": len(evidence_frames),
+            "rejected_candidates": len(scene_vision_rejections),
         }
+        if vision_confidence is None:
+            print(
+                f"WARNING: Scene {i} footage is UNVERIFIED — no AI Vision provider "
+                "inspected the downloaded clip. It must not be reported as approved."
+            )
+
+        footage_audit.append({
+            "scene": i,
+            "narration": scene.get("narration", ""),
+            "visual_query": scene.get("visual_query", ""),
+            "accepted": {
+                "source": hit.get("source"),
+                "id": hit.get("id"),
+                "title": hit.get("title"),
+                "page_url": hit.get("page_url", ""),
+                "file_url": hit.get("url"),
+                "media_file": str(destination),
+                "license": license_info,
+            },
+            "verification": scene["visual_verification"],
+            "rejected_candidates": list(scene_vision_rejections),
+            "license_rejections": list(scene_license_rejections),
+            "queries_tried": list(queries),
+            "reused_from_scene": reused_from_scene,
+        })
 
         vision_credit = (
             f" | Visual verification: "
@@ -6212,6 +6630,34 @@ def fetch_footage(plan):
     Path("credits.txt").write_text(
         "\n".join(credits) + "\n",
         encoding="utf-8"
+    )
+
+    unverified_scenes = [
+        entry["scene"] for entry in footage_audit
+        if entry["verification"].get("status") != "approved"
+    ]
+    verification_payload = {
+        "schema": "mm7-footage-verification",
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "vision_required": VISION_REQUIRED,
+        "vision_providers": visual_provider_names,
+        "license_required": license_required,
+        "scene_count": len(footage_audit),
+        "approved_scenes": len(footage_audit) - len(unverified_scenes),
+        "unverified_scenes": unverified_scenes,
+        "scenes": footage_audit,
+        "license_rejections": license_rejections[:80],
+    }
+    Path("footage_verification.json").write_text(
+        json.dumps(verification_payload, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    PIPELINE_STATE["footage_verification"] = "footage_verification.json"
+    PIPELINE_STATE["unverified_scenes"] = unverified_scenes
+    print(
+        f"Footage verification report: {verification_payload['approved_scenes']}/"
+        f"{verification_payload['scene_count']} approved by AI Vision, "
+        f"{len(license_rejections)} candidate(s) rejected for an unconfirmed licence."
     )
 
     Path("plan.json").write_text(
@@ -6547,10 +6993,12 @@ def _request_speechify_audio(sentence, sentence_index, sentence_total, voice_id,
 
 
 def _generate_speechify_parts(sentences):
+    global SPEECHIFY_VOICE_USED
     api_keys = SPEECHIFY_KEYS
     if not api_keys:
         raise RuntimeError("SPVO_API/SPEECHIFY_API_KEY is not configured.")
     voice_id = _speechify_choose_voice(api_keys)
+    SPEECHIFY_VOICE_USED = voice_id
     wav_parts = []
     sentence_word_events = []
     sentence_events = []
@@ -6727,26 +7175,51 @@ def build_voice_and_subs(script, enforce_minimum=True):
         for stale in OUT.glob(pattern):
             stale.unlink(missing_ok=True)
 
+    allow_fallback = os.getenv("ALLOW_VOICE_FALLBACK", "").strip().lower() in (
+        "1", "true", "yes", "on"
+    )
+    voice_id_used = VOICE
+    voice_model_used = "edge-tts"
+
     if SPEECHIFY_KEYS:
         try:
             sentence_word_events, sentence_events, wav_parts = _generate_speechify_parts(sentences)
             voice_provider = "Speechify"
-            print("Voice-over provider: Speechify (primary, simba-3.5).")
-        except Exception as exc:
+            voice_id_used = SPEECHIFY_VOICE_USED or SPEECHIFY_VOICE_ID or "catalog-default"
+            voice_model_used = SPEECHIFY_MODEL
             print(
-                "Speechify could not complete the full narration; "
-                f"restarting the complete VO with Edge TTS fallback: {str(exc)[:500]}"
+                f"Voice-over provider: Speechify (model {SPEECHIFY_MODEL}, "
+                f"voice {voice_id_used}, locale {LANGUAGE['speechify_locale']})."
             )
+        except Exception as exc:
+            # MM7: never substitute another TTS engine silently. A Speechify
+            # failure is a production failure unless fallback is explicitly
+            # authorised for local development.
             for pattern in ("tts_*.wav", "tts_*.mp3", "tts_*_speechify_raw.wav", "gap_*.wav"):
                 for stale in OUT.glob(pattern):
                     stale.unlink(missing_ok=True)
+            if not allow_fallback:
+                raise RuntimeError(
+                    "Speechify voice-over failed and no other provider may be "
+                    "substituted automatically. Fix the Speechify credential/"
+                    "account error and re-run, or set ALLOW_VOICE_FALLBACK=1 for a "
+                    "local test only. Original error: " + str(exc)[:600]
+                ) from exc
+            print(
+                "Speechify could not complete the full narration; "
+                f"ALLOW_VOICE_FALLBACK is set, restarting the complete VO with Edge TTS: {str(exc)[:500]}"
+            )
             sentence_word_events, sentence_events, wav_parts = _generate_edge_parts(sentences)
             voice_provider = "Edge TTS fallback"
-            print(f"Voice-over provider: Edge TTS fallback ({VOICE}).")
+            print(f"Voice-over provider: Edge TTS fallback ({VOICE}); Speechify was not used.")
     else:
-        print("SPVO_API is not configured; using Edge TTS fallback.")
+        print(
+            "SPVO_API / SPEECHIFY_API_KEY is not configured, so Speechify cannot "
+            "produce the production voice-over. Add the Speechify API key as a "
+            "secret; this run uses the local Edge TTS fallback only."
+        )
         sentence_word_events, sentence_events, wav_parts = _generate_edge_parts(sentences)
-        voice_provider = "Edge TTS fallback"
+        voice_provider = "Edge TTS fallback (Speechify not configured)"
         print(f"Voice-over provider: Edge TTS fallback ({VOICE}).")
 
     ending = _create_silence(OUT / "ending_hold.wav", ENDING_HOLD)
@@ -6809,12 +7282,48 @@ def build_voice_and_subs(script, enforce_minimum=True):
             "minimum_duration": MIN_VIDEO_DURATION,
             "maximum_duration": None,
             "voice_provider": voice_provider,
+            "voice": voice_id_used,
+            "voice_model": voice_model_used,
+            "language": SCRIPT_LANGUAGE,
+            "speechify_used": voice_provider == "Speechify",
         }, indent=2),
         encoding="utf-8",
     )
+
+    # MM7: keep a complete record of the narration audio that was generated, so
+    # a later audit can prove which provider/voice/model produced which file.
+    voice_manifest = {
+        "provider": voice_provider,
+        "speechify_used": voice_provider == "Speechify",
+        "voice": voice_id_used,
+        "model": voice_model_used,
+        "language": SCRIPT_LANGUAGE,
+        "locale": LANGUAGE.get("speechify_locale") or LANGUAGE.get("edge_voice"),
+        "script_sha256": hashlib.sha256(script.encode("utf-8")).hexdigest(),
+        "script_words": len(script.split()),
+        "total_duration": round(float(total_duration), 3),
+        "audio_files": [str(OUT / "voiceover.wav"), str(OUT / "voiceover.mp3")],
+        "sentences": [
+            {
+                "index": index,
+                "start": round(float(event["start"]), 3),
+                "duration": round(float(event["end"]) - float(event["start"]), 3),
+                "text": sentence,
+            }
+            for index, (event, sentence) in enumerate(
+                zip(sentence_events, sentences), 1
+            )
+        ],
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    (OUT / "voiceover_manifest.json").write_text(
+        json.dumps(voice_manifest, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     PIPELINE_STATE["voice_provider"] = voice_provider
-    PIPELINE_STATE["voice"] = VOICE
+    PIPELINE_STATE["voice"] = voice_id_used
+    PIPELINE_STATE["voice_model"] = voice_model_used
     PIPELINE_STATE["language"] = SCRIPT_LANGUAGE
+    PIPELINE_STATE["voiceover_manifest"] = str(OUT / "voiceover_manifest.json")
     if enforce_minimum and total_duration + 0.001 < MIN_VIDEO_DURATION:
         raise RuntimeError(
             f"Duration invariant failed: final VO timeline is {total_duration:.3f}s; "
@@ -7350,13 +7859,11 @@ def main():
     )
     finish_pipeline_stage()
 
-    start_pipeline_stage("footage_search_download_and_visual_verification")
-    print("4/8 Searching, downloading and visually verifying footage...")
-    fetch_footage(plan)
-    finish_pipeline_stage()
-
+    # MM7 pipeline order: the voice-over is produced from the verified script
+    # *before* footage discovery, so visual search follows the narration that
+    # will actually be spoken, and rendering only starts once both exist.
     start_pipeline_stage("voiceover_and_subtitle_generation")
-    print("5/8 Generating paced voice-over and subtitles...")
+    print("4/8 Generating the verified voice-over and subtitles...")
     sentence_events, total_duration = build_voice_and_subs(
         plan["script"], enforce_minimum=False
     )
@@ -7383,6 +7890,14 @@ def main():
         try:
             verification = fact_check_plan(plan, research_data)
             research_module.write_research_files(research_data, verification)
+            plan["fact_check"] = {
+                "overall": verification["overall"],
+                "checked": verification.get("checked", 0),
+                "supported": verification.get("supported", 0),
+                "unsupported": verification.get("unsupported", 0),
+                "contradicted": verification.get("contradicted", 0),
+                "claim_source": verification.get("claim_source"),
+            }
         except Exception as exc:
             print(f"Re-verification of the extended script failed: {str(exc)[:400]}")
             raise
@@ -7411,6 +7926,11 @@ def main():
         f"Voice-over verified: {total_duration:.2f}s of narration "
         f"(minimum {MIN_VIDEO_DURATION:.0f}s, ends with the narration)."
     )
+    finish_pipeline_stage()
+
+    start_pipeline_stage("footage_search_download_and_visual_verification")
+    print("5/8 Searching, downloading and visually verifying footage...")
+    fetch_footage(plan)
     finish_pipeline_stage()
 
     start_pipeline_stage("video_rendering")
