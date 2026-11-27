@@ -1,0 +1,700 @@
+{
+  "generation_status": "complete",
+  "all_scenes_processed": true,
+  "scene_count": 8,
+  "visual_verification_required": true,
+  "all_scenes_visually_verified": true,
+  "visual_verification_policy": {
+    "minimum_confidence": 0.72,
+    "metadata_only_acceptance": false,
+    "provider_outage_policy": "reject_candidate_and_fail_if_no_pixel_verified_alternative"
+  },
+  "narrative_fact_check": {
+    "status": "passed",
+    "method": "trusted-source fetch + independent evidence-grounded AI audit",
+    "fact_checker": {
+      "provider": "gemini",
+      "model": "gemini-3.5-flash-lite"
+    },
+    "claim_count": 8,
+    "supported_claim_count": 8,
+    "failed_claims": [],
+    "uncited_factual_sentences": [],
+    "coverage_note": "All sentences in the script are directly accounted for by the supplied claims, and each claim is fully supported by its respective source excerpts.",
+    "claims": [
+      {
+        "id": "C1",
+        "scene": 1,
+        "sentence": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption.",
+        "source_urls": [
+          "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm"
+        ],
+        "status": "supported",
+        "verified_evidence_urls": [
+          "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm"
+        ],
+        "reason": "The source explicitly states that a volcano is a vent where molten rock material emerges from the Earth's interior during an eruption."
+      },
+      {
+        "id": "C2",
+        "scene": 2,
+        "sentence": "The form and style of an eruption of a volcano is determined by the composition of the lava.",
+        "source_urls": [
+          "https://en.wikipedia.org/wiki/Volcano"
+        ],
+        "status": "supported",
+        "verified_evidence_urls": [
+          "https://en.wikipedia.org/wiki/Volcano"
+        ],
+        "reason": "The source states that the form and style of an eruption of a volcano is largely determined by the composition of the lava it erupts."
+      },
+      {
+        "id": "C3",
+        "scene": 3,
+        "sentence": "Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism.",
+        "source_urls": [
+          "https://en.wikipedia.org/wiki/Volcano"
+        ],
+        "status": "supported",
+        "verified_evidence_urls": [
+          "https://en.wikipedia.org/wiki/Volcano"
+        ],
+        "reason": "The source states that volcanoes, based on their frequency of eruption or volcanism, are referred to as either active, dormant, or extinct."
+      },
+      {
+        "id": "C4",
+        "scene": 4,
+        "sentence": "Superheated magma rises through the mantle and melts the crust above to flow on the surface.",
+        "source_urls": [
+          "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/"
+        ],
+        "status": "supported",
+        "verified_evidence_urls": [
+          "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/"
+        ],
+        "reason": "The source states that superheated magma rises through the mantle, melts the crust above, and flows on to the surface."
+      },
+      {
+        "id": "C5",
+        "scene": 5,
+        "sentence": "If there is evidence for magma beneath the ground, the volcano should be considered active.",
+        "source_urls": [
+          "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications"
+        ],
+        "status": "supported",
+        "verified_evidence_urls": [
+          "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications"
+        ],
+        "reason": "The source explicitly matches the claim that if there is evidence for magma beneath the ground, the volcano should be considered active."
+      },
+      {
+        "id": "C6",
+        "scene": 6,
+        "sentence": "Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle.",
+        "source_urls": [
+          "https://en.wikipedia.org/wiki/Volcanic_eruption"
+        ],
+        "status": "supported",
+        "verified_evidence_urls": [
+          "https://en.wikipedia.org/wiki/Volcanic_eruption"
+        ],
+        "reason": "The source confirms that volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle."
+      },
+      {
+        "id": "C7",
+        "scene": 7,
+        "sentence": "Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style.",
+        "source_urls": [
+          "https://en.wikipedia.org/wiki/Volcanic_eruption"
+        ],
+        "status": "supported",
+        "verified_evidence_urls": [
+          "https://en.wikipedia.org/wiki/Volcanic_eruption"
+        ],
+        "reason": "The source notes that Strombolian eruptions are named after the volcano Stromboli, which has been erupting nearly continuously for centuries."
+      },
+      {
+        "id": "C8",
+        "scene": 8,
+        "sentence": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
+        "source_urls": [
+          "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
+        ],
+        "status": "supported",
+        "verified_evidence_urls": [
+          "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
+        ],
+        "reason": "The source matches the claim that the Pu‘u‘ō‘ō eruption began in 1983 and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years."
+      }
+    ],
+    "sources": [
+      {
+        "claim_id": "C1",
+        "requested_url": "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm",
+        "resolved_url": "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm",
+        "host": "www.nps.gov",
+        "http_status": 200,
+        "page_title": "Anatomy of a Volcano - Volcanoes, Craters & Lava Flows (U.S. National Park Service) Lock",
+        "excerpt": "Volcano Volcano - A vent where molten rock material emerges from the Earth’s interior, and/or the edifice (mountain or cone) built up around that vent or vents during eruption(s). Volcano - A vent where molten rock material emerges from the Earth’s interior, and/or the edifice (mountain or cone) built up around that vent or vents during eruption(s). Introduction Volcanoes are both the vents where molten rock material and volcanic gases are erupted from within Earth’s interior, and the cones and mountains built up around those vents. Lava flow Lava flow - An outpouring of molten rock from a vent onto Earth's surface during an effusive volcanic eruption; Lava flow - An outpouring of molten rock from a vent onto Earth's surface during an effusive volcanic eruption; Lava flow Lava flow - An outpouring of molten rock from a vent onto Earth's surface during an effusive volcanic eruption; Lava ",
+        "source_kind": "planned",
+        "status": "usable"
+      },
+      {
+        "claim_id": "C2",
+        "requested_url": "https://en.wikipedia.org/wiki/Volcano",
+        "resolved_url": "https://en.wikipedia.org/wiki/Volcano",
+        "host": "en.wikipedia.org",
+        "http_status": 200,
+        "page_title": "Volcano",
+        "excerpt": "=== Lava flows ===\n\nThe form and style of an eruption of a volcano is largely determined by the composition of the lava it erupts. == Erupted material ==\n\nThe material that is expelled in a volcanic eruption can be classified into three types:\n\nVolcanic gases, a mixture made mostly of steam, carbon dioxide, and a sulfur compound (either sulfur dioxide, SO2, or hydrogen sulfide, H2S, depending on the temperature)\nLava, the name of magma when it emerges and flows over the surface\nTephra, particles of solid material of all shapes and sizes ejected and thrown through the air\n\n\n=== Volcanic gases ===\n\nThe concentrations of different volcanic gases can vary considerably from one volcano to the next. The potential for eruptions, and their style, depend mainly upon the state of the magma storage system under the volcano, the eruption trigger mechanism and its timescale. A volcano is a vent or fi",
+        "source_kind": "planned",
+        "status": "usable"
+      },
+      {
+        "claim_id": "C3",
+        "requested_url": "https://en.wikipedia.org/wiki/Volcano",
+        "resolved_url": "https://en.wikipedia.org/wiki/Volcano",
+        "host": "en.wikipedia.org",
+        "http_status": 200,
+        "page_title": "Volcano",
+        "excerpt": "Volcanoes, based on their frequency of eruption or volcanism, are referred to as either active, dormant, or extinct. Active volcanoes have a history of volcanism and are likely to erupt again, while extinct ones are not capable of eruption at all as they have no magma source. However, dormant volcanoes are technically considered to be seismically \"active\". Volcanoes are informally described as erupting, active, dormant, or extinct, but the definitions of these terms are not entirely uniform among volcanologists. In an article justifying the re-classification of Alaska's Mount Edgecumbe volcano from \"dormant\" to \"active\", volcanologists at the Alaska Volcano Observatory pointed out that the term \"dormant\" in reference to volcanoes has been deprecated over the past few decades and that \"[t]he term \"dormant volcano\" is so little used and undefined in modern volcanology that the Encyclopedia",
+        "source_kind": "planned",
+        "status": "usable"
+      },
+      {
+        "claim_id": "C4",
+        "requested_url": "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/",
+        "resolved_url": "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/",
+        "host": "www.bgs.ac.uk",
+        "http_status": 200,
+        "page_title": "How volcanoes form - British Geological Survey",
+        "excerpt": "The superheated magma rises through the mantle (yellow), melts the crust above (brown) and flows on to the surface forming a volcano. The Earth’s crust is pulled apart to create a new pathway for rising hot magma to flow on to the surface. Hot-spot volcanism Volcanoes can also form above a column of superheated magma called a mantle plume. As the plates pull apart, molten rock (magma) rises up and erupts as lava, creating new ocean crust. Hot magma rises from the mantle at mid-ocean ridges, pushing the plates apart. Note: Iceland also sits above a mantle plume, or hot spot , where hot magma wells up from deep in the Earth’s mantle. Heat from the mantle plume causes melting and thinning of the crust, which leads to volcanic activity at the surface. The movement of faults at plate boundaries can provide a convenient pathway for magma to reach the surface. It helps to explain this by lookin",
+        "source_kind": "planned",
+        "status": "usable"
+      },
+      {
+        "claim_id": "C5",
+        "requested_url": "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications",
+        "resolved_url": "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications",
+        "host": "www.usgs.gov",
+        "http_status": 200,
+        "page_title": "Active, dormant, and extinct: Clarifying confusing classifications | U.S. Geological Survey",
+        "excerpt": "If there is evidence for magma beneath the ground—for example, as indicated by magma-related seismicity and/or ground deformation, or by an active hydrothermal system—then the volcano should be considered “active” but currently “dormant,” regardless of the time since its last eruption. We’ll start with perhaps the most confusing of these terms: “active.” Most volcanologists would say that a volcano or volcanic field that has erupted within the Holocene (the current geologic epoch, which began at the end of the most recent ice age about 11,650 years ago), or that has the potential to erupt again in the future, should be considered “active.” This does not mean that the volcano is erupting right now, although such a volcano would certainly qualify as “active.” Rather, it means that the volcano has a youthful magmatic system, and if it is not erupting now, it could be in the future. All thre",
+        "source_kind": "planned",
+        "status": "usable"
+      },
+      {
+        "claim_id": "C6",
+        "requested_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
+        "resolved_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
+        "host": "en.wikipedia.org",
+        "http_status": 200,
+        "page_title": "Volcanic eruption",
+        "excerpt": "Columbia University volcanologists found that the eruption of Costa Rica's Irazú Volcano in 1963 was likely triggered by magma that took a nonstop route from the mantle over just a few months. Similar to Strombolian eruptions, this leads to the buildup of high gas pressure, eventually popping the cap holding the magma down and resulting in an explosive eruption. They are also similar to Hawaiian lava fountains in that both eruptive types produce sustained eruption columns maintained by the growth of bubbles that move up at about the same speed as the magma surrounding them. Pinatubo in the Philippines on 15 June 1991, which produced 5 km3 (1 cu mi) of dacitic magma, a 40 km (25 mi) high eruption column, and released 17 megatons of sulfur dioxide. A volcanic eruption occurs when material is expelled from a volcanic vent or fissure. Several types of volcanic eruptions have been distinguish",
+        "source_kind": "planned",
+        "status": "usable"
+      },
+      {
+        "claim_id": "C7",
+        "requested_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
+        "resolved_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
+        "host": "en.wikipedia.org",
+        "http_status": 200,
+        "page_title": "Volcanic eruption",
+        "excerpt": "Mount Mihara in 1986 (see above paragraph)\n\n\n=== Strombolian ===\n\nStrombolian eruptions are a type of volcanic eruption named after the volcano Stromboli, which has been erupting nearly continuously for centuries. Mount Erebus in Antarctica, the southernmost active volcano in the world, having been observed erupting since 1972. Volcanoes are not bound to one eruptive style, and frequently display many different types, both passive and explosive, even in the span of a single eruptive cycle. Columbia University volcanologists found that the eruption of Costa Rica's Irazú Volcano in 1963 was likely triggered by magma that took a nonstop route from the mantle over just a few months. Steady production of small amounts of lava builds up the large, broad form of a shield volcano. Puʻu ʻŌʻō, a volcanic cone on Kilauea, erupted continuously for over 35 years. Small volcanic particles are carried ",
+        "source_kind": "planned",
+        "status": "usable"
+      },
+      {
+        "claim_id": "C8",
+        "requested_url": "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years",
+        "resolved_url": "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years",
+        "host": "www.usgs.gov",
+        "http_status": 200,
+        "page_title": "The Pu‘u‘ō‘ō Eruption Lasted 35 Years | U.S. Geological Survey",
+        "excerpt": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years. The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years. Board on Geographic Names The National Map USGS Library USGS Store Park Passes News News Releases Featured Stories Science Snippets Technical Announcements Media Contacts Connect Headquarters Locations Staff Profiles Social Media Careers Contact Us About About Us Survey Manual Key Officials Organization Congressional Budget Careers and Employees Office of Civil Rights Doing Business Emergency Management Latest Earthquakes Share Social Media Facebook Twitter Linkedin Digg Reddit Pinterest Email Breadcrumb Kīlauea Science The Pu‘u‘ō‘ō Eruption Lasted 35 Year",
+        "source_kind": "planned",
+        "status": "usable"
+      }
+    ],
+    "claim_repairs": [
+      {
+        "claim_id": "C8",
+        "scene": 8,
+        "original_sentence": "An outpouring of lava from a rift zone ranks as the longest known event of its kind.",
+        "replacement_sentence": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
+        "replacement_source_urls": [
+          "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
+        ],
+        "status": "rewritten"
+      }
+    ]
+  },
+  "local_illustration_scene_count": 0,
+  "trusted_reference_scene_count": 0,
+  "metadata_only_scene_count": 0,
+  "opening_title_layout": {
+    "path": "output/opening_hook_overlay.png",
+    "title_lines": [
+      "VOLCANO ERUPTION DYNAMICS"
+    ],
+    "hook_lines": [
+      "Volcanoes erupt molten",
+      "rock from the Earth."
+    ],
+    "title_text": "Volcano Eruption Dynamics",
+    "hook_text": "Volcanoes erupt molten rock from the Earth.",
+    "title_font_size": 27,
+    "hook_font_size": 62,
+    "max_text_width": 880,
+    "card_bounds": [
+      48,
+      150,
+      1032,
+      402
+    ]
+  },
+  "caption_group_count": 27,
+  "voiceover": {
+    "status": "validated",
+    "script": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption. The form and style of an eruption of a volcano is determined by the composition of the lava. Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism. Superheated magma rises through the mantle and melts the crust above to flow on the surface. If there is evidence for magma beneath the ground, the volcano should be considered active. Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle. Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style. The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
+    "voice": "en-US-GuyNeural",
+    "rate": "-4%",
+    "pitch": "-3Hz",
+    "duration_seconds": 58.812,
+    "time_scale": 1.0,
+    "audio_file": "output/voiceover.mp3",
+    "audio_quality": {
+      "status": "passed",
+      "duration_seconds": 58.812,
+      "sample_rate_hz": 48000,
+      "channels": 2,
+      "codec": "pcm_s16le",
+      "mean_volume_db": -23.3,
+      "peak_volume_db": -5.5,
+      "checks": [
+        "audio stream present",
+        "sample rate at least 44.1 kHz",
+        "duration between 70 and 90 seconds",
+        "duration matches timing manifest",
+        "non-silent audio level",
+        "no detected digital clipping above +0.2 dBFS"
+      ]
+    },
+    "sentence_count": 8,
+    "edge_word_boundary_count": 141,
+    "stage": "VO completed and validated before subtitles or visual retrieval",
+    "scene_timing": [
+      {
+        "scene": 1,
+        "start_seconds": 0.0,
+        "spoken_end_seconds": 6.99,
+        "visual_end_seconds": 7.69,
+        "duration_seconds": 7.69,
+        "first_sentence_index": 0,
+        "last_sentence_index": 0
+      },
+      {
+        "scene": 2,
+        "start_seconds": 7.69,
+        "spoken_end_seconds": 13.45,
+        "visual_end_seconds": 13.75,
+        "duration_seconds": 6.06,
+        "first_sentence_index": 1,
+        "last_sentence_index": 1
+      },
+      {
+        "scene": 3,
+        "start_seconds": 13.75,
+        "spoken_end_seconds": 20.35,
+        "visual_end_seconds": 20.65,
+        "duration_seconds": 6.9,
+        "first_sentence_index": 2,
+        "last_sentence_index": 2
+      },
+      {
+        "scene": 4,
+        "start_seconds": 20.65,
+        "spoken_end_seconds": 26.578,
+        "visual_end_seconds": 26.878,
+        "duration_seconds": 6.228,
+        "first_sentence_index": 3,
+        "last_sentence_index": 3
+      },
+      {
+        "scene": 5,
+        "start_seconds": 26.878,
+        "spoken_end_seconds": 32.662,
+        "visual_end_seconds": 32.962,
+        "duration_seconds": 6.084,
+        "first_sentence_index": 4,
+        "last_sentence_index": 4
+      },
+      {
+        "scene": 6,
+        "start_seconds": 32.962,
+        "spoken_end_seconds": 39.634,
+        "visual_end_seconds": 39.934,
+        "duration_seconds": 6.972,
+        "first_sentence_index": 5,
+        "last_sentence_index": 5
+      },
+      {
+        "scene": 7,
+        "start_seconds": 39.934,
+        "spoken_end_seconds": 46.606,
+        "visual_end_seconds": 46.906,
+        "duration_seconds": 6.972,
+        "first_sentence_index": 6,
+        "last_sentence_index": 6
+      },
+      {
+        "scene": 8,
+        "start_seconds": 46.906,
+        "spoken_end_seconds": 57.562,
+        "visual_end_seconds": 58.812,
+        "duration_seconds": 11.906,
+        "first_sentence_index": 7,
+        "last_sentence_index": 7
+      }
+    ],
+    "subtitle_alignment": {
+      "total_words": 146,
+      "edge_timed_words": 138,
+      "estimated_words": 8,
+      "full_sentence_estimate_words": 0,
+      "edge_timing_coverage": 0.9452,
+      "caption_group_count": 27,
+      "alignment_status": "complete_with_estimates"
+    },
+    "timing_master": "final_validated_voiceover"
+  },
+  "subtitle_alignment": {
+    "total_words": 146,
+    "edge_timed_words": 138,
+    "estimated_words": 8,
+    "full_sentence_estimate_words": 0,
+    "edge_timing_coverage": 0.9452,
+    "caption_group_count": 27,
+    "alignment_status": "complete_with_estimates"
+  },
+  "production_sequence": [
+    "script_generated_and_validated",
+    "trusted_source_pages_fetched_and_all_narrative_claims_audited",
+    "voiceover_generated_and_audio_qa_passed",
+    "voiceover_timeline_locked_as_master",
+    "subtitles_aligned_to_final_voiceover",
+    "visuals_retrieved_against_voiceover_scene_map",
+    "video_rendered_to_voiceover_timing"
+  ],
+  "scenes": [
+    {
+      "scene": 1,
+      "visual_file": "output/footage/scene_01.mp4",
+      "visual_type": "footage",
+      "visual_focus": "molten rock material",
+      "visual_source": "Pixabay",
+      "voice_timing": {
+        "start_seconds": 0.0,
+        "spoken_end_seconds": 6.99,
+        "visual_end_seconds": 7.69,
+        "duration_seconds": 7.69,
+        "first_sentence_index": 0,
+        "last_sentence_index": 0
+      },
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show molten rock material (lava/magma) flowing and bubbling, directly matching the required focus.",
+        "query": "molten"
+      }
+    },
+    {
+      "scene": 2,
+      "visual_file": "output/footage/scene_02.mp4",
+      "visual_type": "footage",
+      "visual_focus": "volcano eruption style",
+      "visual_source": "Pixabay",
+      "voice_timing": {
+        "start_seconds": 7.69,
+        "spoken_end_seconds": 13.45,
+        "visual_end_seconds": 13.75,
+        "duration_seconds": 6.06,
+        "first_sentence_index": 1,
+        "last_sentence_index": 1
+      },
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show an active volcano eruption with glowing molten lava and volcanic spatter emerging from a crater, directly matching the required focus.",
+        "query": "volcano"
+      }
+    },
+    {
+      "scene": 3,
+      "visual_file": "output/footage/scene_03.mp4",
+      "visual_type": "footage",
+      "visual_focus": "active volcano",
+      "visual_source": "Pixabay",
+      "voice_timing": {
+        "start_seconds": 13.75,
+        "spoken_end_seconds": 20.35,
+        "visual_end_seconds": 20.65,
+        "duration_seconds": 6.9,
+        "first_sentence_index": 2,
+        "last_sentence_index": 2
+      },
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show an active volcano landscape with fumaroles emitting gas and sulfur deposits on the slopes, directly supporting the narration about active volcanoes.",
+        "query": "active volcano"
+      }
+    },
+    {
+      "scene": 4,
+      "visual_file": "output/footage/scene_04.mp4",
+      "visual_type": "footage",
+      "visual_focus": "superheated magma",
+      "visual_source": "Pixabay",
+      "voice_timing": {
+        "start_seconds": 20.65,
+        "spoken_end_seconds": 26.578,
+        "visual_end_seconds": 26.878,
+        "duration_seconds": 6.228,
+        "first_sentence_index": 3,
+        "last_sentence_index": 3
+      },
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show glowing, superheated magma and molten rock flowing and bubbling on the surface, directly matching the required focus.",
+        "query": "magma"
+      }
+    },
+    {
+      "scene": 5,
+      "visual_file": "output/footage/scene_05.mp4",
+      "visual_type": "footage",
+      "visual_focus": "magma beneath ground",
+      "visual_source": "Pixabay",
+      "voice_timing": {
+        "start_seconds": 26.878,
+        "spoken_end_seconds": 32.662,
+        "visual_end_seconds": 32.962,
+        "duration_seconds": 6.084,
+        "first_sentence_index": 4,
+        "last_sentence_index": 4
+      },
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show glowing molten magma bubbling and churning beneath the ground in a volcanic vent, directly supporting the required focus on magma beneath the ground.",
+        "query": "magma"
+      }
+    },
+    {
+      "scene": 6,
+      "visual_file": "output/footage/scene_06.mp4",
+      "visual_type": "footage",
+      "visual_focus": "magma route",
+      "visual_source": "Pixabay",
+      "voice_timing": {
+        "start_seconds": 32.962,
+        "spoken_end_seconds": 39.634,
+        "visual_end_seconds": 39.934,
+        "duration_seconds": 6.972,
+        "first_sentence_index": 5,
+        "last_sentence_index": 5
+      },
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show an active volcanic vent erupting magma, with molten lava emerging and flowing out, directly corresponding to the required focus of a magma route/activity.",
+        "query": "magma"
+      }
+    },
+    {
+      "scene": 7,
+      "visual_file": "output/footage/scene_07.mp4",
+      "visual_type": "footage",
+      "visual_focus": "volcano erupting continuously",
+      "visual_source": "Pixabay",
+      "voice_timing": {
+        "start_seconds": 39.934,
+        "spoken_end_seconds": 46.606,
+        "visual_end_seconds": 46.906,
+        "duration_seconds": 6.972,
+        "first_sentence_index": 6,
+        "last_sentence_index": 6
+      },
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show an active volcano erupting, with a massive plume of smoke and ash rising from the crater of a volcanic mountain, perfectly matching the required visual focus.",
+        "query": "volcano"
+      }
+    },
+    {
+      "scene": 8,
+      "visual_file": "output/footage/scene_08.mp4",
+      "visual_type": "footage",
+      "visual_focus": "outpouring of lava",
+      "visual_source": "Pixabay",
+      "voice_timing": {
+        "start_seconds": 46.906,
+        "spoken_end_seconds": 57.562,
+        "visual_end_seconds": 58.812,
+        "duration_seconds": 11.906,
+        "first_sentence_index": 7,
+        "last_sentence_index": 7
+      },
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show an outpouring of glowing, molten lava flowing across dark volcanic terrain, directly supporting the scene narration.",
+        "query": "lava"
+      }
+    }
+  ],
+  "final_video": {
+    "path": "documentary.mp4",
+    "size_bytes": 65851536,
+    "duration_seconds": 58.833333,
+    "validated_video_and_audio_streams": true,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30
+  },
+  "voiceover_file": "output/voiceover.mp3",
+  "captions_file": "output/captions.ass",
+  "opening": {
+    "path": "output/opening_overlay.png",
+    "adjustments": [],
+    "layout": {
+      "path": "output/opening_overlay.png",
+      "title_lines": [
+        "VOLCANO ERUPTION DYNAMICS"
+      ],
+      "hook_lines": [
+        "Volcanoes erupt molten",
+        "rock from the Earth."
+      ],
+      "title_text": "Volcano Eruption Dynamics",
+      "hook_text": "Volcanoes erupt molten rock from the Earth.",
+      "title_font_size": 27,
+      "hook_font_size": 62,
+      "max_text_width": 880,
+      "card_bounds": [
+        48,
+        150,
+        1032,
+        402
+      ]
+    }
+  },
+  "diagnostics": {
+    "total_elapsed_seconds": 412.682,
+    "stage_count": 11,
+    "failed_stage": "production_report",
+    "stages": [
+      {
+        "stage": "cache_prune",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:22+00:00",
+        "details": {},
+        "duration_seconds": 0.007
+      },
+      {
+        "stage": "preflight",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:22+00:00",
+        "details": {
+          "topic": "Volcano eruption",
+          "provider_keys": "4"
+        },
+        "duration_seconds": 0.0
+      },
+      {
+        "stage": "source_pool",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:22+00:00",
+        "details": {
+          "topic": "Volcano eruption",
+          "urls": "24",
+          "excerpts": "6"
+        },
+        "duration_seconds": 8.92
+      },
+      {
+        "stage": "script_generation",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:31+00:00",
+        "details": {
+          "topic": "Volcano eruption",
+          "words": "131"
+        },
+        "duration_seconds": 4.007
+      },
+      {
+        "stage": "fact_check",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:35+00:00",
+        "details": {
+          "claims": "8",
+          "status": "passed"
+        },
+        "duration_seconds": 9.616
+      },
+      {
+        "stage": "voiceover",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:44+00:00",
+        "details": {
+          "sentences": "143",
+          "duration_seconds": "58.812"
+        },
+        "duration_seconds": 10.558
+      },
+      {
+        "stage": "timeline_lock",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:55+00:00",
+        "details": {},
+        "duration_seconds": 0.001
+      },
+      {
+        "stage": "subtitles",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:55+00:00",
+        "details": {
+          "caption_groups": "27"
+        },
+        "duration_seconds": 0.012
+      },
+      {
+        "stage": "footage",
+        "status": "completed",
+        "started_at": "2026-11-27T12:06:55+00:00",
+        "details": {},
+        "duration_seconds": 205.314
+      },
+      {
+        "stage": "render",
+        "status": "completed",
+        "started_at": "2026-11-27T12:10:20+00:00",
+        "details": {
+          "total_duration": "58.812"
+        },
+        "duration_seconds": 174.165
+      },
+      {
+        "stage": "production_report",
+        "status": "running",
+        "started_at": "2026-11-27T12:13:14+00:00",
+        "details": {}
+      }
+    ]
+  },
+  "artifact_upload": "pending GitHub Actions upload step"
+}

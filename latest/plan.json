@@ -1,275 +1,347 @@
 {
-  "title": "The Hidden Life Cycle of Ants",
-  "hook": "Discover how tiny eggs transform into complex colonies beneath our feet.",
+  "title": "Volcano Eruption Dynamics",
+  "hook": "Volcanoes erupt molten rock from the Earth.",
   "scenes": [
     {
-      "narration": "Tiny white ant eggs are carefully tended by worker ants within the hidden depths of the dark underground nest.",
-      "visual_focus": "ant eggs in nest",
-      "visual_query": "worker ants tending eggs in underground nest",
+      "narration": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption.",
+      "visual_focus": "molten rock material",
+      "visual_query": "molten rock material erupting",
       "visual_queries": [
-        "ant colony workers caring eggs",
-        "close up of ant nursery chambers"
+        "molten rock flowing",
+        "magma emerging vent"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "worker ants tending eggs in underground nest",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "molten rock material erupting",
+      "source_label": "U.S. National Park Service",
+      "source_url": "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0,
       "voice_timing": {
         "start_seconds": 0.0,
-        "spoken_end_seconds": 7.374,
-        "visual_end_seconds": 8.074,
-        "duration_seconds": 8.074,
+        "spoken_end_seconds": 6.99,
+        "visual_end_seconds": 7.69,
+        "duration_seconds": 7.69,
         "first_sentence_index": 0,
         "last_sentence_index": 0
+      },
+      "media_file": "output/footage/scene_01.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "glowing magma, active volcano, molten rock, volcanic eruption, geology science, nature disaster, thermal heat, earth science, glowing embers, close up shot, high temperature, wild nature, lava flow",
+      "selected_footage_url": "https://pixabay.com/videos/id-387139/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show molten rock material (lava/magma) flowing and bubbling, directly matching the required focus.",
+        "query": "molten"
       }
     },
     {
-      "narration": "Hatching from these fragile eggs emerge legless larvae that rely entirely on adults for constant nourishment and care.",
-      "visual_focus": "ant larvae being fed",
-      "visual_query": "ant larvae receiving food from workers",
+      "narration": "The form and style of an eruption of a volcano is determined by the composition of the lava.",
+      "visual_focus": "volcano eruption style",
+      "visual_query": "volcano eruption style lava",
       "visual_queries": [
-        "worker ant feeding growing larva",
-        "macro shot of ant larvae"
+        "volcano eruption lava flow",
+        "active volcano eruption"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "ant larvae receiving food from workers",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "volcano eruption style lava",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Volcano",
       "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1,
       "voice_timing": {
-        "start_seconds": 8.074,
-        "spoken_end_seconds": 15.274,
-        "visual_end_seconds": 15.574,
-        "duration_seconds": 7.5,
+        "start_seconds": 7.69,
+        "spoken_end_seconds": 13.45,
+        "visual_end_seconds": 13.75,
+        "duration_seconds": 6.06,
         "first_sentence_index": 1,
         "last_sentence_index": 1
+      },
+      "media_file": "output/footage/scene_02.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "volcano, smoke, fire, heat, flame, burn, geology, volcanology, spatter, splash, iceland, nature, lava, magma, eruption",
+      "selected_footage_url": "https://pixabay.com/videos/id-152174/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show an active volcano eruption with glowing molten lava and volcanic spatter emerging from a crater, directly matching the required focus.",
+        "query": "volcano"
       }
     },
     {
-      "narration": "During the resting pupal stage, the motionless insect undergoes a remarkable internal transformation into an adult form.",
-      "visual_focus": "ant pupae in chambers",
-      "visual_query": "ant pupae resting in underground chamber",
+      "narration": "Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism.",
+      "visual_focus": "active volcano",
+      "visual_query": "active volcano mountain cone",
       "visual_queries": [
-        "developing ant pupae close up",
-        "worker ants moving ant pupae"
+        "dormant volcano landscape",
+        "volcano edifice structure"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "ant pupae resting in underground chamber",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "active volcano mountain cone",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Volcano",
       "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2,
       "voice_timing": {
-        "start_seconds": 15.574,
-        "spoken_end_seconds": 23.446,
-        "visual_end_seconds": 23.746,
-        "duration_seconds": 8.172,
+        "start_seconds": 13.75,
+        "spoken_end_seconds": 20.35,
+        "visual_end_seconds": 20.65,
+        "duration_seconds": 6.9,
         "first_sentence_index": 2,
         "last_sentence_index": 2
+      },
+      "media_file": "output/footage/scene_03.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "volcano, mountain, nature, landscape, adventure, island, hill, volcanic, mount, sicily, mediterranean, caldera, sulfur, hot, geothermal, geology, geological, geothermic, fumarole, europe, active, energy, colorful, activity",
+      "selected_footage_url": "https://pixabay.com/videos/id-3960/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show an active volcano landscape with fumaroles emitting gas and sulfur deposits on the slopes, directly supporting the narration about active volcanoes.",
+        "query": "active volcano"
       }
     },
     {
-      "narration": "Newly emerged adult workers begin their lives inside the subterranean nest by performing essential maintenance and nursery duties.",
-      "visual_focus": "young adult worker ant",
-      "visual_query": "young adult worker ant inside nest",
+      "narration": "Superheated magma rises through the mantle and melts the crust above to flow on the surface.",
+      "visual_focus": "superheated magma",
+      "visual_query": "superheated magma rises mantle",
       "visual_queries": [
-        "newly emerged ant in colony",
-        "worker ant cleaning nest chamber"
+        "magma flowing on surface",
+        "molten lava surface flow"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "young adult worker ant inside nest",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "superheated magma rises mantle",
+      "source_label": "British Geological Survey",
+      "source_url": "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/",
       "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3,
       "voice_timing": {
-        "start_seconds": 23.746,
-        "spoken_end_seconds": 31.738,
-        "visual_end_seconds": 32.038,
-        "duration_seconds": 8.292,
+        "start_seconds": 20.65,
+        "spoken_end_seconds": 26.578,
+        "visual_end_seconds": 26.878,
+        "duration_seconds": 6.228,
         "first_sentence_index": 3,
         "last_sentence_index": 3
+      },
+      "media_file": "output/footage/scene_04.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "glowing magma, lava flow, molten rock, volcanic eruption, geology science, thermal heat, earth science, active volcano, glowing embers, natural phenomenon, fiery background, dark crust, close up shot, vibrant glow, high temperature, geological formation, wild nature",
+      "selected_footage_url": "https://pixabay.com/videos/id-387095/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show glowing, superheated magma and molten rock flowing and bubbling on the surface, directly matching the required focus.",
+        "query": "magma"
       }
     },
     {
-      "narration": "As these workers grow older, they transition to foraging outside for vital resources to sustain the entire growing colony.",
-      "visual_focus": "foraging worker ant",
-      "visual_query": "foraging worker ant searching for food",
+      "narration": "If there is evidence for magma beneath the ground, the volcano should be considered active.",
+      "visual_focus": "magma beneath ground",
+      "visual_query": "magma beneath the ground",
       "visual_queries": [
-        "ant walking on forest floor",
-        "worker ant carrying food particle"
+        "volcano ground deformation",
+        "active hydrothermal system"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "foraging worker ant searching for food",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "magma beneath the ground",
+      "source_label": "U.S. Geological Survey",
+      "source_url": "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications",
       "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4,
       "voice_timing": {
-        "start_seconds": 32.038,
-        "spoken_end_seconds": 39.694,
-        "visual_end_seconds": 39.994,
-        "duration_seconds": 7.956,
+        "start_seconds": 26.878,
+        "spoken_end_seconds": 32.662,
+        "visual_end_seconds": 32.962,
+        "duration_seconds": 6.084,
         "first_sentence_index": 4,
         "last_sentence_index": 4
+      },
+      "media_file": "output/footage/scene_05.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "lava, volcano, fire, magma, eruption, rock, explosion, hot, volcanic, heat, smoke, geology, catastrophe, natural disaster, iceland, explosive",
+      "selected_footage_url": "https://pixabay.com/videos/id-260564/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show glowing molten magma bubbling and churning beneath the ground in a volcanic vent, directly supporting the required focus on magma beneath the ground.",
+        "query": "magma"
       }
     },
     {
-      "narration": "Within the heart of the community, the specialized queen remains focused primarily on continuous egg production and colony expansion.",
-      "visual_focus": "ant queen in nest",
-      "visual_query": "ant queen surrounded by worker ants",
+      "narration": "Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle.",
+      "visual_focus": "magma route",
+      "visual_query": "magma route from mantle",
       "visual_queries": [
-        "queen ant laying eggs in chamber",
-        "large ant queen in colony"
+        "volcanologists studying eruption",
+        "magma rising mantle"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "ant queen surrounded by worker ants",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "magma route from mantle",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
       "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5,
       "voice_timing": {
-        "start_seconds": 39.994,
-        "spoken_end_seconds": 48.13,
-        "visual_end_seconds": 48.43,
-        "duration_seconds": 8.436,
+        "start_seconds": 32.962,
+        "spoken_end_seconds": 39.634,
+        "visual_end_seconds": 39.934,
+        "duration_seconds": 6.972,
         "first_sentence_index": 5,
         "last_sentence_index": 5
+      },
+      "media_file": "output/footage/scene_06.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "volcano, eruption, fire, heat, burn, volcanic, iceland, nature, magma, cone, fissure, vent",
+      "selected_footage_url": "https://pixabay.com/videos/id-130156/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show an active volcanic vent erupting magma, with molten lava emerging and flowing out, directly corresponding to the required focus of a magma route/activity.",
+        "query": "magma"
       }
     },
     {
-      "narration": "Mature colonies eventually produce winged reproductives that prepare to leave the natal nest during seasonal mating flights.",
-      "visual_focus": "winged ant reproductives",
-      "visual_query": "winged ant reproductives reproductive ants preparing for flight",
+      "narration": "Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style.",
+      "visual_focus": "volcano erupting continuously",
+      "visual_query": "volcano erupting continuously centuries",
       "visual_queries": [
-        "alates gathering on ant nest",
-        "winged ants ready fly"
+        "stromboli volcano eruption",
+        "continuous volcanic activity"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "winged ant reproductives reproductive ants preparing for flight",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "volcano erupting continuously centuries",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
       "visual_type": "footage",
       "sentence_start": 6,
       "sentence_end": 6,
       "voice_timing": {
-        "start_seconds": 48.43,
-        "spoken_end_seconds": 55.75,
-        "visual_end_seconds": 56.05,
-        "duration_seconds": 7.62,
+        "start_seconds": 39.934,
+        "spoken_end_seconds": 46.606,
+        "visual_end_seconds": 46.906,
+        "duration_seconds": 6.972,
         "first_sentence_index": 6,
         "last_sentence_index": 6
+      },
+      "media_file": "output/footage/scene_07.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "volcano, plume, japan, kyushu, landscape",
+      "selected_footage_url": "https://pixabay.com/videos/id-30142/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 0.95,
+        "reason": "The frames clearly show an active volcano erupting, with a massive plume of smoke and ash rising from the crater of a volcanic mountain, perfectly matching the required visual focus.",
+        "query": "volcano"
       }
     },
     {
-      "narration": "Successful mated females shed their wings to establish brand new foundations and begin the intricate cycle anew.",
-      "visual_focus": "queen ant shedding wings",
-      "visual_query": "new queen ant shedding wings",
+      "narration": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
+      "visual_focus": "outpouring of lava",
+      "visual_query": "outpouring of lava rift zone",
       "visual_queries": [
-        "mated female ant starting nest",
-        "queen ant digging new burrow"
+        "lava flow rift zone",
+        "volcano eruption outpouring"
       ],
       "visual_mode": "footage",
       "reference_required": false,
-      "reference_query": "new queen ant shedding wings",
-      "source_label": "",
-      "source_url": "",
+      "reference_query": "outpouring of lava rift zone",
+      "source_label": "U.S. Geological Survey",
+      "source_url": "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years",
       "visual_type": "footage",
       "sentence_start": 7,
       "sentence_end": 7,
       "voice_timing": {
-        "start_seconds": 56.05,
-        "spoken_end_seconds": 62.962,
-        "visual_end_seconds": 64.212,
-        "duration_seconds": 8.162,
+        "start_seconds": 46.906,
+        "spoken_end_seconds": 57.562,
+        "visual_end_seconds": 58.812,
+        "duration_seconds": 11.906,
         "first_sentence_index": 7,
         "last_sentence_index": 7
+      },
+      "media_file": "output/footage/scene_08.mp4",
+      "selected_footage_source": "Pixabay",
+      "selected_footage_tags": "volcano lava, explosion, volcano, lava, volcanic, hot, nature",
+      "selected_footage_url": "https://pixabay.com/videos/id-144678/",
+      "visual_verification": {
+        "method": "gemini (gemini-3.5-flash-lite) Vision",
+        "confidence": 1.0,
+        "reason": "The frames clearly show an outpouring of glowing, molten lava flowing across dark volcanic terrain, directly supporting the scene narration.",
+        "query": "lava"
       }
     }
   ],
   "fact_claims": [
     {
       "scene": 1,
-      "sentence": "Tiny white ant eggs are carefully tended by worker ants within the hidden depths of the dark underground nest.",
+      "sentence": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://en.wikipedia.org/wiki/Ant_colony"
+        "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm"
       ]
     },
     {
       "scene": 2,
-      "sentence": "Hatching from these fragile eggs emerge legless larvae that rely entirely on adults for constant nourishment and care.",
+      "sentence": "The form and style of an eruption of a volcano is determined by the composition of the lava.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7762752"
+        "https://en.wikipedia.org/wiki/Volcano"
       ]
     },
     {
       "scene": 3,
-      "sentence": "During the resting pupal stage, the motionless insect undergoes a remarkable internal transformation into an adult form.",
+      "sentence": "Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://pubmed.ncbi.nlm.nih.gov/33390754"
+        "https://en.wikipedia.org/wiki/Volcano"
       ]
     },
     {
       "scene": 4,
-      "sentence": "Newly emerged adult workers begin their lives inside the subterranean nest by performing essential maintenance and nursery duties.",
+      "sentence": "Superheated magma rises through the mantle and melts the crust above to flow on the surface.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant_colony",
-        "https://pubmed.ncbi.nlm.nih.gov/24094856"
+        "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/"
       ]
     },
     {
       "scene": 5,
-      "sentence": "As these workers grow older, they transition to foraging outside for vital resources to sustain the entire growing colony.",
+      "sentence": "If there is evidence for magma beneath the ground, the volcano should be considered active.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2567467"
+        "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications"
       ]
     },
     {
       "scene": 6,
-      "sentence": "Within the heart of the community, the specialized queen remains focused primarily on continuous egg production and colony expansion.",
+      "sentence": "Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant_colony",
-        "https://pubmed.ncbi.nlm.nih.gov/18794530"
+        "https://en.wikipedia.org/wiki/Volcanic_eruption"
       ]
     },
     {
       "scene": 7,
-      "sentence": "Mature colonies eventually produce winged reproductives that prepare to leave the natal nest during seasonal mating flights.",
+      "sentence": "Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4021219"
+        "https://en.wikipedia.org/wiki/Volcanic_eruption"
       ]
     },
     {
       "scene": 8,
-      "sentence": "Successful mated females shed their wings to establish brand new foundations and begin the intricate cycle anew.",
+      "sentence": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://pubmed.ncbi.nlm.nih.gov/24886136"
+        "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
       ]
     }
   ],
-  "script": "Tiny white ant eggs are carefully tended by worker ants within the hidden depths of the dark underground nest. Hatching from these fragile eggs emerge legless larvae that rely entirely on adults for constant nourishment and care. During the resting pupal stage, the motionless insect undergoes a remarkable internal transformation into an adult form. Newly emerged adult workers begin their lives inside the subterranean nest by performing essential maintenance and nursery duties. As these workers grow older, they transition to foraging outside for vital resources to sustain the entire growing colony. Within the heart of the community, the specialized queen remains focused primarily on continuous egg production and colony expansion. Mature colonies eventually produce winged reproductives that prepare to leave the natal nest during seasonal mating flights. Successful mated females shed their wings to establish brand new foundations and begin the intricate cycle anew.",
+  "script": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption. The form and style of an eruption of a volcano is determined by the composition of the lava. Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism. Superheated magma rises through the mantle and melts the crust above to flow on the surface. If there is evidence for magma beneath the ground, the volcano should be considered active. Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle. Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style. The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
   "ai_provider": {
     "provider": "gemini",
     "model": "gemini-3.5-flash-lite"
@@ -280,16 +352,14 @@
     "layout": {
       "path": "output/opening_overlay.png",
       "title_lines": [
-        "THE HIDDEN LIFE CYCLE OF ANTS"
+        "VOLCANO ERUPTION DYNAMICS"
       ],
       "hook_lines": [
-        "Discover how tiny eggs",
-        "transform into complex",
-        "colonies beneath our",
-        "feet."
+        "Volcanoes erupt molten",
+        "rock from the Earth."
       ],
-      "title_text": "The Hidden Life Cycle of Ants",
-      "hook_text": "Discover how tiny eggs transform into complex colonies beneath our feet.",
+      "title_text": "Volcano Eruption Dynamics",
+      "hook_text": "Volcanoes erupt molten rock from the Earth.",
       "title_font_size": 27,
       "hook_font_size": 62,
       "max_text_width": 880,
@@ -297,7 +367,7 @@
         48,
         150,
         1032,
-        538
+        402
       ]
     }
   },
@@ -308,6 +378,18 @@
     "fact_checker": {
       "provider": "gemini",
       "model": "gemini-3.5-flash-lite"
-    }
+    },
+    "claim_repairs": [
+      {
+        "claim_id": "C8",
+        "scene": 8,
+        "original_sentence": "An outpouring of lava from a rift zone ranks as the longest known event of its kind.",
+        "replacement_sentence": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
+        "replacement_source_urls": [
+          "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
+        ],
+        "status": "rewritten"
+      }
+    ]
   }
 }

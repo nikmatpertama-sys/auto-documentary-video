@@ -9,277 +9,213 @@
   "supported_claim_count": 8,
   "failed_claims": [],
   "uncited_factual_sentences": [],
-  "coverage_note": "All sentences in the script correspond to the supplied claims, and each claim is fully supported by the provided source excerpts.",
+  "coverage_note": "All sentences in the script are directly accounted for by the supplied claims, and each claim is fully supported by its respective source excerpts.",
   "claims": [
     {
       "id": "C1",
       "scene": 1,
-      "sentence": "Tiny white ant eggs are carefully tended by worker ants within the hidden depths of the dark underground nest.",
+      "sentence": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://en.wikipedia.org/wiki/Ant_colony"
+        "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ant_colony"
+        "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm"
       ],
-      "reason": "The excerpt states that younger ants work within the nest protecting the queen and young, and that colonies are built and maintained by worker ants in underground passages/nests."
+      "reason": "The source explicitly states that a volcano is a vent where molten rock material emerges from the Earth's interior during an eruption."
     },
     {
       "id": "C2",
       "scene": 2,
-      "sentence": "Hatching from these fragile eggs emerge legless larvae that rely entirely on adults for constant nourishment and care.",
+      "sentence": "The form and style of an eruption of a volcano is determined by the composition of the lava.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7762752"
+        "https://en.wikipedia.org/wiki/Volcano"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ant"
+        "https://en.wikipedia.org/wiki/Volcano"
       ],
-      "reason": "The excerpt notes that larvae are provided solid food and care by workers, and need to be kept at constant temperatures."
+      "reason": "The source states that the form and style of an eruption of a volcano is largely determined by the composition of the lava it erupts."
     },
     {
       "id": "C3",
       "scene": 3,
-      "sentence": "During the resting pupal stage, the motionless insect undergoes a remarkable internal transformation into an adult form.",
+      "sentence": "Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://pubmed.ncbi.nlm.nih.gov/33390754"
+        "https://en.wikipedia.org/wiki/Volcano"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ant"
+        "https://en.wikipedia.org/wiki/Volcano"
       ],
-      "reason": "The excerpt states that ants develop by complete metamorphosis with the larva stages passing through a pupal stage before emerging as an adult."
+      "reason": "The source states that volcanoes, based on their frequency of eruption or volcanism, are referred to as either active, dormant, or extinct."
     },
     {
       "id": "C4",
       "scene": 4,
-      "sentence": "Newly emerged adult workers begin their lives inside the subterranean nest by performing essential maintenance and nursery duties.",
+      "sentence": "Superheated magma rises through the mantle and melts the crust above to flow on the surface.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant_colony",
-        "https://pubmed.ncbi.nlm.nih.gov/24094856"
+        "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ant_colony"
+        "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/"
       ],
-      "reason": "The excerpt notes that younger ants work within the nest protecting the young."
+      "reason": "The source states that superheated magma rises through the mantle, melts the crust above, and flows on to the surface."
     },
     {
       "id": "C5",
       "scene": 5,
-      "sentence": "As these workers grow older, they transition to foraging outside for vital resources to sustain the entire growing colony.",
+      "sentence": "If there is evidence for magma beneath the ground, the volcano should be considered active.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2567467"
+        "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ant"
+        "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications"
       ],
-      "reason": "The excerpt describes age-based task-specialization (polyethism) where older ants are involved in foraging."
+      "reason": "The source explicitly matches the claim that if there is evidence for magma beneath the ground, the volcano should be considered active."
     },
     {
       "id": "C6",
       "scene": 6,
-      "sentence": "Within the heart of the community, the specialized queen remains focused primarily on continuous egg production and colony expansion.",
+      "sentence": "Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant_colony",
-        "https://pubmed.ncbi.nlm.nih.gov/18794530"
+        "https://en.wikipedia.org/wiki/Volcanic_eruption"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ant_colony"
+        "https://en.wikipedia.org/wiki/Volcanic_eruption"
       ],
-      "reason": "The excerpt refers to typical colonies consisting of egg-laying queens."
+      "reason": "The source confirms that volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle."
     },
     {
       "id": "C7",
       "scene": 7,
-      "sentence": "Mature colonies eventually produce winged reproductives that prepare to leave the natal nest during seasonal mating flights.",
+      "sentence": "Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4021219"
+        "https://en.wikipedia.org/wiki/Volcanic_eruption"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ant"
+        "https://en.wikipedia.org/wiki/Volcanic_eruption"
       ],
-      "reason": "The excerpt states that during the species-specific breeding period, winged females and winged males, known as alates, engage in mating flights."
+      "reason": "The source notes that Strombolian eruptions are named after the volcano Stromboli, which has been erupting nearly continuously for centuries."
     },
     {
       "id": "C8",
       "scene": 8,
-      "sentence": "Successful mated females shed their wings to establish brand new foundations and begin the intricate cycle anew.",
+      "sentence": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Ant",
-        "https://pubmed.ncbi.nlm.nih.gov/24886136"
+        "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Ant"
+        "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
       ],
-      "reason": "The excerpt states that queens shed or break off their wings after the nuptial or mating flight in order to begin their colonies."
+      "reason": "The source matches the claim that the Pu‘u‘ō‘ō eruption began in 1983 and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years."
     }
   ],
   "sources": [
     {
       "claim_id": "C1",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant",
-      "host": "en.wikipedia.org",
+      "requested_url": "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm",
+      "resolved_url": "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm",
+      "host": "www.nps.gov",
       "http_status": 200,
-      "page_title": "Ant",
-      "excerpt": "Some worker ants maintain the hygiene of the colony and their activities include undertaking or necrophoresis, the disposal of dead nest-mates. The materials used for construction include soil and plant matter, and ants carefully select their nest sites; The ants maintain the nest temperature by choosing the location, nest materials, controlling ventilation and maintaining the heat from solar radiation, worker activity and metabolism, and in some moist nests, microbial activity in the nest materials. === Navigation ===\n\nForaging ants travel distances of up to 200 metres (700 ft) from their nest and scent trails allow them to find their way back even in the dark. Ants form colonies that range in size from a few dozen individuals often living in small natural cavities to highly organised colonies that may occupy large territories with a sizeable nest (or nests) that consist of millions of ",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C1",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "host": "en.wikipedia.org",
-      "http_status": 200,
-      "page_title": "Ant colony",
-      "excerpt": "The colony was estimated to contain 306 million worker ants and one million queen ants living in 45,000 nests interconnected by underground passages over an area of 2.7 km2 (670 acres). These worker ants can only lay haploid eggs producing sterile offspring. A colony is built and maintained by legions of worker ants, who carry tiny bits of dirt and pebbles in their mandibles and deposit them near the exit of the colony. Younger ants work within the nest protecting the queen and young. Despite the title of queen, she does not delegate the tasks to the worker ants; Cardiocondyla ants are an exception because of their ability to produce wingless males, creating the opportunity for these males to mate with the queen ants that inhabit the nest without having to leave the nest like other ant species. The worker ants of an African crematogaster species build small shelters for the hemipterans u",
+      "page_title": "Anatomy of a Volcano - Volcanoes, Craters & Lava Flows (U.S. National Park Service) Lock",
+      "excerpt": "Volcano Volcano - A vent where molten rock material emerges from the Earth’s interior, and/or the edifice (mountain or cone) built up around that vent or vents during eruption(s). Volcano - A vent where molten rock material emerges from the Earth’s interior, and/or the edifice (mountain or cone) built up around that vent or vents during eruption(s). Introduction Volcanoes are both the vents where molten rock material and volcanic gases are erupted from within Earth’s interior, and the cones and mountains built up around those vents. Lava flow Lava flow - An outpouring of molten rock from a vent onto Earth's surface during an effusive volcanic eruption; Lava flow - An outpouring of molten rock from a vent onto Earth's surface during an effusive volcanic eruption; Lava flow Lava flow - An outpouring of molten rock from a vent onto Earth's surface during an effusive volcanic eruption; Lava ",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C2",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant",
+      "requested_url": "https://en.wikipedia.org/wiki/Volcano",
+      "resolved_url": "https://en.wikipedia.org/wiki/Volcano",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Ant",
-      "excerpt": "Larvae, especially in the later stages, may also be provided solid food, such as trophic eggs, pieces of prey, and seeds brought by workers. Larvae and pupae need to be kept at fairly constant temperatures to ensure proper development, and so often are moved around among the various brood chambers within the colony. The forms of inactivity are varied and some temperate species have larvae going into the inactive state (diapause), while in others, the adults alone pass the winter in a state of reduced activity. There, they break off their wings using their tibial spurs and begin to lay and care for eggs. They enlarge the nest, forage for food, and care for the other eggs. Formica polyctena, among other ant species, constructs nests that maintain a relatively constant interior temperature that aids in the development of larvae. species such as Strumigenys xenos are entirely parasitic and d",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C2",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7762752",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Fetched page is about a different subject: it shares 1 of the claim's 12 content terms (needs 2)."
-    },
-    {
-      "claim_id": "C3",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant",
-      "host": "en.wikipedia.org",
-      "http_status": 200,
-      "page_title": "Ant",
-      "excerpt": "Ants develop by complete metamorphosis with the larva stages passing through a pupal stage before emerging as an adult. The larvae grow through a series of four or five moults and enter the pupal stage. They are considered a form of insect caviar and can sell for as much as US$50 per kg going up to US$200 per kg (as of 2006) because they are seasonal and hard to find. Ants form colonies that range in size from a few dozen individuals often living in small natural cavities to highly organised colonies that may occupy large territories with a sizeable nest (or nests) that consist of millions of individuals. It has been hypothesised that a Proto-Indo-European word *morwi- was the root for Sanskrit vamrah, Greek μύρμηξ mýrmēx, Latin formīca, Old Church Slavonic mraviji, Old Irish moirb, Old Norse maurr, Dutch mier, Swedish myra, Danish myre, Middle Dutch miere, and Crimean Gothic miera. == T",
+      "page_title": "Volcano",
+      "excerpt": "=== Lava flows ===\n\nThe form and style of an eruption of a volcano is largely determined by the composition of the lava it erupts. == Erupted material ==\n\nThe material that is expelled in a volcanic eruption can be classified into three types:\n\nVolcanic gases, a mixture made mostly of steam, carbon dioxide, and a sulfur compound (either sulfur dioxide, SO2, or hydrogen sulfide, H2S, depending on the temperature)\nLava, the name of magma when it emerges and flows over the surface\nTephra, particles of solid material of all shapes and sizes ejected and thrown through the air\n\n\n=== Volcanic gases ===\n\nThe concentrations of different volcanic gases can vary considerably from one volcano to the next. The potential for eruptions, and their style, depend mainly upon the state of the magma storage system under the volcano, the eruption trigger mechanism and its timescale. A volcano is a vent or fi",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C3",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/33390754",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
-    },
-    {
-      "claim_id": "C4",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "requested_url": "https://en.wikipedia.org/wiki/Volcano",
+      "resolved_url": "https://en.wikipedia.org/wiki/Volcano",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Ant colony",
-      "excerpt": "The typical colony consists of one or more egg-laying queens, numerous sterile females (workers, soldiers) and, seasonally, many winged sexual males and females. Swarms of the winged sexuals (known as alates) depart the nest in search of other nests. == Etymology ==\nThe term \"ant colony\" refers to a population of workers, reproductive individuals, and brood that live together, cooperate, and treat one another non-aggressively. These can be underground, in trees, under rocks, or even inside a single acorn. The name \"anthill\" (or \"ant hill\") applies to aboveground nests where the workers pile sand or soil outside the entrance, forming a large mound. Colonies have a significant range of sizes: some are just several ants living in a twig, while others are super-colonies with many millions of workers. For example, in the ant Dolichoderus mariae, one colony can shift from around 300 workers in",
+      "page_title": "Volcano",
+      "excerpt": "Volcanoes, based on their frequency of eruption or volcanism, are referred to as either active, dormant, or extinct. Active volcanoes have a history of volcanism and are likely to erupt again, while extinct ones are not capable of eruption at all as they have no magma source. However, dormant volcanoes are technically considered to be seismically \"active\". Volcanoes are informally described as erupting, active, dormant, or extinct, but the definitions of these terms are not entirely uniform among volcanologists. In an article justifying the re-classification of Alaska's Mount Edgecumbe volcano from \"dormant\" to \"active\", volcanologists at the Alaska Volcano Observatory pointed out that the term \"dormant\" in reference to volcanoes has been deprecated over the past few decades and that \"[t]he term \"dormant volcano\" is so little used and undefined in modern volcanology that the Encyclopedia",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C4",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/24094856",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant",
-      "host": "en.wikipedia.org",
+      "requested_url": "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/",
+      "resolved_url": "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/",
+      "host": "www.bgs.ac.uk",
       "http_status": 200,
-      "page_title": "Ant",
-      "excerpt": "An entire generation of identical workers was divided into two groups whose outcome in food foraging was controlled. Usually the largest workers in the colony develop into repletes; and, if repletes are removed from the colony, other workers become repletes, demonstrating the flexibility of this particular polymorphism. Such age-based task-specialization or polyethism has been suggested as having evolved due to the high casualties involved in foraging and defence, making it an acceptable risk only for ants who are older and likely to die sooner from natural causes. In the Brazilian ant Forelius pusillus, the nest entrance is closed from the outside to protect the colony from predatory ant species at sunset each day. One to eight workers seal the nest entrance from the outside, in effect sacrificing themselves, as they have no chance of returning to the nest. Whether these seemingly suici",
+      "page_title": "How volcanoes form - British Geological Survey",
+      "excerpt": "The superheated magma rises through the mantle (yellow), melts the crust above (brown) and flows on to the surface forming a volcano. The Earth’s crust is pulled apart to create a new pathway for rising hot magma to flow on to the surface. Hot-spot volcanism Volcanoes can also form above a column of superheated magma called a mantle plume. As the plates pull apart, molten rock (magma) rises up and erupts as lava, creating new ocean crust. Hot magma rises from the mantle at mid-ocean ridges, pushing the plates apart. Note: Iceland also sits above a mantle plume, or hot spot , where hot magma wells up from deep in the Earth’s mantle. Heat from the mantle plume causes melting and thinning of the crust, which leads to volcanic activity at the surface. The movement of faults at plate boundaries can provide a convenient pathway for magma to reach the surface. It helps to explain this by lookin",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C5",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2567467",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC2567467/",
-      "host": "pmc.ncbi.nlm.nih.gov",
+      "requested_url": "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications",
+      "resolved_url": "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications",
+      "host": "www.usgs.gov",
       "http_status": 200,
-      "page_title": "Newly discovered sister lineage sheds light on early ant evolution - PMC Newly discovered sister lineage sheds light on early ant evolution Lock",
-      "excerpt": "In contrast with previous morphological studies ( 5 – 14 ), the blind, subterranean subfamily Leptanillinae was recovered as sister to all extant ants, as suggested by two earlier partial molecular studies ( 22 , 23 ), implying an early origin and diversification of cryptic, blind species with hypogaeic foraging habits. Open in a new tab Worker of Martialis heureka foraging in a subterranean tunnel. ( 5 ) propodeum evenly rounded at the transition from basal (= dorsal) to declivitous face; Dense appressed pubescence absent from entire body. Five years after two workers were discovered by M. In addition, the specimen was collected in the leaf litter suggesting foraging activity usually performed by the worker caste. The discovery of Martialis and our phylogenetic analyses support the hypothesis that several of the most basal extant ant lineages are hypogaeic foragers, suggesting that hypo",
+      "page_title": "Active, dormant, and extinct: Clarifying confusing classifications | U.S. Geological Survey",
+      "excerpt": "If there is evidence for magma beneath the ground—for example, as indicated by magma-related seismicity and/or ground deformation, or by an active hydrothermal system—then the volcano should be considered “active” but currently “dormant,” regardless of the time since its last eruption. We’ll start with perhaps the most confusing of these terms: “active.” Most volcanologists would say that a volcano or volcanic field that has erupted within the Holocene (the current geologic epoch, which began at the end of the most recent ice age about 11,650 years ago), or that has the potential to erupt again in the future, should be considered “active.” This does not mean that the volcano is erupting right now, although such a volcano would certainly qualify as “active.” Rather, it means that the volcano has a youthful magmatic system, and if it is not erupting now, it could be in the future. All thre",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C6",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "requested_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
+      "resolved_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Ant colony",
-      "excerpt": "For example, in the ant Dolichoderus mariae, one colony can shift from around 300 workers in the summer to over 2,000 workers per queen in the winter. The colony was estimated to contain 306 million worker ants and one million queen ants living in 45,000 nests interconnected by underground passages over an area of 2.7 km2 (670 acres). == Organizational terminology ==\nThe following terminology is commonly used among myrmecologists to describe the behaviors demonstrated by ants when founding and organizing colonies:\n\nMonogyny\nEstablishment of an ant colony under a single egg-laying queen. Haplometrosis\nEstablishment of a colony by a single queen. As ants grow older their jobs move them farther from the queen, or center of the colony. The wingless males typically fight to the death until only one remains in the colony. == Mutualistic relationships ==\nCollecting food for a colony can be diff",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C6",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/18794530",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
-    },
-    {
-      "claim_id": "C7",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant",
-      "host": "en.wikipedia.org",
-      "http_status": 200,
-      "page_title": "Ant",
-      "excerpt": "=== Locomotion ===\nThe female worker ants do not have wings and reproductive females lose their wings after their mating flights in order to begin their colonies. In Fiji Philidris nagasau (Dolichoderinae) are known to selectively grow species of epiphytic Squamellaria (Rubiaceae) which produce large domatia inside which the ant colonies nest. Ants form colonies that range in size from a few dozen individuals often living in small natural cavities to highly organised colonies that may occupy large territories with a sizeable nest (or nests) that consist of millions of individuals. During the species-specific breeding period, winged females and winged males, known to entomologists as alates, leave the colony in what is called a nuptial flight. The genus Cardiocondyla have species with both winged and wingless males, where the latter will only mate with females living in the same nest. Som",
+      "page_title": "Volcanic eruption",
+      "excerpt": "Columbia University volcanologists found that the eruption of Costa Rica's Irazú Volcano in 1963 was likely triggered by magma that took a nonstop route from the mantle over just a few months. Similar to Strombolian eruptions, this leads to the buildup of high gas pressure, eventually popping the cap holding the magma down and resulting in an explosive eruption. They are also similar to Hawaiian lava fountains in that both eruptive types produce sustained eruption columns maintained by the growth of bubbles that move up at about the same speed as the magma surrounding them. Pinatubo in the Philippines on 15 June 1991, which produced 5 km3 (1 cu mi) of dacitic magma, a 40 km (25 mi) high eruption column, and released 17 megatons of sulfur dioxide. A volcanic eruption occurs when material is expelled from a volcanic vent or fissure. Several types of volcanic eruptions have been distinguish",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C7",
-      "requested_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4021219",
-      "resolved_url": "https://pmc.ncbi.nlm.nih.gov:443/articles/PMC4021219/",
-      "host": "pmc.ncbi.nlm.nih.gov",
-      "http_status": 200,
-      "page_title": "The rise of army ants and their relatives: diversification of specialized predatory doryline ants - PMC The rise of army ants and their relatives: diversification of specialized predatory doryline ants Lock",
-      "excerpt": "Such species, found in many dorylomorph groups including all army ants, do not have winged queens that engage in mating flights as in most other ant species, but rather possess large wingless queens that mate within the nest and then disperse on the ground via colony fission. rather, they send out swarms of up to several hundred thousand workers en masse to kill prey items and transport them back to their colonies. Another feature that separates army ants from many other ant species is the nomadic nesting behavior observed in many aboveground species, in which colonies periodically move their habitation sites (and hence foraging ranges) to new locations. These ants – comprising the subfamilies Aenictinae, Dorylinae, and Ecitoninae – are by far the largest and most widespread group to possess the army ant syndrome of traits described above (nomadic colonies, mass group foraging, and highl",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C8",
-      "requested_url": "https://en.wikipedia.org/wiki/Ant",
-      "resolved_url": "https://en.wikipedia.org/wiki/Ant",
+      "requested_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
+      "resolved_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Ant",
-      "excerpt": "Mated females then seek a suitable place to begin a colony. === Locomotion ===\nThe female worker ants do not have wings and reproductive females lose their wings after their mating flights in order to begin their colonies. Queens shed their wings after the nuptial flight, leaving visible stubs, a distinguishing feature of queens. There, they break off their wings using their tibial spurs and begin to lay and care for eggs. Typical colonies consist of various castes of sterile, wingless females, most of which are workers (ergates), as well as soldiers (dinergates) and other specialised groups. Nearly all ant colonies also have some fertile males called \"drones\" and one or more fertile females called \"queens\" (gynes). === Mesosoma ===\nBoth the wings and the 6 legs of the ant are attached to the mesosoma (\"thorax\"). Only reproductive ants (queens and males) have wings. == Life cycle ==\n\nThe",
+      "page_title": "Volcanic eruption",
+      "excerpt": "Mount Mihara in 1986 (see above paragraph)\n\n\n=== Strombolian ===\n\nStrombolian eruptions are a type of volcanic eruption named after the volcano Stromboli, which has been erupting nearly continuously for centuries. Mount Erebus in Antarctica, the southernmost active volcano in the world, having been observed erupting since 1972. Volcanoes are not bound to one eruptive style, and frequently display many different types, both passive and explosive, even in the span of a single eruptive cycle. Columbia University volcanologists found that the eruption of Costa Rica's Irazú Volcano in 1963 was likely triggered by magma that took a nonstop route from the mantle over just a few months. Steady production of small amounts of lava builds up the large, broad form of a shield volcano. Puʻu ʻŌʻō, a volcanic cone on Kilauea, erupted continuously for over 35 years. Small volcanic particles are carried ",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C8",
-      "requested_url": "https://pubmed.ncbi.nlm.nih.gov/24886136",
-      "status": "not_usable",
+      "requested_url": "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years",
+      "resolved_url": "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years",
+      "host": "www.usgs.gov",
+      "http_status": 200,
+      "page_title": "The Pu‘u‘ō‘ō Eruption Lasted 35 Years | U.S. Geological Survey",
+      "excerpt": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years. The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years. Board on Geographic Names The National Map USGS Library USGS Store Park Passes News News Releases Featured Stories Science Snippets Technical Announcements Media Contacts Connect Headquarters Locations Staff Profiles Social Media Careers Contact Us About About Us Survey Manual Key Officials Organization Congressional Budget Careers and Employees Office of Civil Rights Doing Business Emergency Management Latest Earthquakes Share Social Media Facebook Twitter Linkedin Digg Reddit Pinterest Email Breadcrumb Kīlauea Science The Pu‘u‘ō‘ō Eruption Lasted 35 Year",
       "source_kind": "planned",
-      "reason": "Evidence page contains too little readable text for verification."
+      "status": "usable"
+    }
+  ],
+  "claim_repairs": [
+    {
+      "claim_id": "C8",
+      "scene": 8,
+      "original_sentence": "An outpouring of lava from a rift zone ranks as the longest known event of its kind.",
+      "replacement_sentence": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
+      "replacement_source_urls": [
+        "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
+      ],
+      "status": "rewritten"
     }
   ]
 }

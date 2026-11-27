@@ -1,16 +1,14 @@
 {
-  "path": "output/opening_overlay.png",
+  "path": "output/opening_hook_overlay.png",
   "title_lines": [
-    "THE HIDDEN LIFE CYCLE OF ANTS"
+    "VOLCANO ERUPTION DYNAMICS"
   ],
   "hook_lines": [
-    "Discover how tiny eggs",
-    "transform into complex",
-    "colonies beneath our",
-    "feet."
+    "Volcanoes erupt molten",
+    "rock from the Earth."
   ],
-  "title_text": "The Hidden Life Cycle of Ants",
-  "hook_text": "Discover how tiny eggs transform into complex colonies beneath our feet.",
+  "title_text": "Volcano Eruption Dynamics",
+  "hook_text": "Volcanoes erupt molten rock from the Earth.",
   "title_font_size": 27,
   "hook_font_size": 62,
   "max_text_width": 880,
@@ -18,6 +16,6 @@
     48,
     150,
     1032,
-    538
+    402
   ]
 }
