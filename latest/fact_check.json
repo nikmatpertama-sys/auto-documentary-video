@@ -9,8 +9,8 @@
   "claim_source": "semantic:Groq key 1",
   "coverage": {
     "script_sentences": 9,
-    "claimed_sentences": 8,
-    "non_factual_sentences": 1,
+    "claimed_sentences": 5,
+    "non_factual_sentences": 4,
     "uncovered_sentences": [],
     "coverage": 1.0
   },
@@ -18,20 +18,20 @@
   "error": null,
   "research_articles": [
     {
-      "title": "Ant colony",
-      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      "title": "Rainforest",
+      "url": "https://en.wikipedia.org/wiki/Rainforest"
     },
     {
-      "title": "Ant",
-      "url": "https://en.wikipedia.org/wiki/Ant"
+      "title": "2019 Amazon rainforest wildfires",
+      "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
     },
     {
-      "title": "Koloni semut",
-      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+      "title": "Hutan hujan",
+      "url": "https://id.wikipedia.org/wiki/Hutan_hujan"
     },
     {
-      "title": "Semut",
-      "url": "https://id.wikipedia.org/wiki/Semut"
+      "title": "Kebakaran hutan Brasil 2019",
+      "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
     }
   ]
 }

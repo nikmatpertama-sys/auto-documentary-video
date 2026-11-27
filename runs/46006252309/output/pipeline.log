@@ -1,6 +1,6 @@
 Markdown cleanup: no generated upgrade/validation files found.
 Pipeline stage started: research
-1/8 Researching credible sources for: Ant colony life cycle
+1/8 Researching credible sources for: Amazon rainforest canopy aerial
 Research complete: 4 source article(s) stored in research.json.
 Pipeline stage started: documentary_plan_generation
 2/8 Generating documentary plan from the research material...
@@ -22,34 +22,35 @@ Quota-aware routing snapshot:
   Selected next: Groq key 1
 Quota-aware selection: Groq key 1 (best currently known capacity).
 Documentary plan generated successfully by Groq key 1.
-Script ready: 157 words, 7 scenes.
+Script ready: 178 words, 6 scenes.
 Pipeline stage started: fact_checking
 3/8 Fact-checking claims against the research material...
 Quota-aware routing snapshot:
-  - Groq key 1: 57.3% measured (RPD 999/1000, TPM 4586/8000)
+  - Groq key 1: 56.2% measured (RPD 998/1000, TPM 4494/8000)
   - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
   Selected next: Groq key 1
 Quota-aware routing snapshot:
-  - Groq key 1: 20.4% measured (RPD 998/1000, TPM 1630/8000)
+  - Groq key 1: 16.3% measured (RPD 997/1000, TPM 1303/8000)
   - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
   Selected next: Gemini key 1
-fact check: Gemini key 1: Gemini HTTP 429: {   "error": {     "code": 429,     "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 18h38m20.857304549s.",     "status": "RESOURCE_EXHAUSTED",     "details": [       {         "@type": "type.googleapis.com/google.rpc.Hel
+Temporary AI service issue; retrying once in 5s...
+fact check: Gemini key 1: Gemini HTTP 503: {   "error": {     "code": 503,     "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",     "status": "UNAVAILABLE"   } } 
 Quota-aware routing snapshot:
-  - Groq key 1: 20.4% measured (RPD 998/1000, TPM 1630/8000)
+  - Groq key 1: 16.3% measured (RPD 997/1000, TPM 1303/8000)
   - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
   Selected next: Cloudflare AI key pair 1
-Fact check: 5 supported (5 with a cited source), 3 unsupported, 0 contradicted (overall revise); sentence coverage 100%.
+Fact check: 4 supported (4 with a cited source), 1 unsupported, 0 contradicted (overall revise); sentence coverage 100%.
 Quota-aware routing snapshot:
-  - Groq key 1: 20.4% measured (RPD 998/1000, TPM 1630/8000)
+  - Groq key 1: 16.3% measured (RPD 997/1000, TPM 1303/8000)
   - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
   - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
   Selected next: Cloudflare AI key pair 2
-Fact-check repair failed: Scene narration totals 98 words; expected 120-200.
+Fact-check repair failed: Scene narration totals 86 words; expected 120-200.
 Traceback (most recent call last):
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8077, in run_with_diagnostics
     main()
@@ -60,5 +61,5 @@ Traceback (most recent call last):
     _fail_fact_check(
   File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 1758, in _fail_fact_check
     raise RuntimeError(message)
-RuntimeError: Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Eggs hatch into larvae, which are fed by sterile workers until they spin a cocoon and transform into pupae. | When development completes, the first adult workers emerge, taking over foraging, nest maintenance, and brood care. | These founding queens carry a tiny egg supply, raise the first workers alone, and gradually expand the hidden empire.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.
+RuntimeError: Fact check could not support 1 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The Amazon alone stores billions of carbon, acting as the planet’s largest carbon sink and contributing roughly forty percent of the oxygen we breathe.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.
 Markdown cleanup: no generated upgrade/validation files found.
