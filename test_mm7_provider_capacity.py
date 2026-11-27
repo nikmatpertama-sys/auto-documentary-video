@@ -89,6 +89,48 @@ class PlanLengthGraceTests(unittest.TestCase):
         self.assertTrue(written)
 
 
+class DurationExtensionTests(unittest.TestCase):
+    def test_extension_asks_again_until_the_word_floor_is_met(self):
+        short = _plan(scenes=4)
+        long_plan = {
+            "title": "Ants",
+            "hook": "What if a colony thinks?",
+            "script": " ".join([
+                "Ants live in soil and build nests under stones where the queen lays her "
+                "eggs and workers feed the brood every day while the colony grows."
+            ] * 6),
+            "scenes": [
+                {
+                    "narration": (
+                        "Ants live in soil and build nests under stones where the queen "
+                        "lays her eggs and workers feed the brood every day while the "
+                        "colony grows."
+                    ),
+                    "visual_query": "ant colony close",
+                    "visual_queries": ["ant colony"],
+                    "source_label": "Ant",
+                    "source_url": "https://en.wikipedia.org/wiki/Ant",
+                }
+            ] * 6,
+        }
+        self.assertGreaterEqual(len(long_plan["script"].split()), 120)
+        with mock.patch.object(main, "call_json_with_providers",
+                               side_effect=[(short, "mock"), (long_plan, "mock")]) as caller:
+            result = main.extend_plan_for_duration(dict(short, scenes=[
+                dict(scene) for scene in short["scenes"]]), "brief")
+        self.assertGreaterEqual(len(result["script"].split()), 120)
+        self.assertEqual(caller.call_count, 2)
+
+    def test_extension_fails_loudly_instead_of_shipping_a_short_voiceover(self):
+        short = _plan(scenes=4)
+        with mock.patch.object(main, "call_json_with_providers",
+                               side_effect=[(short, "mock")] * 3):
+            with self.assertRaisesRegex(RuntimeError, "could not reach 120 words"):
+                main.extend_plan_for_duration(
+                    dict(short, scenes=[dict(scene) for scene in short["scenes"]]), "brief"
+                )
+
+
 class RepairLengthGraceTests(unittest.TestCase):
     def test_short_but_valid_plan_is_accepted_at_the_repair_floor(self):
         plan = _plan(scenes=4)

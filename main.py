@@ -2120,8 +2120,39 @@ def extend_plan_for_duration(plan, research_brief, target_words=185):
         "visual_query, visual_queries, source_label, source_url. Narration "
         f"language: {LANGUAGE['name']}."
     )
-    payload, provider = call_json_with_providers(prompt, "duration extension")
-    extended = validate_plan_candidate(payload)
+    # A provider can ignore the word target, and one ignored answer used to end
+    # the run at a 40-second voice-over. Ask again with the measured shortfall
+    # before failing, and never accept a draft that is still under the floor.
+    attempts = 0
+    current_prompt = prompt
+    extended = None
+    provider = None
+    words = 0
+    while attempts < 3:
+        attempts += 1
+        payload, provider = call_json_with_providers(current_prompt, "duration extension")
+        candidate = validate_plan_candidate(payload, min_words=MIN_REPAIRED_WORDS)
+        words = len(candidate["script"].split())
+        extended = candidate
+        if words >= 120:
+            break
+        print(
+            f"Duration recovery: the provider returned {words} words "
+            f"(attempt {attempts}/3); asking for the 150-190 word target again."
+        )
+        current_prompt = (
+            prompt
+            + f"\n\nYour previous answer contained only {words} words, which is too "
+            "short. Rewrite the narration with 150-190 words by adding "
+            "source-supported detail to each scene. Do not repeat sentences and do "
+            "not invent numbers, dates or superlatives."
+        )
+    if words < 120:
+        raise RuntimeError(
+            "The duration extension could not reach 120 words after 3 attempts "
+            f"(last draft: {words} words). The run stops rather than shipping a "
+            "voice-over shorter than the format requires."
+        )
 
     # The footage for each scene was already downloaded and visually verified
     # against the original narration, so keep both the approved media and its
