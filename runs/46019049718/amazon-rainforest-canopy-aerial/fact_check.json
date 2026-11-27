@@ -1,0 +1,211 @@
+{
+  "claims": [
+    {
+      "claim": "The Amazon rainforest is a type of tropical rainforest, characterized by a closed and continuous tree canopy, with moisture-dependent vegetation, and a diverse array of plant and animal species.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Definition of tropical rainforest",
+      "quote": "Tropical rainforests are characterized by a warm and wet climate usually with no substantial dry season",
+      "source": {
+        "id": "S7",
+        "title": "Tropical rainforest",
+        "url": "https://en.wikipedia.org/wiki/Tropical_rainforest"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "It has a warm and wet climate, with no substantial dry season, and plays a significant role in mitigating global warming.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Characteristics of tropical rainforests",
+      "quote": "Tropical rainforests are characterized by a warm and wet climate usually with no substantial dry season",
+      "source": {
+        "id": "S7",
+        "title": "Tropical rainforest",
+        "url": "https://en.wikipedia.org/wiki/Tropical_rainforest"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The Amazon rainforest has seen a surge in fires, which can be devastating to the ecosystem, with over 80,000 fires reported in 2019, a 77% increase from the previous year.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "2019 Amazon rainforest wildfires statistics",
+      "quote": "As of August 29, 2019, INPE reported more than 80,000 fires across all of Brazil, a 77% year-to-year increase for the same tracking period",
+      "source": {
+        "id": "S2",
+        "title": "2019 Amazon rainforest wildfires",
+        "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Fires normally occur around the dry season as slash-and-burn methods are used to clear the forest, leading to deforestation and habitat loss.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Causes of fires in the Amazon rainforest",
+      "quote": "Fires normally occur around the dry season as slash-and-burn methods are used to clear the forest, leading to deforestation of the Amazon rainforest",
+      "source": {
+        "id": "S2",
+        "title": "2019 Amazon rainforest wildfires",
+        "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The fate of the Amazon rainforest is a concern, as it is estimated that over 40% of all biotic species are indigenous to the rainforests, and the loss of this ecosystem could have severe consequences for the environment.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Importance of rainforests for biodiversity",
+      "quote": "Estimates vary from 40% to 75% of all biotic species being indigenous to the rainforests",
+      "source": {
+        "id": "S1",
+        "title": "Rainforest",
+        "url": "https://en.wikipedia.org/wiki/Rainforest"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The Amazon rainforest is a moist broadleaf tropical rainforest, spanning over 7 million km2, and is home to many species of plants, insects, and microorganisms, making it a significant source of natural medicines.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Characteristics of the Amazon rainforest",
+      "quote": "The Amazon rainforest, also called the Amazon jungle, Amazonia, or simply the Amazon, is a moist broadleaf tropical rainforest in the Amazon biome that covers most of the Amazon basin of South America",
+      "source": {
+        "id": "S6",
+        "title": "Amazon rainforest",
+        "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The conservation of the Amazon rainforest is crucial, and efforts are being made to protect this vital ecosystem.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Importance of conserving the Amazon rainforest",
+      "quote": "The conservation of the Amazon rainforest is crucial",
+      "source": {
+        "id": "S9",
+        "title": "Amazon rainforest",
+        "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+      },
+      "evidence_type": "source_quote"
+    }
+  ],
+  "checked": 7,
+  "supported": 7,
+  "unsupported": 0,
+  "contradicted": 0,
+  "sourced_supports": 7,
+  "general_knowledge_supports": 0,
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Rainforest",
+      "url": "https://en.wikipedia.org/wiki/Rainforest"
+    },
+    {
+      "id": "S2",
+      "title": "2019 Amazon rainforest wildfires",
+      "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
+    },
+    {
+      "id": "S3",
+      "title": "Hutan hujan",
+      "url": "https://id.wikipedia.org/wiki/Hutan_hujan"
+    },
+    {
+      "id": "S4",
+      "title": "Kebakaran hutan Brasil 2019",
+      "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
+    },
+    {
+      "id": "S5",
+      "title": "Criticism of Amazon",
+      "url": "https://en.wikipedia.org/wiki/Criticism_of_Amazon"
+    },
+    {
+      "id": "S6",
+      "title": "Amazon rainforest",
+      "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+    },
+    {
+      "id": "S7",
+      "title": "Tropical rainforest",
+      "url": "https://en.wikipedia.org/wiki/Tropical_rainforest"
+    },
+    {
+      "id": "S8",
+      "title": "Deforestation of the Amazon rainforest",
+      "url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+    },
+    {
+      "id": "S9",
+      "title": "Amazon rainforest",
+      "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+    }
+  ],
+  "overall": "pass",
+  "checked_at": "2026-11-27T14:54:49+00:00",
+  "provider": "Cloudflare AI key pair 1",
+  "research_articles": [
+    {
+      "title": "Rainforest",
+      "url": "https://en.wikipedia.org/wiki/Rainforest"
+    },
+    {
+      "title": "2019 Amazon rainforest wildfires",
+      "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
+    },
+    {
+      "title": "Hutan hujan",
+      "url": "https://id.wikipedia.org/wiki/Hutan_hujan"
+    },
+    {
+      "title": "Kebakaran hutan Brasil 2019",
+      "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
+    },
+    {
+      "title": "Criticism of Amazon",
+      "url": "https://en.wikipedia.org/wiki/Criticism_of_Amazon"
+    },
+    {
+      "title": "Amazon rainforest",
+      "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+    },
+    {
+      "title": "Tropical rainforest",
+      "url": "https://en.wikipedia.org/wiki/Tropical_rainforest"
+    },
+    {
+      "title": "Deforestation of the Amazon rainforest",
+      "url": "https://en.wikipedia.org/wiki/Deforestation_of_the_Amazon_rainforest"
+    },
+    {
+      "title": "Amazon rainforest",
+      "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+    }
+  ],
+  "evidence_retrieval": {
+    "queries": [
+      "amazon rainforest conservation amazon rainforest"
+    ],
+    "characters": 1104,
+    "sources": [
+      {
+        "title": "Amazon rainforest",
+        "url": "https://en.wikipedia.org/wiki/Amazon_rainforest"
+      }
+    ]
+  },
+  "claim_source": "semantic:Cloudflare AI key pair 1",
+  "coverage": {
+    "script_sentences": 7,
+    "claimed_sentences": 7,
+    "non_factual_sentences": 0,
+    "uncovered_sentences": [],
+    "coverage": 1.0
+  },
+  "skipped_sentences": [],
+  "status": "checked"
+}

@@ -5,9 +5,9 @@
   "model": "simba-3.5",
   "language": "en",
   "locale": "en-US",
-  "script_sha256": "50872fa1d4854f0ecf8dd3d006e0e6ff40dd148fae86797930d8fdc1414f7a46",
-  "script_words": 137,
-  "total_duration": 58.343,
+  "script_sha256": "a3e63cc8583f06412c636abf9e506b555570bd17fb02bc8974e0155f463065a3",
+  "script_words": 191,
+  "total_duration": 79.23,
   "audio_files": [
     "output/voiceover.wav",
     "output/voiceover.mp3"
@@ -16,33 +16,45 @@
     {
       "index": 1,
       "start": 0.75,
-      "duration": 6.857,
-      "text": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals."
+      "duration": 12.096,
+      "text": "The Amazon rainforest is a type of tropical rainforest, characterized by a closed and continuous tree canopy, with moisture-dependent vegetation, and a diverse array of plant and animal species."
     },
     {
       "index": 2,
-      "start": 8.307,
-      "duration": 9.626,
-      "text": "An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy."
+      "start": 13.546,
+      "duration": 7.617,
+      "text": "It has a warm and wet climate, with no substantial dry season, and plays a significant role in mitigating global warming."
     },
     {
       "index": 3,
-      "start": 18.234,
-      "duration": 11.442,
-      "text": "The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers."
+      "start": 21.464,
+      "duration": 12.678,
+      "text": "The Amazon rainforest has seen a surge in fires, which can be devastating to the ecosystem, with over 80,000 fires reported in 2019, a 77% increase from the previous year."
     },
     {
       "index": 4,
-      "start": 29.976,
-      "duration": 9.968,
-      "text": "Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival."
+      "start": 34.442,
+      "duration": 8.359,
+      "text": "Fires normally occur around the dry season as slash-and-burn methods are used to clear the forest, leading to deforestation and habitat loss."
     },
     {
       "index": 5,
-      "start": 40.244,
-      "duration": 17.799,
-      "text": "A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success."
+      "start": 43.101,
+      "duration": 13.599,
+      "text": "The fate of the Amazon rainforest is a concern, as it is estimated that over 40% of all biotic species are indigenous to the rainforests, and the loss of this ecosystem could have severe consequences for the environment."
+    },
+    {
+      "index": 6,
+      "start": 57.0,
+      "duration": 15.038,
+      "text": "The Amazon rainforest is a moist broadleaf tropical rainforest, spanning over 7 million km2, and is home to many species of plants, insects, and microorganisms, making it a significant source of natural medicines."
+    },
+    {
+      "index": 7,
+      "start": 72.337,
+      "duration": 6.593,
+      "text": "The conservation of the Amazon rainforest is crucial, and efforts are being made to protect this vital ecosystem."
     }
   ],
-  "generated_at": "2026-11-27T14:57:33+00:00"
+  "generated_at": "2026-11-27T14:55:02+00:00"
 }

@@ -1,14 +1,14 @@
 {
-  "title": "Ant Colony Life Cycle",
-  "hook": "Ants thrive",
-  "script": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals. An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy. The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers. Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival. A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success.",
+  "title": "Amazon Rainforest Canopy",
+  "hook": "Rainforests thrive",
+  "script": "The Amazon rainforest is a type of tropical rainforest, characterized by a closed and continuous tree canopy, with moisture-dependent vegetation, and a diverse array of plant and animal species. It has a warm and wet climate, with no substantial dry season, and plays a significant role in mitigating global warming. The Amazon rainforest has seen a surge in fires, which can be devastating to the ecosystem, with over 80,000 fires reported in 2019, a 77% increase from the previous year. Fires normally occur around the dry season as slash-and-burn methods are used to clear the forest, leading to deforestation and habitat loss. The fate of the Amazon rainforest is a concern, as it is estimated that over 40% of all biotic species are indigenous to the rainforests, and the loss of this ecosystem could have severe consequences for the environment. The Amazon rainforest is a moist broadleaf tropical rainforest, spanning over 7 million km2, and is home to many species of plants, insects, and microorganisms, making it a significant source of natural medicines. The conservation of the Amazon rainforest is crucial, and efforts are being made to protect this vital ecosystem.",
   "scenes": [
     {
-      "narration": "Ants thrive in moist tropical ecosystems, where they exceed the combined biomass of wild birds and mammals.",
-      "visual_query": "Tropical forest ants",
+      "narration": "The Amazon rainforest is a type of tropical rainforest, characterized by a closed and continuous tree canopy, with moisture-dependent vegetation, and a diverse array of plant and animal species.",
+      "visual_query": "Aerial rainforest view",
       "visual_queries": [
-        "Ants in jungle undergrowth",
-        "Tropical ants on tree bark"
+        "Tropical rainforest landscape",
+        "Amazon rainforest from above"
       ],
       "source_label": "",
       "source_url": "",
@@ -17,11 +17,11 @@
       "sentence_end": 0
     },
     {
-      "narration": "An ant colony is a population of ants, typically from a single species, capable of maintaining their complete lifecycle, with a complex social hierarchy.",
-      "visual_query": "Ant colony in action",
+      "narration": "It has a warm and wet climate, with no substantial dry season, and plays a significant role in mitigating global warming.",
+      "visual_query": "Rainforest climate footage",
       "visual_queries": [
-        "Ants working together in colony",
-        "Single species ant colony"
+        "Amazon rainforest weather",
+        "Tropical rainforest environment"
       ],
       "source_label": "",
       "source_url": "",
@@ -29,11 +29,11 @@
       "sentence_end": 1
     },
     {
-      "narration": "The typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females, including workers and soldiers.",
-      "visual_query": "Ant colony social hierarchy",
+      "narration": "The Amazon rainforest has seen a surge in fires, which can be devastating to the ecosystem, with over 80,000 fires reported in 2019, a 77% increase from the previous year.",
+      "visual_query": "Amazon rainforest conservation",
       "visual_queries": [
-        "Queen ant laying eggs",
-        "Sterile female ants at work"
+        "Amazon rainforest preservation",
+        "Tropical rainforest climate change"
       ],
       "source_label": "",
       "source_url": "",
@@ -41,11 +41,11 @@
       "sentence_end": 2
     },
     {
-      "narration": "Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests, a process crucial for the colony's survival.",
-      "visual_query": "Ants in flight",
+      "narration": "Fires normally occur around the dry season as slash-and-burn methods are used to clear the forest, leading to deforestation and habitat loss.",
+      "visual_query": "Amazon rainforest fires",
       "visual_queries": [
-        "Winged ants flying in swarm",
-        "Ants departing nest in flight"
+        "Amazon rainforest wildfires",
+        "Tropical rainforest fire damage"
       ],
       "source_label": "",
       "source_url": "",
@@ -53,16 +53,40 @@
       "sentence_end": 3
     },
     {
-      "narration": "A small percentage of females survive to initiate new nests, treating one another non-aggressively, and ant colonies are eusocial, communal, and efficiently organized, operating as a unified entity to support the colony, with each caste playing a vital role in the colony's overall success.",
-      "visual_query": "New ant nest formation",
+      "narration": "The fate of the Amazon rainforest is a concern, as it is estimated that over 40% of all biotic species are indigenous to the rainforests, and the loss of this ecosystem could have severe consequences for the environment.",
+      "visual_query": "Deforestation footage",
       "visual_queries": [
-        "Female ant initiating new nest",
-        "Ants working together in new colony"
+        "Amazon rainforest deforestation",
+        "Tropical rainforest habitat loss"
       ],
       "source_label": "",
       "source_url": "",
       "sentence_start": 4,
       "sentence_end": 4
+    },
+    {
+      "narration": "The Amazon rainforest is a moist broadleaf tropical rainforest, spanning over 7 million km2, and is home to many species of plants, insects, and microorganisms, making it a significant source of natural medicines.",
+      "visual_query": "Amazon rainforest conservation efforts",
+      "visual_queries": [
+        "Amazon rainforest preservation efforts",
+        "Tropical rainforest climate change mitigation"
+      ],
+      "source_label": "",
+      "source_url": "",
+      "sentence_start": 5,
+      "sentence_end": 5
+    },
+    {
+      "narration": "The conservation of the Amazon rainforest is crucial, and efforts are being made to protect this vital ecosystem.",
+      "visual_query": "Amazon rainforest landscape",
+      "visual_queries": [
+        "Tropical rainforest environment",
+        "Amazon rainforest ecosystem"
+      ],
+      "source_label": "",
+      "source_url": "",
+      "sentence_start": 6,
+      "sentence_end": 6
     }
   ]
 }

@@ -1,0 +1,6 @@
+run=46019049718
+sha=0b955954199dc97beb2e327f82988c146d9c70e4
+branch=main
+job_status=failure
+topic=Amazon rainforest canopy aerial
+pipeline_exit=failure
