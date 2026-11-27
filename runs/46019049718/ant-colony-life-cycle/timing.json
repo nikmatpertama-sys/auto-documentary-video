@@ -1,0 +1,36 @@
+{
+  "sentences": [
+    {
+      "start": 0.75,
+      "end": 6.192333
+    },
+    {
+      "start": 6.892333,
+      "end": 16.336958
+    },
+    {
+      "start": 16.636958,
+      "end": 24.057416
+    },
+    {
+      "start": 24.357416,
+      "end": 29.960624000000003
+    },
+    {
+      "start": 30.260624000000004,
+      "end": 36.574374000000006
+    },
+    {
+      "start": 36.874374,
+      "end": 40.519582
+    }
+  ],
+  "total_duration": 40.819582,
+  "minimum_duration": 70.0,
+  "maximum_duration": null,
+  "voice_provider": "Speechify",
+  "voice": "geffen_32",
+  "voice_model": "simba-3.5",
+  "language": "en",
+  "speechify_used": true
+}

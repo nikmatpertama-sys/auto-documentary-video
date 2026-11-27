@@ -1,0 +1,45 @@
+{
+  "status": "failed",
+  "current_stage": "voiceover_and_subtitle_generation",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795790892.6791236,
+      "finished_at_epoch": 1795790895.962001,
+      "duration_seconds": 3.28
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795790895.9621766,
+      "finished_at_epoch": 1795790954.1070812,
+      "duration_seconds": 58.14
+    },
+    {
+      "name": "fact_checking",
+      "status": "completed",
+      "started_at_epoch": 1795790954.1073327,
+      "finished_at_epoch": 1795790967.540164,
+      "duration_seconds": 13.43
+    },
+    {
+      "name": "voiceover_and_subtitle_generation",
+      "status": "failed",
+      "started_at_epoch": 1795790967.540385,
+      "finished_at_epoch": 1795791099.2079947,
+      "failure_type": "RuntimeError",
+      "failure_message": "Voice-over is 40.82s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage."
+    }
+  ],
+  "voice_provider": "Speechify",
+  "voice": "geffen_32",
+  "voice_model": "simba-3.5",
+  "language": "en",
+  "voiceover_manifest": "output/voiceover_manifest.json",
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "Voice-over is 40.82s after script extension and a natural slower delivery; the format requires at least 70s. The run is stopped rather than padding the timeline with silence or empty footage.",
+    "finished_at_epoch": 1795791099.2090626
+  }
+}

@@ -1,72 +1,83 @@
 {
-  "title": "Ants",
-  "hook": "What if a colony thinks?",
-  "script": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+  "title": "Ant Colony Life Cycle",
+  "hook": "Ants live together",
+  "script": "Ants live together in colonies, which are eusocial, communal, and efficiently organized. A typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females. According to Wikipedia, ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests. The males die shortly thereafter, while a small percentage of females survive to initiate new nests. As superorganisms, ant colonies operate with a unified purpose, with each caste playing a vital role in the colony's survival. With over 13,800 described species, ants have colonized almost every landmass on Earth, thriving in moist tropical ecosystems and exceeding the combined biomass of wild birds and mammals in some regions, as noted in the Journal of Insect Science.",
   "scenes": [
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "Ants live together in colonies, which are eusocial, communal, and efficiently organized.",
+      "visual_query": "Ants in a colony",
       "visual_queries": [
-        "ant colony"
+        "Ants working together",
+        "Ant colony entrance"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "A typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females.",
+      "visual_query": "Ant queen and workers",
       "visual_queries": [
-        "ant colony"
+        "Ants with different roles",
+        "Queen ant laying eggs"
       ],
-      "source_label": "Ant",
+      "source_label": "Wikipedia",
       "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "According to Wikipedia, ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests.",
+      "visual_query": "Ants in flight",
       "visual_queries": [
-        "ant colony"
+        "Winged ants swarming",
+        "Ants leaving the nest"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "The males die shortly thereafter, while a small percentage of females survive to initiate new nests.",
+      "visual_query": "Female ants starting new nests",
       "visual_queries": [
-        "ant colony"
+        "Female ant digging",
+        "New ant nest formation"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "As superorganisms, ant colonies operate with a unified purpose, with each caste playing a vital role in the colony's survival.",
+      "visual_query": "Ants working together",
       "visual_queries": [
-        "ant colony"
+        "Ants cooperating",
+        "Ant colony activity"
       ],
-      "source_label": "Ant",
+      "source_label": "Wikipedia",
       "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "With over 13,800 described species, ants have colonized almost every landmass on Earth, thriving in moist tropical ecosystems and exceeding the combined biomass of wild birds and mammals in some regions, as noted in the Journal of Insect Science.",
+      "visual_query": "Ants in a tropical ecosystem",
       "visual_queries": [
-        "ant colony"
+        "Ants in a rainforest",
+        "Tropical ant colony"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "Journal of Insect Science",
+      "source_url": "https://academic.oup.com/jinsectscience",
+      "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5
     }

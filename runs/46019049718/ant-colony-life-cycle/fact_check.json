@@ -1,0 +1,139 @@
+{
+  "claims": [
+    {
+      "claim": "Ants live together in colonies, which are eusocial, communal, and efficiently organized.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Ant colonies are described as eusocial, communal, and efficiently organized",
+      "quote": "Ant colonies are eusocial, communal, and efficiently organized",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "A typical colony consists of one or more egg-laying queens, numerous sterile females, and seasonally, many winged sexual males and females.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "The typical colony consists of one or more egg-laying queens, numerous sterile females (workers, soldiers) and, seasonally, many winged sexual males and females",
+      "quote": "The typical colony consists of one or more egg-laying queens, numerous sterile females (workers, soldiers) and, seasonally, many winged sexual males and females",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Ants undertake flights to establish new colonies, with swarms of winged sexuals departing the nest in search of other nests.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "In order to establish new colonies, ants undertake flights that occur at species-characteristic times of the day",
+      "quote": "In order to establish new colonies, ants undertake flights that occur at species-characteristic times of the day",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The males die shortly thereafter, while a small percentage of females survive to initiate new nests.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "The males die shortly thereafter, along with most of the females. A small percentage of the females survive to initiate new nests",
+      "quote": "The males die shortly thereafter, along with most of the females. A small percentage of the females survive to initiate new nests",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Ants have colonized almost every landmass on Earth.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Ants have colonised almost every landmass on Earth",
+      "quote": "Ants have colonised almost every landmass on Earth",
+      "source": {
+        "id": "S2",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    }
+  ],
+  "checked": 5,
+  "supported": 5,
+  "unsupported": 0,
+  "contradicted": 0,
+  "sourced_supports": 5,
+  "general_knowledge_supports": 0,
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Ant colony",
+      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+    },
+    {
+      "id": "S2",
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "id": "S3",
+      "title": "Koloni semut",
+      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+    },
+    {
+      "id": "S4",
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    },
+    {
+      "id": "S5",
+      "title": "Cyrtophorus verrucosus",
+      "url": "https://en.wikipedia.org/wiki/Cyrtophorus_verrucosus"
+    }
+  ],
+  "overall": "pass",
+  "checked_at": "2026-11-27T14:51:19+00:00",
+  "provider": "Cloudflare AI key pair 2",
+  "research_articles": [
+    {
+      "title": "Ant colony",
+      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+    },
+    {
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "title": "Koloni semut",
+      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+    },
+    {
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    },
+    {
+      "title": "Cyrtophorus verrucosus",
+      "url": "https://en.wikipedia.org/wiki/Cyrtophorus_verrucosus"
+    }
+  ],
+  "claim_source": "semantic:Groq key 1",
+  "coverage": {
+    "script_sentences": 6,
+    "claimed_sentences": 5,
+    "non_factual_sentences": 1,
+    "uncovered_sentences": [],
+    "coverage": 1.0
+  },
+  "skipped_sentences": [],
+  "repair_provider": "Cloudflare AI key pair 1",
+  "repair_attempt": 1,
+  "status": "checked"
+}
