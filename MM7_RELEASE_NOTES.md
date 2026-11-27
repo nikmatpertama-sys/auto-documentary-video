@@ -271,6 +271,22 @@ spoken sentence and ends at the end of the spoken timeline, and
 `voiceover_manifest.json` records its text and end time. Final QC checks
 `script_ends_with_cta` instead of the old 120–200-word check.
 
+### First suite with the new rules (run `46054996159`)
+
+All three topics now pass research and scriptwriting with no word gate, and the
+writer itself closes each script with the CTA:
+
+| Topic | Scenes | Words | CTA source | Closing line |
+| --- | --- | --- | --- | --- |
+| Ant colony life cycle | 7 | 228 | written by the model | "Follow our channel for the next documentary and share your thoughts in the comments." |
+| Volcano eruption | 6 | 264 | written by the model | same closing line |
+
+All three jobs then stopped at `fact_checking` because every text provider is out
+of quota for the day (Gemini `20 requests/day`, Groq `8000 TPM`, OpenRouter
+`50/day`, Cloudflare `10,000 neurons/day`, DeepSeek `402 Insufficient Balance`).
+No voice-over or video exists yet from this suite; the spoken CTA still has to be
+heard in a real render.
+
 ## 4c. MM7.4 — what the production suite proved, and what it fixed
 
 Ten real suite runs were executed on GitHub Actions with the production
