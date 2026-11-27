@@ -237,6 +237,42 @@ is now reusable (`workflow_call`), keys its concurrency group by topic, and its
 diagnostics step publishes the finished video's `ffprobe` metadata plus 24
 review frames per run, in `ci-diagnostics/runs/<run_id>/` as well as `latest/`.
 
+## 4c. MM7.4 — what the production suite proved, and what it fixed
+
+Ten real suite runs were executed on GitHub Actions with the production
+secrets. Each failure exposed a defect that unit tests could not see, and every
+one below was reproduced from a published report, not inferred.
+
+### Fixed by evidence
+
+| Symptom in a live run | Real cause | Fix |
+| --- | --- | --- |
+| `Fact check could not support 3 claim(s)` for ordinary ant biology | the verifier only ever saw one fixed topic summary; the only follow-up was rewording | rejected claims trigger a topic-anchored encyclopaedia lookup, the same verifier re-runs against those passages (`tools/../research.gather_claim_evidence`) |
+| the same failure again, with the "forty percent of the oxygen" myth | the repair pass re-created unsupported figures to reach a word count | scriptwriter and repair prompts forbid figures, shares, dates and superlatives absent from the material; contradictions may not be restated |
+| `Required visual content is too wide for 9:16` on every candidate | a 16:9 source leaves a 31%-wide window, so any wide scene was impossible | crop planner separates a `discrete` subject (still fail-closed) from an `extended` scene a bounded pan may traverse |
+| 25 candidates rejected as beetles, bees and crickets for an ant scene | fallback queries dropped the subject (`insect macro nature`) | fallbacks now carry the scene's subject; Pixabay enabled with the key that was already configured |
+| `Voice-over is 40.82s ... 58.34s` after extension | a 120-word floor is not 70 seconds at this delivery pace | recovery measures words-per-second from the real voice-over, targets the words that duration needs, re-asks up to three times |
+| `All configured AI providers failed` while a key answered | a repaired script shorter than 120 words was discarded, and `DEEPSEEK_API_KEY` was never wired to a request | repair may accept a shorter plan; DeepSeek is a routed text provider; a draft under target is accepted and the duration expansion grows it |
+| diagnostics step exited in 0 s on a failed run | `set -euo pipefail` plus a missing artifact | `tools/ci_publish_diagnostics.py` annotates the failing stage publicly, keeps every run under `runs/<id>/<topic>/`, publishes review frames |
+
+### Proven working in production
+
+- Speechify synthesized the narration: `voiceover_manifest.json` records
+  `provider: Speechify`, `voice: geffen_32`, `model: simba-3.5`, 186 words and
+  75.68 s of audio across nine sentences.
+- Research, scriptwriting, duration targeting and subtitle generation completed
+  in the same run, and the run advanced to footage discovery before stopping.
+- Web-search frame extraction now survives sources whose seek or pixel format
+  breaks the MJPEG encoder.
+
+### Where the suite stands
+
+No final `documentary.mp4` was produced yet. The last runs stopped on provider
+quota, not on logic: Groq tokens-per-day, Gemini 20 requests/day, OpenRouter 50
+requests/day, both Cloudflare Workers AI pairs (10,000 neurons/day), and
+DeepSeek answered `402 Insufficient Balance`. Those limits reset daily except
+DeepSeek, which needs credit.
+
 ## 5. Speechify is the only production voice-over path
 
 - A Speechify error now aborts the run instead of silently switching to Edge TTS.
