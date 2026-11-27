@@ -1,104 +1,74 @@
 {
-  "title": "When a Lake Erupts: Taal Volcano's Fury",
-  "hook": "What happens when a lake erupts into fire?",
-  "script": "What happens when a lake erupts into fire? On January twelfth, 2020, Taal Volcano in the Philippines unleashed a sudden phreatomagmatic blast that turned its crater lake into a plume of ash. Seismic swarms started at eleven in the morning, and by one o’clock the volcano expelled ash and steam, shaking the island with loud rumblings. Within an hour the ash column rose roughly a hundred meters, prompting the Philippine Institute of Volcanology and Seismology to raise the alert to level three, then four as explosions intensified. The blast forced evacuations around Taal Lake, halted schools, work and flights, and even erased the tiny Vulcan Point island that once floated in the water. Later, smaller eruptions flickered in July 2021 and a brief burst in March 2022, each raising the alert level again, showing how the volcano remains restless. Volcanoes like Taal sit on the Pacific Ring of Fire, where converging tectonic plates force magma upward, creating explosive eruptions unlike the gentle flows of divergent boundaries. Understanding these mechanisms helps communities prepare, turning fear into informed resilience whenever the earth reminds us it can still roar.",
+  "title": "Ants",
+  "hook": "What if a colony thinks?",
+  "script": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
   "scenes": [
     {
-      "narration": "What happens when a lake erupts into fire?",
-      "visual_query": "Taal Lake erupting view",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Volcanic ash over lake",
-        "Lake eruption closeup"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "On January twelfth, 2020, Taal Volcano in the Philippines unleashed a sudden phreatomagmatic blast that turned its crater lake into a plume of ash.",
-      "visual_query": "Crater lake ash plume",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Volcano crater steam",
-        "Ash plume over water"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "Seismic swarms started at eleven in the morning, and by one o’clock the volcano expelled ash and steam, shaking the island with loud rumblings.",
-      "visual_query": "Volcano island rumbling",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Ash and steam eruption",
-        "Island shaking footage"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 2,
       "sentence_end": 2
     },
     {
-      "narration": "Within an hour the ash column rose roughly a hundred meters, prompting the Philippine Institute of Volcanology and Seismology to raise the alert to level three, then four as explosions intensified.",
-      "visual_query": "Ash column rising",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Volcano alert signage",
-        "Explosive ash burst"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "The blast forced evacuations around Taal Lake, halted schools, work and flights, and even erased the tiny Vulcan Point island that once floated in the water.",
-      "visual_query": "Evacuation boats Taal",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Vulcan Point submerged",
-        "Lake evacuation scene"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "Later, smaller eruptions flickered in July 2021 and a brief burst in March 2022, each raising the alert level again, showing how the volcano remains restless.",
-      "visual_query": "Taal volcano smoke 2022",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "July 2021 eruption plume",
-        "Recent volcanic activity"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 5,
       "sentence_end": 5
-    },
-    {
-      "narration": "Volcanoes like Taal sit on the Pacific Ring of Fire, where converging tectonic plates force magma upward, creating explosive eruptions unlike the gentle flows of divergent boundaries.",
-      "visual_query": "Pacific Ring of Fire map",
-      "visual_queries": [
-        "Convergent plate volcano",
-        "Tectonic plate collision"
-      ],
-      "source_label": "",
-      "source_url": "",
-      "sentence_start": 6,
-      "sentence_end": 6
-    },
-    {
-      "narration": "Understanding these mechanisms helps communities prepare, turning fear into informed resilience whenever the earth reminds us it can still roar.",
-      "visual_query": "Community preparedness meeting",
-      "visual_queries": [
-        "People watching volcano",
-        "Local safety briefing"
-      ],
-      "source_label": "",
-      "source_url": "",
-      "sentence_start": 7,
-      "sentence_end": 7
     }
   ]
 }
