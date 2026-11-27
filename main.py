@@ -1,6 +1,7 @@
 
 import os
 import re
+import math
 import json
 import time
 import asyncio
@@ -2103,12 +2104,16 @@ def extend_plan_for_duration(plan, research_brief, target_words=185):
     """Ask the writer to deepen the script so the spoken VO reaches 70s.
 
     Used only when the measured voice-over is too short; the result is fully
-    re-validated (8 scenes, 120-200 words, target language).
+    re-validated (120-200 words, target language). ``target_words`` comes from
+    the measured speaking rate, because 120 words only bought 58 seconds of
+    narration at this pipeline's delivery pace.
     """
+    required_words = max(120, min(200, int(target_words or 185)))
+    target_words = required_words
     prompt = (
         "A documentary voice-over measured shorter than the required 70 seconds. "
-        "Deepen the narration so it reads at roughly 185 words while staying "
-        "between 120 and 200 words. Add concrete, source-supported detail, a "
+        f"Deepen the narration so it reads at roughly {target_words} words while "
+        "staying between 120 and 200 words. Add concrete, source-supported detail, a "
         "clearer mechanism, or a stronger transition; never add filler, "
         "repetition, or unsupported numbers. Keep the current number of scenes "
         "(never add a scene just to lengthen the video), keep every visual query "
@@ -2134,22 +2139,24 @@ def extend_plan_for_duration(plan, research_brief, target_words=185):
         candidate = validate_plan_candidate(payload, min_words=MIN_REPAIRED_WORDS)
         words = len(candidate["script"].split())
         extended = candidate
-        if words >= 120:
+        if words >= required_words:
             break
         print(
             f"Duration recovery: the provider returned {words} words "
-            f"(attempt {attempts}/3); asking for the 150-190 word target again."
+            f"(attempt {attempts}/3); asking for the {required_words} word target again."
         )
         current_prompt = (
             prompt
             + f"\n\nYour previous answer contained only {words} words, which is too "
-            "short. Rewrite the narration with 150-190 words by adding "
+            f"short. Rewrite the narration with {required_words} words by adding "
             "source-supported detail to each scene. Do not repeat sentences and do "
             "not invent numbers, dates or superlatives."
         )
     if words < 120:
+        # The caller re-measures the voice-over and extends again if the target
+        # was not reached, so only the 120-word format floor is fatal here.
         raise RuntimeError(
-            "The duration extension could not reach 120 words after 3 attempts "
+            f"The duration extension could not reach 120 words after 3 attempts "
             f"(last draft: {words} words). The run stops rather than shipping a "
             "voice-over shorter than the format requires."
         )
@@ -8211,7 +8218,21 @@ def main():
             f"(attempt {attempts}/2) instead of padding with silence."
         )
         try:
-            plan = extend_plan_for_duration(plan, research_data.get("brief"))
+            # The word floor alone is not a duration: measure the delivery rate of
+            # the voice-over that was actually produced and target the words that
+            # rate needs for the minimum duration, with a small safety margin.
+            spoken_words = max(1, len(str(plan.get("script") or "").split()))
+            words_per_second = spoken_words / max(0.5, total_duration)
+            needed_words = int(
+                min(200, max(120, math.ceil(MIN_VIDEO_DURATION * words_per_second * 1.08)))
+            )
+            print(
+                f"Duration planning: {total_duration:.2f}s for {spoken_words} words "
+                f"({words_per_second:.2f} words/s); targeting {needed_words} words."
+            )
+            plan = extend_plan_for_duration(
+                plan, research_data.get("brief"), target_words=needed_words
+            )
         except Exception as exc:
             print(f"Script extension unavailable: {str(exc)[:300]}")
             break

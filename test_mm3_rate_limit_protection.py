@@ -135,9 +135,13 @@ class MM3RateLimitProtectionTests(unittest.TestCase):
         response = Mock(status_code=503, headers={})
         error = requests.HTTPError("503 Service Unavailable")
         error.response = response
+        # Every source is mocked: the live web-search request this test used to
+        # make took over a minute when it was rate limited, and the cooldown
+        # assertion below then measured an almost expired cooldown.
         with patch.object(main, "internet_archive_search", side_effect=error), \
              patch.object(main, "commons_search", return_value=[]), \
              patch.object(main, "nasa_search", return_value=[]), \
+             patch.object(main, "web_page_video_search", return_value=[]), \
              patch.object(main, "google_open_web_video_search", return_value=[]):
             main.search_all_footage_sources("rare rainforest query")
         cache_path = main._footage_source_cache_path("Internet Archive", "rare rainforest query")

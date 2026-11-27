@@ -116,9 +116,12 @@ class DurationExtensionTests(unittest.TestCase):
         self.assertGreaterEqual(len(long_plan["script"].split()), 120)
         with mock.patch.object(main, "call_json_with_providers",
                                side_effect=[(short, "mock"), (long_plan, "mock")]) as caller:
-            result = main.extend_plan_for_duration(dict(short, scenes=[
-                dict(scene) for scene in short["scenes"]]), "brief")
-        self.assertGreaterEqual(len(result["script"].split()), 120)
+            result = main.extend_plan_for_duration(
+                dict(short, scenes=[dict(scene) for scene in short["scenes"]]),
+                "brief",
+                target_words=150,
+            )
+        self.assertGreaterEqual(len(result["script"].split()), 150)
         self.assertEqual(caller.call_count, 2)
 
     def test_extension_fails_loudly_instead_of_shipping_a_short_voiceover(self):
@@ -127,7 +130,9 @@ class DurationExtensionTests(unittest.TestCase):
                                side_effect=[(short, "mock")] * 3):
             with self.assertRaisesRegex(RuntimeError, "could not reach 120 words"):
                 main.extend_plan_for_duration(
-                    dict(short, scenes=[dict(scene) for scene in short["scenes"]]), "brief"
+                    dict(short, scenes=[dict(scene) for scene in short["scenes"]]),
+                    "brief",
+                    target_words=160,
                 )
 
 
