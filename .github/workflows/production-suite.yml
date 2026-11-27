@@ -29,10 +29,10 @@ jobs:
   render:
     strategy:
       fail-fast: false
-      # One at a time. Two concurrent renders shared one provider account and
-      # both failed inside the first five minutes, so the suite no longer
-      # competes with itself for quota.
-      max-parallel: 1
+      # The early failures turned out to be fact-check logic, not quota, so all
+      # three topics can run at once. Providers still fall back across four
+      # accounts and the pipeline cools down on 429.
+      max-parallel: 3
       matrix:
         include:
           - topic: "Ant colony life cycle"

@@ -38,7 +38,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # A full nine-scene render with per-candidate AI vision review takes well
+    # over an hour; the old limit cancelled valid runs mid-render.
+    timeout-minutes: 100
 
     env:
       OMP_NUM_THREADS: "2"
@@ -372,6 +374,10 @@ jobs:
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+          # The key is configured, so this existing source is used instead of
+          # being left off. Pexels stays off: no credential is configured.
+          ENABLE_PIXABAY_FALLBACK: "true"
+          ENABLE_PEXELS_FALLBACK: "false"
 
           # Optional quota-scope labels/IDs. Leave defaults when keys share one account/project.
           GROQ_QUOTA_GROUP: shared-organization

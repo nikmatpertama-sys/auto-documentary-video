@@ -4009,6 +4009,18 @@ def expand_visual_queries(raw_queries, narration=""):
     return expanded[:6]
 
 
+def scene_subject_phrase(query, max_words=2):
+    """The scene's subject words, without shot and style descriptors."""
+    phrases = footage_queries.subject_phrases(str(query or "")) or []
+    if phrases:
+        return phrases[0]
+    words = [
+        word for word in dict.fromkeys(normalize_words(clean_query(str(query or ""))))
+        if word not in footage_queries.SHOT_WORDS and len(word) > 2
+    ]
+    return " ".join(words[:max_words])
+
+
 def fallback_visual_queries(raw_queries, narration=""):
     """Broaden sparse searches with independent, subject-preserving variants.
 
@@ -4035,6 +4047,7 @@ def fallback_visual_queries(raw_queries, narration=""):
     context_tokens = set(normalize_words(context_text))
     _, groups = query_concepts(context_text)
     names = set(groups)
+    subject_phrase = scene_subject_phrase(primary)
     candidates = []
 
     research_terms = {
@@ -4140,10 +4153,14 @@ def fallback_visual_queries(raw_queries, narration=""):
             "river landscape drone",
         ])
     elif "insect" in names:
+        # The concept group says "insect"; only the scene query knows which one.
+        # Dropping that word produced a moth/beetle/grasshopper pool that the
+        # visual gate then rejected, so the subject is kept and only the shot
+        # wording is broadened.
         candidates.extend([
-            "insect macro nature",
-            "insect on leaf closeup",
-            "insect crawling plant",
+            f"{subject_phrase} macro nature",
+            f"{subject_phrase} on leaf closeup",
+            f"{subject_phrase} crawling plant",
         ])
     elif "orchid" in names:
         candidates.extend([
@@ -4482,6 +4499,45 @@ def tag_similarity(tags_a, tags_b):
     )
 
 
+def _extract_single_frame(video_path, timestamp, frame_path):
+    """Write one JPEG frame, tolerating sources whose first seek fails.
+
+    Some archive uploads decode badly on an input-side seek or carry a pixel
+    format the MJPEG encoder rejects ("parameters such as bit_rate, rate, width
+    or height"). Falling back to an output-side seek with an explicit even-sized
+    yuvj420p conversion keeps those clips reviewable instead of losing an
+    otherwise valid candidate.
+    """
+    attempts = (
+        [
+            "-ss", f"{timestamp:.3f}", "-i", str(video_path),
+            "-frames:v", "1", "-vf", "scale=768:-2", "-q:v", "5", str(frame_path),
+        ],
+        [
+            "-i", str(video_path), "-ss", f"{timestamp:.3f}",
+            "-frames:v", "1",
+            "-vf", "scale=768:-2:flags=lanczos,format=yuvj420p",
+            "-pix_fmt", "yuvj420p", "-q:v", "5", str(frame_path),
+        ],
+        [
+            "-i", str(video_path), "-frames:v", "1",
+            "-vf", "scale=768:-2:flags=lanczos,format=yuvj420p",
+            "-pix_fmt", "yuvj420p", "-q:v", "5", str(frame_path),
+        ],
+    )
+    result = None
+    for args in attempts:
+        result = subprocess.run(
+            ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if result.returncode == 0 and frame_path.exists():
+            return result
+    return result
+
+
 def extract_vision_frames(video_path, frame_count=3, save_dir=None):
     """Extract evenly spaced, low-resolution frames for visual inspection.
 
@@ -4526,22 +4582,7 @@ def extract_vision_frames(video_path, frame_count=3, save_dir=None):
         for index, timestamp in enumerate(timestamps, 1):
             frame_path = temp_path / f"frame_{index:02d}.jpg"
 
-            result = subprocess.run(
-                [
-                    "ffmpeg", "-y",
-                    "-hide_banner",
-                    "-loglevel", "error",
-                    "-ss", f"{timestamp:.3f}",
-                    "-i", str(video_path),
-                    "-frames:v", "1",
-                    "-vf", "scale=768:-2",
-                    "-q:v", "5",
-                    str(frame_path),
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
+            result = _extract_single_frame(video_path, timestamp, frame_path)
 
             if (
                 result.returncode != 0
@@ -5767,8 +5808,10 @@ def adaptive_visual_retry_queries(scene, rejection_feedback=None):
         add("wild jaguar moving in natural rainforest habitat camera trap")
         add("jaguar wildlife in dense tropical forest natural environment")
     elif "insect" in group_names:
-        add("insect macro closeup on natural leaf detailed wildlife footage")
-        add("wild insect crawling on plant macro documentary video")
+        # Keep the scene's own subject in every fallback. "insect" alone matches
+        # beetles, bees and crickets as readily as the ant the narration is about.
+        add(f"{scene_subject_phrase(primary)} macro closeup on natural leaf detailed footage")
+        add(f"wild {scene_subject_phrase(primary)} crawling on plant macro documentary video")
     elif "orchid" in group_names:
         add("wild tropical orchid flowering naturally on tree closeup")
         add("orchid epiphyte growing on rainforest tree macro footage")
