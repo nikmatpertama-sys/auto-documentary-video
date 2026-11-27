@@ -1,0 +1,42 @@
+{
+  "status": "failed",
+  "current_stage": "footage_search_download_and_visual_verification",
+  "error_type": "RuntimeError",
+  "error_message": "Scene 1 could not obtain verified relevant footage. None of the 20 candidates checked from 19 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 116234697: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Internet Archive Flickr-16780887326: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Wikimedia Commons 28504331: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Wikimedia Commons 118517403: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 1080x1080 (aspect 1.0000). Queries tried: ['ant trail close', 'ant trail', 'ant close', 'formicidae trail', 'ant mound wide shot', 'ant mound', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 7980, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 7933, in main\n    fetch_footage(plan)\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 6453, in fetch_footage\n    raise RuntimeError(\nRuntimeError: Scene 1 could not obtain verified relevant footage. None of the 20 candidates checked from 19 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 116234697: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Internet Archive Flickr-16780887326: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Wikimedia Commons 28504331: Required visual content is too wide for 9:16 at sample 1; the generator will not cut off scene-critical subjects. | Wikimedia Commons 118517403: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 1080x1080 (aspect 1.0000). Queries tried: ['ant trail close', 'ant trail', 'ant close', 'formicidae trail', 'ant mound wide shot', 'ant mound', 'insect macro closeup on natural leaf detailed wildlife footage', 'wild insect crawling on plant macro documentary video']. No unrelated footage or diagram will be substituted.\n",
+  "finished_at_epoch": 1795781653.1660979,
+  "configuration": {
+    "project_release": "MM6",
+    "visual_verification_required": true,
+    "groq_keys_configured": 1,
+    "openrouter_keys_configured": 1,
+    "gemini_keys_configured": 1,
+    "cloudflare_key_pairs_configured": 2,
+    "speechify_keys_configured": 1,
+    "pixabay_key_configured": true,
+    "pexels_key_configured": false,
+    "release": "MM6",
+    "source_priority": [
+      "Coverr",
+      "Internet Archive",
+      "Wikimedia Commons",
+      "NASA",
+      "Web Search",
+      "Google Search",
+      "Pexels",
+      "Pixabay"
+    ],
+    "footage_source_requests": {
+      "Coverr": 2,
+      "Internet Archive": 21,
+      "Wikimedia Commons": 31,
+      "NASA": 8,
+      "Web Search": 20,
+      "Google Search": 6
+    },
+    "footage_source_cooldowns_seconds": {
+      "Web Search": 69,
+      "Google Search": 70
+    }
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "claims": [
+    {
+      "claim": "Ants are eusocial insects whose colonies can range from a few dozen individuals to millions.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Direct statement in Ant source about eusociality and colony size range.",
+      "quote": "Ants are eusocial insects of the family Formicidae",
+      "source": {
+        "id": "S3",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Nearly all ant colonies include one or more fertile females called queens, along with fertile males called drones.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Source explicitly mentions fertile queens and drones in nearly all colonies.",
+      "quote": "Nearly all ant colonies also have some fertile males called \"drones\" and one or more fertile females called \"queens\" (gynes).",
+      "source": {
+        "id": "S3",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Most colony members are sterile, wingless female workers called ergates.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Source states that most sterile wingless females are workers (ergates).",
+      "quote": "most of which are workers (ergates)",
+      "source": {
+        "id": "S3",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Typical colonies consist of various castes of sterile, wingless females, most of which are workers, as well as soldiers and other specialised groups.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Source directly describes typical colony composition.",
+      "quote": "Typical colonies consist of various castes of sterile, wingless females, most of which are workers (ergates), as well as soldiers (dinergates) and other specialised groups.",
+      "source": {
+        "id": "S3",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Some colonies occupy large territories with sizeable nests, and supercolonies can reach hundreds of millions of individuals.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Source mentions large territories and supercolony size.",
+      "quote": "Some colonies occupy large territories with sizeable nest (or nests) that consist of millions of individuals. In some cases they reach hundreds of millions of individuals in super colonies.",
+      "source": {
+        "id": "S3",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "In some lineages, such as army ants, the colony does not construct a permanent nest and moves almost incessantly.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Army ant source states colonies lack permanent nests and move incessantly.",
+      "quote": "army ants do not construct permanent nests; an army ant colony moves almost incessantly",
+      "source": {
+        "id": "S4",
+        "title": "Army ant",
+        "url": "https://en.wikipedia.org/wiki/Army_ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Ant colonies are described as superorganisms because the ants appear to operate as a unified entity.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Source directly links superorganism description to unified entity operation.",
+      "quote": "The colonies are described as superorganisms because the ants appear to operate as a unified entity",
+      "source": {
+        "id": "S3",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Ants have colonised almost every landmass on Earth; the only places lacking indigenous ants are Antarctica and a few remote or inhospitable islands.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Source states colonization extent and the only ant‑free places.",
+      "quote": "Ants have colonised almost every landmass on Earth. The only places lacking indigenous ants are Antarctica and a few remote or inhospitable islands.",
+      "source": {
+        "id": "S3",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    }
+  ],
+  "checked": 8,
+  "supported": 8,
+  "unsupported": 0,
+  "contradicted": 0,
+  "sourced_supports": 8,
+  "general_knowledge_supports": 0,
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    },
+    {
+      "id": "S2",
+      "title": "Semut tentara",
+      "url": "https://id.wikipedia.org/wiki/Semut_tentara"
+    },
+    {
+      "id": "S3",
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "id": "S4",
+      "title": "Army ant",
+      "url": "https://en.wikipedia.org/wiki/Army_ant"
+    }
+  ],
+  "overall": "pass",
+  "checked_at": "2026-11-27T12:06:21+00:00",
+  "provider": "OpenRouter key 1",
+  "research_articles": [
+    {
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    },
+    {
+      "title": "Semut tentara",
+      "url": "https://id.wikipedia.org/wiki/Semut_tentara"
+    },
+    {
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "title": "Army ant",
+      "url": "https://en.wikipedia.org/wiki/Army_ant"
+    }
+  ],
+  "claim_source": "semantic:OpenRouter key 1",
+  "coverage": {
+    "script_sentences": 10,
+    "claimed_sentences": 8,
+    "non_factual_sentences": 2,
+    "uncovered_sentences": [],
+    "coverage": 1.0
+  },
+  "skipped_sentences": [],
+  "repair_provider": "OpenRouter key 1",
+  "repair_attempt": 1,
+  "status": "checked"
+}

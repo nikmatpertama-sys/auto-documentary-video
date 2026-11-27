@@ -1,395 +1,88 @@
 {
-  "title": "Volcano Eruption Dynamics",
-  "hook": "Volcanoes erupt molten rock from the Earth.",
+  "title": "The Hidden City Inside an Ant Colony",
+  "hook": "What if a single insect could build a city that rivals humanity?",
+  "script": "What if a single insect could build a city that rivals humanity? Ants are eusocial insects whose colonies can range from a few dozen individuals to millions. Nearly all ant colonies include one or more fertile females called queens, along with fertile males called drones. Most colony members are sterile, wingless female workers called ergates. Typical colonies consist of various castes of sterile, wingless females, most of which are workers, as well as soldiers and other specialised groups. Some colonies occupy large territories with sizeable nests, and supercolonies can reach hundreds of millions of individuals. In some lineages, such as army ants, the colony does not construct a permanent nest and moves almost incessantly. Ant colonies are described as superorganisms because the ants appear to operate as a unified entity. Ants have colonised almost every landmass on Earth; the only places lacking indigenous ants are Antarctica and a few remote or inhospitable islands. Their highly organised colonies remind us that the smallest lives can build complex societies.",
   "scenes": [
     {
-      "narration": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption.",
-      "visual_focus": "molten rock material",
-      "visual_query": "molten rock material erupting",
+      "narration": "What if a single insect could build a city that rivals humanity? Ants are eusocial insects whose colonies can range from a few dozen individuals to millions.",
+      "visual_query": "ant trail close-up",
       "visual_queries": [
-        "molten rock flowing",
-        "magma emerging vent"
+        "ant mound wide shot",
+        "ant trail close-up"
       ],
-      "visual_mode": "footage",
-      "reference_required": false,
-      "reference_query": "molten rock material erupting",
-      "source_label": "U.S. National Park Service",
-      "source_url": "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "visual_type": "footage",
       "sentence_start": 0,
-      "sentence_end": 0,
-      "voice_timing": {
-        "start_seconds": 0.0,
-        "spoken_end_seconds": 6.99,
-        "visual_end_seconds": 7.69,
-        "duration_seconds": 7.69,
-        "first_sentence_index": 0,
-        "last_sentence_index": 0
-      },
-      "media_file": "output/footage/scene_01.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "glowing magma, active volcano, molten rock, volcanic eruption, geology science, nature disaster, thermal heat, earth science, glowing embers, close up shot, high temperature, wild nature, lava flow",
-      "selected_footage_url": "https://pixabay.com/videos/id-387139/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show molten rock material (lava/magma) flowing and bubbling, directly matching the required focus.",
-        "query": "molten"
-      }
+      "sentence_end": 1
     },
     {
-      "narration": "The form and style of an eruption of a volcano is determined by the composition of the lava.",
-      "visual_focus": "volcano eruption style",
-      "visual_query": "volcano eruption style lava",
+      "narration": "Nearly all ant colonies include one or more fertile females called queens, along with fertile males called drones. Most colony members are sterile, wingless female workers called ergates.",
+      "visual_query": "queen ant close-up",
       "visual_queries": [
-        "volcano eruption lava flow",
-        "active volcano eruption"
+        "queen ant close-up",
+        "founding queen on forest floor"
       ],
-      "visual_mode": "footage",
-      "reference_required": false,
-      "reference_query": "volcano eruption style lava",
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Volcano",
-      "visual_type": "footage",
-      "sentence_start": 1,
-      "sentence_end": 1,
-      "voice_timing": {
-        "start_seconds": 7.69,
-        "spoken_end_seconds": 13.45,
-        "visual_end_seconds": 13.75,
-        "duration_seconds": 6.06,
-        "first_sentence_index": 1,
-        "last_sentence_index": 1
-      },
-      "media_file": "output/footage/scene_02.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "volcano, smoke, fire, heat, flame, burn, geology, volcanology, spatter, splash, iceland, nature, lava, magma, eruption",
-      "selected_footage_url": "https://pixabay.com/videos/id-152174/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show an active volcano eruption with glowing molten lava and volcanic spatter emerging from a crater, directly matching the required focus.",
-        "query": "volcano"
-      }
-    },
-    {
-      "narration": "Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism.",
-      "visual_focus": "active volcano",
-      "visual_query": "active volcano mountain cone",
-      "visual_queries": [
-        "dormant volcano landscape",
-        "volcano edifice structure"
-      ],
-      "visual_mode": "footage",
-      "reference_required": false,
-      "reference_query": "active volcano mountain cone",
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Volcano",
-      "visual_type": "footage",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 2,
-      "sentence_end": 2,
-      "voice_timing": {
-        "start_seconds": 13.75,
-        "spoken_end_seconds": 20.35,
-        "visual_end_seconds": 20.65,
-        "duration_seconds": 6.9,
-        "first_sentence_index": 2,
-        "last_sentence_index": 2
-      },
-      "media_file": "output/footage/scene_03.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "volcano, mountain, nature, landscape, adventure, island, hill, volcanic, mount, sicily, mediterranean, caldera, sulfur, hot, geothermal, geology, geological, geothermic, fumarole, europe, active, energy, colorful, activity",
-      "selected_footage_url": "https://pixabay.com/videos/id-3960/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly show an active volcano landscape with fumaroles emitting gas and sulfur deposits on the slopes, directly supporting the narration about active volcanoes.",
-        "query": "active volcano"
-      }
+      "sentence_end": 3
     },
     {
-      "narration": "Superheated magma rises through the mantle and melts the crust above to flow on the surface.",
-      "visual_focus": "superheated magma",
-      "visual_query": "superheated magma rises mantle",
+      "narration": "Typical colonies consist of various castes of sterile, wingless females, most of which are workers, as well as soldiers and other specialised groups.",
+      "visual_query": "worker ant feeding larvae",
       "visual_queries": [
-        "magma flowing on surface",
-        "molten lava surface flow"
+        "worker ant feeding larvae",
+        "ant larvae in nest close-up"
       ],
-      "visual_mode": "footage",
-      "reference_required": false,
-      "reference_query": "superheated magma rises mantle",
-      "source_label": "British Geological Survey",
-      "source_url": "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/",
-      "visual_type": "footage",
-      "sentence_start": 3,
-      "sentence_end": 3,
-      "voice_timing": {
-        "start_seconds": 20.65,
-        "spoken_end_seconds": 26.578,
-        "visual_end_seconds": 26.878,
-        "duration_seconds": 6.228,
-        "first_sentence_index": 3,
-        "last_sentence_index": 3
-      },
-      "media_file": "output/footage/scene_04.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "glowing magma, lava flow, molten rock, volcanic eruption, geology science, thermal heat, earth science, active volcano, glowing embers, natural phenomenon, fiery background, dark crust, close up shot, vibrant glow, high temperature, geological formation, wild nature",
-      "selected_footage_url": "https://pixabay.com/videos/id-387095/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show glowing, superheated magma and molten rock flowing and bubbling on the surface, directly matching the required focus.",
-        "query": "magma"
-      }
-    },
-    {
-      "narration": "If there is evidence for magma beneath the ground, the volcano should be considered active.",
-      "visual_focus": "magma beneath ground",
-      "visual_query": "magma beneath the ground",
-      "visual_queries": [
-        "volcano ground deformation",
-        "active hydrothermal system"
-      ],
-      "visual_mode": "footage",
-      "reference_required": false,
-      "reference_query": "magma beneath the ground",
-      "source_label": "U.S. Geological Survey",
-      "source_url": "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications",
-      "visual_type": "footage",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 4,
-      "sentence_end": 4,
-      "voice_timing": {
-        "start_seconds": 26.878,
-        "spoken_end_seconds": 32.662,
-        "visual_end_seconds": 32.962,
-        "duration_seconds": 6.084,
-        "first_sentence_index": 4,
-        "last_sentence_index": 4
-      },
-      "media_file": "output/footage/scene_05.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "lava, volcano, fire, magma, eruption, rock, explosion, hot, volcanic, heat, smoke, geology, catastrophe, natural disaster, iceland, explosive",
-      "selected_footage_url": "https://pixabay.com/videos/id-260564/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly show glowing molten magma bubbling and churning beneath the ground in a volcanic vent, directly supporting the required focus on magma beneath the ground.",
-        "query": "magma"
-      }
+      "sentence_end": 4
     },
     {
-      "narration": "Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle.",
-      "visual_focus": "magma route",
-      "visual_query": "magma route from mantle",
+      "narration": "Some colonies occupy large territories with sizeable nests, and supercolonies can reach hundreds of millions of individuals.",
+      "visual_query": "new adult ant exiting nest",
       "visual_queries": [
-        "volcanologists studying eruption",
-        "magma rising mantle"
+        "new adult ant exiting nest",
+        "emerging ant pupa"
       ],
-      "visual_mode": "footage",
-      "reference_required": false,
-      "reference_query": "magma route from mantle",
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
-      "visual_type": "footage",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 5,
-      "sentence_end": 5,
-      "voice_timing": {
-        "start_seconds": 32.962,
-        "spoken_end_seconds": 39.634,
-        "visual_end_seconds": 39.934,
-        "duration_seconds": 6.972,
-        "first_sentence_index": 5,
-        "last_sentence_index": 5
-      },
-      "media_file": "output/footage/scene_06.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "volcano, eruption, fire, heat, burn, volcanic, iceland, nature, magma, cone, fissure, vent",
-      "selected_footage_url": "https://pixabay.com/videos/id-130156/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly show an active volcanic vent erupting magma, with molten lava emerging and flowing out, directly corresponding to the required focus of a magma route/activity.",
-        "query": "magma"
-      }
+      "sentence_end": 5
     },
     {
-      "narration": "Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style.",
-      "visual_focus": "volcano erupting continuously",
-      "visual_query": "volcano erupting continuously centuries",
+      "narration": "In some lineages, such as army ants, the colony does not construct a permanent nest and moves almost incessantly. Ant colonies are described as superorganisms because the ants appear to operate as a unified entity.",
+      "visual_query": "army ant raid",
       "visual_queries": [
-        "stromboli volcano eruption",
-        "continuous volcanic activity"
+        "army ant raid",
+        "soldier ant defending nest"
       ],
-      "visual_mode": "footage",
-      "reference_required": false,
-      "reference_query": "volcano erupting continuously centuries",
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Volcanic_eruption",
-      "visual_type": "footage",
+      "source_url": "https://en.wikipedia.org/wiki/Army_ant",
       "sentence_start": 6,
-      "sentence_end": 6,
-      "voice_timing": {
-        "start_seconds": 39.934,
-        "spoken_end_seconds": 46.606,
-        "visual_end_seconds": 46.906,
-        "duration_seconds": 6.972,
-        "first_sentence_index": 6,
-        "last_sentence_index": 6
-      },
-      "media_file": "output/footage/scene_07.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "volcano, plume, japan, kyushu, landscape",
-      "selected_footage_url": "https://pixabay.com/videos/id-30142/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 0.95,
-        "reason": "The frames clearly show an active volcano erupting, with a massive plume of smoke and ash rising from the crater of a volcanic mountain, perfectly matching the required visual focus.",
-        "query": "volcano"
-      }
+      "sentence_end": 7
     },
     {
-      "narration": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
-      "visual_focus": "outpouring of lava",
-      "visual_query": "outpouring of lava rift zone",
+      "narration": "Ants have colonised almost every landmass on Earth; the only places lacking indigenous ants are Antarctica and a few remote or inhospitable islands. Their highly organised colonies remind us that the smallest lives can build complex societies.",
+      "visual_query": "ant supercolony aerial",
       "visual_queries": [
-        "lava flow rift zone",
-        "volcano eruption outpouring"
+        "ant supercolony aerial",
+        "massive ant swarm landscape"
       ],
-      "visual_mode": "footage",
-      "reference_required": false,
-      "reference_query": "outpouring of lava rift zone",
-      "source_label": "U.S. Geological Survey",
-      "source_url": "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years",
-      "visual_type": "footage",
-      "sentence_start": 7,
-      "sentence_end": 7,
-      "voice_timing": {
-        "start_seconds": 46.906,
-        "spoken_end_seconds": 57.562,
-        "visual_end_seconds": 58.812,
-        "duration_seconds": 11.906,
-        "first_sentence_index": 7,
-        "last_sentence_index": 7
-      },
-      "media_file": "output/footage/scene_08.mp4",
-      "selected_footage_source": "Pixabay",
-      "selected_footage_tags": "volcano lava, explosion, volcano, lava, volcanic, hot, nature",
-      "selected_footage_url": "https://pixabay.com/videos/id-144678/",
-      "visual_verification": {
-        "method": "gemini (gemini-3.5-flash-lite) Vision",
-        "confidence": 1.0,
-        "reason": "The frames clearly show an outpouring of glowing, molten lava flowing across dark volcanic terrain, directly supporting the scene narration.",
-        "query": "lava"
-      }
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "sentence_start": 8,
+      "sentence_end": 9
     }
   ],
-  "fact_claims": [
-    {
-      "scene": 1,
-      "sentence": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption.",
-      "source_urls": [
-        "https://www.nps.gov/subjects/volcanoes/anatomy-of-a-volcano.htm"
-      ]
-    },
-    {
-      "scene": 2,
-      "sentence": "The form and style of an eruption of a volcano is determined by the composition of the lava.",
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Volcano"
-      ]
-    },
-    {
-      "scene": 3,
-      "sentence": "Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism.",
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Volcano"
-      ]
-    },
-    {
-      "scene": 4,
-      "sentence": "Superheated magma rises through the mantle and melts the crust above to flow on the surface.",
-      "source_urls": [
-        "https://www.bgs.ac.uk/discovering-geology/earth-hazards/volcanoes/how-volcanoes-form-2/"
-      ]
-    },
-    {
-      "scene": 5,
-      "sentence": "If there is evidence for magma beneath the ground, the volcano should be considered active.",
-      "source_urls": [
-        "https://www.usgs.gov/observatories/yvo/news/active-dormant-and-extinct-clarifying-confusing-classifications"
-      ]
-    },
-    {
-      "scene": 6,
-      "sentence": "Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle.",
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Volcanic_eruption"
-      ]
-    },
-    {
-      "scene": 7,
-      "sentence": "Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style.",
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Volcanic_eruption"
-      ]
-    },
-    {
-      "scene": 8,
-      "sentence": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
-      "source_urls": [
-        "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
-      ]
-    }
-  ],
-  "script": "Volcanoes are vents where molten rock material emerges from the Earth’s interior during an eruption. The form and style of an eruption of a volcano is determined by the composition of the lava. Volcanoes are referred to as either active or dormant based on their frequency of eruption or volcanism. Superheated magma rises through the mantle and melts the crust above to flow on the surface. If there is evidence for magma beneath the ground, the volcano should be considered active. Volcanologists found that an eruption was likely triggered by magma taking a nonstop route from the mantle. Stromboli is a volcano that has been erupting nearly continuously for centuries in a specific style. The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
-  "ai_provider": {
-    "provider": "gemini",
-    "model": "gemini-3.5-flash-lite"
-  },
-  "opening_overlay": {
-    "path": "output/opening_overlay.png",
-    "adjustments": [],
-    "layout": {
-      "path": "output/opening_overlay.png",
-      "title_lines": [
-        "VOLCANO ERUPTION DYNAMICS"
-      ],
-      "hook_lines": [
-        "Volcanoes erupt molten",
-        "rock from the Earth."
-      ],
-      "title_text": "Volcano Eruption Dynamics",
-      "hook_text": "Volcanoes erupt molten rock from the Earth.",
-      "title_font_size": 27,
-      "hook_font_size": 62,
-      "max_text_width": 880,
-      "card_bounds": [
-        48,
-        150,
-        1032,
-        402
-      ]
-    }
-  },
   "fact_check": {
-    "status": "passed",
-    "method": "trusted-source fetch + independent evidence-grounded AI audit",
-    "claim_count": 8,
-    "fact_checker": {
-      "provider": "gemini",
-      "model": "gemini-3.5-flash-lite"
-    },
-    "claim_repairs": [
-      {
-        "claim_id": "C8",
-        "scene": 8,
-        "original_sentence": "An outpouring of lava from a rift zone ranks as the longest known event of its kind.",
-        "replacement_sentence": "The Pu‘u‘ō‘ō eruption began in 1983, and ranks as the longest and most voluminous known outpouring of lava from Kīlauea Volcano's East Rift Zone in more than 500 years.",
-        "replacement_source_urls": [
-          "https://www.usgs.gov/volcanoes/kilauea/science/puuoo-eruption-lasted-35-years"
-        ],
-        "status": "rewritten"
-      }
-    ]
+    "overall": "pass",
+    "checked": 8,
+    "supported": 8,
+    "unsupported": 0,
+    "contradicted": 0,
+    "claim_source": "semantic:OpenRouter key 1"
   }
 }
