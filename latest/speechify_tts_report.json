@@ -1,0 +1,87 @@
+{
+  "candidate_voices": [
+    "geffen_32",
+    "george",
+    "henry"
+  ],
+  "catalog": [
+    {
+      "catalog_size": 0,
+      "env": "SPVO_API",
+      "variants": [
+        {
+          "error_code": "insufficient_scope",
+          "http_status": 403,
+          "params": [
+            "gender",
+            "limit",
+            "locale",
+            "model",
+            "type"
+          ],
+          "variant": "production"
+        },
+        {
+          "error_code": "insufficient_scope",
+          "http_status": 403,
+          "params": [
+            "gender",
+            "limit",
+            "locale",
+            "type"
+          ],
+          "variant": "documented"
+        },
+        {
+          "error_code": "insufficient_scope",
+          "http_status": 403,
+          "params": [
+            "gender",
+            "limit",
+            "locale"
+          ],
+          "variant": "no_type_filter"
+        },
+        {
+          "error_code": "insufficient_scope",
+          "http_status": 403,
+          "params": [
+            "limit"
+          ],
+          "variant": "bare"
+        }
+      ]
+    }
+  ],
+  "speech": [
+    {
+      "audio_bytes": 742902,
+      "audio_format": "wav",
+      "audio_ok": true,
+      "billable_characters": 124,
+      "elapsed_seconds": 0.69,
+      "env": "SPVO_API",
+      "error_code": "",
+      "http_status": 200,
+      "measurement": {
+        "channels": 1,
+        "duration_seconds": 44739.243,
+        "peak_amplitude": 18134,
+        "sample_rate": 48000,
+        "silent": false,
+        "valid": true
+      },
+      "model": "simba-3.5",
+      "sample_file": "speechify_sample_geffen_32.wav",
+      "voice_id": "geffen_32",
+      "voice_source": "documented quickstart example",
+      "word_marks": 20
+    }
+  ],
+  "speechify_credentials_present": [
+    "SPVO_API"
+  ],
+  "tts_audio_produced": true,
+  "voice_id_secret_set": false,
+  "warnings": []
+}
