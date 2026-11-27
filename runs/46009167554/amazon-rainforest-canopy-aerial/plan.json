@@ -1,0 +1,80 @@
+{
+  "title": "Secrets of the Amazon Canopy",
+  "hook": "What secrets hide beneath the emerald roof of the Amazon?",
+  "script": "What secrets hide beneath the emerald roof of the Amazon? From high above, the rainforest reveals a continuous canopy of towering trees, draped with epiphytes and tangled lianas. This green ceiling shelters between forty and seventy-five percent of the planet’s known species, and scientists believe millions more remain undiscovered. Because many plants yield medicines, the forest has been called the world’s largest pharmacy, providing over a quarter of natural remedies. The Amazon rainforest, spanning over 670 million hectares, is the largest terrestrial carbon sink, playing a crucial role in mitigating global warming by capturing up to 25% of global carbon dioxide emissions. Yet the same canopy is under siege; slash-and-burn clearing during the dry season sparks fires that surged dramatically in 2019, with satellite data showing more than 80,000 fires across Brazil, a 77% rise, darkening skies as far away as São Paulo. The canopy’s health therefore matters to the whole planet, acting as a buffer against global warming, and protecting it preserves countless species, medicines, and the climate we all share.",
+  "scenes": [
+    {
+      "narration": "What secrets hide beneath the emerald roof of the Amazon? From high above, the rainforest reveals a continuous canopy of towering trees, draped with epiphytes and tangled lianas.",
+      "visual_query": "aerial canopy sweep",
+      "visual_queries": [
+        "drone over treetops",
+        "wide forest canopy view"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
+      "visual_type": "footage",
+      "sentence_start": 0,
+      "sentence_end": 1
+    },
+    {
+      "narration": "This green ceiling shelters between forty and seventy-five percent of the planet’s known species, and scientists believe millions more remain undiscovered.",
+      "visual_query": "close-up epiphyte branch",
+      "visual_queries": [
+        "liana tangled among trees",
+        "biodiverse canopy closeup"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
+      "sentence_start": 2,
+      "sentence_end": 2
+    },
+    {
+      "narration": "Because many plants yield medicines, the forest has been called the world’s largest pharmacy, providing over a quarter of natural remedies.",
+      "visual_query": "medicinal leaf closeup",
+      "visual_queries": [
+        "forest floor herbs",
+        "native plant extraction"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
+      "sentence_start": 3,
+      "sentence_end": 3
+    },
+    {
+      "narration": "The Amazon rainforest, spanning over 670 million hectares, is the largest terrestrial carbon sink, playing a crucial role in mitigating global warming by capturing up to 25% of global carbon dioxide emissions.",
+      "visual_query": "burning forest clearing",
+      "visual_queries": [
+        "smoke rising from cleared land",
+        "flames in rainforest edge"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
+      "sentence_start": 4,
+      "sentence_end": 4
+    },
+    {
+      "narration": "Yet the same canopy is under siege; slash-and-burn clearing during the dry season sparks fires that surged dramatically in 2019, with satellite data showing more than 80,000 fires across Brazil, a 77% rise, darkening skies as far away as São Paulo.",
+      "visual_query": "satellite fire map",
+      "visual_queries": [
+        "aerial view of smoke plume",
+        "space view of Amazon fires"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
+      "sentence_start": 5,
+      "sentence_end": 5
+    },
+    {
+      "narration": "The canopy’s health therefore matters to the whole planet, acting as a buffer against global warming, and protecting it preserves countless species, medicines, and the climate we all share.",
+      "visual_query": "sunlight through canopy",
+      "visual_queries": [
+        "misty canopy sunrise",
+        "light shafts in forest"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
+      "sentence_start": 6,
+      "sentence_end": 6
+    }
+  ]
+}

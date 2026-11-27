@@ -1,0 +1,471 @@
+Markdown cleanup: no generated upgrade/validation files found.
+Pipeline stage started: research
+1/8 Researching credible sources for: Amazon rainforest canopy aerial
+Research complete: 4 source article(s) stored in research.json.
+Pipeline stage started: documentary_plan_generation
+2/8 Generating documentary plan from the research material...
+Quota-aware routing snapshot:
+  - Groq key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - OpenRouter key 1: 100.0% measured ($100 of $100 remaining)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: OpenRouter key 1
+Quota-aware selection: OpenRouter key 1 (best currently known capacity).
+OpenRouter key 1: OpenRouter HTTP 429: {"error":{"message":"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit","code":429,"metadata":{"headers":{"X-RateLimit-Limit":"50","X-RateLimit-Remaining":"0","X-RateLimit-Reset":"1795824000000"},"limit_source":"openrouter_free_tier_daily","remedy_hint":"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.","provider_name":null,"previous_errors":[{"code":429,"message":"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit
+Rechecking provider availability and ranking the remaining routes...
+Quota-aware routing snapshot:
+  - Groq key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+Quota-aware selection: Groq key 1 (best currently known capacity).
+Documentary plan generated successfully by Groq key 1.
+Script ready: 148 words, 6 scenes.
+Pipeline stage started: fact_checking
+3/8 Fact-checking claims against the research material...
+Quota-aware routing snapshot:
+  - Groq key 1: 56.4% measured (RPD 999/1000, TPM 4511/8000)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+Quota-aware routing snapshot:
+  - Groq key 1: 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Gemini key 1
+fact check: Gemini key 1: Gemini HTTP 429: {   "error": {     "code": 429,     "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 17h40m26.069999544s.",     "status": "RESOURCE_EXHAUSTED",     "details": [       {         "@type": "type.googleapis.com/google.rpc.Hel
+Quota-aware routing snapshot:
+  - Groq key 1: 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 1
+Fact check: 7 supported (6 with a cited source), 0 unsupported, 0 contradicted (overall pass); sentence coverage 100%.
+Fact check stored in fact_check.json (overall pass, 7 claim(s) checked).
+Pipeline stage started: voiceover_and_subtitle_generation
+4/8 Generating the verified voice-over and subtitles...
+Speechify voice catalog key slot 1 unavailable; trying the next configured key: Speechify voice catalog HTTP 403: {"error":{"code":"insufficient_scope","message":"You do not have permission to perform this operation."},"request_id":"7d02060b0e80602388eb2963"}
+
+Speechify voice catalog is not readable with the configured credential (403 insufficient_scope is a token scope limit, not a bad key). Falling back to the documented shared voice id.
+Speechify VO sentence 1/8 rendered (3.65s).
+Speechify VO sentence 2/8 rendered (8.18s).
+Speechify VO sentence 3/8 rendered (9.03s).
+Speechify VO sentence 4/8 rendered (7.78s).
+Speechify VO sentence 5/8 rendered (8.68s).
+Speechify VO sentence 6/8 rendered (9.24s).
+Speechify VO sentence 7/8 rendered (6.89s).
+Speechify VO sentence 8/8 rendered (6.00s).
+Voice-over provider: Speechify (model simba-3.5, voice geffen_32, locale en-US).
+VO timeline is 63.00s, below the 70s format minimum. No silence padding is added; the script/delivery must be adjusted and the VO regenerated.
+VO audio check: 63.00s, mean -23.7 dBFS, peak -5.1 dBFS
+VO timeline ready: 63.00s (minimum 70s; no maximum duration).
+Voice-over is 63.00s; extending the script (attempt 1/2) instead of padding with silence.
+Quota-aware routing snapshot:
+  - Groq key 1: 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Duration recovery: script expanded to 172 words by Cloudflare AI key pair 2.
+Quota-aware routing snapshot:
+  - Groq key 1: 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 1
+Quota-aware routing snapshot:
+  - Groq key 1: 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact check: 5 supported (5 with a cited source), 0 unsupported, 0 contradicted (overall pass); sentence coverage 100%.
+Speechify voice catalog key slot 1 unavailable; trying the next configured key: Speechify voice catalog HTTP 403: {"error":{"code":"insufficient_scope","message":"You do not have permission to perform this operation."},"request_id":"939ca51c7e0d3c28140185c4"}
+
+Speechify voice catalog is not readable with the configured credential (403 insufficient_scope is a token scope limit, not a bad key). Falling back to the documented shared voice id.
+Speechify VO sentence 1/7 rendered (3.65s).
+Speechify VO sentence 2/7 rendered (8.18s).
+Speechify VO sentence 3/7 rendered (9.04s).
+Speechify VO sentence 4/7 rendered (7.78s).
+Speechify VO sentence 5/7 rendered (13.76s).
+Speechify VO sentence 6/7 rendered (17.39s).
+Speechify VO sentence 7/7 rendered (10.83s).
+Voice-over provider: Speechify (model simba-3.5, voice geffen_32, locale en-US).
+VO audio check: 73.86s, mean -23.6 dBFS, peak -6.1 dBFS
+VO timeline ready: 73.86s (minimum 70s; no maximum duration).
+Voice-over verified: 73.86s of narration (minimum 70s, ends with the narration).
+Pipeline stage started: footage_search_download_and_visual_verification
+5/8 Searching, downloading and visually verifying footage...
+Footage request budget for 6 scene(s): Coverr=30, Internet Archive=240, Wikimedia Commons=200, NASA=240, Web Search=88, Google Search=58. Cached searches do not consume it.
+Footage discovery priority: Coverr native-vertical API -> Internet Archive -> Wikimedia Commons -> NASA -> Google Search direct reusable-video files. Coverr vertical/free/non-AI search is enabled via COVERR_API_KEY. Pexels/Pixabay remain disabled unless explicitly enabled.
+Visual verification enabled with automatic failover: Groq (1 key(s), qwen/qwen3.8-27b) -> OpenRouter (1 key(s), nvidia/nemotron-3.5-super-vl:free) -> OpenRouter backup model (inclusionai/ling-3.2-flash:free) -> Gemini (1 key(s), gemini-3.8-flash) -> Cloudflare Workers AI (2 key pair(s), @cf/meta/llama-3.2-11b-vision-instruct). Minimum confidence=0.72.
+Scene 1: applying metadata anchors independently to each of 6 search variants.
+  Coverr: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'aerial canopy sweep' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'aerial canopy' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'canopy' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'aerial canopy' produced 3 candidate(s).
+  Wikimedia Commons: 3 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+  Google web discovery: 0 result page(s).
+  Web Search: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+  Google web discovery: 0 result page(s).
+  Google Search: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'canopy sweep' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'canopy' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 1 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+Web Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google web discovery unavailable: 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dcanopy%2Bsweep%2Bvideo%2B%2528%2522creative%2Bcommons%2
+  Web Search: source entered cooldown mid-search; partial results were not cached.
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google Search search unavailable for 'canopy sweep': 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dcanopy%2Bsweep%2Bfiletype%253Amp4%2B%2528%2522public%2Bdomain%2522%2BOR%2B%2522Creative%2BCommons%2522%2BOR%2BCC0%2BOR%2B%2522CC%2BBY%2522%2529%26num%3D30%26filter%3D0&q=EgSExCBwGMyjptgGIjBSTi_4DQxZtCUQkeqP245-X_nfGSI6-AsyvTHerZK97EXzxqpd5Bpp800ROFa7QkgyAnJSWgFDYJyrvMytpaTa4AE
+  Internet Archive: 30 item(s) matched 'canopy aerial' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'canopy' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: 3 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (88s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (88s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'treetops sweep' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'treetops' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'treetops' produced 16 candidate(s).
+  Wikimedia Commons: 16 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (83s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (83s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'drone treetops' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'treetops' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'treetops' produced 16 candidate(s).
+  Wikimedia Commons: 16 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (79s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (79s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'treetops drone' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: relaxed query 'treetops' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'treetops' produced 16 candidate(s).
+  Wikimedia Commons: 16 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+Scene 1: strict metadata produced 0 candidates; running a second, AI-gated discovery pass with softer metadata matching.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 1m).
+  Wikimedia Commons: 3 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: 0 cached candidate(s) (independent source cache, age 0m).
+  Google Search: 0 cached candidate(s) (independent source cache, age 0m).
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 1 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 3 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 16 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 16 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Internet Archive: 1 cached candidate(s) (independent source cache, age 0m).
+  Wikimedia Commons: 16 cached candidate(s) (independent source cache, age 0m).
+  NASA: 0 cached candidate(s) (independent source cache, age 0m).
+  Web Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (75s remaining); no stale cache available.
+Scene 1: trying 6 additional subject-preserving fallback searches.
+  Internet Archive: 30 item(s) matched 'tropical rainforest canopy aerial' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'tropical rainforest canopy' but none had a reusable licence and a usable video file (15 rejected for licence).
+  Internet Archive: 30 item(s) matched 'tropical rainforest' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'tropical rainforest' produced 17 candidate(s).
+  Wikimedia Commons: 17 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (68s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (68s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'rainforest treetops drone' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'rainforest treetops' but none had a reusable licence and a usable video file (15 rejected for licence).
+  Internet Archive: relaxed query 'rainforest' produced 1 candidate(s).
+  Internet Archive: 1 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'rainforest treetops' produced 1 candidate(s).
+  Wikimedia Commons: 1 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (62s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (62s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'jungle canopy overhead' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'jungle canopy' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'jungle' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'jungle canopy' produced 2 candidate(s).
+  Wikimedia Commons: 2 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (56s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (56s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'tropical forest canopy aerial' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'tropical forest canopy' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'tropical forest' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'tropical forest' produced 10 candidate(s).
+  Wikimedia Commons: 10 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (49s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (49s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'jungle treetops aerial' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'jungle treetops' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'jungle' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'jungle' produced 16 candidate(s).
+  Wikimedia Commons: 16 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (42s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (42s remaining); no stale cache available.
+  Internet Archive: 30 item(s) matched 'amazon basin forest canopy' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'amazon basin forest' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'amazon basin' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'amazon basin forest' produced 1 candidate(s).
+  Wikimedia Commons: 1 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (36s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (37s remaining); no stale cache available.
+Scene 1: footage discovery summary — strict=12, relaxed=58, ranked=17, partial-metadata-for-visual-review=12, visual-check-limit=26; filtered=metadata:100, resolution:14, duration:1, relevance:8
+Scene 1: portrait metadata hints=3; orientation deferred to downloaded-file ffprobe=14.
+Scene 1: 21 metadata-qualified candidate(s) across 12 search variants; checking up to 17 candidates.
+  Candidate rank 1: Wikimedia Commons ID=44471006 score=0.56 match=1/2 query='treetops sweep' metadata=File:Moon and treetops at normal speed.webm Moon and treetops at normal speed. Filmed in Johoku-Chuo Park, Nerima-ku, Tokyo, Japan on 25 October 2015. 
+  Candidate rank 2: Wikimedia Commons ID=106594920 score=0.41 match=2/3 query='tropical rainforest canopy aerial' metadata=File:Amazon Rainforest Brazil Google Earth Timelapse 1984-2018.webm Amazon Rainforest, Brazil aerial timelapse from 1984 to 2018. 
+  Candidate rank 3: Wikimedia Commons ID=131841871 score=0.32 match=1/2 query='treetops sweep' metadata=File:Hot tub on Crown Iris.webm Hot tub on Crown Iris 
+  Candidate rank 4: Wikimedia Commons ID=132788932 score=0.32 match=1/2 query='treetops sweep' metadata=File:Wedding of Crown Prince Hussein bin Abdullah and Rajwa Al Saif.mpg Wedding Procession of Crown Prince Hussein bin Abdullah and Rajwa Al Saif 
+  Candidate rank 5: Wikimedia Commons ID=178822309 score=0.32 match=1/2 query='treetops sweep' metadata=File:Crown Prince of Saudi Arabia at The White House - November 19, 2025.webm  "The friendship &amp; blessings to America, to the Kingdom of Saudi Arabia, &amp;
+Scene 1: candidate download budget=180 MB (metadata relevance 0.56).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 1/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the main subject is not visible, and the frames contradict the requested shot type
+Scene 1: candidate download budget=180 MB (metadata relevance 0.41).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 2/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): brief visible evidence and metadata basis
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 3/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): visible subject and composition do not match the SCENE PRIMARY VISUAL QUERY, and source metadata does not support a tropical rainforest setting.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 4/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): no visible evidence of aerial canopy sweep, and source metadata does not support a rainforest setting
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 5/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): visible subject and composition do not match the SCENE PRIMARY VISUAL QUERY and source metadata does not support a tropical rainforest setting.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 6/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): visible subject and composition do not match the SCENE PRIMARY VISUAL QUERY, and source metadata does not support a tropical rainforest setting.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 7/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): absent aerial canopy sweep, visible subject is a house in a forest, metadata basis is a house in Washington, USA
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 8/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): The visible subject is not a broad overhead rainforest canopy, and the source metadata does not support a tropical/rainforest setting.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 9/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the visible subject is the moon, not a rainforest canopy, and the metadata does not support an Amazon rainforest setting
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 10/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the main subject is not visible, and the frames contradict the requested shot type.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Scene 1: candidate rejected/skipped (Wikimedia Commons): Clip is 533.3 MB, above the 180 MB relevance-based limit.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Scene 1: candidate rejected/skipped (Wikimedia Commons): Clip is 324.4 MB, above the 180 MB relevance-based limit.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 13/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): the primary visual query asks for an aerial/drone canopy view of the Amazon rainforest, but the frames show a group of people standing in front of a white building with flags and greenery, which does not match the reques
+Scene 1: candidate download budget=180 MB (metadata relevance 0.32).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 14/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): visible subject and composition do not match the SCENE PRIMARY VISUAL QUERY, and source metadata does not support a tropical rainforest setting.
+Scene 1: candidate download budget=180 MB (metadata relevance 0.23).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 15/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): brief visible evidence and metadata basis
+Scene 1: candidate download budget=180 MB (metadata relevance 0.23).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 16/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): brief visible evidence and metadata basis
+Scene 1: candidate download budget=180 MB (metadata relevance 0.14).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 17/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): no visible evidence of aerial canopy sweep, and metadata does not support Amazon rainforest setting
+Scene 1: candidate download budget=180 MB (metadata relevance 0.13).
+Scene 1: candidate rejected/skipped (Wikimedia Commons): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333).
+Scene 1: candidate download budget=180 MB (metadata relevance 0.11).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 19/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): no visible evidence of aerial canopy sweep or rainforest setting
+Scene 1: candidate download budget=180 MB (metadata relevance 0.00).
+Scene 1: candidate rejected/skipped (Internet Archive): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333).
+Scene 1: candidate download budget=180 MB (metadata relevance 0.00).
+Scene 1: candidate rejected/skipped (Wikimedia Commons): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 656x480 (aspect 1.3667).
+Scene 1: candidate download budget=180 MB (metadata relevance 0.00).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 22/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): no visible evidence of aerial canopy sweep or treetops drone, and metadata does not support Amazon rainforest setting
+Scene 1: candidate download budget=180 MB (metadata relevance 0.00).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 23/17 via Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): brief visible evidence and metadata basis
+Scene 1: candidate download budget=180 MB (metadata relevance 0.00).
+Scene 1: candidate rejected/skipped (Internet Archive): Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 854x480 (aspect 1.7778).
+Scene 1: candidate download budget=180 MB (metadata relevance 0.00).
+Quota-aware routing snapshot:
+  - Groq key 1 (qwen/qwen3.8-27b): 21.3% measured (RPD 998/1000, TPM 1704/8000)
+  - Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare Vision key pair 2 (@cf/meta/llama-3.2-11b-vision-instruct): UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct)
+Visual verifier: quota-aware selection -> Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) (attempt 1/3)...
+Visual verifier: Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) returned REJECT (0.00).
+Scene 1: visual check 25/17 via Cloudflare Vision key pair 1 (@cf/meta/llama-3.2-11b-vision-instruct) — REJECT (0.00): brief visible evidence and metadata basis
+Scene 1: initial candidates exhausted; starting one rejection-guided search retry with 2 targeted query variant(s).
+  Coverr: 0 candidate(s); source result cached.
+  Internet Archive: 30 item(s) matched 'aerial canopy sweep drone overhead perspective wide documentary footage' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'aerial canopy sweep' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'aerial canopy' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'aerial canopy' produced 3 candidate(s).
+  Wikimedia Commons: 3 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  DuckDuckGo web discovery: 0 result page(s).
+Web Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google web discovery unavailable: 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Daerial%2Bcanopy%2Bsweep%2Bdrone%2Boverhead%2Bperspectiv
+  Web Search: source entered cooldown mid-search; partial results were not cached.
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+Google Search rate-limited; persisted cooldown for 90s (Retry-After respected when supplied).
+  Google Search search unavailable for 'aerial canopy sweep drone overhead perspective wide documentary footage': 429 Client Error: Too Many Requests for url: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Daerial%2Bcanopy%2Bsweep%2Bdrone%2Boverhead%2Bperspective%2Bwide%2Bdocumentary%2Bfootage%2Bfiletype%253Amp4%2B%2528%2522public%2Bdomain%2522%2BOR%2B%2522Creative%2BCommons%2522%2BOR%2BCC0%2BOR%2B%2522CC%2BBY%2522%2529%26num%3D30%26filter%3D0&q=EgSExCBwGIulptgGIjCn4kAVagzguo0vaoyLTZRq-iqV5VJ6f3jt2ZOAJfcCv_Z-oKg9ey1zMyuZAay2CqEyAnJSWgFDYIyP8pHauZf9bw
+  Internet Archive: 30 item(s) matched 'aerial canopy sweep high altitude camera wide landscape' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'aerial canopy sweep' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 30 item(s) matched 'aerial canopy' but none had a reusable licence and a usable video file (16 rejected for licence).
+  Internet Archive: 0 candidate(s); source result cached.
+  Wikimedia Commons: relaxed query 'aerial canopy' produced 3 candidate(s).
+  Wikimedia Commons: 3 candidate(s); source result cached.
+  NASA: 0 candidate(s); source result cached.
+  Web Search: skipped during persisted cooldown (83s remaining); no stale cache available.
+  Google Search: skipped during persisted cooldown (83s remaining); no stale cache available.
+Scene 1: adaptive retry added no new eligible candidates.
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8176, in run_with_diagnostics
+    main()
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8129, in main
+    fetch_footage(plan)
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 6597, in fetch_footage
+    raise RuntimeError(
+RuntimeError: Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 67574213: Clip is 533.3 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 178823538: Clip is 324.4 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 41067354: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). | Internet Archive YourHitParade-May21951musicvariety: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). Queries tried: ['aerial canopy sweep', 'canopy sweep', 'canopy aerial', 'treetops sweep', 'drone treetops', 'treetops drone', 'tropical rainforest canopy aerial', 'rainforest treetops drone', 'jungle canopy overhead', 'tropical forest canopy aerial', 'jungle treetops aerial', 'Amazon basin forest canopy', 'aerial canopy sweep drone overhead perspective wide documentary footage', 'aerial canopy sweep high altitude camera wide landscape']. No unrelated footage or diagram will be substituted.
+Markdown cleanup: no generated upgrade/validation files found.

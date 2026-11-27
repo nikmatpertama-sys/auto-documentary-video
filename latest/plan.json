@@ -1,76 +1,80 @@
 {
-  "title": "Life Inside an Ant Colony",
-  "hook": "What if a single queen could birth an entire city?",
-  "script": "What if a single queen could birth an entire city? Inside an ant colony, millions of tiny workers cooperate like a living superorganism. The colony revolves around one or more egg‑laying queens, whose sole purpose is to lay thousands of eggs. From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones. Most adults become sterile females—workers that tend brood, forage, and defend the nest, while some develop into larger soldiers. At the right season, the queen also raises winged males and virgin females, called alates, that gather in massive swarms. These nuptial flights happen at species‑specific times of day, and the alates leave the nest in search of mates. Males die soon after mating, and most females also perish, but a few fertilized queens shed their wings and descend to start new colonies. The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil. From a single egg to a sprawling underground metropolis, the ant colony reminds us that cooperation can build worlds.",
+  "title": "Secrets of the Amazon Canopy",
+  "hook": "What secrets hide beneath the emerald roof of the Amazon?",
+  "script": "What secrets hide beneath the emerald roof of the Amazon? From high above, the rainforest reveals a continuous canopy of towering trees, draped with epiphytes and tangled lianas. This green ceiling shelters between forty and seventy-five percent of the planet’s known species, and scientists believe millions more remain undiscovered. Because many plants yield medicines, the forest has been called the world’s largest pharmacy, providing over a quarter of natural remedies. The Amazon rainforest, spanning over 670 million hectares, is the largest terrestrial carbon sink, playing a crucial role in mitigating global warming by capturing up to 25% of global carbon dioxide emissions. Yet the same canopy is under siege; slash-and-burn clearing during the dry season sparks fires that surged dramatically in 2019, with satellite data showing more than 80,000 fires across Brazil, a 77% rise, darkening skies as far away as São Paulo. The canopy’s health therefore matters to the whole planet, acting as a buffer against global warming, and protecting it preserves countless species, medicines, and the climate we all share.",
   "scenes": [
     {
-      "narration": "What if a single queen could birth an entire city? Inside an ant colony, millions of tiny workers cooperate like a living superorganism.",
-      "visual_query": "queen ant close-up",
+      "narration": "What secrets hide beneath the emerald roof of the Amazon? From high above, the rainforest reveals a continuous canopy of towering trees, draped with epiphytes and tangled lianas.",
+      "visual_query": "aerial canopy sweep",
       "visual_queries": [
-        "ant colony entrance wide",
-        "ant nest entrance wide"
+        "drone over treetops",
+        "wide forest canopy view"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 1
     },
     {
-      "narration": "The colony revolves around one or more egg‑laying queens, whose sole purpose is to lay thousands of eggs. From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones.",
-      "visual_query": "ant brood chamber macro",
+      "narration": "This green ceiling shelters between forty and seventy-five percent of the planet’s known species, and scientists believe millions more remain undiscovered.",
+      "visual_query": "close-up epiphyte branch",
       "visual_queries": [
-        "larvae in ant nest close-up",
-        "ant larvae macro"
+        "liana tangled among trees",
+        "biodiverse canopy closeup"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
       "sentence_start": 2,
+      "sentence_end": 2
+    },
+    {
+      "narration": "Because many plants yield medicines, the forest has been called the world’s largest pharmacy, providing over a quarter of natural remedies.",
+      "visual_query": "medicinal leaf closeup",
+      "visual_queries": [
+        "forest floor herbs",
+        "native plant extraction"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
+      "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "Most adults become sterile females—workers that tend brood, forage, and defend the nest, while some develop into larger soldiers. At the right season, the queen also raises winged males and virgin females, called alates, that gather in massive swarms.",
-      "visual_query": "worker ants foraging",
+      "narration": "The Amazon rainforest, spanning over 670 million hectares, is the largest terrestrial carbon sink, playing a crucial role in mitigating global warming by capturing up to 25% of global carbon dioxide emissions.",
+      "visual_query": "burning forest clearing",
       "visual_queries": [
-        "soldier ants defending nest",
-        "ant workers carrying food"
+        "smoke rising from cleared land",
+        "flames in rainforest edge"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
       "sentence_start": 4,
+      "sentence_end": 4
+    },
+    {
+      "narration": "Yet the same canopy is under siege; slash-and-burn clearing during the dry season sparks fires that surged dramatically in 2019, with satellite data showing more than 80,000 fires across Brazil, a 77% rise, darkening skies as far away as São Paulo.",
+      "visual_query": "satellite fire map",
+      "visual_queries": [
+        "aerial view of smoke plume",
+        "space view of Amazon fires"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
+      "sentence_start": 5,
       "sentence_end": 5
     },
     {
-      "narration": "These nuptial flights happen at species‑specific times of day, and the alates leave the nest in search of mates. Males die soon after mating, and most females also perish, but a few fertilized queens shed their wings and descend to start new colonies.",
-      "visual_query": "winged alates swarm",
+      "narration": "The canopy’s health therefore matters to the whole planet, acting as a buffer against global warming, and protecting it preserves countless species, medicines, and the climate we all share.",
+      "visual_query": "sunlight through canopy",
       "visual_queries": [
-        "ant nuptial flight sky",
-        "alates taking off from nest"
+        "misty canopy sunrise",
+        "light shafts in forest"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
       "sentence_start": 6,
-      "sentence_end": 7
-    },
-    {
-      "narration": "The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil. From a single egg to a sprawling underground metropolis, the ant colony reminds us that cooperation can build worlds.",
-      "visual_query": "founding queen digging",
-      "visual_queries": [
-        "new ant nest chamber close-up",
-        "queen ant excavating soil"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "sentence_start": 8,
-      "sentence_end": 9
+      "sentence_end": 6
     }
-  ],
-  "fact_check": {
-    "overall": "pass",
-    "checked": 9,
-    "supported": 9,
-    "unsupported": 0,
-    "contradicted": 0,
-    "claim_source": "semantic:Cloudflare AI key pair 1"
-  }
+  ]
 }

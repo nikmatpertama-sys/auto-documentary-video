@@ -1,0 +1,60 @@
+{
+  "provider": "Speechify",
+  "speechify_used": true,
+  "voice": "geffen_32",
+  "model": "simba-3.5",
+  "language": "en",
+  "locale": "en-US",
+  "script_sha256": "e289490ef2820c407ca3a5d3133e44e2793841782b38ec45a9b4082014a0dbe1",
+  "script_words": 172,
+  "total_duration": 73.865,
+  "audio_files": [
+    "output/voiceover.wav",
+    "output/voiceover.mp3"
+  ],
+  "sentences": [
+    {
+      "index": 1,
+      "start": 0.75,
+      "duration": 3.648,
+      "text": "What secrets hide beneath the emerald roof of the Amazon?"
+    },
+    {
+      "index": 2,
+      "start": 5.098,
+      "duration": 8.177,
+      "text": "From high above, the rainforest reveals a continuous canopy of towering trees, draped with epiphytes and tangled lianas."
+    },
+    {
+      "index": 3,
+      "start": 13.575,
+      "duration": 9.039,
+      "text": "This green ceiling shelters between forty and seventy-five percent of the planet’s known species, and scientists believe millions more remain undiscovered."
+    },
+    {
+      "index": 4,
+      "start": 22.915,
+      "duration": 7.778,
+      "text": "Because many plants yield medicines, the forest has been called the world’s largest pharmacy, providing over a quarter of natural remedies."
+    },
+    {
+      "index": 5,
+      "start": 30.993,
+      "duration": 13.757,
+      "text": "The Amazon rainforest, spanning over 670 million hectares, is the largest terrestrial carbon sink, playing a crucial role in mitigating global warming by capturing up to 25% of global carbon dioxide emissions."
+    },
+    {
+      "index": 6,
+      "start": 45.05,
+      "duration": 17.388,
+      "text": "Yet the same canopy is under siege; slash-and-burn clearing during the dry season sparks fires that surged dramatically in 2019, with satellite data showing more than 80,000 fires across Brazil, a 77% rise, darkening skies as far away as São Paulo."
+    },
+    {
+      "index": 7,
+      "start": 62.738,
+      "duration": 10.827,
+      "text": "The canopy’s health therefore matters to the whole planet, acting as a buffer against global warming, and protecting it preserves countless species, medicines, and the climate we all share."
+    }
+  ],
+  "generated_at": "2026-11-27T14:20:41+00:00"
+}

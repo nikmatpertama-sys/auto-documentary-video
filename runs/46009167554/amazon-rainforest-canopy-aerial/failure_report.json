@@ -1,0 +1,42 @@
+{
+  "status": "failed",
+  "current_stage": "footage_search_download_and_visual_verification",
+  "error_type": "RuntimeError",
+  "error_message": "Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 67574213: Clip is 533.3 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 178823538: Clip is 324.4 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 41067354: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). | Internet Archive YourHitParade-May21951musicvariety: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). Queries tried: ['aerial canopy sweep', 'canopy sweep', 'canopy aerial', 'treetops sweep', 'drone treetops', 'treetops drone', 'tropical rainforest canopy aerial', 'rainforest treetops drone', 'jungle canopy overhead', 'tropical forest canopy aerial', 'jungle treetops aerial', 'Amazon basin forest canopy', 'aerial canopy sweep drone overhead perspective wide documentary footage', 'aerial canopy sweep high altitude camera wide landscape']. No unrelated footage or diagram will be substituted.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8176, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8129, in main\n    fetch_footage(plan)\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 6597, in fetch_footage\n    raise RuntimeError(\nRuntimeError: Scene 1 could not obtain verified relevant footage. None of the 25 candidates checked from 17 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 67574213: Clip is 533.3 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 178823538: Clip is 324.4 MB, above the 180 MB relevance-based limit. | Wikimedia Commons 41067354: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). | Internet Archive YourHitParade-May21951musicvariety: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x480 (aspect 1.3333). Queries tried: ['aerial canopy sweep', 'canopy sweep', 'canopy aerial', 'treetops sweep', 'drone treetops', 'treetops drone', 'tropical rainforest canopy aerial', 'rainforest treetops drone', 'jungle canopy overhead', 'tropical forest canopy aerial', 'jungle treetops aerial', 'Amazon basin forest canopy', 'aerial canopy sweep drone overhead perspective wide documentary footage', 'aerial canopy sweep high altitude camera wide landscape']. No unrelated footage or diagram will be substituted.\n",
+  "finished_at_epoch": 1795789458.8955045,
+  "configuration": {
+    "project_release": "MM6",
+    "visual_verification_required": true,
+    "groq_keys_configured": 1,
+    "openrouter_keys_configured": 1,
+    "gemini_keys_configured": 1,
+    "cloudflare_key_pairs_configured": 2,
+    "speechify_keys_configured": 1,
+    "pixabay_key_configured": true,
+    "pexels_key_configured": false,
+    "release": "MM6",
+    "source_priority": [
+      "Coverr",
+      "Internet Archive",
+      "Wikimedia Commons",
+      "NASA",
+      "Web Search",
+      "Google Search",
+      "Pexels",
+      "Pixabay"
+    ],
+    "footage_source_requests": {
+      "Coverr": 2,
+      "Internet Archive": 43,
+      "Wikimedia Commons": 53,
+      "NASA": 14,
+      "Web Search": 8,
+      "Google Search": 3
+    },
+    "footage_source_cooldowns_seconds": {
+      "Web Search": 83,
+      "Google Search": 83
+    }
+  }
+}

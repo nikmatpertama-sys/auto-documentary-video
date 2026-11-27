@@ -1,208 +1,125 @@
 {
   "claims": [
     {
-      "claim": "Inside an ant colony, millions of tiny workers cooperate like a living superorganism.",
+      "claim": "This green ceiling shelters between forty and seventy-five percent of the planet’s known species, and scientists believe millions more remain undiscovered.",
       "kind": "",
       "verdict": "supported",
-      "evidence": "Ant colonies are described as superorganisms",
-      "quote": "The colonies are described as superorganisms because the ants appear to operate as a unified entity, collectively working together to support the colony.",
+      "evidence": "Estimates of species in rainforests",
+      "quote": "Estimates vary from 40% to 75% of all biotic species being indigenous to the rainforests",
+      "source": {
+        "id": "S1",
+        "title": "Rainforest",
+        "url": "https://en.wikipedia.org/wiki/Rainforest"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Because many plants yield medicines, the forest has been called the world’s largest pharmacy, providing over a quarter of natural remedies.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Rainforests as a source of medicines",
+      "quote": "Tropical rainforests have been called the 'jewels of the Earth' and the 'world's largest pharmacy', because over one quarter of natural medicines have been discovered there",
+      "source": {
+        "id": "S1",
+        "title": "Rainforest",
+        "url": "https://en.wikipedia.org/wiki/Rainforest"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The Amazon rainforest, spanning over 670 million hectares, is the largest terrestrial carbon sink, playing a crucial role in mitigating global warming by capturing up to 25% of global carbon dioxide emissions.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Amazon rainforest size and carbon capture",
+      "quote": "Hutan Amazon memiliki luas 670.000.000 hektar ... dan diperkirakan dapat menangkap hingga 25% dari generasi karbon dioksida global menjadi tanaman dan biomassa lainnya",
+      "source": {
+        "id": "S4",
+        "title": "Kebakaran hutan Brasil 2019",
+        "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "Yet the same canopy is under siege; slash-and-burn clearing during the dry season sparks fires that surged dramatically in 2019, with satellite data showing more than 80,000 fires across Brazil, a 77% rise, darkening skies as far away as São Paulo.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "2019 Amazon rainforest wildfires",
+      "quote": "As of August 29, 2019, INPE reported more than 80,000 fires across all of Brazil, a 77% year-to-year increase for the same tracking period",
       "source": {
         "id": "S2",
-        "title": "Ant",
-        "url": "https://en.wikipedia.org/wiki/Ant"
+        "title": "2019 Amazon rainforest wildfires",
+        "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
       },
       "evidence_type": "source_quote"
     },
     {
-      "claim": "The colony revolves around one or more egg‑laying queens, whose sole purpose is to lay thousands of eggs.",
+      "claim": "The canopy’s health therefore matters to the whole planet, acting as a buffer against global warming, and protecting it preserves countless species, medicines, and the climate we all share.",
       "kind": "",
       "verdict": "supported",
-      "evidence": "Typical colony consists of one or more egg-laying queens",
-      "quote": "The typical colony consists of one or more egg-laying queens, numerous sterile females (workers, soldiers) and, seasonally, many winged sexual males and females.",
-      "source": {
-        "id": "S1",
-        "title": "Ant colony",
-        "url": "https://en.wikipedia.org/wiki/Ant_colony"
-      },
-      "evidence_type": "source_quote"
-    },
-    {
-      "claim": "From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones.",
-      "kind": "",
-      "verdict": "supported",
-      "evidence": "Development from egg to adult",
-      "quote": "From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones.",
-      "source": {
-        "id": "S5",
-        "title": "Ant",
-        "url": "https://en.wikipedia.org/wiki/Ant"
-      },
-      "evidence_type": "source_quote"
-    },
-    {
-      "claim": "Most adults become sterile females—workers that tend brood, forage, and defend the nest, while some develop into larger soldiers.",
-      "kind": "",
-      "verdict": "supported",
-      "evidence": "Typical colonies consist of various castes of sterile, wingless females",
-      "quote": "Typical colonies consist of various castes of sterile, wingless females, most of which are workers (ergates), as well as soldiers (dinergates) and other specialised groups.",
+      "evidence": "Importance of rainforests for the planet",
+      "quote": "The largest terrestrial carbon dioxide sink and plays a significant role in mitigating global warming",
       "source": {
         "id": "S2",
-        "title": "Ant",
-        "url": "https://en.wikipedia.org/wiki/Ant"
+        "title": "2019 Amazon rainforest wildfires",
+        "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
       },
       "evidence_type": "source_quote"
-    },
-    {
-      "claim": "At the right season, the queen also raises winged males and virgin females, called alates, that gather in massive swarms.",
-      "kind": "",
-      "verdict": "supported",
-      "evidence": "Seasonal production of winged virgin queens and males",
-      "quote": "A mature ant colony seasonally produces winged virgin queens and males, called alates.",
-      "source": {
-        "id": "S6",
-        "title": "Nuptial flight",
-        "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
-      },
-      "evidence_type": "source_quote"
-    },
-    {
-      "claim": "These nuptial flights happen at species‑specific times of day, and the alates leave the nest in search of mates.",
-      "kind": "",
-      "verdict": "supported",
-      "evidence": "Nuptial flights occur at species-characteristic times of the day",
-      "quote": "In order to establish new colonies, ants undertake flights that occur at species-characteristic times of the day.",
-      "source": {
-        "id": "S1",
-        "title": "Ant colony",
-        "url": "https://en.wikipedia.org/wiki/Ant_colony"
-      },
-      "evidence_type": "source_quote"
-    },
-    {
-      "claim": "Males die soon after mating, and most females also perish, but a few fertilized queens shed their wings and descend to start new colonies.",
-      "kind": "",
-      "verdict": "supported",
-      "evidence": "Males die shortly after mating, and most females perish",
-      "quote": "The males die shortly thereafter, along with most of the females. A small percentage of the females survive to initiate new nests.",
-      "source": {
-        "id": "S1",
-        "title": "Ant colony",
-        "url": "https://en.wikipedia.org/wiki/Ant_colony"
-      },
-      "evidence_type": "source_quote"
-    },
-    {
-      "claim": "The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil.",
-      "kind": "",
-      "verdict": "supported",
-      "evidence": "New queen starts a new colony",
-      "quote": "The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil.",
-      "source": {
-        "id": "S6",
-        "title": "Nuptial flight",
-        "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
-      },
-      "evidence_type": "source_quote"
-    },
-    {
-      "claim": "From a single egg to a sprawling underground metropolis, the ant colony reminds us that cooperation can build worlds.",
-      "kind": "",
-      "verdict": "supported",
-      "evidence": "Universally established fact about cooperation in ant colonies",
-      "quote": "",
-      "source": null,
-      "evidence_type": "general_knowledge"
     }
   ],
-  "checked": 9,
-  "supported": 9,
+  "checked": 5,
+  "supported": 5,
   "unsupported": 0,
   "contradicted": 0,
-  "sourced_supports": 8,
-  "general_knowledge_supports": 1,
+  "sourced_supports": 5,
+  "general_knowledge_supports": 0,
   "sources": [
     {
       "id": "S1",
-      "title": "Ant colony",
-      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      "title": "Rainforest",
+      "url": "https://en.wikipedia.org/wiki/Rainforest"
     },
     {
       "id": "S2",
-      "title": "Ant",
-      "url": "https://en.wikipedia.org/wiki/Ant"
+      "title": "2019 Amazon rainforest wildfires",
+      "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
     },
     {
       "id": "S3",
-      "title": "Koloni semut",
-      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+      "title": "Hutan hujan",
+      "url": "https://id.wikipedia.org/wiki/Hutan_hujan"
     },
     {
       "id": "S4",
-      "title": "Semut",
-      "url": "https://id.wikipedia.org/wiki/Semut"
-    },
-    {
-      "id": "S5",
-      "title": "Ant",
-      "url": "https://en.wikipedia.org/wiki/Ant"
-    },
-    {
-      "id": "S6",
-      "title": "Nuptial flight",
-      "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
+      "title": "Kebakaran hutan Brasil 2019",
+      "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
     }
   ],
   "overall": "pass",
-  "checked_at": "2026-11-27T13:45:17+00:00",
-  "provider": "Cloudflare AI key pair 1",
+  "checked_at": "2026-11-27T14:20:29+00:00",
+  "provider": "Cloudflare AI key pair 2",
   "research_articles": [
     {
-      "title": "Ant colony",
-      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      "title": "Rainforest",
+      "url": "https://en.wikipedia.org/wiki/Rainforest"
     },
     {
-      "title": "Ant",
-      "url": "https://en.wikipedia.org/wiki/Ant"
+      "title": "2019 Amazon rainforest wildfires",
+      "url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires"
     },
     {
-      "title": "Koloni semut",
-      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+      "title": "Hutan hujan",
+      "url": "https://id.wikipedia.org/wiki/Hutan_hujan"
     },
     {
-      "title": "Semut",
-      "url": "https://id.wikipedia.org/wiki/Semut"
-    },
-    {
-      "title": "Ant",
-      "url": "https://en.wikipedia.org/wiki/Ant"
-    },
-    {
-      "title": "Nuptial flight",
-      "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
+      "title": "Kebakaran hutan Brasil 2019",
+      "url": "https://id.wikipedia.org/wiki/Kebakaran_hutan_Brasil_2019"
     }
   ],
-  "evidence_retrieval": {
-    "queries": [
-      "ant colony emerge larva pupa",
-      "ant colony queen small chamber"
-    ],
-    "characters": 2199,
-    "sources": [
-      {
-        "title": "Ant",
-        "url": "https://en.wikipedia.org/wiki/Ant"
-      },
-      {
-        "title": "Nuptial flight",
-        "url": "https://en.wikipedia.org/wiki/Nuptial_flight"
-      }
-    ]
-  },
   "claim_source": "semantic:Cloudflare AI key pair 1",
   "coverage": {
-    "script_sentences": 10,
-    "claimed_sentences": 9,
-    "non_factual_sentences": 1,
+    "script_sentences": 7,
+    "claimed_sentences": 5,
+    "non_factual_sentences": 2,
     "uncovered_sentences": [],
     "coverage": 1.0
   },

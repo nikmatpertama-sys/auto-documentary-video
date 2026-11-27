@@ -5,9 +5,9 @@
   "model": "simba-3.5",
   "language": "en",
   "locale": "en-US",
-  "script_sha256": "6f668f901de9018aa90cd3bdc3142551d90426787974a7442dff392386830dae",
-  "script_words": 186,
-  "total_duration": 75.676,
+  "script_sha256": "e289490ef2820c407ca3a5d3133e44e2793841782b38ec45a9b4082014a0dbe1",
+  "script_words": 172,
+  "total_duration": 73.865,
   "audio_files": [
     "output/voiceover.wav",
     "output/voiceover.mp3"
@@ -16,63 +16,45 @@
     {
       "index": 1,
       "start": 0.75,
-      "duration": 3.469,
-      "text": "What if a single queen could birth an entire city?"
+      "duration": 3.648,
+      "text": "What secrets hide beneath the emerald roof of the Amazon?"
     },
     {
       "index": 2,
-      "start": 4.919,
-      "duration": 5.609,
-      "text": "Inside an ant colony, millions of tiny workers cooperate like a living superorganism."
+      "start": 5.098,
+      "duration": 8.177,
+      "text": "From high above, the rainforest reveals a continuous canopy of towering trees, draped with epiphytes and tangled lianas."
     },
     {
       "index": 3,
-      "start": 10.827,
-      "duration": 6.165,
-      "text": "The colony revolves around one or more egg‑laying queens, whose sole purpose is to lay thousands of eggs."
+      "start": 13.575,
+      "duration": 9.039,
+      "text": "This green ceiling shelters between forty and seventy-five percent of the planet’s known species, and scientists believe millions more remain undiscovered."
     },
     {
       "index": 4,
-      "start": 17.292,
-      "duration": 8.179,
-      "text": "From each egg emerges a larva, then a pupa, and finally an adult whose destiny is decided by its nutrition and hormones."
+      "start": 22.915,
+      "duration": 7.778,
+      "text": "Because many plants yield medicines, the forest has been called the world’s largest pharmacy, providing over a quarter of natural remedies."
     },
     {
       "index": 5,
-      "start": 25.771,
-      "duration": 8.321,
-      "text": "Most adults become sterile females—workers that tend brood, forage, and defend the nest, while some develop into larger soldiers."
+      "start": 30.993,
+      "duration": 13.757,
+      "text": "The Amazon rainforest, spanning over 670 million hectares, is the largest terrestrial carbon sink, playing a crucial role in mitigating global warming by capturing up to 25% of global carbon dioxide emissions."
     },
     {
       "index": 6,
-      "start": 34.392,
-      "duration": 7.808,
-      "text": "At the right season, the queen also raises winged males and virgin females, called alates, that gather in massive swarms."
+      "start": 45.05,
+      "duration": 17.388,
+      "text": "Yet the same canopy is under siege; slash-and-burn clearing during the dry season sparks fires that surged dramatically in 2019, with satellite data showing more than 80,000 fires across Brazil, a 77% rise, darkening skies as far away as São Paulo."
     },
     {
       "index": 7,
-      "start": 42.5,
-      "duration": 6.504,
-      "text": "These nuptial flights happen at species‑specific times of day, and the alates leave the nest in search of mates."
-    },
-    {
-      "index": 8,
-      "start": 49.304,
-      "duration": 9.045,
-      "text": "Males die soon after mating, and most females also perish, but a few fertilized queens shed their wings and descend to start new colonies."
-    },
-    {
-      "index": 9,
-      "start": 58.649,
-      "duration": 8.897,
-      "text": "The new queen digs a small chamber, lays her first eggs, and the cycle begins anew, linking countless generations beneath the soil."
-    },
-    {
-      "index": 10,
-      "start": 67.846,
-      "duration": 7.53,
-      "text": "From a single egg to a sprawling underground metropolis, the ant colony reminds us that cooperation can build worlds."
+      "start": 62.738,
+      "duration": 10.827,
+      "text": "The canopy’s health therefore matters to the whole planet, acting as a buffer against global warming, and protecting it preserves countless species, medicines, and the climate we all share."
     }
   ],
-  "generated_at": "2026-11-27T13:45:29+00:00"
+  "generated_at": "2026-11-27T14:20:41+00:00"
 }
