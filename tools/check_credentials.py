@@ -26,6 +26,7 @@ import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Iterable
 
@@ -122,6 +123,22 @@ def collect_report() -> dict:
     }
 
 
+def _classify(status: int) -> str:
+    """Map a probe status to a verdict.
+
+    Only 401 means the credential itself is wrong. 403 means the credential was
+    accepted but that endpoint/plan is not permitted, which is a warning, not a
+    proof that the secret is absent or invalid.
+    """
+    if 200 <= status < 300:
+        return "OK"
+    if status == 401:
+        return "INVALID"
+    if status == 403:
+        return "FORBIDDEN"
+    return "ERROR"
+
+
 def _status_line(name: str, group: dict) -> str:
     if group["set"]:
         detail = ", ".join(group["present_names"])
@@ -175,11 +192,22 @@ def probe(group_name: str, limit: int = 3) -> list[dict]:
             )
             results.append({"provider": "gemini", "env": name, "http_status": code, "note": note})
     elif group_name == "speechify":
+        # Mirror exactly what main.py sends, so a probe result means something
+        # about the pipeline instead of about a different request shape.
+        query = urllib.parse.urlencode(
+            {
+                "type": "shared",
+                "locale": "en-US",
+                "gender": "male",
+                "model": os.getenv("SPEECHIFY_MODEL", "simba-3.5").strip() or "simba-3.5",
+                "limit": 1,
+            }
+        )
         for name in ("SPVO_API", "SPEECHIFY_API_KEY"):
             if not _present(name):
                 continue
             code, note = _request(
-                "https://api.speechify.ai/v1/voices?page_size=1",
+                f"https://api.speechify.ai/v1/voices?{query}",
                 {"Authorization": f"Bearer {os.environ[name].strip()}"},
             )
             results.append({"provider": "speechify", "env": name, "http_status": code, "note": note})
@@ -251,14 +279,21 @@ def main(argv: list[str] | None = None) -> int:
             if not group["set"] or name == "deepseek":
                 continue
             probes.extend(probe(name))
+        warnings: list[str] = []
         for item in probes:
             status = item["http_status"]
-            verdict = "OK" if 200 <= status < 300 else ("REJECTED" if status in (401, 403) else "ERROR")
+            verdict = _classify(status)
             note = f" ({item['note']})" if item["note"] else ""
             print(f"  {item['provider']:<11} {item['env']:<26} HTTP {status} {verdict}{note}")
-        rejected = [item["env"] for item in probes if item["http_status"] in (401, 403)]
-        if rejected:
-            failures.append("provider rejected: " + ", ".join(sorted(set(rejected))))
+            item["verdict"] = verdict
+            if verdict == "FORBIDDEN":
+                warnings.append(f"{item['provider']}:{item['env']} reachable but forbidden (plan or scope)")
+        invalid = [item["env"] for item in probes if item["verdict"] == "INVALID"]
+        if invalid:
+            failures.append("credential rejected by provider: " + ", ".join(sorted(set(invalid))))
+        for warning in warnings:
+            print(f"WARN: {warning}", file=sys.stderr)
+        report["warnings"] = warnings
         report["probe_results"] = probes
 
     if args.json_out:

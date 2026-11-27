@@ -58,6 +58,12 @@ class CredentialCheckTests(unittest.TestCase):
         with mock.patch.dict(os.environ, {}, clear=True):
             self.assertEqual(check_credentials.main([]), 1)
 
+    def test_probe_verdicts_separate_invalid_key_from_forbidden_scope(self):
+        self.assertEqual(check_credentials._classify(200), "OK")
+        self.assertEqual(check_credentials._classify(401), "INVALID")
+        self.assertEqual(check_credentials._classify(403), "FORBIDDEN")
+        self.assertEqual(check_credentials._classify(0), "ERROR")
+
     def test_json_report_contains_names_and_booleans_only(self):
         with mock.patch.dict(os.environ, {"GEMINI_API_KEY": "gemini-secret-value"}, clear=True):
             with tempfile.TemporaryDirectory() as folder:
