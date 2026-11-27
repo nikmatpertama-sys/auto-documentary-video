@@ -1,0 +1,33 @@
+{
+  "status": "failed",
+  "current_stage": "fact_checking",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795789686.747824,
+      "finished_at_epoch": 1795789689.2628317,
+      "duration_seconds": 2.52
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795789689.2629805,
+      "finished_at_epoch": 1795789698.1918647,
+      "duration_seconds": 8.93
+    },
+    {
+      "name": "fact_checking",
+      "status": "failed",
+      "started_at_epoch": 1795789698.193857,
+      "finished_at_epoch": 1795789755.0623932,
+      "failure_type": "RuntimeError",
+      "failure_message": "Fact check could not support 1 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Within an hour the ash column rose roughly a hundred meters, prompting the Philippine Institute of Volcanology and Seismology to raise the alert to level three, then four as explosions intensified.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
+    }
+  ],
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "Fact check could not support 1 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Within an hour the ash column rose roughly a hundred meters, prompting the Philippine Institute of Volcanology and Seismology to raise the alert to level three, then four as explosions intensified.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+    "finished_at_epoch": 1795789755.0634842
+  }
+}

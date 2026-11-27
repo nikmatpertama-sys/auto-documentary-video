@@ -2,5 +2,5 @@ run=46015918420
 sha=95a718aecff6e3a419819a12e1f9857ca4f86130
 branch=main
 job_status=failure
-topic=Ant colony life cycle
+topic=Volcano eruption
 pipeline_exit=failure
