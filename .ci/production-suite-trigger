@@ -27,3 +27,5 @@ Re-run requested after provider capacity and repair fixes.
 Re-run requested after accepting short drafts.
 
 Re-run requested after duration extension retry.
+
+Re-run requested after rate-aware duration targeting.
