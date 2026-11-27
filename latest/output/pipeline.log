@@ -8,208 +8,272 @@ Cost policy: free-tier only. Paid routes (DeepSeek and paid OpenRouter models) a
 1/7 Writing and validating the documentary script...
 [stage] source_pool: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/source_pool...
-Gemini model gemini-3.5-flash-lite answered HTTP 503; trying gemini-3.8-flash.
-AI router: gemini:gemini-3.5-flash-lite temporarily unavailable; switching provider. network timeout/connection error
-AI router: trying groq / openai/gpt-oss-120b for text/source_pool...
-AI router: groq/openai/gpt-oss-120b returned a valid text response.
-Source pool articles suggested by groq/openai/gpt-oss-120b: Solar System formation, Stellar nucleosynthesis, Planetary formation
-Source pool: 12 trusted page(s) cited by Solar System formation, Stellar nucleosynthesis, Planetary formation.
-Evidence brief: skipped https://en.wikipedia.org/wiki/Solar_System_formation (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
-Evidence brief: skipped https://en.wikipedia.org/wiki/Stellar_nucleosynthesis (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
-Evidence brief: skipped https://en.wikipedia.org/wiki/Planetary_formation (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
-Evidence brief: skipped https://www.nature.com/articles/s41586-020-2934-0 (FactCheckError: Evidence URL redirected outside the trusted HTTPS allowlist; redirect was not followed.)
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/18096793 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs (FactCheckError: Could not fetch evidence source https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs:)
-Evidence brief: skipped https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1393&context=physastro_pubs (FactCheckError: Could not fetch evidence source https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1393&context=physastro_pubs:)
-Evidence brief: skipped https://tigerprints.clemson.edu/physastro_pubs/312 (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
-Evidence brief: skipped https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1305&context=physastro_pubs (FactCheckError: Could not fetch evidence source https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1305&context=physastro_pubs:)
-Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/33239797 (FactCheckError: Evidence page contains too little readable text for verification.)
-Evidence brief: skipped https://lccn.loc.gov/68-012263 (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
-Fact-check source temporarily unavailable (ConnectionError HTTP n/a); retrying in 4s.
-Fact-check source temporarily unavailable (ConnectionError HTTP n/a); retrying in 7s.
-Evidence brief: skipped https://helios.gsfc.nasa.gov/nucleo.html (FactCheckError: Could not fetch evidence source https://helios.gsfc.nasa.gov/nucleo.html: ConnectionError)
-Evidence brief: 0 source passages fetched for planning.
-[stage] source_pool: completed in 136.6s
+AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
+Source pool articles suggested by gemini/gemini-3.5-flash-lite: Star, Stellar evolution, Neutron star
+Source pool: 59 trusted page(s) cited by Star, Stellar evolution, Neutron star.
+Evidence brief: skipped https://www.loc.gov/collections/finding-our-place-in-the-cosmos-with-carl-sagan/articles-and-essays/modeling-the-cosmos/ancient-greek-astronomy-and-cosmology (FactCheckError: Could not fetch evidence source https://www.loc.gov/collections/finding-our-place-in-the-cosmos-with-carl-sagan/articles)
+Evidence brief: skipped https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1084808 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/16586823 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/11217843 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://www.science.org/content/article/way-universe-ends-not-whimper-bang (FactCheckError: Could not fetch evidence source https://www.science.org/content/article/way-universe-ends-not-whimper-bang: HTTPError (H)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/21124316 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/16917054 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://spaceplace.nasa.gov/sun-corona/en/ (FactCheckError: Fetched source page has no lexical anchor for this claim; no evidence excerpt can be selected.)
+Evidence brief: skipped https://pubmed.ncbi.nlm.nih.gov/16179471 (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: skipped https://id.loc.gov/authorities/sh85127415 (FactCheckError: Could not fetch evidence source https://id.loc.gov/authorities/sh85127415: HTTPError (HTTP 403))
+Evidence brief: skipped https://lux.collections.yale.edu/view/place/0dce6b35-9b30-4e00-8eff-7426c8c8ed2e (FactCheckError: Could not fetch evidence source https://lux.collections.yale.edu/view/place/0dce6b35-9b30-4e00-8eff-7426c8c8ed2e: HTTPEr)
+Evidence brief: skipped https://rainman.astro.illinois.edu/ddr/stellar/intermediate.html (FactCheckError: Evidence page contains too little readable text for verification.)
+Evidence brief: 6 source passages fetched for planning.
+[stage] source_pool: completed in 9.5s
 [stage] script_generation: start
 AI router: trying gemini / gemini-3.5-flash-lite for text/script_generation...
 AI router: gemini/gemini-3.5-flash-lite returned a valid text response.
-Documentary plan generated by gemini/gemini-3.5-flash-lite: 121 words, 8 scenes.
-Opening validated before TTS: title=6 word(s), hook=12 word(s) (hook shortened to 12 words).
-[stage] script_generation: completed in 4.5s
+Documentary plan generated by gemini/gemini-3.5-flash-lite: 119 words, 8 scenes.
+Opening validated before TTS: title=5 word(s), hook=12 word(s) (hook shortened to 12 words).
+[stage] script_generation: completed in 4.2s
 2/7 Fetching trusted source pages and auditing every factual assertion...
 [stage] fact_check: start
-Fact-check source temporarily unavailable (ConnectionError HTTP n/a); retrying in 4s.
-Fact-check source temporarily unavailable (ConnectionError HTTP n/a); retrying in 7s.
-Fact-check source temporarily unavailable (ConnectionError HTTP n/a); retrying in 4s.
-Fact-check source temporarily unavailable (ConnectionError HTTP n/a); retrying in 7s.
+Encyclopedia API unavailable for https://en.wikipedia.org/wiki/Star (HTTPError); using HTML.
+Encyclopedia API unavailable for https://en.wikipedia.org/wiki/Stellar_evolution (HTTPError); using HTML.
+Encyclopedia API unavailable for https://en.wikipedia.org/wiki/Neutron_star (HTTPError); using HTML.
 AI router: trying gemini / gemini-3.5-flash-lite for fact/fact_check_audit...
 AI router: gemini/gemini-3.5-flash-lite returned a valid fact response.
-[stage] fact_check: completed in 27.0s
+[stage] fact_check: completed in 4.3s
 3/7 Generating the complete voice-over (no subtitle/visual work yet)...
 [stage] voiceover: start
-VO duration is within target: 59.34s.
-VO quality gate passed: 59.34s, 48000 Hz, mean -23.4 dB, peak -5.2 dB.
-[stage] voiceover: completed in 7.5s
+VO duration is within target: 49.19s.
+VO quality gate passed: 49.19s, 48000 Hz, mean -23.2 dB, peak -4.3 dB.
+[stage] voiceover: completed in 8.5s
 4/7 Locking the final VO timeline as the master production reference...
 [stage] timeline_lock: start
 [stage] timeline_lock: completed in 0.0s
 5/7 Building phrase subtitles from the validated VO timing...
 [stage] subtitles: start
-Subtitles created from final VO: 121 words; 121 measured by Edge TTS, 0 estimated; 24 natural phrase groups.
+Subtitles created from final VO: 119 words; 119 measured by Edge TTS, 0 estimated; 22 natural phrase groups.
 [stage] subtitles: completed in 0.0s
 6/7 Searching for footage and trusted published visuals against the VO scene map...
 [stage] footage: start
 Footage source: Pexels disabled because PEXELS_API_KEY is not configured.
 Visual verification enabled with automatic failover: Gemini (gemini-3.5-flash-lite) -> Groq (qwen/qwen3.8-27b) -> OpenRouter (nvidia/nemotron-3.5-super-vl:free) -> OpenRouter (inclusionai/ling-3.2-flash:free). Minimum confidence=0.72.
-Scene 1: applying metadata anchors independently to each of 8 search variants.
+Scene 1: applying metadata anchors independently to each of 5 search variants.
   Pixabay: 25 candidate(s)
-  Wikimedia Commons: 5 candidate(s)
-  Pixabay: 25 candidate(s)
-  Wikimedia Commons: 3 candidate(s)
-  Pixabay: 25 candidate(s)
+  Coverr: 3 candidate(s)
   NASA: 1 candidate(s)
   Wikimedia Commons: 4 candidate(s)
   Pixabay: 25 candidate(s)
-  NASA: 1 candidate(s)
-  Wikimedia Commons: 9 candidate(s)
   Pixabay: 25 candidate(s)
+  Coverr: 3 candidate(s)
   NASA: 1 candidate(s)
-  Wikimedia Commons: 6 candidate(s)
-  Pixabay: 25 candidate(s)
-  NASA: 3 candidate(s)
-  Wikimedia Commons: 9 candidate(s)
+  Wikimedia Commons: 4 candidate(s)
   Pixabay: 1 candidate(s)
-  NASA: 6 candidate(s)
-  Wikimedia Commons: 8 candidate(s)
+  Coverr: 2 candidate(s)
+  Wikimedia Commons: 1 candidate(s)
   Pixabay: 25 candidate(s)
   Coverr: 25 candidate(s)
   NASA: 6 candidate(s)
-  Wikimedia Commons: 9 candidate(s)
+  Wikimedia Commons: 10 candidate(s)
 Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
-Scene 1: SigLIP thumbnail reranking applied to 6 candidate(s).
-Scene 1: 145 metadata-qualified candidate(s) across 8 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=230528 score=0.79 match=1/1 query='dark' metadata=clouds, dark, duster, cloud landscape, cloudy, meteorology https://pixabay.com/videos/id-230528/
-  Candidate rank 2: Pixabay ID=2106 score=0.79 match=1/1 query='dark' metadata=darkness, dark clouds, weather, air, storm, beautiful wallpaper, stormy sky, cloudy, atmosphere, condensation, meteorology, steam, background, cloud, dark, fog,
-  Candidate rank 3: Pixabay ID=7093 score=0.79 match=1/1 query='dark' metadata=moon, moonlight, night, full moon, heaven, darkness, night shot, mystical, gespentisch, ghostly, clouds, gruesome, horror mood, grim, dark, cloud passage, cloud
-  Candidate rank 4: Pixabay ID=16160 score=0.79 match=1/1 query='dark' metadata=storm, ocean, sky, rain, the waves, wind, dark clouds, rolling sea, anger, a strong wind, clouds, sea, night, darkness, rainy, cloudy, water, lightning https://
-  Candidate rank 5: Wikimedia Commons ID=198782646 score=1.00 match=5/5 query='interstellar gas cloud dust nebula' metadata=File:A superbubble scene (potm2608a).webm This sprawling cosmic vista and subject of today’s ESA/Hubble  Picture of the Month  comes from the Large Magellanic C
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 1: visual check 1/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show terrestrial storm clouds in Earth's atmosphere, not an interstellar gas cloud.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 1: visual check 2/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show terrestrial dark storm clouds in Earth's atmosphere, not an interstellar gas cloud or nebula.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 1: visual check 3/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show the Moon in a night sky with clouds, not an interstellar gas cloud or nebula.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 1: visual check 4/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show terrestrial storm clouds over a dark landscape, not an interstellar gas cloud.
+Scene 1: SigLIP thumbnail reranking applied to 4 candidate(s).
+Scene 1: 88 metadata-qualified candidate(s) across 5 search variants; checking up to 14 candidates.
+  Candidate rank 1: Coverr ID=67eeLQQZcp score=0.85 match=4/4 query='night sky filled with stars' metadata=Silhouette Walking on Beach Beneath a Star-Filled Sky A lone silhouette walks the shoreline beneath a vast star-filled sky and the Milky Way, stars faintly refl
+  Candidate rank 2: Coverr ID=QjW7fCpztu score=0.88 match=4/4 query='night sky filled with stars' metadata=Starry Night Sky Over Pine Forest Experience the tranquil beauty of a star-filled night sky gracefully hovering over a serene pine forest. A breathtaking blend 
+  Candidate rank 3: Coverr ID=eOzZ3ePEur score=0.85 match=1/1 query='starlit' metadata=Mysterious Figure Under a Starlit Sky A captivating scene features a lone figure in a red kimono standing amidst a field of vibrant flowers, illuminated by the 
+  Candidate rank 4: Wikimedia Commons ID=187814804 score=0.94 match=4/4 query='night sky filled with stars' metadata=File:Mars After Dark- What NASA Rovers Really See (JPL-20250415-MARSf-0001-What You See at Night on Mars 2160cc).webm Would the night sky on Mars be filled with
+  Candidate rank 5: NASA ID=JPL-20250415-MARSf-0001-What_You_See_at_Night_on_Mars_2160cc score=0.94 match=4/4 query='night sky filled with stars' metadata=Mars After Dark: What NASA Rovers Really See Would the night sky on Mars be filled with twinkling stars like we’re used to seeing on Earth? That depends on how 
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
 AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
-Scene 1: visual check 5/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show an interstellar gas cloud and nebula with stellar formations in the Large Magellanic Cloud, directly matching the required visible focus.
-Scene 1: accepted Wikimedia Commons metadata=1.00, visual confidence=1.0 — File:A superbubble scene (potm2608a).webm This sprawling cosmic vista and subject of today’s ESA/Hubble  Picture of the Month  comes from th
-Scene 2: applying metadata anchors independently to each of 7 search variants.
+Scene 1: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show a person walking along a beach beneath a vast night sky filled with stars, directly supporting the scene narration and visual focus.
+Scene 1: accepted Coverr metadata=0.85, visual confidence=1.0 — Silhouette Walking on Beach Beneath a Star-Filled Sky A lone silhouette walks the shoreline beneath a vast star-filled sky and the Milky Way
+Scene 2: applying metadata anchors independently to each of 4 search variants.
   Pixabay: 25 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 9 candidate(s)
+  Pixabay: 25 candidate(s)
+  NASA: 2 candidate(s)
   Wikimedia Commons: 10 candidate(s)
-  Pixabay: 25 candidate(s)
-  Pixabay: 25 candidate(s)
+  Pixabay: 22 candidate(s)
+  Coverr: 9 candidate(s)
+  NASA: 6 candidate(s)
   Wikimedia Commons: 8 candidate(s)
-  Pixabay: 25 candidate(s)
-  Wikimedia Commons: 10 candidate(s)
   Pixabay: 25 candidate(s)
   Coverr: 25 candidate(s)
   NASA: 6 candidate(s)
-  Wikimedia Commons: 7 candidate(s)
+  Wikimedia Commons: 6 candidate(s)
+Scene 2: SigLIP unavailable/no usable thumbnails; metadata ranking retained.
+Scene 2: 120 metadata-qualified candidate(s) across 4 search variants; checking up to 14 candidates.
+  Candidate rank 1: Wikimedia Commons ID=196751029 score=0.88 match=4/4 query='deep space stars field' metadata=File:Rubin Looks Deep Into a Famous Cosmic Field (noirlab2618a).webm This exceptionally deep image from NSF–DOE Vera C. Rubin Observatory reveals the renowned C
+  Candidate rank 2: NASA ID=GSFC_20181129_FERMI_m13104_Starlight score=0.88 match=3/3 query='distant stars in space' metadata=Tracing the History of Starlight with NASA's Fermi Mission Scientists using data from NASA’s Fermi Gamma-ray Space Telescope have measured all the starlight pro
+  Candidate rank 3: NASA ID=MIRI_Feature_Edit score=0.88 match=3/3 query='distant stars in space' metadata=James Webb Space Telescope’s Multifaceted MIRI James Webb Space Telescope’s mid-infrared instrument (MIRI) has both a camera and a spectrograph that sees light 
+  Candidate rank 4: Wikimedia Commons ID=113570950 score=0.85 match=3/3 query='distant stars in space' metadata=File:Social Media Shorts- NASA’s James Webb Space Telescope Sunshield, Fully Deployed.webm In October 2019, technicians and engineers successfully performed a c
+  Candidate rank 5: Wikimedia Commons ID=96293221 score=0.85 match=3/3 query='distant stars in space' metadata=File:NASA's Nancy Grace Roman Space Telescope- Broadening Our Cosmic Horizons jPq2VVPjk U.webm Scheduled to launch in the mid-2020s, the Nancy Grace Roman Space
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
+Scene 2: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show distant stars in deep space and star fields, perfectly matching the required visible focus.
+Scene 2: accepted Wikimedia Commons metadata=0.88, visual confidence=1.0 — File:Rubin Looks Deep Into a Famous Cosmic Field (noirlab2618a).webm This exceptionally deep image from NSF–DOE Vera C. Rubin Observatory re
+Scene 3: applying metadata anchors independently to each of 5 search variants.
+  Pixabay: 25 candidate(s)
+  Coverr returned HTTP 403 (forbidden); disabling this source for the remainder of this run.
+  Wikimedia Commons: 8 candidate(s)
+  Pixabay: 25 candidate(s)
+  NASA: 2 candidate(s)
+  Wikimedia Commons: 8 candidate(s)
   Pixabay: 25 candidate(s)
   Wikimedia Commons: 9 candidate(s)
+  Pixabay: 22 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 5 candidate(s)
   Pixabay: 20 candidate(s)
   NASA: 6 candidate(s)
   Wikimedia Commons: 7 candidate(s)
-Scene 2: SigLIP thumbnail reranking applied to 11 candidate(s).
-Scene 2: 84 metadata-qualified candidate(s) across 7 search variants; checking up to 14 candidates.
-  Candidate rank 1: Coverr ID=KaYnb08Lgy score=0.76 match=1/1 query='rotating' metadata=Blue Ferris Wheel  Still shot of a moving, blue Ferris Wheel.  ferris wheel sky amusement park round rotating recreation top view relaxing chilling artsy beauti
-  Candidate rank 2: Coverr ID=VNnicQpTs4 score=0.76 match=1/1 query='rotating' metadata=Rotating shot of a retro car Rotating close-up of a Nissan 300ZX outside in the rain. retro neon light automobile 90s rainy nissan 300zx noir outdoors outside a
-  Candidate rank 3: Pixabay ID=210933 score=0.48 match=2/3 query='collapsing gas in space' metadata=nebula, universe, space, astronomy, science, cosmos, gas, stars https://pixabay.com/videos/id-210933/
-  Candidate rank 4: Coverr ID=k6GEFHq7u4 score=0.76 match=1/1 query='rotating' metadata=Several wind turbines Aerial shot of several wind turbines in a field.  aerial landscape review drone drone view top view hill mountains trees plant sky skyline
-  Candidate rank 5: Pixabay ID=2154 score=0.38 match=1/2 query='collapsing gas' metadata=boiling mud, icelandic, mud, geothermal, hot, thermal, boil, boiling, volcanic, iceland, steam, minerals, bubble, gas https://pixabay.com/videos/id-2154/
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 2: visual check 1/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a Ferris wheel against the sky, which does not depict a collapsing gas cloud.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 2: visual check 2/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a retro car (Nissan 300ZX) parked at night, which completely fails to depict the required visible focus of a collapsing gas cloud.
+Scene 3: SigLIP unavailable/no usable thumbnails; metadata ranking retained.
+Scene 3: 93 metadata-qualified candidate(s) across 5 search variants; checking up to 14 candidates.
+  Candidate rank 1: Wikimedia Commons ID=193973264 score=0.94 match=3/3 query='nebula gas dust' metadata=File:Tarantula Nebula- 30 Doradus and The Growing Tarantula Within (2011-30dor - spacescoop 30dor lg web).webm The star-forming region, 30 Doradus, is one of th
+  Candidate rank 2: NASA ID=ksc_061404_t-nebula score=0.91 match=3/3 query='nebula gas dust' metadata=KSC-04-S-00193 The Hubble Space Telescope has trained its eyes on the Trifid Nebula, a dazzling star nursery 9,000 light-years from Earth. With its three huge i
+  Candidate rank 3: Wikimedia Commons ID=151565308 score=0.88 match=3/3 query='nebula gas dust' metadata=File:Carina Nebula Webb vs Hubble (SVS31197 - carina nebula 720p30).webm Carina Nebula comparison of James Web vs HubbleThese comparison photos of a young star-
+  Candidate rank 4: Wikimedia Commons ID=151642368 score=0.88 match=3/3 query='nebula gas dust' metadata=File:Carina Nebula Webb vs Hubble (SVS31197 - carina nebula 2160p30 h265).webm Carina Nebula comparison of James Web vs HubbleThese comparison photos of a young
+  Candidate rank 5: NASA ID=First Images from the James Webb Space Telescope (Official NASA Highlights) score=0.88 match=3/3 query='nebula gas dust' metadata=First Images from the James Webb Space Telescope (Official NASA Highlights) Description: NASA revealed the first five full-color images and spectrographic data 
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
 AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (0.95).
-Scene 2: visual check 3/14 via gemini (gemini-3.5-flash-lite) — PASS (0.95): The frames clearly show a vast gas cloud (nebula) in space with dense regions and embedded stars, visually depicting a collapsing gas cloud as required.
-Scene 2: accepted Pixabay metadata=0.48, visual confidence=0.95 — nebula, universe, space, astronomy, science, cosmos, gas, stars https://pixabay.com/videos/id-210933/
-Scene 3: applying metadata anchors independently to each of 5 search variants.
+Scene 3: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (0.95): The frames clearly display vast clouds of gas and dust in a nebula (such as the Tarantula Nebula), directly illustrating the required visible focus of collapsing clouds of gas associated with star formation.
+Scene 3: accepted Wikimedia Commons metadata=0.94, visual confidence=0.95 — File:Tarantula Nebula- 30 Doradus and The Growing Tarantula Within (2011-30dor - spacescoop 30dor lg web).webm The star-forming region, 30 D
+Scene 4: applying metadata anchors independently to each of 3 search variants.
   Pixabay: 25 candidate(s)
+  NASA: 5 candidate(s)
+  Wikimedia Commons: 10 candidate(s)
   Pixabay: 25 candidate(s)
-  Pixabay: 8 candidate(s)
-  Wikimedia Commons: 4 candidate(s)
+  NASA: 1 candidate(s)
+  Wikimedia Commons: 9 candidate(s)
+  Pixabay: 6 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 8 candidate(s)
+Scene 4: SigLIP unavailable/no usable thumbnails; metadata ranking retained.
+Scene 4: 56 metadata-qualified candidate(s) across 3 search variants; checking up to 14 candidates.
+  Candidate rank 1: Wikimedia Commons ID=96290919 score=0.91 match=3/3 query='binary stars in space' metadata=File:NASA’s Fermi Finds Record-breaking Binary Star 38aw4HMjlag.webm Using data from NASA's Fermi Gamma-ray Space Telescope and other facilities, scientists hav
+  Candidate rank 2: Wikimedia Commons ID=96293730 score=0.85 match=3/3 query='binary stars in space' metadata=File:TESS Satellite Discovered Its 1st World Orbiting 2 Stars 8FrlhrtVEW8.webm Researchers working with data from NASA’s Transiting Exoplanet Survey Satellite (
+  Candidate rank 3: NASA ID=ksc_110104_swiftexplained score=0.85 match=3/3 query='binary stars in space' metadata=KSC-04-S-00343 Mysterious and fleeting, gamma-ray bursts come from galaxies so far away that they take billions of years to reach us.   NASA's new satellite cal
+  Candidate rank 4: Wikimedia Commons ID=69220643 score=0.82 match=4/4 query='binary star system orbit' metadata=File:Artist’s impression of eclipsing binary (eso1311b).webm This video shows an artist’s impression of an eclipsing binary star system. As the two stars orbit 
+  Candidate rank 5: Wikimedia Commons ID=149646589 score=0.82 match=1/1 query='binary' metadata=File:Identifying Eclipsing Star Systems using Light Curves (SVS5290 - eclipsing binary light curves explainer 2160p60).webm This data visualization presents a c
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
+Scene 4: visual check 1/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a wide star field with text pointing to the Large Magellanic Cloud and an abstract or lens flare effect, but do not clearly depict binary stars in space as required by the focus.
+AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
+AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
+Scene 4: visual check 2/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show binary stars in space, specifically a simulation and system diagram of the binary star system TOI 1338 with orbiting planet, directly matching the required visible focus.
+Scene 4: accepted Wikimedia Commons metadata=0.85, visual confidence=1.0 — File:TESS Satellite Discovered Its 1st World Orbiting 2 Stars 8FrlhrtVEW8.webm Researchers working with data from NASA’s Transiting Exoplane
+Scene 5: applying metadata anchors independently to each of 4 search variants.
   Pixabay: 25 candidate(s)
-  Coverr: 25 candidate(s)
+  NASA: 5 candidate(s)
+  Wikimedia Commons: 10 candidate(s)
+  Pixabay: 25 candidate(s)
+  NASA: 2 candidate(s)
+  Wikimedia Commons: 5 candidate(s)
+  Pixabay: 25 candidate(s)
+NASA asset lookup skipped (How Do Stars Influence the Search for Life? - Horizontal Video): 404 Client Error: Not Found for url: https://images-api.nasa.gov/asset/How%20Do%20Stars%20Influence%20the%20Search%20for%20Life?%20-%20Horizontal%20Video
+  NASA: 5 candidate(s)
+  Wikimedia Commons: 8 candidate(s)
+  Pixabay: 25 candidate(s)
   NASA: 6 candidate(s)
   Wikimedia Commons: 9 candidate(s)
-Scene 3: SigLIP thumbnail reranking applied to 16 candidate(s).
-Scene 3: 72 metadata-qualified candidate(s) across 5 search variants; checking up to 14 candidates.
-  Candidate rank 1: Pixabay ID=37056 score=0.76 match=1/1 query='young' metadata=young, woman, blond, eyes, blue, closeup, slow, move, hair https://pixabay.com/videos/id-37056/
-  Candidate rank 2: Pixabay ID=174008 score=0.76 match=1/1 query='young' metadata=woman, smile, communication, gesture, expression, asian, close up, young, university https://pixabay.com/videos/id-174008/
-  Candidate rank 3: Pixabay ID=130721 score=0.76 match=1/1 query='young' metadata=girl, model, young, lifestyle, freedom https://pixabay.com/videos/id-130721/
-  Candidate rank 4: Pixabay ID=167889 score=0.76 match=1/1 query='young' metadata=couple, young, happy, running, smoke, sea, sunset https://pixabay.com/videos/id-167889/
-  Candidate rank 5: Pixabay ID=63241 score=0.76 match=1/1 query='young' metadata=woman, mask, healthcare, young, epidemic, virus, pandemic, face, health, protection, medical, quarantine, coronavirus, concept, care, protective, person, sick, 
+Scene 5: SigLIP unavailable/no usable thumbnails; metadata ranking retained.
+Scene 5: 93 metadata-qualified candidate(s) across 4 search variants; checking up to 14 candidates.
+  Candidate rank 1: Wikimedia Commons ID=96294660 score=0.88 match=4/4 query='stars visible in night sky' metadata=File:NASA - A Swift Tour of the Nearest Galaxies in UV Light 53yokIKAnDs.webm Astronomers at NASA's Goddard Space Flight Center in Greenbelt, Md., and the Penns
+  Candidate rank 2: Wikimedia Commons ID=67105139 score=0.88 match=4/4 query='stars visible in night sky' metadata=File:ESOcast 63.webm The clear night sky offers one of the most beautiful views in nature. The eye adapts to the dark and the pupil widens to collect more light
+  Candidate rank 3: NASA ID=JPL-20260930-WHATSUf-0001-Whats_Up_October_2026 score=0.88 match=4/4 query='stars visible in night sky' metadata=What's Up: October 2026 Skywatching Tips from NASA Saturn takes center stage, a meteor shower lights up the sky, and the Moon visits the Seven Sisters.   On Oct
+  Candidate rank 4: Wikimedia Commons ID=187581500 score=0.85 match=4/4 query='stars visible in night sky' metadata=File:What's Up- April 2026 Skywatching Tips from NASA (JPL-20260326-WHATSUf-0001-Whats Up April 2026).webm Mercury shines at its brightest for the year, the Lyr
+  Candidate rank 5: Wikimedia Commons ID=28012225 score=0.85 match=4/4 query='stars visible in night sky' metadata=File:Restoration of James Turrells Skyspace at M HKA.webm The M HKA’s (Museum van Hedendaagse Kunst Antwerpen, Belgium) rooftop terrace has its own Skyspace by 
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (1.00).
-Scene 3: visual check 1/14 via gemini (gemini-3.5-flash-lite) — REJECT (1.00): The frames show a closeup of a young woman with blond hair, which does not depict a protostellar core as required by the scene focus.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 2/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a young woman smiling outdoors, which does not depict a protostellar core as required by the scene focus.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 3/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a young woman standing on a balcony near a modern building, which has no connection to the required visible focus of a protostellar core.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 4/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a young couple running on a beach at sunset with purple smoke, which does not depict a protostellar core.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 5/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a young woman wearing a mask and looking at a smartphone outdoors, which has no connection to a protostellar core.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 6/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a close-up of a person's blonde hair blowing in the wind outdoors, which does not depict a protostellar core.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 7/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a person walking through an orchard, which completely fails to depict the required visible focus of a protostellar core.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 8/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a couple running on a beach with smoke flares, which has no connection to a protostellar core.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 9/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a close-up of a person's hair and ear outdoors, which is completely unrelated to the required visible focus of a protostellar core.
-AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 10/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a silhouette of a person playing a guitar outdoors near a bridge at dusk, which has no relation to a protostellar core.
+AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
+Scene 5: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show numerous stars visible in the night sky, including views of the Large and Small Magellanic Clouds, directly supporting the required visual focus.
+Scene 5: accepted Wikimedia Commons metadata=0.88, visual confidence=1.0 — File:NASA - A Swift Tour of the Nearest Galaxies in UV Light 53yokIKAnDs.webm Astronomers at NASA's Goddard Space Flight Center in Greenbelt
+Scene 6: applying metadata anchors independently to each of 5 search variants.
+  Pixabay: 25 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 8 candidate(s)
+  Pixabay: 11 candidate(s)
+  Wikimedia Commons: 1 candidate(s)
+  Pixabay: 25 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 8 candidate(s)
+  Pixabay: 1 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 10 candidate(s)
+  Pixabay: 8 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 10 candidate(s)
+Scene 6: SigLIP unavailable/no usable thumbnails; metadata ranking retained.
+Scene 6: 62 metadata-qualified candidate(s) across 5 search variants; checking up to 14 candidates.
+  Candidate rank 1: Wikimedia Commons ID=94184222 score=0.88 match=2/2 query='core of a star' metadata=File:NASA-ExoplanetOrbitingWhiteDwarfStarWD1856+534.webm NASA Missions Spy First Possible Planet Hugging a Stellar Cinder   [ 1 ]      [ 2 ]   
+  https://www.jp
+  Candidate rank 2: NASA ID=ksc_111604_swift_three_theories score=0.88 match=2/2 query='core of a star' metadata=KSC-04-S-00359 As Swift begins its investigation of gamma-ray bursts, NASA scientists are anxious to see if their origins lie in the explanations of three possi
+  Candidate rank 3: NASA ID=GSFC_20100126_Nova_m10547_SuperNova score=0.88 match=2/2 query='core of a star' metadata=Supernova with Expanding Shell Stars which are 8 times or more massive than our Sun end their lives in a most spectacular way; they go supernova. A supernova ex
+  Candidate rank 4: NASA ID=GSFC_20170206_Exo_m12503_Volcano score=0.85 match=1/1 query='stellar' metadata=Planets of Red Dwarf Stars May Face Oxygen Loss in Habitable Zones The search for life beyond Earth starts in habitable zones, the regions around stars where co
+  Candidate rank 5: Wikimedia Commons ID=96296922 score=0.85 match=2/2 query='core of a star' metadata=File:TESS, Spitzer Spot Potential Giant World Circling Tiny Star fDhG0ppvQ2g.webm An international team of astronomers has reported what may be the first exampl
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
 AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 11/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show a person sitting on a rocky river shore outdoors, which does not depict a protostellar core.
+Scene 6: visual check 1/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show an animation of a planetary system with a star and orbiting planets (WD 1856 b), but they do not show the internal core of a star as required by the visual focus.
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 12/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show young people and adults attending an indoor educational event (STEM sleepover), not a protostellar core as required.
+AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (0.85).
+Scene 6: visual check 2/14 via gemini (gemini-3.5-flash-lite) — PASS (0.85): The frames show an animated depiction of a star's core and stellar processes, matching the scene's focus on the core of a star.
+Scene 6: accepted NASA metadata=0.88, visual confidence=0.85 — KSC-04-S-00359 As Swift begins its investigation of gamma-ray bursts, NASA scientists are anxious to see if their origins lie in the explana
+Scene 7: applying metadata anchors independently to each of 3 search variants.
+  Pixabay: 25 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 6 candidate(s)
+  Pixabay: 25 candidate(s)
+  Wikimedia Commons: 1 candidate(s)
+  Pixabay: 1 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 9 candidate(s)
+Scene 7: SigLIP unavailable/no usable thumbnails; metadata ranking retained.
+Scene 7: 41 metadata-qualified candidate(s) across 3 search variants; checking up to 14 candidates.
+  Candidate rank 1: NASA ID=GSFC_20100126_Nova_m10547_SuperNova score=0.85 match=3/3 query='massive star in space' metadata=Supernova with Expanding Shell Stars which are 8 times or more massive than our Sun end their lives in a most spectacular way; they go supernova. A supernova ex
+  Candidate rank 2: NASA ID=GSFC_20170206_Exo_m12503_Volcano score=0.82 match=3/3 query='massive star in space' metadata=Planets of Red Dwarf Stars May Face Oxygen Loss in Habitable Zones The search for life beyond Earth starts in habitable zones, the regions around stars where co
+  Candidate rank 3: Wikimedia Commons ID=119118361 score=0.79 match=4/4 query='massive star evolution phase' metadata=File:Molecular diversity of early high-mass protostars - evidence for a deeply embedded hot corino phase.webm Laure Bouscasse (IRAM)
+ During star formation the 
+  Candidate rank 4: NASA ID=ksc_061404_t-nebula score=0.79 match=3/3 query='massive star in space' metadata=KSC-04-S-00193 The Hubble Space Telescope has trained its eyes on the Trifid Nebula, a dazzling star nursery 9,000 light-years from Earth. With its three huge i
+  Candidate rank 5: NASA ID=20190530-SPITZRf-0001-Stars of Cephus score=0.79 match=3/3 query='massive star in space' metadata=Stars of Cepheus as Seen by NASA's Spitzer Space Telescope Soar through this cosmic landscape filled with bright nebulas, as well as runaway, massive and young 
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 13/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show an expert being interviewed and a spacecraft in orbit near the Sun, not a protostellar core.
+AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
+Scene 7: visual check 1/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly depict a massive star in space surrounded by glowing gas and nebular material, directly supporting the required visual focus.
+Scene 7: accepted NASA metadata=0.85, visual confidence=1.0 — Supernova with Expanding Shell Stars which are 8 times or more massive than our Sun end their lives in a most spectacular way; they go super
+Scene 8: applying metadata anchors independently to each of 4 search variants.
+  Pixabay: 25 candidate(s)
+  NASA: 3 candidate(s)
+  Wikimedia Commons: 9 candidate(s)
+  Pixabay: 25 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 6 candidate(s)
+  Pixabay: 25 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 5 candidate(s)
+  NASA: 6 candidate(s)
+  Wikimedia Commons: 8 candidate(s)
+Scene 8: SigLIP unavailable/no usable thumbnails; metadata ranking retained.
+Scene 8: 78 metadata-qualified candidate(s) across 4 search variants; checking up to 14 candidates.
+  Candidate rank 1: Wikimedia Commons ID=96293931 score=0.85 match=3/3 query='dense neutron star' metadata=File:What is a Neutron Star- hCwDNXKlN8Q.webm Here's just some of what we already know about neutron stars. An upcoming NASA mission will further investigate th
+  Candidate rank 2: Wikimedia Commons ID=63420974 score=0.85 match=3/3 query='dense neutron star' metadata=File:Neutron star merger animation ending with kilonova explosion.webm This artist’s impression video shows how two tiny but very dense neutron stars merge and 
+  Candidate rank 3: Wikimedia Commons ID=70082638 score=0.85 match=3/3 query='dense neutron star' metadata=File:Binary Neutron Star Merger (without magnetic fields).webm This movie shows the final stages of the coalescence and the merging of two neutron stars. Neutro
+  Candidate rank 4: Wikimedia Commons ID=70082644 score=0.85 match=3/3 query='dense neutron star' metadata=File:Binary Neutron Star Merger (with magnetic fields).webm This movie shows the final stages of the coalescence and the merging of two neutron stars. Neutron s
+  Candidate rank 5: Wikimedia Commons ID=146259179 score=0.82 match=1/1 query='neutron' metadata=File:Instabilities in Very Young Neutron Stars- Temperature (SVS1382).webm Evolution of the temperature during the first 20 milliseconds in the life of a neutro
+Scene 8: candidate rejected/skipped (Wikimedia Commons): All 1 available rendition URL(s) failed. RuntimeError: Clip is 209.6 MB, above the 180 MB limit.
 AI router: trying gemini / gemini-3.5-flash-lite for vision/visual_verification...
-AI router: gemini/gemini-3.5-flash-lite visual verdict=REJECT (0.00).
-Scene 3: visual check 14/14 via gemini (gemini-3.5-flash-lite) — REJECT (0.00): The frames show an interview with a man sitting indoors, not a protostellar core.
-[stage] footage: FAILED after 164.6s
-[diagnostics] Failure report written to failure_report.json
-Traceback (most recent call last):
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4379, in <module>
-    main()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4359, in main
-    _run_pipeline()
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 4197, in _run_pipeline
-    fetch_footage(plan)
-  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 3042, in fetch_footage
-    raise RuntimeError(
-RuntimeError: Scene 3 has no verified relevant footage or trusted published visual. The generator intentionally did not invent a replacement diagram. Details: None of 14 attempted candidates could be downloaded and accepted under the visual verification policy.
+AI router: gemini/gemini-3.5-flash-lite visual verdict=PASS (1.00).
+Scene 8: visual check 2/14 via gemini (gemini-3.5-flash-lite) — PASS (1.00): The frames clearly show dense neutron stars in space, matching the required visual focus of a dense neutron star.
+Scene 8: accepted Wikimedia Commons metadata=0.85, visual confidence=1.0 — File:Neutron star merger animation ending with kilonova explosion.webm This artist’s impression video shows how two tiny but very dense neut
+[stage] footage: completed in 204.9s
+7/7 Rendering every scene to the locked VO timeline...
+[stage] render: start
+Scene 1/8 rendered: 6.97s
+Scene 2/8 rendered: 6.83s
+Scene 3/8 rendered: 5.87s
+Scene 4/8 rendered: 5.46s
+Scene 5/8 rendered: 5.58s
+Scene 6/8 rendered: 5.77s
+Scene 7/8 rendered: 5.77s
+Scene 8/8 rendered: 6.94s
+Final output validated: 27.0 MB, 49.21s, 1080x1920, video+audio streams present.
+Final video ready and validated: documentary.mp4; duration 49.21s
+[stage] render: completed in 126.9s
+[stage] production_report: start
+[stage] production_report: completed in 0.1s
+7/7 Production files validated: documentary.mp4, plan.json, fact_check_report.json, voiceover_manifest.json, credits.txt, timing.json, production_report.json. GitHub Actions will upload artifacts next.

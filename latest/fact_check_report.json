@@ -9,267 +9,199 @@
   "supported_claim_count": 8,
   "failed_claims": [],
   "uncited_factual_sentences": [],
-  "coverage_note": "All sentences in the script correspond to a corresponding claim that is fully supported by the provided excerpts.",
+  "coverage_note": "All sentences in the script correspond directly to the supplied claims, and each claim is fully supported by its respective source excerpt.",
   "claims": [
     {
       "id": "C1",
       "scene": 1,
-      "sentence": "Deep within cold clouds of gas, new stars slowly awaken to light up the universe.",
+      "sentence": "Have you ever looked up into the night sky and wondered just how many stars there are in space?",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Solar_System_formation",
-        "https://tigerprints.clemson.edu/physastro_pubs/312"
+        "https://www.esa.int/articles/about-us/directorates/science/how-many-stars-are-there-in-the-universe"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
+        "https://www.esa.int/articles/about-us/directorates/science/how-many-stars-are-there-in-the-universe"
       ],
-      "reason": "The excerpt states that poor clusters are embedded deep within molecular clouds, supporting the premise."
+      "reason": "The exact sentence is present in the source excerpt."
     },
     {
       "id": "C2",
       "scene": 2,
-      "sentence": "Gravitational forces cause these vast molecular regions to collapse inward and gather substantial mass over time.",
+      "sentence": "The observable universe contains an estimated range of celestial bodies and distant light sources.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Solar_System_formation",
-        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs"
+        "https://en.wikipedia.org/wiki/Star"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
+        "https://en.wikipedia.org/wiki/Star"
       ],
-      "reason": "The excerpt explicitly mentions the gravitational collapse of parts of a giant molecular cloud."
+      "reason": "The source explicitly states that the observable universe contains an estimated range of stars."
     },
     {
       "id": "C3",
       "scene": 3,
-      "sentence": "As materials draw tightly together, the center heats up and forms a dense rotating protostellar core.",
+      "sentence": "All stars are formed from collapsing clouds of gas and dust known as molecular clouds.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Solar_System_formation",
-        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1393&context=physastro_pubs"
+        "https://en.wikipedia.org/wiki/Stellar_evolution"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
+        "https://en.wikipedia.org/wiki/Stellar_evolution"
       ],
-      "reason": "The excerpt notes that collapsing mass collected in the center, forming the Sun, which aligns with forming a core."
+      "reason": "The source states that all stars are formed from collapsing clouds of gas and dust, often called nebulae or molecular clouds."
     },
     {
       "id": "C4",
       "scene": 4,
-      "sentence": "Surrounding debris flattens into a swirling disk where future planets can slowly accumulate from debris.",
+      "sentence": "Astronomers state that all stars like our sun are always born with a sibling.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Planetary_formation",
-        "https://www.nature.com/articles/s41586-020-2934-0"
+        "https://news.berkeley.edu/2017/06/13/new-evidence-that-all-stars-are-born-in-pairs/"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Nebular_hypothesis"
+        "https://news.berkeley.edu/2017/06/13/new-evidence-that-all-stars-are-born-in-pairs/"
       ],
-      "reason": "The excerpt explains that gaseous clouds slowly rotate, gradually collapse and flatten due to gravity, forming stars and planets."
+      "reason": "The source states that stars like our sun are always born with a sibling."
     },
     {
       "id": "C5",
       "scene": 5,
-      "sentence": "Extreme core temperatures eventually trigger nuclear fusion reactions that power the newly born star.",
+      "sentence": "Many other stars are visible to the naked eye at night across the constellations.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
-        "https://helios.gsfc.nasa.gov/nucleo.html"
+        "https://en.wikipedia.org/wiki/Star"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis"
+        "https://en.wikipedia.org/wiki/Star"
       ],
-      "reason": "The excerpt supports that energy released from nuclear fusion reactions accounts for stellar energy and luminosity."
+      "reason": "The source states that many other stars are visible to the naked eye at night."
     },
     {
       "id": "C6",
       "scene": 6,
-      "sentence": "Stellar nucleosynthesis inside the burning core forges heavier chemical elements from simpler hydrogen atoms.",
+      "sentence": "As atoms at the core become helium, stars like the Sun begin to fuse hydrogen.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
-        "https://helios.gsfc.nasa.gov/nucleo.html"
+        "https://en.wikipedia.org/wiki/Stellar_evolution"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis"
+        "https://en.wikipedia.org/wiki/Stellar_evolution"
       ],
-      "reason": "The excerpt details hydrogen fusion (nuclear fusion of four protons to form a helium-4 nucleus) as a key reaction process."
+      "reason": "The source states that as atoms at the core become helium, stars like the Sun begin to fuse hydrogen along a spherical shell."
     },
     {
       "id": "C7",
       "scene": 7,
-      "sentence": "Eventually, mature stellar systems stabilize and maintain a steady balance between gravity and internal pressure.",
+      "sentence": "The lifecycle of high mass stars diverges from low mass stars after carbon fusion.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Solar_System_formation",
-        "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1305&context=physastro_pubs"
+        "https://courses.ems.psu.edu/astro801/content/l6_p5.html"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
+        "https://courses.ems.psu.edu/astro801/content/l6_p5.html"
       ],
-      "reason": "The excerpt mentions competing forces and how an internal source of energy countered gravitational contraction until hydrostatic equilibrium was achieved."
+      "reason": "The source states that the lifecycle of high mass stars diverges from that of low mass stars after the stage of carbon fusion."
     },
     {
       "id": "C8",
       "scene": 8,
-      "sentence": "When aging stars finally scatter their enriched materials outward, they seed future stellar generations across space.",
+      "sentence": "Neutron stars are the second smallest and second densest known class of stellar objects.",
       "source_urls": [
-        "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
-        "https://en.wikipedia.org/wiki/Solar_System_formation"
+        "https://en.wikipedia.org/wiki/Neutron_star"
       ],
       "status": "supported",
       "verified_evidence_urls": [
-        "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System"
+        "https://en.wikipedia.org/wiki/Neutron_star"
       ],
-      "reason": "The excerpt states that ejected material continues the enrichment of the interstellar medium with heavy elements for future generations of stars and planets."
+      "reason": "The source states that neutron stars are the second-smallest and second-densest known class of stellar objects."
     }
   ],
   "sources": [
     {
       "claim_id": "C1",
-      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
-      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
-      "host": "en.wikipedia.org",
+      "requested_url": "https://www.esa.int/articles/about-us/directorates/science/how-many-stars-are-there-in-the-universe",
+      "resolved_url": "https://www.esa.int/articles/about-us/directorates/science/how-many-stars-are-there-in-the-universe",
+      "host": "www.esa.int",
       "http_status": 200,
-      "page_title": "Formation and evolution of the Solar System",
-      "excerpt": "Poor clusters are embedded deep within molecular clouds and contain no nearby massive stars. In a poor star cluster similar to the ones seen in the Ophiuchus cluster, the Sun is embedded deep inside the molecular cloud with massive stars being absent. Eventually, after about 800 million years, the gravitational disruption caused by galactic tides, passing stars and giant molecular clouds began to deplete the cloud, sending comets into the inner Solar System. Assuming that the Big Crunch or Big Rip scenarios for the end of the Universe do not occur, calculations suggest that the gravity of passing stars will have completely stripped the dead Sun of its remaining planets within 1 quadrillion (1015) years. In the distant future, the gravity of passing stars will gradually reduce the Sun's retinue of planets. However, since the early 1980s studies of young stars have shown them to be surroun",
-      "source_kind": "planned",
-      "status": "usable"
-    },
-    {
-      "claim_id": "C1",
-      "requested_url": "https://tigerprints.clemson.edu/physastro_pubs/312",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Fetched page is about a different subject: it shares 0 of the claim's 8 content terms (needs 2)."
-    },
-    {
-      "claim_id": "C2",
-      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
-      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
-      "host": "en.wikipedia.org",
-      "http_status": 200,
-      "page_title": "Formation and evolution of the Solar System",
-      "excerpt": "The formation of the Solar System began about 4.6 billion years ago with the gravitational collapse of a small part of a giant molecular cloud. == Formation ==\n\n\n=== Presolar nebula ===\nThe nebular hypothesis says that the Solar System formed from the gravitational collapse of a fragment of a giant molecular cloud most likely at the edge of a Wolf-Rayet bubble. A shock wave from a supernova may have triggered the formation of the Sun by creating relatively dense regions within the cloud, causing these regions to collapse. === Late Heavy Bombardment and after ===\n\nGravitational disruption from the outer planets' migration would have sent large numbers of asteroids into the inner Solar System, severely depleting the original belt until it reached today's extremely low mass. Eventually, after about 800 million years, the gravitational disruption caused by galactic tides, passing stars and g",
+      "page_title": "How many stars are there in the Universe?",
+      "excerpt": "Have you ever looked up into the night sky and wondered just how many stars there are in space? Have you ever looked up into the night sky and wondered just how many stars there are in space? 2025 publication date 1157648 Views Have you ever looked up into the night sky and wondered just how many stars there are in space? Look into the sky on a clear night, out of the glare of streetlights, and you will see a few thousand individual stars with your naked eyes. Stars are not scattered randomly through space, they are gathered together into vast groups known as galaxies. Media modal copy url 0 favorites publication date 0 Views Gaia mapping the stars of the Milky Way In 1995, an image from the Hubble Space Telescope (HST) suggested that star formation had reached a peak at roughly seven thousand million years ago. But Herschel could peer into this previously hidden Universe at infrared wav",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C2",
-      "requested_url": "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Could not fetch evidence source https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1307&context=physastro_pubs: HTTPError (HTTP 403)"
-    },
-    {
-      "claim_id": "C3",
-      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
-      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
+      "requested_url": "https://en.wikipedia.org/wiki/Star",
+      "resolved_url": "https://en.wikipedia.org/wiki/Star",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Formation and evolution of the Solar System",
-      "excerpt": "Most of the collapsing mass collected in the center, forming the Sun, while the rest flattened into a protoplanetary disk out of which the planets, moons, asteroids, and other small Solar System bodies formed. In roughly five billion years, the Sun's surface will cool as the fusion of hydrogen to helium stops in the core of the Sun, becoming a subgiant, and over the next two and a half to three billion years thereafter, it will expand outward to many times its current diameter, becoming a red giant twice with an intermittent phase between the principal RGB and AGB phases, before casting off its outer layers as a planetary nebula and leaving behind a stellar remnant known as a white dwarf. Arthur Stanley Eddington's confirmation of Albert Einstein's theory of relativity led to his realisation that the Sun's energy comes from nuclear fusion reactions in its core, fusing hydrogen into heliu",
+      "page_title": "Star - Wikipedia",
+      "excerpt": "The observable universe contains an estimated 10 22 to 10 24 stars. [ 34 ] Spitzer Space Telescope infrared image showing a multitude of stars in the Milky Way galaxy The observable universe contains an estimated 10 22 to 10 24 stars. [ 45 ] [ 46 ] The internationally recognized authority for naming celestial bodies is the International Astronomical Union (IAU). \"Chapter 7: The Moon and Other Celestial Bodies\". their immense distances from Earth make them appear as fixed points of light. They have been part of religious practices, divination rituals, mythology , used for celestial navigation and orientation, to mark the passage of seasons, and to define calendars. Early astronomers recognized a difference between \" fixed stars \", whose position on the celestial sphere does not change, and \"wandering stars\" ( planets ), which move noticeably relative to the fixed stars over days or weeks.",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C3",
-      "requested_url": "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1393&context=physastro_pubs",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again."
-    },
-    {
-      "claim_id": "C4",
-      "requested_url": "https://en.wikipedia.org/wiki/Planetary_formation",
-      "resolved_url": "https://en.wikipedia.org/wiki/Nebular_hypothesis",
+      "requested_url": "https://en.wikipedia.org/wiki/Stellar_evolution",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stellar_evolution",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Nebular hypothesis",
-      "excerpt": "Jupiter- and Saturn-like planets are thought to accumulate the bulk of their mass during only 10,000 years. Immanuel Kant, familiar with Swedenborg's work, developed the theory further in 1755, publishing his own Universal Natural History and Theory of the Heavens, wherein he argued that gaseous clouds (nebulae) slowly rotate, gradually collapse and flatten due to gravity, eventually forming stars and planets. Another possible process for shedding angular momentum is magnetic braking, where the spin of the star is transferred into the surrounding disk via that star's magnetic field. Old theories were unable to explain how their cores could form fast enough to accumulate significant amounts of gas from the quickly disappearing protoplanetary disk. Particles several centimeters in size or larger slowly settle near the middle plane of the disk, forming a very thin—less than 100 km—and dense",
+      "page_title": "Stellar evolution - Wikipedia",
+      "excerpt": "[ 1 ] All stars are formed from collapsing clouds of gas and dust, often called nebulae or molecular clouds . Neutron stars [ edit ] Main article: Neutron star Bubble-like shock wave still expanding from a supernova explosion 15,000 years ago Ordinarily, atoms are mostly electron clouds by volume, with very compact nuclei at the center (proportionally, if atoms were the size of a football stadium, their nuclei would be the size of dust mites). Typical giant molecular clouds are roughly 100 light-years (9.5 × 10 14 km) across and contain up to 6,000,000 solar masses (1.2 × 10 37 kg ) . Dense molecular filaments will fragment into gravitationally bound cores, which are the precursors of stars. [ 4 ] A protostar continues to grow by accretion of gas and dust from the molecular cloud, becoming a pre-main-sequence star as it reaches its final mass. This is known as the second dredge up, and i",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C4",
-      "requested_url": "https://www.nature.com/articles/s41586-020-2934-0",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Evidence URL redirected outside the trusted HTTPS allowlist; redirect was not followed."
-    },
-    {
-      "claim_id": "C5",
-      "requested_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
-      "resolved_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
-      "host": "en.wikipedia.org",
+      "requested_url": "https://news.berkeley.edu/2017/06/13/new-evidence-that-all-stars-are-born-in-pairs/",
+      "resolved_url": "https://news.berkeley.edu/2017/06/13/new-evidence-that-all-stars-are-born-in-pairs/",
+      "host": "news.berkeley.edu",
       "http_status": 200,
-      "page_title": "Stellar nucleosynthesis",
-      "excerpt": "A second stimulus to understanding the processes of stellar nucleosynthesis occurred later in the same century, when it was realized by Arthur Eddington and expanded on by George Gamow and then Hans Bethe that the energy released from nuclear fusion reactions accounted for the longevity of the Sun as a source of heat and light. In the following decade the Gamow factor was used by Robert d'Escourt Atkinson and Fritz Houtermans and later by Edward Teller and Gamow himself to derive the rate at which nuclear reactions would occur at the high temperatures believed to exist in stellar interiors. == Key reactions ==\n\nThe most important reactions in stellar nucleosynthesis:\n\nHydrogen fusion:\nDeuterium fusion\nThe proton–proton chain\nThe carbon–nitrogen–oxygen cycle\nHelium fusion:\nThe triple-alpha process\nThe alpha process\nFusion of heavier elements:\nLithium burning: a process found most commonly",
+      "page_title": "New evidence that all stars are born in pairs - Berkeley News",
+      "excerpt": "New evidence that all stars are born in pairs - Berkeley News Stars like our sun are always born with a sibling, astronomers say; in the case of our sun, that twin has long since vanished from the neighborhood Skip to Content Toggle Main Menu Sections Toggle Search Form Berkeley.edu All news Media inquiries Research Technology & engineering Business & economics Humanities Mind & body Politics & society Science & environment People Profiles Awards Milestones Campus & community Work life Campus news Events at Berkeley Arts & culture Performing arts Literature Film Visual arts Events calendar Podcasts & series Berkeley Talks Berkeley Voices Changemakers Climate Change Democracy in Distress Resources Find an expert Media training Berkeleyan newsletter Instagram LinkedIn Facebook YouTube X Reddit Research , Science & environment New evidence that all stars are born in pairs Stars like our sun",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C5",
-      "requested_url": "https://helios.gsfc.nasa.gov/nucleo.html",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Could not fetch evidence source https://helios.gsfc.nasa.gov/nucleo.html: ConnectionError"
-    },
-    {
-      "claim_id": "C6",
-      "requested_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
-      "resolved_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
+      "requested_url": "https://en.wikipedia.org/wiki/Star",
+      "resolved_url": "https://en.wikipedia.org/wiki/Star",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Stellar nucleosynthesis",
-      "excerpt": "== Key reactions ==\n\nThe most important reactions in stellar nucleosynthesis:\n\nHydrogen fusion:\nDeuterium fusion\nThe proton–proton chain\nThe carbon–nitrogen–oxygen cycle\nHelium fusion:\nThe triple-alpha process\nThe alpha process\nFusion of heavier elements:\nLithium burning: a process found most commonly in brown dwarfs\nCarbon-burning process\nNeon-burning process\nOxygen-burning process\nSilicon-burning process\nProduction of elements heavier than iron:\nNeutron capture:\nThe r-process\nThe s-process\nProton capture:\nThe rp-process\nThe p-process\nPhotodisintegration\n\n\n=== Hydrogen fusion ===\n\nHydrogen fusion (nuclear fusion of four protons to form a helium-4 nucleus) is the dominant process that generates energy in the cores of main-sequence stars. In astrophysics, stellar nucleosynthesis is the creation of chemical elements by nuclear reactions within stars. Stellar nucleosynthesis has occurred si",
+      "page_title": "Star - Wikipedia",
+      "excerpt": "Many other stars are visible to the naked eye at night ; Only about 4,000 of these stars are visible to the naked eye—all within the Milky Way galaxy. [ citation needed ] Only about 4,000 of these stars are visible to the naked eye—all within the Milky Way galaxy. The faintest stars visible to the naked eye under good seeing conditions are about magnitude +6. The most prominent stars have been categorised into constellations and asterisms , and many of the brightest stars have proper names . By convention, astronomers grouped prominent stars into asterisms and constellations and used them to track the motions of the planets and the inferred position of the Sun. [ 8 ] Stars in the night sky The first star catalogue in Greek astronomy was created by Aristillus in approximately 300 BC, with the help of Timocharis . [ 21 ] Early European astronomers such as Tycho Brahe identified new stars i",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C6",
-      "requested_url": "https://helios.gsfc.nasa.gov/nucleo.html",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Could not fetch evidence source https://helios.gsfc.nasa.gov/nucleo.html: ConnectionError"
-    },
-    {
-      "claim_id": "C7",
-      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
-      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
+      "requested_url": "https://en.wikipedia.org/wiki/Stellar_evolution",
+      "resolved_url": "https://en.wikipedia.org/wiki/Stellar_evolution",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Formation and evolution of the Solar System",
-      "excerpt": "However it was not a direct collapse as the internal pressure of the cloud keeps it up. Over about 100,000 years, the competing forces of gravity, gas pressure, magnetic fields, and rotation caused the contracting nebula to flatten into a spinning protoplanetary disc with a diameter of about 200 AU and form a hot, dense protostar (a star in which hydrogen fusion has not yet begun) at the centre. Within 50 million years, the temperature and pressure at the core of the Sun became so great that its hydrogen began to fuse, creating an internal source of energy that countered gravitational contraction until hydrostatic equilibrium was achieved. As the early Solar System continued to evolve, it eventually drifted away from its siblings in the stellar nursery, and continued orbiting the Milky Way's center on its own. In roughly five billion years, the Sun's surface will cool as the fusion of hy",
+      "page_title": "Stellar evolution - Wikipedia",
+      "excerpt": "Later, as the preponderance of atoms at the core becomes helium , stars like the Sun begin to fuse hydrogen along a spherical shell surrounding the core. The violent youth of stars like the Sun For a more-massive protostar, the core temperature will eventually reach 10 million kelvin , initiating the proton–proton chain reaction and allowing hydrogen to fuse, first to deuterium and then to helium . Stars with at least half the mass of the Sun can also begin to generate energy through the fusion of helium at their core, whereas more-massive stars can fuse heavier elements along a series of concentric shells. [ 9 ] [ 10 ] Such stars will not become red giants as the whole star is a convection zone and it will not develop a degenerate helium core with a shell burning hydrogen. Massive stars [ edit ] Main article: Supergiant Reconstructed image of Antares , a red supergiant In massive stars,",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C7",
-      "requested_url": "https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=1305&context=physastro_pubs",
-      "status": "not_usable",
-      "source_kind": "planned",
-      "reason": "Source host was already blocked in this run (institution returned HTTP 401/403 for this run); it was not requested again."
-    },
-    {
-      "claim_id": "C8",
-      "requested_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
-      "resolved_url": "https://en.wikipedia.org/wiki/Stellar_nucleosynthesis",
-      "host": "en.wikipedia.org",
+      "requested_url": "https://courses.ems.psu.edu/astro801/content/l6_p5.html",
+      "resolved_url": "https://courses.ems.psu.edu/astro801/content/l6_p5.html",
+      "host": "courses.ems.psu.edu",
       "http_status": 200,
-      "page_title": "Stellar nucleosynthesis",
-      "excerpt": "In astrophysics, stellar nucleosynthesis is the creation of chemical elements by nuclear reactions within stars. This final burning in massive stars, called explosive nucleosynthesis or supernova nucleosynthesis, is the final epoch of stellar nucleosynthesis. == Key reactions ==\n\nThe most important reactions in stellar nucleosynthesis:\n\nHydrogen fusion:\nDeuterium fusion\nThe proton–proton chain\nThe carbon–nitrogen–oxygen cycle\nHelium fusion:\nThe triple-alpha process\nThe alpha process\nFusion of heavier elements:\nLithium burning: a process found most commonly in brown dwarfs\nCarbon-burning process\nNeon-burning process\nOxygen-burning process\nSilicon-burning process\nProduction of elements heavier than iron:\nNeutron capture:\nThe r-process\nThe s-process\nProton capture:\nThe rp-process\nThe p-process\nPhotodisintegration\n\n\n=== Hydrogen fusion ===\n\nHydrogen fusion (nuclear fusion of four protons to ",
+      "page_title": "The Evolution of Massive Stars and Type II Supernovae | ASTRO 801: Planets, Stars, Galaxies, and the Universe Penn State College of Earth and Mineral Sciences Logo",
+      "excerpt": "The Evolution of Massive Stars and Type II Supernovae | ASTRO 801: Planets, Stars, Galaxies, and the Universe Skip to main content ASTRO 801: Planets, Stars, Galaxies, and the Universe Log in Home Welcome to ASTRO 801 Lesson 6 The Evolution of Massive Stars and Type II Supernovae The lifecycle of high mass stars diverges from that of low mass stars after the stage of carbon fusion. However, in high mass stars, the temperature and pressure in the core can reach high enough values that carbon fusion can begin, and then oxygen fusion can begin, and then even heavier elements—like neon, magnesium, and silicon—can undergo fusion, continuing to power the star. In low mass stars, once helium fusion has occurred, the core will never get hot or dense enough to fuse any additional elements, so the star begins to die. The evolutionary track of a high mass star on the HR diagram is also different fr",
       "source_kind": "planned",
       "status": "usable"
     },
     {
       "claim_id": "C8",
-      "requested_url": "https://en.wikipedia.org/wiki/Solar_System_formation",
-      "resolved_url": "https://en.wikipedia.org/wiki/Formation_and_evolution_of_the_Solar_System",
+      "requested_url": "https://en.wikipedia.org/wiki/Neutron_star",
+      "resolved_url": "https://en.wikipedia.org/wiki/Neutron_star",
       "host": "en.wikipedia.org",
       "http_status": 200,
-      "page_title": "Formation and evolution of the Solar System",
-      "excerpt": "The ejected material will contain the helium and carbon produced by the Sun's nuclear reactions, continuing the enrichment of the interstellar medium with heavy elements for future generations of stars and planets. In roughly five billion years, the Sun's surface will cool as the fusion of hydrogen to helium stops in the core of the Sun, becoming a subgiant, and over the next two and a half to three billion years thereafter, it will expand outward to many times its current diameter, becoming a red giant twice with an intermittent phase between the principal RGB and AGB phases, before casting off its outer layers as a planetary nebula and leaving behind a stellar remnant known as a white dwarf. In the distant future, the gravity of passing stars will gradually reduce the Sun's retinue of planets. The remaining 2% of the mass consisted of heavier elements that were created by nucleosynthes",
+      "page_title": "Neutron star - Wikipedia",
+      "excerpt": "Neutron stars are the second-smallest and second-densest known class of stellar objects, surpassed only by black holes in both respects. [ clarification needed ] If the true maximum mass of neutron stars was known, it would help characterize compact objects in that mass range as either neutron stars or black holes. [ 76 ] [ 77 ] This seems to be a characteristic of the X-ray sources known as Central Compact Objects in supernova remnants (CCOs in SNRs), which are thought to be young, radio-quiet isolated neutron stars. PSR B1257+12 (also known as Lich) – the first neutron star discovered with planets (a millisecond pulsar) PSR B1509−58 – source of the \"Hand of God\" photo shot by the Chandra X-ray Observatory RX J1856.5−3754 – the closest neutron star The Magnificent Seven – a group of nearby, X-ray dim isolated neutron stars PSR J0348+0432 – the most massive neutron star with a well-const",
       "source_kind": "planned",
       "status": "usable"
     }
