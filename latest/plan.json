@@ -1,92 +1,74 @@
 {
-  "title": "Amazon Rainforest Canopy",
-  "hook": "Rainforests thrive",
-  "script": "The Amazon rainforest is a type of tropical rainforest, characterized by a closed and continuous tree canopy, with moisture-dependent vegetation, and a diverse array of plant and animal species. It has a warm and wet climate, with no substantial dry season, and plays a significant role in mitigating global warming. The Amazon rainforest has seen a surge in fires, which can be devastating to the ecosystem, with over 80,000 fires reported in 2019, a 77% increase from the previous year. Fires normally occur around the dry season as slash-and-burn methods are used to clear the forest, leading to deforestation and habitat loss. The fate of the Amazon rainforest is a concern, as it is estimated that over 40% of all biotic species are indigenous to the rainforests, and the loss of this ecosystem could have severe consequences for the environment. The Amazon rainforest is a moist broadleaf tropical rainforest, spanning over 7 million km2, and is home to many species of plants, insects, and microorganisms, making it a significant source of natural medicines. The conservation of the Amazon rainforest is crucial, and efforts are being made to protect this vital ecosystem.",
+  "title": "Ants",
+  "hook": "What if a colony thinks?",
+  "script": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
   "scenes": [
     {
-      "narration": "The Amazon rainforest is a type of tropical rainforest, characterized by a closed and continuous tree canopy, with moisture-dependent vegetation, and a diverse array of plant and animal species.",
-      "visual_query": "Aerial rainforest view",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Tropical rainforest landscape",
-        "Amazon rainforest from above"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "It has a warm and wet climate, with no substantial dry season, and plays a significant role in mitigating global warming.",
-      "visual_query": "Rainforest climate footage",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Amazon rainforest weather",
-        "Tropical rainforest environment"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "The Amazon rainforest has seen a surge in fires, which can be devastating to the ecosystem, with over 80,000 fires reported in 2019, a 77% increase from the previous year.",
-      "visual_query": "Amazon rainforest conservation",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Amazon rainforest preservation",
-        "Tropical rainforest climate change"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 2,
       "sentence_end": 2
     },
     {
-      "narration": "Fires normally occur around the dry season as slash-and-burn methods are used to clear the forest, leading to deforestation and habitat loss.",
-      "visual_query": "Amazon rainforest fires",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Amazon rainforest wildfires",
-        "Tropical rainforest fire damage"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "The fate of the Amazon rainforest is a concern, as it is estimated that over 40% of all biotic species are indigenous to the rainforests, and the loss of this ecosystem could have severe consequences for the environment.",
-      "visual_query": "Deforestation footage",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Amazon rainforest deforestation",
-        "Tropical rainforest habitat loss"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "The Amazon rainforest is a moist broadleaf tropical rainforest, spanning over 7 million km2, and is home to many species of plants, insects, and microorganisms, making it a significant source of natural medicines.",
-      "visual_query": "Amazon rainforest conservation efforts",
+      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+      "visual_query": "ant colony close",
       "visual_queries": [
-        "Amazon rainforest preservation efforts",
-        "Tropical rainforest climate change mitigation"
+        "ant colony"
       ],
-      "source_label": "",
-      "source_url": "",
+      "source_label": "Ant",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 5,
       "sentence_end": 5
-    },
-    {
-      "narration": "The conservation of the Amazon rainforest is crucial, and efforts are being made to protect this vital ecosystem.",
-      "visual_query": "Amazon rainforest landscape",
-      "visual_queries": [
-        "Tropical rainforest environment",
-        "Amazon rainforest ecosystem"
-      ],
-      "source_label": "",
-      "source_url": "",
-      "sentence_start": 6,
-      "sentence_end": 6
     }
   ]
 }

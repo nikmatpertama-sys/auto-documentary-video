@@ -1,52 +1,26 @@
 {
   "status": "failed",
-  "current_stage": "footage_search_download_and_visual_verification",
+  "current_stage": "documentary_plan_generation",
   "stages": [
     {
       "name": "research",
       "status": "completed",
-      "started_at_epoch": 1795791165.2040615,
-      "finished_at_epoch": 1795791168.2699656,
-      "duration_seconds": 3.07
+      "started_at_epoch": 1795791686.0576465,
+      "finished_at_epoch": 1795791688.4962165,
+      "duration_seconds": 2.44
     },
     {
       "name": "documentary_plan_generation",
-      "status": "completed",
-      "started_at_epoch": 1795791168.2701125,
-      "finished_at_epoch": 1795791183.0000033,
-      "duration_seconds": 14.73
-    },
-    {
-      "name": "fact_checking",
-      "status": "completed",
-      "started_at_epoch": 1795791183.0002737,
-      "finished_at_epoch": 1795791237.6327899,
-      "duration_seconds": 54.63
-    },
-    {
-      "name": "voiceover_and_subtitle_generation",
-      "status": "completed",
-      "started_at_epoch": 1795791237.6330624,
-      "finished_at_epoch": 1795791302.045735,
-      "duration_seconds": 64.41
-    },
-    {
-      "name": "footage_search_download_and_visual_verification",
       "status": "failed",
-      "started_at_epoch": 1795791302.0459952,
-      "finished_at_epoch": 1795791623.621039,
+      "started_at_epoch": 1795791688.4963455,
+      "finished_at_epoch": 1795791703.4891875,
       "failure_type": "RuntimeError",
-      "failure_message": "Scene 1 could not obtain verified relevant footage. None of the 30 candidates checked from 22 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 123420892: Clip is 3175.3 MB, above the 900 MB relevance-based limit. | Wikimedia Commons 106594920: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 66319566: Clip is 1088.4 MB, above the 900 MB relevance-based limit. | NASA GSFC_20181009_GEDI_m13090_Beauty_Waveform: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). Queries tried: ['aerial rainforest view', 'rainforest view', 'rainforest aerial', 'forest view', 'tropical rainforest landscape', 'rainforest tropical landscape', 'tropical rainforest canopy aerial', 'rainforest treetops drone', 'jungle canopy overhead', 'tropical forest canopy aerial', 'jungle treetops aerial', 'Amazon basin forest canopy', 'aerial rainforest view drone overhead perspective wide documentary footage', 'aerial rainforest view high altitude camera wide landscape', 'aerial rainforest view drone overhead perspective high altitude wide shot']. No unrelated footage or diagram will be substituted."
+      "failure_message": "All configured AI providers failed:\n- OpenRouter key 1: OpenRouter HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null,\"previous_errors\":[{\"code\":429,\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit\n- Groq key 1: Groq HTTP 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199387, Requested 3501. Please try again in 20m47.616s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}} \n- Gemini key 1: Gemini HTTP 429: {   \"error\": {     \"code\": 429,     \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 16h58m30.956858928s.\",     \"status\": \"RESOURCE_EXHAUSTED\",     \"details\": [       {         \"@type\": \"type.googleapis.com/google.rpc.Hel\n- DeepSeek key 1: DeepSeek HTTP 402: {\"error\":{\"message\":\"Insufficient Balance (request_id: 42f22abe-f032-4b9b-82aa-39dc95b7e950)\",\"type\":\"insufficient_balance_error\",\"param\":null,\"code\":\"invalid_request_error\"}}\n- Cloudflare AI key pair 1: Cloudflare AI HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (ba372e57-c200-4b4c-86b8-0c1d23c72725)\",\"code\":4006}],\"success\":false,\"result\":{},\"messages\":[]}\n- Cloudflare AI key pair 2: Scene narration totals 75 words; expected 80-200."
     }
   ],
-  "voice_provider": "Speechify",
-  "voice": "geffen_32",
-  "voice_model": "simba-3.5",
-  "language": "en",
-  "voiceover_manifest": "output/voiceover_manifest.json",
   "failure": {
     "error_type": "RuntimeError",
-    "error_message": "Scene 1 could not obtain verified relevant footage. None of the 30 candidates checked from 22 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 123420892: Clip is 3175.3 MB, above the 900 MB relevance-based limit. | Wikimedia Commons 106594920: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 66319566: Clip is 1088.4 MB, above the 900 MB relevance-based limit. | NASA GSFC_20181009_GEDI_m13090_Beauty_Waveform: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). Queries tried: ['aerial rainforest view', 'rainforest view', 'rainforest aerial', 'forest view', 'tropical rainforest landscape', 'rainforest tropical landscape', 'tropical rainforest canopy aerial', 'rainforest treetops drone', 'jungle canopy overhead', 'tropical forest canopy aerial', 'jungle treetops aerial', 'Amazon basin forest canopy', 'aerial rainforest view drone overhead perspective wide documentary footage', 'aerial rainforest view high altitude camera wide landscape', 'aerial rainforest view drone overhead perspective high altitude wide shot']. No unrelated footage or diagram will be substituted.",
-    "finished_at_epoch": 1795791623.62269
+    "error_message": "All configured AI providers failed:\n- OpenRouter key 1: OpenRouter HTTP 429: {\"error\":{\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit\",\"code\":429,\"metadata\":{\"headers\":{\"X-RateLimit-Limit\":\"50\",\"X-RateLimit-Remaining\":\"0\",\"X-RateLimit-Reset\":\"1795824000000\"},\"limit_source\":\"openrouter_free_tier_daily\",\"remedy_hint\":\"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.\",\"provider_name\":null,\"previous_errors\":[{\"code\":429,\"message\":\"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit\n- Groq key 1: Groq HTTP 429: {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199387, Requested 3501. Please try again in 20m47.616s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}} \n- Gemini key 1: Gemini HTTP 429: {   \"error\": {     \"code\": 429,     \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\\nPlease retry in 16h58m30.956858928s.\",     \"status\": \"RESOURCE_EXHAUSTED\",     \"details\": [       {         \"@type\": \"type.googleapis.com/google.rpc.Hel\n- DeepSeek key 1: DeepSeek HTTP 402: {\"error\":{\"message\":\"Insufficient Balance (request_id: 42f22abe-f032-4b9b-82aa-39dc95b7e950)\",\"type\":\"insufficient_balance_error\",\"param\":null,\"code\":\"invalid_request_error\"}}\n- Cloudflare AI key pair 1: Cloudflare AI HTTP 429: {\"errors\":[{\"message\":\"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (ba372e57-c200-4b4c-86b8-0c1d23c72725)\",\"code\":4006}],\"success\":false,\"result\":{},\"messages\":[]}\n- Cloudflare AI key pair 2: Scene narration totals 75 words; expected 80-200.",
+    "finished_at_epoch": 1795791703.4903018
   }
 }
