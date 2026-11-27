@@ -1,0 +1,44 @@
+{
+  "sentences": [
+    {
+      "start": 0.75,
+      "end": 4.932458
+    },
+    {
+      "start": 5.632458,
+      "end": 14.711041
+    },
+    {
+      "start": 15.011041,
+      "end": 26.050583000000003
+    },
+    {
+      "start": 26.350583000000004,
+      "end": 29.040791000000006
+    },
+    {
+      "start": 29.340791000000007,
+      "end": 41.301416
+    },
+    {
+      "start": 41.601416,
+      "end": 49.932958
+    },
+    {
+      "start": 50.232957999999996,
+      "end": 57.317457999999995
+    },
+    {
+      "start": 57.61745799999999,
+      "end": 66.58320799999998
+    }
+  ],
+  "total_duration": 66.88320799999998,
+  "minimum_duration": 70.0,
+  "maximum_duration": null,
+  "voice_provider": "Speechify",
+  "voice": "geffen_32",
+  "voice_model": "simba-3.5",
+  "language": "en",
+  "speechify_used": true
+}

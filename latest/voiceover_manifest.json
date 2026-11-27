@@ -1,0 +1,66 @@
+{
+  "provider": "Speechify",
+  "speechify_used": true,
+  "voice": "geffen_32",
+  "model": "simba-3.5",
+  "language": "en",
+  "locale": "en-US",
+  "script_sha256": "f668d45a7b871f181ef7acabc56d4996040e291b5fd32fb2c5faf57f783378a7",
+  "script_words": 163,
+  "total_duration": 66.883,
+  "audio_files": [
+    "output/voiceover.wav",
+    "output/voiceover.mp3"
+  ],
+  "sentences": [
+    {
+      "index": 1,
+      "start": 0.75,
+      "duration": 4.182,
+      "text": "What secrets hide beneath the emerald sea of the Amazon canopy?"
+    },
+    {
+      "index": 2,
+      "start": 5.632,
+      "duration": 9.079,
+      "text": "From high above, the forest appears as a continuous green roof, a closed canopy that traps moisture and shelters countless epiphytes and lianas."
+    },
+    {
+      "index": 3,
+      "start": 15.011,
+      "duration": 11.04,
+      "text": "This living roof houses an estimated half of all terrestrial species, making rainforests the Earth's greatest pharmacy, where more than a quarter of natural medicines were first discovered."
+    },
+    {
+      "index": 4,
+      "start": 26.351,
+      "duration": 2.69,
+      "text": "Yet the canopy is not immune to danger."
+    },
+    {
+      "index": 5,
+      "start": 29.341,
+      "duration": 11.961,
+      "text": "In the dry season of 2019, satellite monitors recorded over 80,000 fires across Brazil, a 77 percent jump from the previous year, and thick smoke even dimmed distant cities."
+    },
+    {
+      "index": 6,
+      "start": 41.601,
+      "duration": 8.332,
+      "text": "Those flames threaten the Amazon's role as the planet's largest carbon sink, a system that captures roughly a quarter of global carbon dioxide."
+    },
+    {
+      "index": 7,
+      "start": 50.233,
+      "duration": 7.084,
+      "text": "As the sun filters through layers of leaves, each drop of rain fuels a cycle that sustains climate and life."
+    },
+    {
+      "index": 8,
+      "start": 57.617,
+      "duration": 8.966,
+      "text": "Remember, the canopy is both a shield and a signal—protecting biodiversity while warning us of the fragile balance we must preserve."
+    }
+  ],
+  "generated_at": "2026-11-27T13:39:16+00:00"
+}

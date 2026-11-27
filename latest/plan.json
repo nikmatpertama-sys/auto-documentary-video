@@ -1,79 +1,79 @@
 {
-  "title": "The Hidden Life Cycle of Ant Colonies",
-  "hook": "Ever wondered how a single ant can build an empire?",
-  "script": "Ever wondered how a single ant can build an empire? Ant colonies are eusocial superorganisms, each housing queens, workers, and seasonal winged alates. The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. Sterile workers tend the brood, forage for food, and maintain the nest, while soldiers defend it. When the colony matures, thousands of winged males and females—called alates—emerge and gather for a nuptial flight. During the flight, males mate briefly then die, while a few fertilized females land, shed their wings, and start new nests. These founding queens raise the first generation of workers alone, beginning the cycle anew. Thus, from a single egg to a bustling metropolis, the ant colony’s life cycle repeats across the planet.",
+  "title": "Secrets of the Amazon Canopy",
+  "hook": "What secrets hide beneath?",
+  "script": "What secrets hide beneath the emerald sea of the Amazon canopy? From high above, the forest appears as a continuous green roof, a closed canopy that traps moisture and shelters countless epiphytes and lianas. This living roof houses an estimated half of all terrestrial species, making rainforests the Earth's greatest pharmacy, where more than a quarter of natural medicines were first discovered. The Amazon rainforest, spanning over 670 million hectares, is the world's largest terrestrial carbon dioxide sink, capturing roughly 25% of global carbon dioxide. Yet the canopy is not immune to danger. In the dry season of 2019, satellite monitors recorded over 80,000 fires across Brazil, a 77 percent jump from the previous year, and thick smoke even dimmed distant cities. As the sun filters through layers of leaves, each drop of rain fuels a cycle that sustains climate and life, with rain providing water for hydroelectric power plants, crop irrigation, and suitable conditions for many types of ecosystems. Remember, the canopy is both a shield and a signal—protecting biodiversity while warning us of the fragile balance we must preserve.",
   "scenes": [
     {
-      "narration": "Ever wondered how a single ant can build an empire? Ant colonies are eusocial superorganisms, each housing queens, workers, and seasonal winged alates.",
-      "visual_query": "ant nest entrance wide",
+      "narration": "What secrets hide beneath the emerald sea of the Amazon canopy?",
+      "visual_query": "Amazon canopy aerial wide",
       "visual_queries": [
-        "ant nest entrance wide",
-        "ant hill entrance aerial"
+        "Rainforest roof drone shot",
+        "High altitude forest canopy view"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "visual_type": "footage",
+      "source_label": "Wikipedia Rainforest",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
       "sentence_start": 0,
+      "sentence_end": 0,
+      "visual_type": "footage"
+    },
+    {
+      "narration": "From high above, the forest appears as a continuous green roof, a closed canopy that traps moisture and shelters countless epiphytes and lianas.",
+      "visual_query": "Epiphyte on branch close-up",
+      "visual_queries": [
+        "Liana climbing tree close-up",
+        "Moist canopy epiphyte macro"
+      ],
+      "source_label": "Wikipedia Rainforest",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
+      "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. Sterile workers tend the brood, forage for food, and maintain the nest, while soldiers defend it.",
-      "visual_query": "queen ant close-up",
+      "narration": "This living roof houses an estimated half of all terrestrial species, making rainforests the Earth's greatest pharmacy, where more than a quarter of natural medicines were first discovered.",
+      "visual_query": "Rainforest insects macro",
       "visual_queries": [
-        "queen ant close-up",
-        "queen laying eggs macro"
+        "Medicinal plant leaf close-up",
+        "Biodiverse forest floor macro"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "source_label": "Wikipedia Rainforest",
+      "source_url": "https://en.wikipedia.org/wiki/Rainforest",
       "sentence_start": 2,
+      "sentence_end": 2
+    },
+    {
+      "narration": "The Amazon rainforest, spanning over 670 million hectares, is the world's largest terrestrial carbon dioxide sink, capturing roughly 25% of global carbon dioxide.",
+      "visual_query": "Smoke plume over forest",
+      "visual_queries": [
+        "Aerial fire scar view",
+        "Satellite fire hotspot animation"
+      ],
+      "source_label": "Wikipedia 2019 Amazon wildfires",
+      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
+      "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "When the colony matures, thousands of winged males and females—called alates—emerge and gather for a nuptial flight.",
-      "visual_query": "winged alates emerging",
+      "narration": "Yet the canopy is not immune to danger. In the dry season of 2019, satellite monitors recorded over 80,000 fires across Brazil, a 77 percent jump from the previous year, and thick smoke even dimmed distant cities.",
+      "visual_query": "Sunlight through canopy",
       "visual_queries": [
-        "winged alates emerging",
-        "alates exiting nest"
+        "Light rays forest canopy",
+        "Sun beams breaking canopy"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "source_label": "Wikipedia 2019 Amazon wildfires",
+      "source_url": "https://en.wikipedia.org/wiki/2019_Amazon_rainforest_wildfires",
       "sentence_start": 4,
-      "sentence_end": 4
-    },
-    {
-      "narration": "During the flight, males mate briefly then die, while a few fertilized females land, shed their wings, and start new nests.",
-      "visual_query": "alates nuptial flight",
-      "visual_queries": [
-        "alates nuptial flight",
-        "winged ants mating swarm"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "sentence_start": 5,
       "sentence_end": 5
     },
     {
-      "narration": "These founding queens raise the first generation of workers alone, beginning the cycle anew.",
-      "visual_query": "founding queen ground",
+      "narration": "As the sun filters through layers of leaves, each drop of rain fuels a cycle that sustains climate and life, with rain providing water for hydroelectric power plants, crop irrigation, and suitable conditions for many types of ecosystems. Remember, the canopy is both a shield and a signal—protecting biodiversity while warning us of the fragile balance we must preserve.",
+      "visual_query": "Rain falling through leaves",
       "visual_queries": [
-        "founding queen ground",
-        "new queen digging nest"
+        "Droplets on canopy close-up",
+        "Rainy forest canopy view"
       ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "source_label": "Wikipedia Rain",
+      "source_url": "https://en.wikipedia.org/wiki/Rain",
       "sentence_start": 6,
-      "sentence_end": 6
-    },
-    {
-      "narration": "Thus, from a single egg to a bustling metropolis, the ant colony’s life cycle repeats across the planet.",
-      "visual_query": "ant traffic panorama",
-      "visual_queries": [
-        "ant traffic panorama",
-        "colony activity overhead"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
-      "sentence_start": 7,
       "sentence_end": 7
     }
   ]
