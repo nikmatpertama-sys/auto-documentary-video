@@ -1,72 +1,83 @@
 {
-  "title": "Ants",
-  "hook": "What if a colony thinks?",
-  "script": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+  "title": "Taal Volcano Eruption",
+  "hook": "Volcano erupts",
+  "script": "Taal Volcano in the Philippines began to erupt on January 12, 2020, with a phreatomagmatic eruption from its main crater. The eruption sent ashes over Calabarzon, Metro Manila, and parts of Central Luzon, resulting in the suspension of school classes, work schedules, and flights in the area. The Philippine Institute of Volcanology and Seismology monitored the situation, issuing an Alert Level 4, indicating a hazardous explosive eruption was possible within hours to days. Volcanic activity continued into 2021, with smaller eruptions occurring in July 2021, and on March 26, 2022, a short-lived phreatomagmatic eruption was recorded. The eruptions caused significant disruptions, including the suspension of school classes, work schedules, and flights in the area, and had a major impact on the surrounding communities. Taal Volcano is a large caldera filled by Taal Lake, located in the province of Batangas, about 50 kilometers south of Manila, and is the second most active volcano in the country, with 39 confirmed historical eruptions.",
   "scenes": [
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "Taal Volcano in the Philippines began to erupt on January 12, 2020, with a phreatomagmatic eruption from its main crater.",
+      "visual_query": "Volcano eruption",
       "visual_queries": [
-        "ant colony"
+        "Volcano ash cloud",
+        "Erupting volcano landscape"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "The eruption sent ashes over Calabarzon, Metro Manila, and parts of Central Luzon, resulting in the suspension of school classes, work schedules, and flights in the area.",
+      "visual_query": "Taal Volcano",
       "visual_queries": [
-        "ant colony"
+        "Taal Volcano island",
+        "Volcano crater lake"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
+      "visual_type": "footage",
       "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "The Philippine Institute of Volcanology and Seismology monitored the situation, issuing an Alert Level 4, indicating a hazardous explosive eruption was possible within hours to days.",
+      "visual_query": "Ash fall",
       "visual_queries": [
-        "ant colony"
+        "Ash-covered landscape",
+        "People in ash masks"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
+      "visual_type": "footage",
       "sentence_start": 2,
       "sentence_end": 2
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "Volcanic activity continued into 2021, with smaller eruptions occurring in July 2021, and on March 26, 2022, a short-lived phreatomagmatic eruption was recorded.",
+      "visual_query": "Seismology equipment",
       "visual_queries": [
-        "ant colony"
+        "Volcanologists at work",
+        "Seismic graph"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
+      "visual_type": "footage",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "The eruptions caused significant disruptions, including the suspension of school classes, work schedules, and flights in the area, and had a major impact on the surrounding communities.",
+      "visual_query": "Volcano monitoring",
       "visual_queries": [
-        "ant colony"
+        "Volcano observatory",
+        "Scientists reviewing data"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
+      "visual_type": "footage",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "Taal Volcano is a large caldera filled by Taal Lake, located in the province of Batangas, about 50 kilometers south of Manila, and is the second most active volcano in the country, with 39 confirmed historical eruptions.",
+      "visual_query": "Evacuation scene",
       "visual_queries": [
-        "ant colony"
+        "People evacuating",
+        "Closed airport"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
+      "visual_type": "footage",
       "sentence_start": 5,
       "sentence_end": 5
     }

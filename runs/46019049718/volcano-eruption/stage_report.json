@@ -1,0 +1,45 @@
+{
+  "status": "failed",
+  "current_stage": "voiceover_and_subtitle_generation",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795791680.5008318,
+      "finished_at_epoch": 1795791682.971895,
+      "duration_seconds": 2.47
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795791682.9720573,
+      "finished_at_epoch": 1795791706.3436394,
+      "duration_seconds": 23.37
+    },
+    {
+      "name": "fact_checking",
+      "status": "completed",
+      "started_at_epoch": 1795791706.345631,
+      "finished_at_epoch": 1795791726.7718787,
+      "duration_seconds": 20.43
+    },
+    {
+      "name": "voiceover_and_subtitle_generation",
+      "status": "failed",
+      "started_at_epoch": 1795791726.7721364,
+      "finished_at_epoch": 1795791950.1795516,
+      "failure_type": "RuntimeError",
+      "failure_message": "Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Taal Volcano is located in the province of Batangas. | The volcano is a large caldera filled by Taal Lake. | The volcano's activity was monitored by the Philippine Institute of Volcanology and Seismology.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
+    }
+  ],
+  "voice_provider": "Speechify",
+  "voice": "geffen_32",
+  "voice_model": "simba-3.5",
+  "language": "en",
+  "voiceover_manifest": "output/voiceover_manifest.json",
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Taal Volcano is located in the province of Batangas. | The volcano is a large caldera filled by Taal Lake. | The volcano's activity was monitored by the Philippine Institute of Volcanology and Seismology.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+    "finished_at_epoch": 1795791950.1805902
+  }
+}

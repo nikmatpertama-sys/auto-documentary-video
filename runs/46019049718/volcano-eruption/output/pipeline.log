@@ -1,0 +1,268 @@
+Markdown cleanup: no generated upgrade/validation files found.
+Pipeline stage started: research
+1/8 Researching credible sources for: Volcano eruption
+Research complete: 4 source article(s) stored in research.json.
+Pipeline stage started: documentary_plan_generation
+2/8 Generating documentary plan from the research material...
+Quota-aware routing snapshot:
+  - Groq key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - OpenRouter key 1: 100.0% measured ($100 of $100 remaining)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - DeepSeek key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: OpenRouter key 1
+Quota-aware selection: OpenRouter key 1 (best currently known capacity).
+OpenRouter key 1: OpenRouter HTTP 429: {"error":{"message":"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credits?utm_source=api&utm_campaign=free_daily_limit","code":429,"metadata":{"headers":{"X-RateLimit-Limit":"50","X-RateLimit-Remaining":"0","X-RateLimit-Reset":"1795824000000"},"limit_source":"openrouter_free_tier_daily","remedy_hint":"Wait for the daily reset (see X-RateLimit-Reset), or purchase credits to raise your free-model daily limit.","provider_name":null,"previous_errors":[{"code":429,"message":"Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day: https://openrouter.ai/settings/credit
+Rechecking provider availability and ranking the remaining routes...
+Quota-aware routing snapshot:
+  - Groq key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - DeepSeek key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+Quota-aware selection: Groq key 1 (best currently known capacity).
+Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199400, Requested 3580. Please try again in 21m27.36s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Rechecking provider availability and ranking the remaining routes...
+Quota-aware routing snapshot:
+  - Gemini key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - DeepSeek key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Gemini key 1
+Quota-aware selection: Gemini key 1 (best currently known capacity).
+Temporary AI service issue; retrying once in 5s...
+Gemini key 1: Gemini HTTP 429: {   "error": {     "code": 429,     "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 16h58m29.335613896s.",     "status": "RESOURCE_EXHAUSTED",     "details": [       {         "@type": "type.googleapis.com/google.rpc.Hel
+Rechecking provider availability and ranking the remaining routes...
+Quota-aware routing snapshot:
+  - DeepSeek key 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: DeepSeek key 1
+Quota-aware selection: DeepSeek key 1 (best currently known capacity).
+DeepSeek key 1: DeepSeek HTTP 402: {"error":{"message":"Insufficient Balance (request_id: facbc1ee-30ff-4791-a0c2-d9aa04d83ecf)","type":"insufficient_balance_error","param":null,"code":"invalid_request_error"}}
+Rechecking provider availability and ranking the remaining routes...
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; not yet observed)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 1
+Quota-aware selection: Cloudflare AI key pair 1 (best currently known capacity).
+Cloudflare AI key pair 1: Cloudflare AI HTTP 429: {"errors":[{"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (952456c1-ee49-498a-a244-a8719db3226e)","code":4006}],"success":false,"result":{},"messages":[]}
+Rechecking provider availability and ranking the remaining routes...
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Quota-aware selection: Cloudflare AI key pair 2 (best currently known capacity).
+Documentary plan generated successfully by Cloudflare AI key pair 2.
+Draft narration is 82 words; the duration expansion will extend it and the fact-check is re-verified afterwards.
+Script ready: 82 words, 6 scenes.
+Pipeline stage started: fact_checking
+3/8 Fact-checking claims against the research material...
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+Quota-aware routing snapshot:
+  - Groq key 1: 92.4% measured (RPD 999/1000, TPM 7392/8000)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact check: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 200000, Requested 2392. Please try again in 17m13.344s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Retrieved 3 additional source(s) for 3 rejected claim(s); re-verifying against the enriched brief.
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact check: 6 supported (6 with a cited source), 0 unsupported, 0 contradicted (overall pass); sentence coverage 100%.
+Fact check stored in fact_check.json (overall pass, 6 claim(s) checked).
+Pipeline stage started: voiceover_and_subtitle_generation
+4/8 Generating the verified voice-over and subtitles...
+Speechify voice catalog key slot 1 unavailable; trying the next configured key: Speechify voice catalog HTTP 403: {"error":{"code":"insufficient_scope","message":"You do not have permission to perform this operation."},"request_id":"a4252308f744094e1aa7e6f1"}
+
+Speechify voice catalog is not readable with the configured credential (403 insufficient_scope is a token scope limit, not a bad key). Falling back to the documented shared voice id.
+Speechify VO sentence 1/6 rendered (3.66s).
+Speechify VO sentence 2/6 rendered (4.72s).
+Speechify VO sentence 3/6 rendered (7.62s).
+Speechify VO sentence 4/6 rendered (8.16s).
+Speechify VO sentence 5/6 rendered (6.15s).
+Speechify VO sentence 6/6 rendered (5.29s).
+Voice-over provider: Speechify (model simba-3.5, voice geffen_32, locale en-US).
+VO timeline is 38.55s, below the 70s format minimum. No silence padding is added; the script/delivery must be adjusted and the VO regenerated.
+VO audio check: 38.55s, mean -23.8 dBFS, peak -6.2 dBFS
+VO timeline ready: 38.55s (minimum 70s; no maximum duration).
+Voice-over is 38.55s; extending the script (attempt 1/2) instead of padding with silence.
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Duration recovery: script expanded to 123 words by Cloudflare AI key pair 2.
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Claim extraction skipped 2 sentence(s); 2 were recovered as claims for verification.
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; HTTP 429; retry after about 60s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 1
+fact check: Cloudflare AI key pair 1: Cloudflare AI HTTP 429: {"errors":[{"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (48b0042b-d615-4d79-b643-11b1c196491e)","code":4006}],"success":false,"result":{},"messages":[]}
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Retrieved 2 additional source(s) for 2 rejected claim(s); re-verifying against the enriched brief.
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact check: 3 supported (3 with a cited source), 5 unsupported, 0 contradicted (overall revise); sentence coverage 100%.
+Quota-aware routing snapshot:
+  - Groq key 1: 86.2% measured (Groq rate limit reached; retry after about 86s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact-check repair: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199795, Requested 4260. Please try again in 29m11.76s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+claim extraction: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199768, Requested 588. Please try again in 2m33.792s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact-check re-verification: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199758, Requested 3809. Please try again in 25m40.944s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact check after repair 1: 7 supported, 0 unsupported, 0 contradicted.
+Speechify voice catalog key slot 1 unavailable; trying the next configured key: Speechify voice catalog HTTP 403: {"error":{"code":"insufficient_scope","message":"You do not have permission to perform this operation."},"request_id":"572cebc32e680f46b2b0dc8f"}
+
+Speechify voice catalog is not readable with the configured credential (403 insufficient_scope is a token scope limit, not a bad key). Falling back to the documented shared voice id.
+Speechify VO sentence 1/7 rendered (7.21s).
+Speechify VO sentence 2/7 rendered (5.23s).
+Speechify VO sentence 3/7 rendered (5.07s).
+Speechify VO sentence 4/7 rendered (2.88s).
+Speechify VO sentence 5/7 rendered (5.24s).
+Speechify VO sentence 6/7 rendered (3.81s).
+Speechify VO sentence 7/7 rendered (5.49s).
+Voice-over provider: Speechify (model simba-3.5, voice geffen_32, locale en-US).
+VO timeline is 38.17s, below the 70s format minimum. No silence padding is added; the script/delivery must be adjusted and the VO regenerated.
+VO audio check: 38.17s, mean -23.7 dBFS, peak -5.1 dBFS
+VO timeline ready: 38.17s (minimum 70s; no maximum duration).
+Voice-over is 38.17s; extending the script (attempt 2/2) instead of padding with silence.
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; HTTP 429; retry after about 60s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+duration extension: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199719, Requested 3839. Please try again in 25m37.056s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; HTTP 429; retry after about 60s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 1
+duration extension: Cloudflare AI key pair 1: Cloudflare AI HTTP 429: {"errors":[{"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (a30e5a58-2902-475c-a1b5-078461e86dcc)","code":4006}],"success":false,"result":{},"messages":[]}
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Duration recovery: script expanded to 160 words by Cloudflare AI key pair 2.
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+claim extraction: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199684, Requested 718. Please try again in 2m53.664s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact check: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199670, Requested 4016. Please try again in 26m32.351999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Retrieved 3 additional source(s) for 3 rejected claim(s); re-verifying against the enriched brief.
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact check with retrieved evidence: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199611, Requested 5718. Please try again in 38m22.127999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact check: 3 supported (3 with a cited source), 3 unsupported, 0 contradicted (overall revise); sentence coverage 100%.
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact-check repair: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199582, Requested 5917. Please try again in 39m35.568s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact-check repair attempt 1 failed: Scene narration totals 68 words; expected 80-200.
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; HTTP 429; retry after about 60s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact-check repair: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199561, Requested 5200. Please try again in 34m16.752s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 1: UNKNOWN (neutral scheduling; HTTP 429; retry after about 60s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 1
+fact-check repair: Cloudflare AI key pair 1: Cloudflare AI HTTP 429: {"errors":[{"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (791a9798-4fa4-4ea7-9e86-0206c61a0b17)","code":4006}],"success":false,"result":{},"messages":[]}
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+claim extraction: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199532, Requested 663. Please try again in 1m24.24s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact-check re-verification: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199523, Requested 4832. Please try again in 31m21.36s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact check after repair 1: 5 supported, 3 unsupported, 0 contradicted.
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact-check repair: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199493, Requested 4945. Please try again in 31m57.216s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact-check repair attempt 1 failed: Scene narration totals 62 words; expected 80-200.
+Quota-aware routing snapshot:
+  - Groq key 1: 100.0% measured (Groq rate limit reached; retry after about 0s)
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Groq key 1
+fact-check repair: Groq key 1: Groq HTTP 429: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m82gm669errt4t73c4cyekn2` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199466, Requested 5004. Please try again in 32m11.04s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}} 
+Quota-aware routing snapshot:
+  - Cloudflare AI key pair 2: UNKNOWN (neutral scheduling; not yet observed)
+  Selected next: Cloudflare AI key pair 2
+Fact-check repair attempt 2 failed: Scene narration totals 77 words; expected 80-200.
+Re-verification of the extended script failed: Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Taal Volcano is located in the province of Batangas. | The volcano is a large caldera filled by Taal Lake. | The volcano's activity was monitored by the Philippine Institute of Volcanology and Seismology.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_ch
+Traceback (most recent call last):
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8282, in run_with_diagnostics
+    main()
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 8193, in main
+    verification = fact_check_plan(plan, research_data)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 2081, in fact_check_plan
+    _fail_fact_check(
+  File "/home/runner/work/auto-documentary-video/auto-documentary-video/main.py", line 1827, in _fail_fact_check
+    raise RuntimeError(message)
+RuntimeError: Fact check could not support 3 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: Taal Volcano is located in the province of Batangas. | The volcano is a large caldera filled by Taal Lake. | The volcano's activity was monitored by the Philippine Institute of Volcanology and Seismology.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.
+Markdown cleanup: no generated upgrade/validation files found.
