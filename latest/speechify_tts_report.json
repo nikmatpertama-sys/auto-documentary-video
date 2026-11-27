@@ -55,18 +55,18 @@
   ],
   "speech": [
     {
-      "audio_bytes": 742902,
+      "audio_bytes": 743130,
       "audio_format": "wav",
       "audio_ok": true,
       "billable_characters": 124,
-      "elapsed_seconds": 0.69,
+      "elapsed_seconds": 1.7,
       "env": "SPVO_API",
       "error_code": "",
       "http_status": 200,
       "measurement": {
         "channels": 1,
-        "duration_seconds": 44739.243,
-        "peak_amplitude": 18134,
+        "duration_seconds": 7.74,
+        "peak_amplitude": 21071,
         "sample_rate": 48000,
         "silent": false,
         "valid": true
