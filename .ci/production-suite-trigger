@@ -17,3 +17,5 @@ Per-run diagnostics and review frames land in the `ci-diagnostics` branch under
 Re-run requested 2026-11-27 (serial, annotated diagnostics).
 
 Re-run requested after fact-check evidence retrieval.
+
+Re-run requested after topic-anchored evidence retrieval.
