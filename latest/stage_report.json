@@ -1,52 +1,33 @@
 {
   "status": "failed",
-  "current_stage": "footage_search_download_and_visual_verification",
+  "current_stage": "fact_checking",
   "stages": [
     {
       "name": "research",
       "status": "completed",
-      "started_at_epoch": 1795786026.5133362,
-      "finished_at_epoch": 1795786029.2687483,
-      "duration_seconds": 2.76
+      "started_at_epoch": 1795786578.8202143,
+      "finished_at_epoch": 1795786582.00103,
+      "duration_seconds": 3.18
     },
     {
       "name": "documentary_plan_generation",
       "status": "completed",
-      "started_at_epoch": 1795786029.2689307,
-      "finished_at_epoch": 1795786037.6666672,
-      "duration_seconds": 8.4
+      "started_at_epoch": 1795786582.001223,
+      "finished_at_epoch": 1795786589.6490238,
+      "duration_seconds": 7.65
     },
     {
       "name": "fact_checking",
-      "status": "completed",
-      "started_at_epoch": 1795786037.6669645,
-      "finished_at_epoch": 1795786260.1361127,
-      "duration_seconds": 222.47
-    },
-    {
-      "name": "voiceover_and_subtitle_generation",
-      "status": "completed",
-      "started_at_epoch": 1795786260.1363328,
-      "finished_at_epoch": 1795786275.290525,
-      "duration_seconds": 15.15
-    },
-    {
-      "name": "footage_search_download_and_visual_verification",
       "status": "failed",
-      "started_at_epoch": 1795786275.2908537,
-      "finished_at_epoch": 1795786505.3660712,
+      "started_at_epoch": 1795786589.6493058,
+      "finished_at_epoch": 1795786631.2932854,
       "failure_type": "RuntimeError",
-      "failure_message": "Scene 1 could not obtain verified relevant footage. None of the 24 candidates checked from 23 metadata-ranked candidates passed visual verification or downloaded successfully. Details: NASA JPL-20210507-TECHf-0001-Ingenuity 5th Flight Recap: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20210419-TECHf-0001-First Video of NASA’s Ingenuity Mars Helicopter in Flight: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20220906-Perseverance_Explores_Jezero_Crater_Delta_UHD: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA NHQ_2020_0814_Gravity Assist_Kennda Lynch: Clip is 190.3 MB, above the 180 MB relevance-based limit. Queries tried: ['crater lake aerial', 'crater lake', 'crater aerial', 'moon lake', 'volcanic lake drone', 'volcanic lake', 'crater lake aerial drone overhead perspective wide documentary footage', 'crater lake aerial high altitude camera wide landscape']. No unrelated footage or diagram will be substituted."
+      "failure_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. | These founding queens raise the first generation of workers alone, beginning the cycle anew.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
     }
   ],
-  "voice_provider": "Speechify",
-  "voice": "geffen_32",
-  "voice_model": "simba-3.5",
-  "language": "en",
-  "voiceover_manifest": "output/voiceover_manifest.json",
   "failure": {
     "error_type": "RuntimeError",
-    "error_message": "Scene 1 could not obtain verified relevant footage. None of the 24 candidates checked from 23 metadata-ranked candidates passed visual verification or downloaded successfully. Details: NASA JPL-20210507-TECHf-0001-Ingenuity 5th Flight Recap: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20210419-TECHf-0001-First Video of NASA’s Ingenuity Mars Helicopter in Flight: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20220906-Perseverance_Explores_Jezero_Crater_Delta_UHD: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA NHQ_2020_0814_Gravity Assist_Kennda Lynch: Clip is 190.3 MB, above the 180 MB relevance-based limit. Queries tried: ['crater lake aerial', 'crater lake', 'crater aerial', 'moon lake', 'volcanic lake drone', 'volcanic lake', 'crater lake aerial drone overhead perspective wide documentary footage', 'crater lake aerial high altitude camera wide landscape']. No unrelated footage or diagram will be substituted.",
-    "finished_at_epoch": 1795786505.3691072
+    "error_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. | These founding queens raise the first generation of workers alone, beginning the cycle anew.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+    "finished_at_epoch": 1795786631.2944572
   }
 }

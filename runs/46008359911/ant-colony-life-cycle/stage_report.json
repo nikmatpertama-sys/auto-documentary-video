@@ -1,0 +1,33 @@
+{
+  "status": "failed",
+  "current_stage": "fact_checking",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795786578.8202143,
+      "finished_at_epoch": 1795786582.00103,
+      "duration_seconds": 3.18
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795786582.001223,
+      "finished_at_epoch": 1795786589.6490238,
+      "duration_seconds": 7.65
+    },
+    {
+      "name": "fact_checking",
+      "status": "failed",
+      "started_at_epoch": 1795786589.6493058,
+      "finished_at_epoch": 1795786631.2932854,
+      "failure_type": "RuntimeError",
+      "failure_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. | These founding queens raise the first generation of workers alone, beginning the cycle anew.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json."
+    }
+  ],
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. | These founding queens raise the first generation of workers alone, beginning the cycle anew.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+    "finished_at_epoch": 1795786631.2944572
+  }
+}

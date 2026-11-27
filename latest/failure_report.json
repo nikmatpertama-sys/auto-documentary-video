@@ -1,10 +1,10 @@
 {
   "status": "failed",
-  "current_stage": "footage_search_download_and_visual_verification",
+  "current_stage": "fact_checking",
   "error_type": "RuntimeError",
-  "error_message": "Scene 1 could not obtain verified relevant footage. None of the 24 candidates checked from 23 metadata-ranked candidates passed visual verification or downloaded successfully. Details: NASA JPL-20210507-TECHf-0001-Ingenuity 5th Flight Recap: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20210419-TECHf-0001-First Video of NASA’s Ingenuity Mars Helicopter in Flight: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20220906-Perseverance_Explores_Jezero_Crater_Delta_UHD: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA NHQ_2020_0814_Gravity Assist_Kennda Lynch: Clip is 190.3 MB, above the 180 MB relevance-based limit. Queries tried: ['crater lake aerial', 'crater lake', 'crater aerial', 'moon lake', 'volcanic lake drone', 'volcanic lake', 'crater lake aerial drone overhead perspective wide documentary footage', 'crater lake aerial high altitude camera wide landscape']. No unrelated footage or diagram will be substituted.",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8077, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8030, in main\n    fetch_footage(plan)\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 6498, in fetch_footage\n    raise RuntimeError(\nRuntimeError: Scene 1 could not obtain verified relevant footage. None of the 24 candidates checked from 23 metadata-ranked candidates passed visual verification or downloaded successfully. Details: NASA JPL-20210507-TECHf-0001-Ingenuity 5th Flight Recap: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20210419-TECHf-0001-First Video of NASA’s Ingenuity Mars Helicopter in Flight: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA JPL-20220906-Perseverance_Explores_Jezero_Crater_Delta_UHD: Downloaded source is neither native 9:16 nor a supported landscape source for content-aware reframing: 640x360 (aspect 1.7778). | NASA NHQ_2020_0814_Gravity Assist_Kennda Lynch: Clip is 190.3 MB, above the 180 MB relevance-based limit. Queries tried: ['crater lake aerial', 'crater lake', 'crater aerial', 'moon lake', 'volcanic lake drone', 'volcanic lake', 'crater lake aerial drone overhead perspective wide documentary footage', 'crater lake aerial high altitude camera wide landscape']. No unrelated footage or diagram will be substituted.\n",
-  "finished_at_epoch": 1795786505.3691072,
+  "error_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. | These founding queens raise the first generation of workers alone, beginning the cycle anew.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8172, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8034, in main\n    verification = fact_check_plan(plan, research_data)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 2014, in fact_check_plan\n    _fail_fact_check(\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 1782, in _fail_fact_check\n    raise RuntimeError(message)\nRuntimeError: Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. | These founding queens raise the first generation of workers alone, beginning the cycle anew.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.\n",
+  "finished_at_epoch": 1795786631.2944572,
   "configuration": {
     "project_release": "MM6",
     "visual_verification_required": true,
@@ -26,17 +26,7 @@
       "Pexels",
       "Pixabay"
     ],
-    "footage_source_requests": {
-      "Coverr": 2,
-      "Internet Archive": 26,
-      "Wikimedia Commons": 26,
-      "NASA": 28,
-      "Web Search": 8,
-      "Google Search": 4
-    },
-    "footage_source_cooldowns_seconds": {
-      "Web Search": 84,
-      "Google Search": 89
-    }
+    "footage_source_requests": {},
+    "footage_source_cooldowns_seconds": {}
   }
 }

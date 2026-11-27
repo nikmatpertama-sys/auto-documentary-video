@@ -1,0 +1,133 @@
+{
+  "status": "unsupported",
+  "overall": "fail",
+  "claims": [
+    {
+      "claim": "Ant colonies are eusocial superorganisms, each housing queens, workers, and seasonal winged alates.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of ant colonies as eusocial superorganisms",
+      "quote": "Ant colonies are eusocial, communal, and efficiently organized",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes.",
+      "kind": "",
+      "verdict": "unsupported",
+      "evidence": "Lack of explicit description of the queen's egg-laying process and caste development in the provided source material",
+      "quote": "",
+      "source": null,
+      "evidence_type": "unsupported"
+    },
+    {
+      "claim": "Sterile workers tend the brood, forage for food, and maintain the nest, while soldiers defend it.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of ant colony roles",
+      "quote": "Typical colonies consist of various castes of sterile, wingless females, most of which are workers",
+      "source": {
+        "id": "S2",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "When the colony matures, thousands of winged males and females—called alates—emerge and gather for a nuptial flight.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of nuptial flights in ant colonies",
+      "quote": "Swarms of the winged sexuals (known as alates) depart the nest in search of other nests",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "During the flight, males mate briefly then die, while a few fertilized females land, shed their wings, and start new nests.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of the fate of males and females after nuptial flights",
+      "quote": "The males die shortly thereafter, along with most of the females. A small percentage of the females survive to initiate new nests",
+      "source": {
+        "id": "S1",
+        "title": "Ant colony",
+        "url": "https://en.wikipedia.org/wiki/Ant_colony"
+      },
+      "evidence_type": "source_quote"
+    },
+    {
+      "claim": "These founding queens raise the first generation of workers alone, beginning the cycle anew.",
+      "kind": "",
+      "verdict": "unsupported",
+      "evidence": "Lack of explicit description of the founding queen's role in raising the first generation of workers",
+      "quote": "",
+      "source": null,
+      "evidence_type": "unsupported"
+    },
+    {
+      "claim": "Thus, from a single egg to a bustling metropolis, the ant colony’s life cycle repeats across the planet.",
+      "kind": "",
+      "verdict": "supported",
+      "evidence": "Description of ant colonies and their life cycles",
+      "quote": "Ants have colonised almost every landmass on Earth",
+      "source": {
+        "id": "S2",
+        "title": "Ant",
+        "url": "https://en.wikipedia.org/wiki/Ant"
+      },
+      "evidence_type": "source_quote"
+    }
+  ],
+  "checked": 7,
+  "supported": 5,
+  "unsupported": 2,
+  "contradicted": 0,
+  "rejected_claims": [
+    {
+      "claim": "The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes.",
+      "verdict": "unsupported",
+      "evidence": "Lack of explicit description of the queen's egg-laying process and caste development in the provided source material"
+    },
+    {
+      "claim": "These founding queens raise the first generation of workers alone, beginning the cycle anew.",
+      "verdict": "unsupported",
+      "evidence": "Lack of explicit description of the founding queen's role in raising the first generation of workers"
+    }
+  ],
+  "claim_source": "semantic:Groq key 1",
+  "coverage": {
+    "script_sentences": 8,
+    "claimed_sentences": 7,
+    "non_factual_sentences": 1,
+    "uncovered_sentences": [],
+    "coverage": 1.0
+  },
+  "skipped_sentences": [],
+  "error": null,
+  "research_articles": [
+    {
+      "title": "Ant colony",
+      "url": "https://en.wikipedia.org/wiki/Ant_colony"
+    },
+    {
+      "title": "Ant",
+      "url": "https://en.wikipedia.org/wiki/Ant"
+    },
+    {
+      "title": "Koloni semut",
+      "url": "https://id.wikipedia.org/wiki/Koloni_semut"
+    },
+    {
+      "title": "Semut",
+      "url": "https://id.wikipedia.org/wiki/Semut"
+    }
+  ]
+}

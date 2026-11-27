@@ -1,88 +1,80 @@
 {
-  "title": "Taal Volcano: When a Lake Explodes",
-  "hook": "What happens when a peaceful lake suddenly erupts into fire?",
-  "script": "What happens when a peaceful lake suddenly erupts into fire? Taal Volcano, a small island in a Philippine lake, sits on the Pacific Ring of Fire, where converging plates fuel violent eruptions. On the afternoon of 12 January 2020, seismic swarms began at eleven a.m., and by one p.m. a phreatomagmatic blast ripped through the main crater, sending ash and steam skyward. The explosion hurled a hundred‑meter ash column, darkened Manila’s sky, and forced officials to raise the alert to level four, the highest warning. Ash fell across Calabarzon, schools closed, flights halted, and the once‑blue crater lake temporarily dried, erasing the tiny Vulcan Point island. Smaller eruptions returned in July 2021 and again in March 2022, each prompting a temporary jump to alert level three as scientists monitored renewed magma‑water interaction. These brief but fierce outbursts illustrate how water meeting magma creates explosive power that can reshape a landscape in minutes. Today, Taal’s calm surface reminds us that even the smallest volcano can unleash Earth’s restless interior at any moment.",
+  "title": "The Hidden Life Cycle of Ant Colonies",
+  "hook": "Ever wondered how a single ant can build an empire?",
+  "script": "Ever wondered how a single ant can build an empire? Ant colonies are eusocial superorganisms, each housing queens, workers, and seasonal winged alates. The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. Sterile workers tend the brood, forage for food, and maintain the nest, while soldiers defend it. When the colony matures, thousands of winged males and females—called alates—emerge and gather for a nuptial flight. During the flight, males mate briefly then die, while a few fertilized females land, shed their wings, and start new nests. These founding queens raise the first generation of workers alone, beginning the cycle anew. Thus, from a single egg to a bustling metropolis, the ant colony’s life cycle repeats across the planet.",
   "scenes": [
     {
-      "narration": "What happens when a peaceful lake suddenly erupts into fire? Taal Volcano, a small island in a Philippine lake, sits on the Pacific Ring of Fire, where converging plates fuel violent eruptions.",
-      "visual_query": "Crater lake aerial",
+      "narration": "Ever wondered how a single ant can build an empire? Ant colonies are eusocial superorganisms, each housing queens, workers, and seasonal winged alates.",
+      "visual_query": "ant nest entrance wide",
       "visual_queries": [
-        "Crater lake aerial",
-        "Volcanic lake drone"
+        "ant nest entrance wide",
+        "ant hill entrance aerial"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 1
     },
     {
-      "narration": "On the afternoon of 12 January 2020, seismic swarms began at eleven a.m., and by one p.m. a phreatomagmatic blast ripped through the main crater, sending ash and steam skyward.",
-      "visual_query": "Volcano plume close-up",
+      "narration": "The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. Sterile workers tend the brood, forage for food, and maintain the nest, while soldiers defend it.",
+      "visual_query": "queen ant close-up",
       "visual_queries": [
-        "Volcano plume close-up",
-        "Ash cloud over island"
+        "queen ant close-up",
+        "queen laying eggs macro"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "sentence_start": 2,
+      "sentence_end": 3
+    },
+    {
+      "narration": "When the colony matures, thousands of winged males and females—called alates—emerge and gather for a nuptial flight.",
+      "visual_query": "winged alates emerging",
+      "visual_queries": [
+        "winged alates emerging",
+        "alates exiting nest"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 4,
+      "sentence_end": 4
+    },
+    {
+      "narration": "During the flight, males mate briefly then die, while a few fertilized females land, shed their wings, and start new nests.",
+      "visual_query": "alates nuptial flight",
+      "visual_queries": [
+        "alates nuptial flight",
+        "winged ants mating swarm"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 5,
+      "sentence_end": 5
+    },
+    {
+      "narration": "These founding queens raise the first generation of workers alone, beginning the cycle anew.",
+      "visual_query": "founding queen ground",
+      "visual_queries": [
+        "founding queen ground",
+        "new queen digging nest"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 6,
       "sentence_end": 6
     },
     {
-      "narration": "The explosion hurled a hundred‑meter ash column, darkened Manila’s sky, and forced officials to raise the alert to level four, the highest warning.",
-      "visual_query": "Ash column over city",
+      "narration": "Thus, from a single egg to a bustling metropolis, the ant colony’s life cycle repeats across the planet.",
+      "visual_query": "ant traffic panorama",
       "visual_queries": [
-        "Ash column over city",
-        "Ash falling on streets"
+        "ant traffic panorama",
+        "colony activity overhead"
       ],
       "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "sentence_start": 7,
       "sentence_end": 7
-    },
-    {
-      "narration": "Ash fell across Calabarzon, schools closed, flights halted, and the once‑blue crater lake temporarily dried, erasing the tiny Vulcan Point island.",
-      "visual_query": "Dry crater lake surface",
-      "visual_queries": [
-        "Dry crater lake surface",
-        "Vulcan Point remains submerged"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
-      "sentence_start": 8,
-      "sentence_end": 8
-    },
-    {
-      "narration": "Smaller eruptions returned in July 2021 and again in March 2022, each prompting a temporary jump to alert level three as scientists monitored renewed magma‑water interaction.",
-      "visual_query": "Volcanology monitoring station",
-      "visual_queries": [
-        "Volcanology monitoring station",
-        "Scientists at volcano observatory"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
-      "sentence_start": 9,
-      "sentence_end": 9
-    },
-    {
-      "narration": "These brief but fierce outbursts illustrate how water meeting magma creates explosive power that can reshape a landscape in minutes. Today, Taal’s calm surface reminds us that even the smallest volcano can unleash Earth’s restless interior at any moment.",
-      "visual_query": "Sunrise over volcanic island",
-      "visual_queries": [
-        "Sunrise over volcanic island",
-        "Peaceful volcano landscape dawn"
-      ],
-      "source_label": "Wikipedia",
-      "source_url": "https://en.wikipedia.org/wiki/2020%E2%80%932022_Taal_Volcano_eruptions",
-      "sentence_start": 10,
-      "sentence_end": 11
     }
-  ],
-  "fact_check": {
-    "overall": "pass",
-    "checked": 8,
-    "supported": 8,
-    "unsupported": 0,
-    "contradicted": 0,
-    "claim_source": "semantic:Groq key 1"
-  }
+  ]
 }

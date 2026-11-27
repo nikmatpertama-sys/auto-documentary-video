@@ -1,0 +1,32 @@
+{
+  "status": "failed",
+  "current_stage": "fact_checking",
+  "error_type": "RuntimeError",
+  "error_message": "Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. | These founding queens raise the first generation of workers alone, beginning the cycle anew.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8172, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8034, in main\n    verification = fact_check_plan(plan, research_data)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 2014, in fact_check_plan\n    _fail_fact_check(\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 1782, in _fail_fact_check\n    raise RuntimeError(message)\nRuntimeError: Fact check could not support 2 claim(s) after 2 repair attempt(s), so the script is not safe to narrate: The queen continuously lays eggs, which develop into larvae, then pupae, and finally into the various castes. | These founding queens raise the first generation of workers alone, beginning the cycle anew.. Set ALLOW_UNSUPPORTED_CLAIMS=1 only to keep such wording with an explicit flag in fact_check.json.\n",
+  "finished_at_epoch": 1795786631.2944572,
+  "configuration": {
+    "project_release": "MM6",
+    "visual_verification_required": true,
+    "groq_keys_configured": 1,
+    "openrouter_keys_configured": 1,
+    "gemini_keys_configured": 1,
+    "cloudflare_key_pairs_configured": 2,
+    "speechify_keys_configured": 1,
+    "pixabay_key_configured": true,
+    "pexels_key_configured": false,
+    "release": "MM6",
+    "source_priority": [
+      "Coverr",
+      "Internet Archive",
+      "Wikimedia Commons",
+      "NASA",
+      "Web Search",
+      "Google Search",
+      "Pexels",
+      "Pixabay"
+    ],
+    "footage_source_requests": {},
+    "footage_source_cooldowns_seconds": {}
+  }
+}
