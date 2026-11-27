@@ -1,74 +1,96 @@
 {
-  "title": "Ants",
-  "hook": "What if a colony thinks?",
-  "script": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+  "title": "Inside the Hidden City: The Life Cycle of an Ant Colony",
+  "hook": "What if an entire city lives inside a single grain of sand?",
+  "script": "What if an entire city lives inside a single grain of sand? Beneath our feet, ant colonies operate as highly organized societies, each capable of completing its entire life cycle. A typical colony contains one or more egg‑laying queens, countless sterile female workers, and, at certain times of year, winged males and females called alates. The queen continuously deposits tiny eggs into the nest, where they develop through larval and pupal stages before emerging as workers or future reproductives. Worker ants tend the brood, feed the larvae, clean the chambers, and expand the tunnel network that connects the colony to the surface. When conditions are right, the colony produces swarms of alates that rise in synchronized flights, seeking mates far from the nest. Males die after mating, while most females also perish; only a few fertilized queens survive to land, shed their wings, and start a new nest. The founding queen begins by laying her first batch of eggs, slowly building a workforce that will grow the colony into a bustling superorganism. As the colony expands, millions of ants cooperate, moving food, defending the nest, and maintaining a complex social order that rivals any human city. This hidden world reminds us that even the smallest creatures can create societies as intricate as our own. Follow our channel for the next documentary and share your thoughts in the comments.",
   "scenes": [
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "What if an entire city lives inside a single grain of sand? Beneath our feet, ant colonies operate as highly organized societies, each capable of completing its entire life cycle.",
+      "visual_query": "ant mound wide view",
       "visual_queries": [
-        "ant colony"
+        "soil cross-section ant nest",
+        "ant mound close-up"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "visual_type": "footage",
       "sentence_start": 0,
-      "sentence_end": 0
-    },
-    {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
-      "visual_queries": [
-        "ant colony"
-      ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
-      "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "A typical colony contains one or more egg‑laying queens, countless sterile female workers, and, at certain times of year, winged males and females called alates. The queen continuously deposits tiny eggs into the nest, where they develop through larval and pupal stages before emerging as workers or future reproductives.",
+      "visual_query": "queen ant close-up",
       "visual_queries": [
-        "ant colony"
+        "worker ants surrounding queen",
+        "queen ant inside nest"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "sentence_start": 2,
-      "sentence_end": 2
-    },
-    {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
-      "visual_queries": [
-        "ant colony"
-      ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
-      "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "Worker ants tend the brood, feed the larvae, clean the chambers, and expand the tunnel network that connects the colony to the surface.",
+      "visual_query": "worker ant tunneling",
       "visual_queries": [
-        "ant colony"
+        "worker ant carrying leaf",
+        "worker ant feeding larva"
       ],
-      "source_label": "Ant",
+      "source_label": "Wikipedia",
       "source_url": "https://en.wikipedia.org/wiki/Ant",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "When conditions are right, the colony produces swarms of alates that rise in synchronized flights, seeking mates far from the nest.",
+      "visual_query": "winged alates taking flight",
       "visual_queries": [
-        "ant colony"
+        "alate swarm over forest",
+        "winged ants in sky"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
       "sentence_start": 5,
       "sentence_end": 5
+    },
+    {
+      "narration": "Males die after mating, while most females also perish; only a few fertilized queens survive to land, shed their wings, and start a new nest.",
+      "visual_query": "queen ant founding nest",
+      "visual_queries": [
+        "new ant colony entrance",
+        "queen ant underground"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant_colony",
+      "sentence_start": 6,
+      "sentence_end": 6
+    },
+    {
+      "narration": "The founding queen begins by laying her first batch of eggs, slowly building a workforce that will grow the colony into a bustling superorganism. As the colony expands, millions of ants cooperate, moving food, defending the nest, and maintaining a complex social order that rivals any human city.",
+      "visual_query": "ant trail across soil",
+      "visual_queries": [
+        "ant mound from above",
+        "ant workers carrying food"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "sentence_start": 7,
+      "sentence_end": 8
+    },
+    {
+      "narration": "This hidden world reminds us that even the smallest creatures can create societies as intricate as our own. Follow our channel for the next documentary and share your thoughts in the comments.",
+      "visual_query": "ant workers carrying leaf",
+      "visual_queries": [
+        "ant soldiers defending tunnel",
+        "close‑up ant colony activity"
+      ],
+      "source_label": "Wikipedia",
+      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "sentence_start": 9,
+      "sentence_end": 10
     }
-  ]
+  ],
+  "cta": {
+    "text": "Follow our channel for the next documentary and share your thoughts in the comments.",
+    "source": "script"
+  }
 }
