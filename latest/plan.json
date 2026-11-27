@@ -1,74 +1,88 @@
 {
-  "title": "Ants",
-  "hook": "What if a colony thinks?",
-  "script": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day. Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
+  "title": "Taal Volcano Eruption",
+  "hook": "Volcano erupts",
+  "script": "Volcano erupts, spewing ash over surrounding areas, causing widespread disruption and damage. Taal Volcano in the Philippines began to erupt on January 12, 2020, with a phreatomagmatic eruption from its main crater, as reported by the Philippine Institute of Volcanology and Seismology. The eruption produced loud rumbling sounds and ash that affected nearby regions, including Calabarzon, Metro Manila, and parts of Central Luzon and Ilocos Region, resulting in the suspension of school classes and work schedules. The Philippine Institute of Volcanology and Seismology issued an Alert Level 4, indicating a hazardous explosive eruption was possible within hours to days, prompting evacuations and precautions in the surrounding areas. Volcanic activity continued into 2021 and 2022, with smaller eruptions occurring in July 2021 and March 2022, demonstrating the ongoing volatility of the volcano. The eruptions caused significant disruptions to daily life, including the suspension of school classes and flights, as well as environmental damage, such as the temporary drying up of Taal Main Crater Lake and the destruction of Vulcan Point.",
   "scenes": [
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "Volcano erupts, spewing ash over surrounding areas, causing widespread disruption and damage.",
+      "visual_query": "Volcano eruption",
       "visual_queries": [
-        "ant colony"
+        "Volcano ash cloud",
+        "Erupting volcano landscape"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
       "visual_type": "footage",
       "sentence_start": 0,
       "sentence_end": 0
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "Taal Volcano in the Philippines began to erupt on January 12, 2020, with a phreatomagmatic eruption from its main crater, as reported by the Philippine Institute of Volcanology and Seismology.",
+      "visual_query": "Taal Volcano",
       "visual_queries": [
-        "ant colony"
+        "Taal Volcano landscape",
+        "Volcano island scenery"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 1,
       "sentence_end": 1
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "The eruption produced loud rumbling sounds and ash that affected nearby regions, including Calabarzon, Metro Manila, and parts of Central Luzon and Ilocos Region, resulting in the suspension of school classes and work schedules.",
+      "visual_query": "Ash fall",
       "visual_queries": [
-        "ant colony"
+        "Ash-covered landscape",
+        "Volcanic ash falling"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 2,
       "sentence_end": 2
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "The Philippine Institute of Volcanology and Seismology issued an Alert Level 4, indicating a hazardous explosive eruption was possible within hours to days, prompting evacuations and precautions in the surrounding areas.",
+      "visual_query": "Volcanology warning sign",
       "visual_queries": [
-        "ant colony"
+        "Warning sign landscape",
+        "Seismology equipment"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 3,
       "sentence_end": 3
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "Volcanic activity continued into 2021 and 2022, with smaller eruptions occurring in July 2021 and March 2022, demonstrating the ongoing volatility of the volcano.",
+      "visual_query": "Volcano activity",
       "visual_queries": [
-        "ant colony"
+        "Volcano steam vent",
+        "Erupting volcano close-up"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 4,
       "sentence_end": 4
     },
     {
-      "narration": "Ants live in soil and build nests under stones where the queen lays her eggs and workers feed the brood every day.",
-      "visual_query": "ant colony close",
+      "narration": "The eruptions caused significant disruptions to daily life, including the suspension of school classes and flights, as well as environmental damage, such as the temporary drying up of Taal Main Crater Lake and the destruction of Vulcan Point.",
+      "visual_query": "Evacuation scene",
       "visual_queries": [
-        "ant colony"
+        "People evacuating",
+        "Flight cancellation screen"
       ],
-      "source_label": "Ant",
-      "source_url": "https://en.wikipedia.org/wiki/Ant",
+      "source_label": "",
+      "source_url": "",
       "sentence_start": 5,
       "sentence_end": 5
     }
-  ]
+  ],
+  "fact_check": {
+    "overall": "pass",
+    "checked": 6,
+    "supported": 6,
+    "unsupported": 0,
+    "contradicted": 0,
+    "claim_source": "semantic:Groq key 1"
+  }
 }

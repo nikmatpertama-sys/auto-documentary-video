@@ -1,0 +1,52 @@
+{
+  "status": "failed",
+  "current_stage": "footage_search_download_and_visual_verification",
+  "stages": [
+    {
+      "name": "research",
+      "status": "completed",
+      "started_at_epoch": 1795792023.7373068,
+      "finished_at_epoch": 1795792026.0646918,
+      "duration_seconds": 2.33
+    },
+    {
+      "name": "documentary_plan_generation",
+      "status": "completed",
+      "started_at_epoch": 1795792026.0648417,
+      "finished_at_epoch": 1795792037.094717,
+      "duration_seconds": 11.03
+    },
+    {
+      "name": "fact_checking",
+      "status": "completed",
+      "started_at_epoch": 1795792037.0950263,
+      "finished_at_epoch": 1795792050.2862613,
+      "duration_seconds": 13.19
+    },
+    {
+      "name": "voiceover_and_subtitle_generation",
+      "status": "completed",
+      "started_at_epoch": 1795792050.2865415,
+      "finished_at_epoch": 1795792110.8814487,
+      "duration_seconds": 60.59
+    },
+    {
+      "name": "footage_search_download_and_visual_verification",
+      "status": "failed",
+      "started_at_epoch": 1795792110.8817027,
+      "finished_at_epoch": 1795793495.815606,
+      "failure_type": "RuntimeError",
+      "failure_message": "Scene 2 could not obtain verified relevant footage. None of the 22 candidates checked from 22 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 116428855: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 116426780: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 191426560: Clip is 1683.7 MB, above the 900 MB relevance-based limit. | Wikimedia Commons 116421339: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  Queries tried: ['taal volcano', 'volcano taal', 'eruption taal', 'volcano', 'taal volcano landscape', 'volcano taal landscape', 'taal volcano authentic real world documentary video', 'taal volcano close detailed natural environment footage']. No unrelated footage or diagram will be substituted."
+    }
+  ],
+  "voice_provider": "Speechify",
+  "voice": "geffen_32",
+  "voice_model": "simba-3.5",
+  "language": "en",
+  "voiceover_manifest": "output/voiceover_manifest.json",
+  "failure": {
+    "error_type": "RuntimeError",
+    "error_message": "Scene 2 could not obtain verified relevant footage. None of the 22 candidates checked from 22 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 116428855: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 116426780: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 191426560: Clip is 1683.7 MB, above the 900 MB relevance-based limit. | Wikimedia Commons 116421339: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  Queries tried: ['taal volcano', 'volcano taal', 'eruption taal', 'volcano', 'taal volcano landscape', 'volcano taal landscape', 'taal volcano authentic real world documentary video', 'taal volcano close detailed natural environment footage']. No unrelated footage or diagram will be substituted.",
+    "finished_at_epoch": 1795793495.8172007
+  }
+}

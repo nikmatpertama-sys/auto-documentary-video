@@ -1,0 +1,43 @@
+{
+  "status": "failed",
+  "current_stage": "footage_search_download_and_visual_verification",
+  "error_type": "RuntimeError",
+  "error_message": "Scene 2 could not obtain verified relevant footage. None of the 22 candidates checked from 22 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 116428855: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 116426780: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 191426560: Clip is 1683.7 MB, above the 900 MB relevance-based limit. | Wikimedia Commons 116421339: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  Queries tried: ['taal volcano', 'volcano taal', 'eruption taal', 'volcano', 'taal volcano landscape', 'volcano taal landscape', 'taal volcano authentic real world documentary video', 'taal volcano close detailed natural environment footage']. No unrelated footage or diagram will be substituted.",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8313, in run_with_diagnostics\n    main()\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 8266, in main\n    fetch_footage(plan)\n  File \"/home/runner/work/auto-documentary-video/auto-documentary-video/main.py\", line 6734, in fetch_footage\n    raise RuntimeError(\nRuntimeError: Scene 2 could not obtain verified relevant footage. None of the 22 candidates checked from 22 metadata-ranked candidates passed visual verification or downloaded successfully. Details: Wikimedia Commons 116428855: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 116426780: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  | Wikimedia Commons 191426560: Clip is 1683.7 MB, above the 900 MB relevance-based limit. | Wikimedia Commons 116421339: No vision provider produced a safe dynamic crop plan. Groq visual verification HTTP 400: {\"error\":{\"message\":\"Too many images provided.  This model supports up to 3 images\",\"type\":\"invalid_request_error\"}}  Queries tried: ['taal volcano', 'volcano taal', 'eruption taal', 'volcano', 'taal volcano landscape', 'volcano taal landscape', 'taal volcano authentic real world documentary video', 'taal volcano close detailed natural environment footage']. No unrelated footage or diagram will be substituted.\n",
+  "finished_at_epoch": 1795793495.8172007,
+  "configuration": {
+    "project_release": "MM6",
+    "visual_verification_required": true,
+    "groq_keys_configured": 1,
+    "openrouter_keys_configured": 1,
+    "gemini_keys_configured": 1,
+    "cloudflare_key_pairs_configured": 2,
+    "speechify_keys_configured": 1,
+    "pixabay_key_configured": true,
+    "pexels_key_configured": false,
+    "release": "MM6",
+    "source_priority": [
+      "Coverr",
+      "Internet Archive",
+      "Wikimedia Commons",
+      "NASA",
+      "Web Search",
+      "Google Search",
+      "Pexels",
+      "Pixabay"
+    ],
+    "footage_source_requests": {
+      "Coverr": 3,
+      "Internet Archive": 33,
+      "Wikimedia Commons": 33,
+      "NASA": 33,
+      "Web Search": 6,
+      "Google Search": 3,
+      "Pixabay": 17
+    },
+    "footage_source_cooldowns_seconds": {
+      "Web Search": 80,
+      "Google Search": 81
+    }
+  }
+}
