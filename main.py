@@ -1134,6 +1134,15 @@ def documentary_prompt(topic, research_brief=None):
             "specific statistics, dates and quotations.)"
         )
 
+    brief = (
+        brief
+        + "\n\nEVIDENCE RULES: every factual sentence must be supported by the "
+        "material above. Do not state a percentage, a share, a date, a number or "
+        "a superlative (largest, most, only) unless it appears in the material. "
+        "A claim outside the material is treated as unverified and the script is "
+        "rejected, so describe mechanisms instead of inventing figures."
+    )
+
     replacements = {
         "[[TOPIC]]": str(topic or "").strip(),
         "[[LANGUAGE]]": LANGUAGE["name"],
@@ -1916,6 +1925,17 @@ def fact_check_plan(plan, research_data, max_repairs=2):
             "and the same visual queries. Remove, correct or soften each "
             "problem claim. Do not add new numbers, dates or quotations that the "
             "source material does not contain.\n\n"
+            "RULES FOR THE REWRITE:\n"
+            "- A contradicted claim is wrong. Never restate it in any form, and do "
+            "not replace it with a similar statistic.\n"
+            "- Do not introduce any new number, share, percentage, date or "
+            "superlative (largest, biggest, most, only) unless those exact words "
+            "appear in the source material. Describe the mechanism instead.\n"
+            "- Deleting a sentence is allowed. Replacing a removed claim with "
+            "another unverifiable dramatic line is not: the word count target is "
+            "secondary to correctness.\n"
+            "- Keep at least three separate sentences that make a checkable "
+            "statement the source material supports.\n\n"
             f"SOURCE MATERIAL:\n{research_data.get('brief') or '(none supplied)'}\n\n"
             f"CURRENT PLAN JSON:\n{json.dumps(plan, ensure_ascii=False)[:9000]}\n\n"
             f"PROBLEMS:\n{problems}\n\n"
