@@ -1,0 +1,12 @@
+# Local environments and generated artefacts
+.venv/
+venv/
+__pycache__/
+*.pyc
+.api-cache/
+output/
+e2e_run/
+e2e.log
+footage/
+documentary.mp4
+*.zip

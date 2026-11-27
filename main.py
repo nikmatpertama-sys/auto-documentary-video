@@ -23,6 +23,9 @@ from email.utils import parsedate_to_datetime
 import requests
 import edge_tts
 
+import qc as qc_module
+import reference_style
+import research as research_module
 from quota_router import QuotaAwareRouter
 from visual_retry import visual_retry_policy, redact_provider_error
 
@@ -206,11 +209,36 @@ CLOUDFLARE_VISION_MODEL = os.getenv(
 ).strip()
 SPEECHIFY_MODEL = os.getenv("SPEECHIFY_MODEL", "simba-3.5").strip() or "simba-3.5"
 SPEECHIFY_VOICE_ID = os.getenv("SPEECHIFY_VOICE_ID", "").strip()
-VOICE = os.getenv("TTS_VOICE", "en-US-GuyNeural").strip()  # Edge TTS fallback only
+
+# MM6: the reference format is an Indonesian vertical documentary. The script
+# language also drives the TTS voice, caption casing and vocabulary checks.
+LANGUAGE = reference_style.language_profile(os.getenv("SCRIPT_LANGUAGE", ""))
+SCRIPT_LANGUAGE = LANGUAGE["code"]
+CAPTION_STYLE = reference_style.caption_style(SCRIPT_LANGUAGE)
+VOICE = os.getenv("TTS_VOICE", "").strip() or LANGUAGE["edge_voice"]  # Edge TTS
 BASE_RATE = os.getenv("TTS_RATE", "-4%").strip()
 BASE_PITCH = os.getenv("TTS_PITCH", "-3Hz").strip()
+# Set by the duration-recovery loop when the measured VO is shorter than 70s.
+VO_RATE_OVERRIDE = None
 MIN_VIDEO_DURATION = 70.0
 MAX_VIDEO_DURATION = None  # Intentionally unlimited; final duration follows the complete VO.
+
+# MM6 presentation: a locally synthesised royalty-free music bed and subtle
+# transition sound design, both generated with FFmpeg (no third-party audio).
+MUSIC_BED_ENABLED = os.getenv("MUSIC_BED", "true").strip().lower() not in (
+    "0", "false", "no", "off"
+)
+SFX_ENABLED = os.getenv("SFX_ENABLED", "true").strip().lower() not in (
+    "0", "false", "no", "off"
+)
+try:
+    MUSIC_GAIN_DB = float(os.getenv("MUSIC_GAIN_DB", "-23"))
+except ValueError:
+    MUSIC_GAIN_DB = -23.0
+try:
+    SFX_GAIN_DB = float(os.getenv("SFX_GAIN_DB", "-17"))
+except ValueError:
+    SFX_GAIN_DB = -17.0
 
 W, H, FPS = 1080, 1920, 30
 TARGET_SOURCE_ASPECT = 9 / 16
@@ -223,14 +251,17 @@ SMART_CROP_FRAME_COUNT = 6
 SMART_CROP_MIN_BOX_CONFIDENCE = 0.55
 SMART_CROP_BOX_MARGIN_FRACTION = 0.045
 SMART_CROP_MAX_PAN_RATE_PER_SECOND = 0.55
-CAPTION_MAX_WORDS = 5
-CAPTION_MAX_CHARS = 32
-X264_PRESET = os.getenv("X264_PRESET", "ultrafast").strip() or "ultrafast"
+CAPTION_MAX_WORDS = CAPTION_STYLE["max_words"]
+CAPTION_MAX_CHARS = CAPTION_STYLE["max_chars"]
+X264_PRESET = os.getenv("X264_PRESET", "veryfast").strip() or "veryfast"
+X264_CRF = os.getenv("X264_CRF", "19").strip() or "19"
 
 OPENING_LEAD = 0.75
 SENTENCE_GAP = 0.30
 HOOK_GAP = 0.70
-ENDING_HOLD = 1.25
+# Only a tiny tail so the last phoneme is not clipped. The format requires the
+# video to end when the narration ends, so there is deliberately no long hold.
+ENDING_HOLD = 0.30
 
 MIN_CLIP_WIDTH = 640
 # Ordinary candidates keep the original 180 MB budget. Highly relevant footage
@@ -961,8 +992,8 @@ def normalize_words(text):
 # AI DOCUMENTARY PLANNER
 # ============================================================
 
-def documentary_prompt(topic):
-    """Load the standalone single-role professional scriptwriter master prompt."""
+def documentary_prompt(topic, research_brief=None):
+    """Load the scriptwriter master prompt and bind topic, language, research."""
     prompt_path = Path(__file__).with_name("SCRIPTWRITER_MASTER_PROMPT.md")
 
     if not prompt_path.is_file():
@@ -978,7 +1009,23 @@ def documentary_prompt(topic):
             "SCRIPTWRITER_MASTER_PROMPT.md must contain the [[TOPIC]] placeholder."
         )
 
-    return prompt.replace("[[TOPIC]]", str(topic or "").strip())
+    brief = str(research_brief or "").strip()
+    if not brief:
+        brief = (
+            "(No external source material was supplied for this run. Keep the "
+            "narration to widely established, uncontroversial knowledge and avoid "
+            "specific statistics, dates and quotations.)"
+        )
+
+    replacements = {
+        "[[TOPIC]]": str(topic or "").strip(),
+        "[[LANGUAGE]]": LANGUAGE["name"],
+        "[[LANGUAGE_NATIVE]]": LANGUAGE["native_name"],
+        "[[RESEARCH_BRIEF]]": brief,
+    }
+    for token, value in replacements.items():
+        prompt = prompt.replace(token, value)
+    return prompt
 
 
 def extract_json_object(raw_text):
@@ -1260,9 +1307,66 @@ def call_cloudflare_chat(api_token, account_id, model, prompt):
         ) from exc
 
 
-def gemini_plan(topic):
+def call_json_with_providers(prompt, label="auxiliary request"):
+    """Ask any available free provider for one JSON object.
+
+    Used by the fact-check and script-repair stages. Routes are rebuilt each call
+    so quota-aware ranking and key rotation still apply.
+    """
+    routes = []
+    for key_index, api_key in enumerate(GROQ_KEYS, 1):
+        routes.append(_quota_route(
+            "Groq", f"Groq key {key_index}", api_key,
+            lambda api_key=api_key: call_openai_compatible("Groq", api_key, GROQ_MODEL, prompt),
+        ))
+    for key_index, api_key in enumerate(OPENROUTER_KEYS, 1):
+        routes.append(_quota_route(
+            "OpenRouter", f"OpenRouter key {key_index}", api_key,
+            lambda api_key=api_key: call_openai_compatible("OpenRouter", api_key, OPENROUTER_MODEL, prompt),
+            model=OPENROUTER_MODEL,
+        ))
+    for key_index, api_key in enumerate(GEMINI_KEYS, 1):
+        routes.append(_quota_route(
+            "Gemini", f"Gemini key {key_index}", api_key,
+            lambda api_key=api_key: call_gemini(api_key, MODEL, prompt),
+            route_id=f"Gemini::{QuotaAwareRouter.fingerprint(api_key)}",
+        ))
+    for key_index, credentials in enumerate(CLOUDFLARE_CREDENTIALS, 1):
+        routes.append(_quota_route(
+            "Cloudflare", f"Cloudflare AI key pair {key_index}", credentials["token"],
+            lambda credentials=credentials: call_cloudflare_chat(
+                credentials["token"], credentials["account_id"], CLOUDFLARE_CHAT_MODEL, prompt
+            ),
+            account_id=credentials["account_id"],
+        ))
+
+    if not routes:
+        raise RuntimeError(
+            f"No AI provider is configured for the {label}."
+        )
+
+    errors = []
+    pending = list(routes)
+    while pending:
+        ranked = QUOTA_ROUTER.rank_routes(pending)
+        if not ranked:
+            break
+        route = ranked[0]
+        pending.remove(route)
+        QUOTA_ROUTER.mark_selected(route)
+        try:
+            return route["run"](), route["name"]
+        except Exception as exc:
+            errors.append(f"{route['name']}: {exc}")
+            print(f"{label}: {errors[-1]}")
+    raise RuntimeError(
+        f"All configured AI providers failed during the {label}:\n- " + "\n- ".join(errors)
+    )
+
+
+def gemini_plan(topic, research_brief=None):
     """Generate the documentary plan through live quota-aware provider ranking."""
-    prompt = documentary_prompt(topic)
+    prompt = documentary_prompt(topic, research_brief=research_brief)
     routes = []
 
     for key_index, api_key in enumerate(GROQ_KEYS, 1):
@@ -1315,28 +1419,7 @@ def gemini_plan(topic):
         print(f"Quota-aware selection: {provider_name} (best currently known capacity).")
 
         try:
-            candidate = route["run"]()
-            candidate["scenes"] = candidate.get("scenes", [])
-            if not isinstance(candidate["scenes"], list) or len(candidate["scenes"]) != 8:
-                raise RuntimeError("AI returned an incomplete plan. Expected exactly 8 scenes.")
-
-            scene_narrations = []
-            for scene_index, scene in enumerate(candidate["scenes"], 1):
-                if not isinstance(scene, dict):
-                    raise RuntimeError(f"Scene {scene_index} is not a JSON object.")
-                narration = re.sub(r"\s+", " ", str(scene.get("narration", ""))).strip()
-                if not narration:
-                    raise RuntimeError(f"Scene {scene_index} has empty narration.")
-                scene["narration"] = narration
-                scene_narrations.append(narration)
-
-            candidate["script"] = " ".join(scene_narrations).strip()
-            word_count = len(candidate["script"].split())
-            if not 120 <= word_count <= 200:
-                raise RuntimeError(f"Scene narration totals {word_count} words; expected 120-200.")
-
-            candidate["scenes"][0]["visual_type"] = "footage"
-            assign_scene_sentence_ranges(candidate)
+            candidate = validate_plan_candidate(route["run"]())
             plan = candidate
             print(f"Documentary plan generated successfully by {provider_name}.")
             break
@@ -1354,6 +1437,189 @@ def gemini_plan(topic):
     Path("plan.json").write_text(json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"Script ready: {len(plan['script'].split())} words, {len(plan['scenes'])} scenes.")
     return plan
+
+
+def validate_plan_candidate(candidate):
+    """Validate a generated/repaired/expanded plan and map its sentences.
+
+    Shared by the initial plan, the fact-check repair pass and the duration
+    recovery pass so every plan obeys the same format invariants.
+    """
+    if not isinstance(candidate, dict):
+        raise RuntimeError("Plan response is not a JSON object.")
+    candidate["scenes"] = candidate.get("scenes", [])
+    if not isinstance(candidate["scenes"], list) or len(candidate["scenes"]) != 8:
+        raise RuntimeError("AI returned an incomplete plan. Expected exactly 8 scenes.")
+
+    scene_narrations = []
+    for scene_index, scene in enumerate(candidate["scenes"], 1):
+        if not isinstance(scene, dict):
+            raise RuntimeError(f"Scene {scene_index} is not a JSON object.")
+        narration = re.sub(r"\s+", " ", str(scene.get("narration", ""))).strip()
+        if not narration:
+            raise RuntimeError(f"Scene {scene_index} has empty narration.")
+        scene["narration"] = narration
+        scene_narrations.append(narration)
+
+    candidate["script"] = " ".join(scene_narrations).strip()
+    word_count = len(candidate["script"].split())
+    if not 120 <= word_count <= 200:
+        raise RuntimeError(f"Scene narration totals {word_count} words; expected 120-200.")
+    if not reference_style.narration_language_matches(candidate["script"], SCRIPT_LANGUAGE):
+        raise RuntimeError(
+            f"Narration is not written in {LANGUAGE['name']}. "
+            "The provider ignored the requested narration language."
+        )
+
+    hook = str(candidate.get("hook") or "").strip()
+    if not hook:
+        hook = split_sentences(candidate["script"])[0] if candidate["script"] else ""
+        candidate["hook"] = hook
+    hook_words = str(hook).split()
+    if len(hook_words) > 12:
+        # Keep the strongest opening clause but never invent a new sentence.
+        candidate["hook"] = " ".join(hook_words[:12]).rstrip(",;:-") + "..."
+
+    candidate["scenes"][0]["visual_type"] = "footage"
+    assign_scene_sentence_ranges(candidate)
+    return candidate
+
+
+def _verify_claims(script, claims, research_data, label="fact check"):
+    prompt = research_module.fact_check_prompt(
+        script, claims, research_data.get("brief", "")
+    )
+    payload, provider = call_json_with_providers(prompt, label)
+    result = research_module.summarise_verification(payload, claims)
+    result["provider"] = provider
+    return result
+
+
+def fact_check_plan(plan, research_data, max_repairs=1):
+    """Verify factual claims and repair contradicted/unsupported sentences.
+
+    A contradicted claim aborts the run after the repair attempt. Unsupported
+    claims are repaired once and otherwise recorded as warnings, never hidden.
+    """
+    claims = research_module.extract_claims(plan.get("script", ""))
+    if not claims:
+        return {
+            "claims": [],
+            "supported": 0,
+            "unsupported": 0,
+            "contradicted": 0,
+            "overall": "pass",
+            "note": "No numeric, dated or absolute claim was detected in the script.",
+        }
+
+    verification = _verify_claims(plan["script"], claims, research_data)
+    print(
+        f"Fact check: {verification['supported']} supported, "
+        f"{verification['unsupported']} unsupported, "
+        f"{verification['contradicted']} contradicted "
+        f"(overall {verification['overall']})."
+    )
+
+    repairs = 0
+    while verification["overall"] != "pass" and repairs < max_repairs:
+        repairs += 1
+        problems = "\n".join(
+            f"- {item['claim']} ({item['verdict']}): {item['evidence']}"
+            for item in verification["claims"]
+            if item["verdict"] != "supported"
+        )
+        prompt = (
+            "You are correcting a documentary script so that every factual claim "
+            "is supported. Rewrite only what is necessary; keep the same story "
+            "and roughly the same visual queries. Remove, correct or soften each "
+            "problem claim. Do not add new numbers, dates or quotations that the "
+            "source material does not contain.\n\n"
+            f"SOURCE MATERIAL:\n{research_data.get('brief') or '(none supplied)'}\n\n"
+            f"CURRENT PLAN JSON:\n{json.dumps(plan, ensure_ascii=False)[:9000]}\n\n"
+            f"PROBLEMS:\n{problems}\n\n"
+            "Return ONLY the same JSON object schema: title, hook, script, and "
+            "exactly 8 scenes each with narration, visual_query, visual_queries, "
+            "source_label, source_url. The combined narration must stay between "
+            f"120 and 200 words and must be written in {LANGUAGE['name']}."
+        )
+        try:
+            payload, provider = call_json_with_providers(prompt, "fact-check repair")
+            repaired = validate_plan_candidate(payload)
+        except Exception as exc:
+            print(f"Fact-check repair failed: {str(exc)[:400]}")
+            break
+        plan.clear()
+        plan.update(repaired)
+        verification = _verify_claims(
+            plan["script"],
+            research_module.extract_claims(plan["script"]),
+            research_data,
+            label="fact-check re-verification",
+        )
+        verification["repair_provider"] = provider
+        print(
+            f"Fact check after repair: {verification['supported']} supported, "
+            f"{verification['unsupported']} unsupported, "
+            f"{verification['contradicted']} contradicted."
+        )
+
+    if verification["overall"] == "fail":
+        bad = [
+            item for item in verification["claims"]
+            if item["verdict"] == "contradicted"
+        ]
+        raise RuntimeError(
+            "Fact check found claims contradicted by the source material after "
+            "repair: " + " | ".join(f"{item['claim']} ({item['evidence']})" for item in bad)
+        )
+    return verification
+
+
+def extend_plan_for_duration(plan, research_brief, target_words=185):
+    """Ask the writer to deepen the script so the spoken VO reaches 70s.
+
+    Used only when the measured voice-over is too short; the result is fully
+    re-validated (8 scenes, 120-200 words, target language).
+    """
+    prompt = (
+        "A documentary voice-over measured shorter than the required 70 seconds. "
+        "Deepen the narration so it reads at roughly 185 words while staying "
+        "between 120 and 200 words. Add concrete, source-supported detail, a "
+        "clearer mechanism, or a stronger transition; never add filler, "
+        "repetition, or unsupported numbers. Keep exactly 8 scenes, keep every "
+        "visual query usable, and keep the hook at 12 words or fewer.\n\n"
+        f"SOURCE MATERIAL:\n{research_brief or '(none supplied)'}\n\n"
+        f"CURRENT PLAN JSON:\n{json.dumps(plan, ensure_ascii=False)[:9000]}\n\n"
+        "Return ONLY the same JSON object schema: title, hook, script, and exactly "
+        "8 scenes each with narration, visual_query, visual_queries, "
+        f"source_label, source_url. Narration language: {LANGUAGE['name']}."
+    )
+    payload, provider = call_json_with_providers(prompt, "duration extension")
+    extended = validate_plan_candidate(payload)
+
+    # The footage for each scene was already downloaded and visually verified
+    # against the original narration, so keep both the approved media and its
+    # visual intent when the wording is deepened.
+    carry_over = (
+        "media_file", "visual_type", "selected_footage_source",
+        "selected_footage_tags", "selected_footage_url", "source", "creator",
+        "page_url", "license", "coverr_attribution", "source_video_dimensions",
+        "smart_vertical_reframe", "reused_footage_from_scene",
+        "footage_search_retry_count", "footage_search_retry_queries",
+    )
+    for old_scene, new_scene in zip(plan.get("scenes", []), extended["scenes"]):
+        for key in carry_over:
+            if key in old_scene:
+                new_scene[key] = old_scene[key]
+        if old_scene.get("visual_query"):
+            new_scene["visual_query"] = old_scene["visual_query"]
+        if old_scene.get("visual_queries"):
+            new_scene["visual_queries"] = old_scene["visual_queries"]
+    print(
+        f"Duration recovery: script expanded to "
+        f"{len(extended['script'].split())} words by {provider}."
+    )
+    return extended
 
 
 def assign_scene_sentence_ranges(plan):
@@ -5337,6 +5603,12 @@ def fetch_footage(plan):
             "page_url",
             ""
         )
+        # Asset provenance for credits.txt / copyright_report.json.
+        scene["source"] = hit.get("source")
+        scene["creator"] = hit.get("creator")
+        scene["page_url"] = hit.get("page_url", "")
+        scene["license"] = hit.get("license", "")
+        scene["coverr_attribution"] = str(hit.get("source") or "") == "Coverr"
         scene["source_video_dimensions"] = hit.get("_source_video_info", {})
         scene["output_aspect_ratio"] = "9:16"
         smart_crop_plan = hit.get("_smart_crop_plan")
@@ -5524,7 +5796,7 @@ def _speechify_choose_voice(api_keys):
             for page_index in range(8):
                 params = {
                     "type": "shared",
-                    "locale": "en",
+                    "locale": LANGUAGE["speechify_locale"],
                     "gender": "male",
                     "model": SPEECHIFY_MODEL,
                     "limit": 200,
@@ -5692,7 +5964,7 @@ def _request_speechify_audio(sentence, sentence_index, sentence_total, voice_id,
         "input": _speechify_sentence_ssml(sentence, sentence_index, sentence_total),
         "voice_id": voice_id,
         "audio_format": "wav",
-        "language": "en-US",
+        "language": LANGUAGE["speechify_locale"],
         "model": SPEECHIFY_MODEL,
     }
     last_error = None
@@ -5824,6 +6096,9 @@ def _generate_edge_parts(sentences):
             cursor += ffprobe_duration(opening)
         for index, sentence in enumerate(sentences):
             rate_values = [BASE_RATE, "-5%", "-3%", "-4%"]
+            if VO_RATE_OVERRIDE:
+                # Duration-recovery retry: a natural, uniformly slower delivery.
+                rate_values = [VO_RATE_OVERRIDE] * len(rate_values)
             pitch_values = [BASE_PITCH, "-2Hz", "-4Hz", "-2Hz"]
             mp3_path = OUT / f"tts_{index:02d}.mp3"
             wav_path = OUT / f"tts_{index:02d}.wav"
@@ -5878,8 +6153,42 @@ def _generate_edge_parts(sentences):
     return asyncio.run(generate())
 
 
-def build_voice_and_subs(script):
-    """Speechify-first calm/deep narration, Edge TTS backup, and 70s minimum."""
+def validate_voice_audio(path, duration):
+    """Reject silent, near-silent or clipped narration before rendering."""
+    loudness = qc_module.probe_loudness(path)
+    mean_db = loudness.get("mean_db")
+    peak_db = loudness.get("peak_db")
+    print(
+        f"VO audio check: {float(duration):.2f}s, mean {mean_db} dBFS, "
+        f"peak {peak_db} dBFS"
+    )
+    if float(duration) < 1.0:
+        raise RuntimeError("The generated voice-over is shorter than one second.")
+    if mean_db is None or mean_db <= -45.0:
+        raise RuntimeError(
+            "The generated voice-over is effectively silent "
+            f"(mean {mean_db} dBFS). Rendering stopped."
+        )
+    if peak_db is None or peak_db <= -30.0:
+        raise RuntimeError(
+            "The generated voice-over has no usable level "
+            f"(peak {peak_db} dBFS). Rendering stopped."
+        )
+    if peak_db >= 0.0:
+        print(
+            "VO audio warning: the raw narration peaks at or above 0 dBFS; the "
+            "final mix limiter handles it, but the TTS output is hot."
+        )
+    return loudness
+
+
+def build_voice_and_subs(script, enforce_minimum=True):
+    """Speechify-first calm/deep narration, Edge TTS backup, and duration check.
+
+    When ``enforce_minimum`` is False the measured VO is returned even if it is
+    shorter than the format minimum, so the orchestrator can extend the script
+    or slow the delivery and regenerate instead of padding with silence.
+    """
     sentences = split_sentences(script)
     if not sentences:
         raise RuntimeError("The script contains no speakable sentences.")
@@ -5917,16 +6226,12 @@ def build_voice_and_subs(script):
 
     total_duration = sum(ffprobe_duration(part) for part in wav_parts)
     if total_duration < MIN_VIDEO_DURATION:
-        # Add a tiny encoder/rounding cushion so the final mux cannot land just
-        # below the hard 70-second minimum because of container time-base rounding.
-        pad_duration = (MIN_VIDEO_DURATION - total_duration) + 0.20
-        padding = _create_silence(OUT / "minimum_duration_padding.wav", pad_duration)
-        if padding:
-            wav_parts.append(padding)
-        total_duration = sum(ffprobe_duration(part) for part in wav_parts)
+        # MM6: never pad the timeline with silence. The orchestrator extends the
+        # script or slows delivery naturally, then regenerates the whole VO.
         print(
-            f"VO timeline was shorter than {MIN_VIDEO_DURATION:.0f}s; "
-            f"added {pad_duration:.2f}s of final silence to meet the minimum."
+            f"VO timeline is {total_duration:.2f}s, below the "
+            f"{MIN_VIDEO_DURATION:.0f}s format minimum. No silence padding is added; "
+            "the script/delivery must be adjusted and the VO regenerated."
         )
 
     concat = OUT / "voice_concat.txt"
@@ -5943,25 +6248,20 @@ def build_voice_and_subs(script):
         "-c:a", "libmp3lame", "-b:a", "192k", str(OUT / "voiceover.mp3"),
     ])
 
-    lines = [
-        "[Script Info]",
-        "Title: Calm Deep Documentary Captions",
-        "ScriptType: v4.00+",
-        "WrapStyle: 2",
-        "ScaledBorderAndShadow: yes",
-        "PlayResX: 1080",
-        "PlayResY: 1920",
-        "[V4+ Styles]",
-        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-        "Style: Default,DejaVu Sans,52,&H00FFFFFF,&H000000FF,&H00101A25,&H90000000,-1,0,0,0,100,100,0,0,1,3,1,2,90,90,360,1",
-        "[Events]",
-        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
-    ]
+    # Pre-render audio inspection: a silent or clipped narration must never reach
+    # the editing stage just because the TTS request returned bytes.
+    validate_voice_audio(OUT / "voiceover.wav", total_duration)
+
+    # Reference-style subtitle block: bold, centred, above the Reels UI zone.
+    lines = reference_style.caption_ass_header(CAPTION_STYLE)
     for sentence_group in sentence_word_events:
         for group in build_caption_groups(sentence_group):
             start = group[0]["offset"]
-            end = max(group[-1]["offset"] + group[-1]["duration"], start + 0.45)
+            end = max(group[-1]["offset"] + group[-1]["duration"], start + 0.70)
             phrase = " ".join(str(item["text"]) for item in group)
+            phrase = reference_style.format_caption_text(
+                phrase, uppercase=CAPTION_STYLE["uppercase"]
+            )
             phrase = r"\N".join(textwrap.wrap(
                 phrase,
                 width=CAPTION_MAX_CHARS,
@@ -5983,7 +6283,10 @@ def build_voice_and_subs(script):
         }, indent=2),
         encoding="utf-8",
     )
-    if total_duration + 0.001 < MIN_VIDEO_DURATION:
+    PIPELINE_STATE["voice_provider"] = voice_provider
+    PIPELINE_STATE["voice"] = VOICE
+    PIPELINE_STATE["language"] = SCRIPT_LANGUAGE
+    if enforce_minimum and total_duration + 0.001 < MIN_VIDEO_DURATION:
         raise RuntimeError(
             f"Duration invariant failed: final VO timeline is {total_duration:.3f}s; "
             f"minimum is {MIN_VIDEO_DURATION:.0f}s."
@@ -6051,7 +6354,6 @@ def render_footage_scene(
     source,
     duration,
     output,
-    hook_text=None,
     smart_crop_plan=None,
 ):
     source_info = ffprobe_video_info(source)
@@ -6080,23 +6382,6 @@ def render_footage_scene(
     source_duration = ffprobe_duration(source)
     loop_args = ["-stream_loop", "-1"] if source_duration < duration + 0.1 else []
 
-    if hook_text:
-        hook_file = OUT / "hook.txt"
-        wrapped_hook = wrap_overlay_text(hook_text, width=24, max_lines=5)
-        hook_file.write_text(wrapped_hook, encoding="utf-8")
-        longest_hook_line = max((len(line) for line in wrapped_hook.splitlines()), default=1)
-        hook_font_size = max(32, min(54, int((W - 180) / max(1, longest_hook_line * 0.62))))
-        vf += (
-            f",drawtext=fontfile=/usr/share/fonts/truetype/dejavu/"
-            f"DejaVuSans-Bold.ttf:textfile={hook_file}:"
-            f"fontcolor=white:fontsize={hook_font_size}:line_spacing=8:"
-            "borderw=2:bordercolor=black@0.70:"
-            "box=1:boxcolor=black@0.42:boxborderw=30:"
-            "x=(w-text_w)/2:y=160:"
-            "alpha='if(lt(t,1.0),(t-0.6)/0.4,if(gt(t,4.1),(4.5-t)/0.4,1))':"
-            "enable='between(t,0.6,4.5)'"
-        )
-
     cmd = [
         "ffmpeg", "-y", *loop_args, "-i", str(source),
         "-t", f"{duration:.3f}", "-vf", vf, "-an",
@@ -6105,6 +6390,57 @@ def render_footage_scene(
         str(output),
     ]
     run(cmd)
+
+
+def build_sfx_track(total_duration, scene_starts):
+    """Mix locally synthesised whooshes at cuts plus one hook impact.
+
+    Returns the path of the SFX stem, or None when sound design is disabled or
+    FFmpeg's synthesis filters are unavailable.
+    """
+    if not SFX_ENABLED or not reference_style.music_bed_available():
+        return None
+
+    whoosh = reference_style.build_whoosh(OUT / "sfx_whoosh.wav", run_command=run)
+    impact = reference_style.build_impact(OUT / "sfx_impact.wav", run_command=run)
+
+    inputs = [["-i", str(impact)]]
+    delays = [550]  # hook lands with the first title fade-in
+    for start in list(scene_starts)[1:]:
+        try:
+            delay_ms = int(round(float(start) * 1000))
+        except (TypeError, ValueError):
+            continue
+        if 0 <= delay_ms < int(total_duration * 1000):
+            inputs.append(["-i", str(whoosh)])
+            delays.append(delay_ms)
+
+    labels = []
+    graph = []
+    for index, delay in enumerate(delays):
+        graph.append(f"[{index}:a]adelay={delay}|{delay}[s{index}]")
+        labels.append(f"[s{index}]")
+    graph.append(
+        "".join(labels)
+        + f"amix=inputs={len(labels)}:normalize=0,"
+        # apad keeps the stem exactly as long as the video; otherwise amix
+        # would end at the last whoosh and shorten the final mix.
+        + f"volume={SFX_GAIN_DB}dB,apad,aresample=48000[out]"
+    )
+
+    output = OUT / "sfx_track.wav"
+    command = ["ffmpeg", "-y"]
+    for pair in inputs:
+        command.extend(pair)
+    command += [
+        "-filter_complex", ";".join(graph),
+        "-map", "[out]",
+        "-t", f"{float(total_duration):.3f}",
+        "-ac", "2", "-ar", "48000", "-c:a", "pcm_s16le",
+        str(output),
+    ]
+    run(command)
+    return output
 
 
 def render(plan, sentence_events, total_duration):
@@ -6131,20 +6467,10 @@ def render(plan, sentence_events, total_duration):
         source = scene.get("media_file")
 
         if source and Path(source).exists():
-            hook = None
-
-            if i == 1:
-                hook = re.sub(
-                    r"[^A-Za-z0-9 ,.!?\-]",
-                    "",
-                    str(plan.get("hook") or "")
-                ).strip()
-
             render_footage_scene(
                 source,
                 duration,
                 output,
-                hook,
                 smart_crop_plan=scene.get("smart_vertical_reframe")
                 if isinstance(scene.get("smart_vertical_reframe"), dict)
                 and scene.get("smart_vertical_reframe", {}).get("mode") == "ai_content_aware_dynamic_crop"
@@ -6187,27 +6513,97 @@ def render(plan, sentence_events, total_duration):
 
     final = Path("documentary.mp4")
 
-    audio_filter = (
+    music_file = None
+    if MUSIC_BED_ENABLED:
+        try:
+            music_file = reference_style.build_music_bed(
+                total_duration, OUT / "music_bed.wav", run_command=run
+            )
+            print(
+                f"Music bed ready ({total_duration:.1f}s, original FFmpeg synthesis, "
+                f"{MUSIC_GAIN_DB:.0f} dB under the narration)."
+            )
+        except Exception as exc:
+            print(f"Music bed synthesis failed; continuing with narration only: {exc}")
+            music_file = None
+
+    sfx_file = None
+    if SFX_ENABLED:
+        try:
+            sfx_file = build_sfx_track(
+                total_duration, [span[0] for span in spans]
+            )
+        except Exception as exc:
+            print(f"Sound design synthesis failed; continuing without it: {exc}")
+            sfx_file = None
+
+    # The opening hook is an ASS event, not drawtext: libass is required for the
+    # subtitles anyway and the bundled fonts guarantee identical typography.
+    hook_text = re.sub(r"\s+", " ", str(plan.get("hook") or "")).strip()
+    if hook_text:
+        reference_style.append_hook_caption(
+            OUT / "captions.ass", hook_text, CAPTION_STYLE
+        )
+
+    fonts_dir = Path(__file__).with_name("fonts")
+    captions_path = str((OUT / "captions.ass").resolve()).replace(":", r"\:")
+    fonts_arg = ""
+    if fonts_dir.is_dir():
+        fonts_arg = ":fontsdir=" + str(fonts_dir).replace(":", r"\:")
+
+    inputs = ["-i", str(base), "-i", str(OUT / "voiceover.wav")]
+    graph_parts = [
+        "[0:v]subtitles=" + captions_path + fonts_arg + "[v]",
         "[1:a]highpass=f=65,lowpass=f=15000,"
-        "acompressor=threshold=-22dB:ratio=2.0:"
-        "attack=25:release=250:makeup=1.15,"
-        "alimiter=limit=0.88,"
-        "loudnorm=I=-16:TP=-1.5:LRA=9,"
-        "aresample=48000[a]"
+        "acompressor=threshold=-22dB:ratio=2.5:attack=15:release=220:makeup=1.1"
+        + ("[vo0]" if music_file else "[vo]"),
+    ]
+    music_index = None
+    sfx_index = None
+    if music_file:
+        music_index = len(inputs) // 2
+        inputs += ["-i", str(music_file)]
+        # The narration feeds both the mix and the ducker, so it must be split.
+        graph_parts.append("[vo0]asplit=2[vo][vosc]")
+        graph_parts.append(
+            f"[{music_index}:a]volume={MUSIC_GAIN_DB}dB[mus]"
+        )
+        graph_parts.append(
+            "[mus][vosc]sidechaincompress=threshold=0.032:ratio=8:"
+            "attack=12:release=320:makeup=1[musduck]"
+        )
+        graph_parts.append(
+            "[vo][musduck]amix=inputs=2:duration=first:normalize=0[mixed]"
+        )
+        mix_label = "[mixed]"
+    else:
+        mix_label = "[vo]"
+
+    if sfx_file:
+        sfx_index = len(inputs) // 2
+        inputs += ["-i", str(sfx_file)]
+        graph_parts.append(
+            f"{mix_label}[{sfx_index}:a]amix=inputs=2:duration=first:normalize=0[mixedsfx]"
+        )
+        mix_label = "[mixedsfx]"
+
+    # Loudness normalisation runs before the limiter so the delivered peak is
+    # controlled after gain changes (previous order could re-introduce peaks).
+    graph_parts.append(
+        f"{mix_label}loudnorm=I=-15:TP=-1.5:LRA=9,"
+        "alimiter=limit=0.95,aresample=48000[a]"
     )
 
     run([
         "ffmpeg", "-y",
-        "-i", str(base),
-        "-i", str(OUT / "voiceover.wav"),
-        "-filter_complex",
-        f"[0:v]subtitles={OUT}/captions.ass[v];{audio_filter}",
+        *inputs,
+        "-filter_complex", ";".join(graph_parts),
         "-map", "[v]",
         "-map", "[a]",
         "-t", f"{total_duration:.3f}",
         "-c:v", "libx264",
         "-preset", X264_PRESET,
-        "-crf", "20",
+        "-crf", X264_CRF,
         "-pix_fmt", "yuv420p",
         "-r", str(FPS),
         "-c:a", "aac",
@@ -6217,6 +6613,8 @@ def render(plan, sentence_events, total_duration):
         "-movflags", "+faststart",
         str(final)
     ])
+    PIPELINE_STATE["music_bed"] = bool(music_file)
+    PIPELINE_STATE["sound_design"] = bool(sfx_file)
 
     final_duration = ffprobe_duration(final)
     if final_duration + 0.15 < MIN_VIDEO_DURATION:
@@ -6289,7 +6687,7 @@ def write_failure_diagnostics(exc):
         "traceback": traceback.format_exc(),
         "finished_at_epoch": time.time(),
         "configuration": {
-            "project_release": "MM3",
+            "project_release": "MM6",
             "visual_verification_required": VISION_REQUIRED,
             "groq_keys_configured": len(GROQ_KEYS),
             "openrouter_keys_configured": len(OPENROUTER_KEYS),
@@ -6298,7 +6696,7 @@ def write_failure_diagnostics(exc):
             "speechify_keys_configured": len(SPEECHIFY_KEYS),
             "pixabay_key_configured": bool(PIXABAY_KEY),
             "pexels_key_configured": bool(PEXELS_KEY),
-            "release": "MM5",
+            "release": "MM6",
             "source_priority": list(FOOTAGE_SOURCE_PRIORITY),
             "footage_source_requests": dict(FOOTAGE_SOURCE_REQUEST_COUNTS),
             "footage_source_cooldowns_seconds": {
@@ -6380,35 +6778,127 @@ def validate_runtime_config():
 
 
 def main():
+    global VO_RATE_OVERRIDE
     cleanup_generated_markdown()
     validate_runtime_config()
 
+    start_pipeline_stage("research")
+    print(f"1/8 Researching credible sources for: {TOPIC}")
+    research_data = research_module.research_topic(TOPIC)
+    research_module.write_research_files(research_data)
+    for warning in research_data.get("warnings") or []:
+        print(f"Research warning: {warning}")
+    print(
+        f"Research complete: {research_data['verified_source_count']} "
+        f"source article(s) stored in research.json."
+    )
+    finish_pipeline_stage()
+
     start_pipeline_stage("documentary_plan_generation")
-    print("1/5 Generating documentary plan...")
-    plan = gemini_plan(TOPIC)
+    print("2/8 Generating documentary plan from the research material...")
+    plan = gemini_plan(TOPIC, research_brief=research_data.get("brief"))
+    finish_pipeline_stage()
+
+    start_pipeline_stage("fact_checking")
+    print("3/8 Fact-checking claims against the research material...")
+    verification = fact_check_plan(plan, research_data)
+    research_module.write_research_files(research_data, verification)
+    Path("plan.json").write_text(
+        json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    print(
+        f"Fact check stored in fact_check.json "
+        f"(overall {verification['overall']})."
+    )
     finish_pipeline_stage()
 
     start_pipeline_stage("footage_search_download_and_visual_verification")
-    print("2/5 Searching and ranking relevant footage...")
+    print("4/8 Searching, downloading and visually verifying footage...")
     fetch_footage(plan)
     finish_pipeline_stage()
 
     start_pipeline_stage("voiceover_and_subtitle_generation")
-    print("3/5 Generating paced voice-over and subtitles...")
-    sentence_events, total_duration = build_voice_and_subs(plan["script"])
+    print("5/8 Generating paced voice-over and subtitles...")
+    sentence_events, total_duration = build_voice_and_subs(
+        plan["script"], enforce_minimum=False
+    )
+
+    # MM6: the 120-word floor does not guarantee 70 seconds of speech. Measure
+    # the real VO, deepen the script or slow delivery naturally, regenerate.
+    attempts = 0
+    while total_duration + 0.05 < MIN_VIDEO_DURATION and attempts < 2:
+        attempts += 1
+        print(
+            f"Voice-over is {total_duration:.2f}s; extending the script "
+            f"(attempt {attempts}/2) instead of padding with silence."
+        )
+        try:
+            plan = extend_plan_for_duration(plan, research_data.get("brief"))
+        except Exception as exc:
+            print(f"Script extension unavailable: {str(exc)[:300]}")
+            break
+        Path("plan.json").write_text(
+            json.dumps(plan, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        sentence_events, total_duration = build_voice_and_subs(
+            plan["script"], enforce_minimum=False
+        )
+
+    if total_duration + 0.05 < MIN_VIDEO_DURATION:
+        print(
+            "Duration recovery: trying a slower but still natural delivery pace "
+            f"({os.getenv('TTS_RATE_RECOVERY', '-12%')})."
+        )
+        VO_RATE_OVERRIDE = os.getenv("TTS_RATE_RECOVERY", "-12%").strip() or "-12%"
+        sentence_events, total_duration = build_voice_and_subs(
+            plan["script"], enforce_minimum=False
+        )
+
+    if total_duration + 0.05 < MIN_VIDEO_DURATION:
+        raise RuntimeError(
+            f"Voice-over is {total_duration:.2f}s after script extension and a "
+            f"natural slower delivery; the format requires at least "
+            f"{MIN_VIDEO_DURATION:.0f}s. The run is stopped rather than padding "
+            "the timeline with silence or empty footage."
+        )
+    print(
+        f"Voice-over verified: {total_duration:.2f}s of narration "
+        f"(minimum {MIN_VIDEO_DURATION:.0f}s, ends with the narration)."
+    )
     finish_pipeline_stage()
 
     start_pipeline_stage("video_rendering")
-    print("4/5 Rendering scenes to actual narration timing...")
+    print("6/8 Editing scenes, mixing audio and rendering...")
     render(plan, sentence_events, total_duration)
+    finish_pipeline_stage()
+
+    start_pipeline_stage("quality_control")
+    print("7/8 Running final quality control...")
+    qc_report = qc_module.run_qc(
+        "documentary.mp4", plan, total_duration,
+        captions_path=str(OUT / "captions.ass"),
+    )
+    qc_module.write_qc_report(qc_report)
+    copyright_report = reference_style.build_copyright_report(
+        plan,
+        SCRIPT_LANGUAGE,
+        PIPELINE_STATE.get("voice_provider", "unknown"),
+        reference_style.MUSIC_BED_PROVENANCE
+        if PIPELINE_STATE.get("music_bed")
+        else None,
+    )
+    reference_style.write_copyright_report(
+        "copyright_report.json", copyright_report
+    )
     finish_pipeline_stage()
 
     PIPELINE_STATE["status"] = "completed"
     PIPELINE_STATE["current_stage"] = "complete"
     _write_json_report("stage_report.json", PIPELINE_STATE)
     print(
-        "5/5 Production complete: "
-        "documentary.mp4, plan.json, credits.txt, timing.json"
+        "8/8 Production complete: documentary.mp4, plan.json, credits.txt, "
+        "timing.json, research.json, fact_check.json, copyright_report.json, "
+        "qc_report.json"
     )
 
 

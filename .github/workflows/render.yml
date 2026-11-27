@@ -7,6 +7,14 @@ on:
         description: "Documentary topic / idea (English or Indonesian)"
         required: true
         type: string
+      language:
+        description: "Narration language (id = Bahasa Indonesia, en = English)"
+        required: false
+        default: "id"
+        type: choice
+        options:
+          - id
+          - en
 
 permissions:
   contents: write
@@ -250,14 +258,20 @@ jobs:
           restore-keys: |
             footage-api-${{ runner.os }}-
 
-      - name: Verify runtime and quota router
+      - name: Verify runtime and complete test suite
         run: |
-          python -m py_compile main.py quota_router.py render.py footage.py test_quota_router.py
-          python -m unittest -v test_quota_router
+          python -m py_compile main.py quota_router.py render.py footage.py research.py qc.py reference_style.py
+          python -m unittest discover -v
 
       - name: Generate documentary
         env:
           INPUT_TOPIC: ${{ inputs.topic }}
+          # Reference format: Indonesian vertical documentary for Facebook Reels.
+          SCRIPT_LANGUAGE: ${{ inputs.language }}
+          MUSIC_BED: "true"
+          SFX_ENABLED: "true"
+          MUSIC_GAIN_DB: "-23"
+          SFX_GAIN_DB: "-17"
 
           # Existing provider credentials retained from the old workflow.
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -323,11 +337,14 @@ jobs:
           FOOTAGE_VISION_MIN_CONFIDENCE: "0.72"
           FOOTAGE_VISION_CANDIDATE_LIMIT: "26"
 
-          # Edge TTS is only the narration fallback when Speechify cannot complete VO.
-          TTS_VOICE: en-US-GuyNeural
+          # Edge TTS is the free narration fallback (local, no key, no billing).
+          # Leave TTS_VOICE unset so the voice follows SCRIPT_LANGUAGE
+          # (id -> id-ID-ArdiNeural, en -> en-US-GuyNeural).
           TTS_RATE: "-4%"
+          TTS_RATE_RECOVERY: "-12%"
           TTS_PITCH: "-3Hz"
           X264_PRESET: medium
+          X264_CRF: "19"
         run: python main.py
 
       - name: Upload final video and diagnostic files
@@ -340,12 +357,17 @@ jobs:
             plan.json
             credits.txt
             timing.json
+            research.json
+            fact_check.json
+            copyright_report.json
+            qc_report.json
             stage_report.json
             failure_report.json
             production_report.json
             output/voiceover.mp3
             output/voiceover.wav
             output/captions.ass
+            output/music_bed.wav
             output/pipeline.log
           if-no-files-found: warn
           retention-days: 7

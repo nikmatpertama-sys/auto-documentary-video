@@ -1,6 +1,43 @@
-# Auto Documentary Video — MM5
+# Auto Documentary Video — MM6
 
-Automated vertical documentary generator. It builds a scene plan, searches for relevant real-world footage, performs visual verification, generates narration and captions, and renders the final video with FFmpeg.
+Automated vertical documentary generator for Facebook Reels. It researches a
+ topic, writes a grounded 120-200-word Indonesian documentary script, fact-checks
+ its claims, searches and visually verifies real-world footage, generates a
+ voice-over and reference-style subtitles, mixes a royalty-free music bed and
+ sound design, renders a 1080x1920 video that ends with the narration, and gates
+ the result through a final quality-control report.
+
+Production line:
+
+```
+TOPIC -> RESEARCH -> SCRIPT -> FACT-CHECK -> FOOTAGE SEARCH -> VISUAL MATCHING
+      -> VOICE-OVER -> EDITING -> AUDIO MIX -> RENDER -> QUALITY CONTROL
+```
+
+MM6 details are documented in [`MM6_RELEASE_NOTES.md`](MM6_RELEASE_NOTES.md).
+
+## MM6 — reference-style production stages
+
+- **Language:** `SCRIPT_LANGUAGE=id` (default) writes and narrates in Bahasa
+  Indonesia with `id-ID-ArdiNeural`; `en` keeps the English path. Captions,
+  hook and vocabulary checks follow the same setting.
+- **Research:** `research.py` reads the public Wikipedia API (no key) and stores
+  the evidence, URLs and licences in `research.json`.
+- **Fact-checking:** numeric/absolute claims are verified per claim, repaired
+  once when needed, and a surviving contradiction stops the run
+  (`fact_check.json`).
+- **Duration:** the measured voice-over decides the video length. If it is under
+  70 seconds the script is deepened or the delivery is slowed naturally and the
+  VO regenerated; silence padding is never used.
+- **Presentation:** bold centred uppercase subtitles with `MarginV=420` (above
+  the Reels UI), an ASS-based opening hook, bundled DejaVu fonts (`fonts/`), a
+  locally synthesised music bed ducked under the narration, and procedural
+  whoosh/impact sound design. No third-party audio is downloaded.
+- **Quality control:** `qc_report.json` verifies resolution, duration, VO
+  alignment, audio level/clipping, black gaps, captions, word count, scene count
+  and footage reuse after the render.
+- **Asset documentation:** `copyright_report.json` records the licence and
+  provenance of every clip, the voice provider, the generated audio and the font.
 
 ## Master scriptwriter prompt
 
@@ -95,7 +132,11 @@ The quota router prints provider names, measured percentages where available, an
 
 ## Output
 
-The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.json`, voice-over/caption files, and diagnostic files (`failure_report.json`, `stage_report.json`, `output/pipeline.log`) when a run fails.
+The pipeline produces `documentary.mp4`, `plan.json`, `credits.txt`, `timing.json`, `research.json`, `fact_check.json`, `copyright_report.json`, `qc_report.json`, voice-over/caption/music files, and diagnostic files (`failure_report.json`, `stage_report.json`, `output/pipeline.log`).
+
+A local end-to-end check that needs no API key is available with
+`python tools/local_e2e.py e2e_run` (real Edge TTS, real render and QC; synthetic
+vertical clips instead of stock footage).
 
 ## Version 10.10 — source-priority enforcement
 
